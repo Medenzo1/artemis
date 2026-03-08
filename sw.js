@@ -1,4 +1,4 @@
-const CACHE_NAME = 'artemis-v1';
+const CACHE_NAME = 'artemis-v3';
 const ASSETS = [
   '/artemis/',
   '/artemis/index.html',
