@@ -668,6 +668,159 @@ body.dash-mode #sc6 { padding: 0; }
 
 }
 
+/* ══════════════════════════════════════════════
+   DASHBOARD MOBILE — Drawer de navigation
+══════════════════════════════════════════════ */
+
+/* Bouton flottant "Nav Dashboard" sur mobile */
+#dash-mobile-fab {
+  display: none;
+}
+
+/* Overlay sombre */
+#dash-drawer-overlay {
+  display: none;
+  position: fixed; inset: 0; z-index: 490;
+  background: rgba(0,0,0,.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+#dash-drawer-overlay.open { display: block; }
+
+/* Le drawer lui-même — monte depuis le bas */
+#dash-drawer {
+  display: none;
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 500;
+  background: #0d1117;
+  border-top: 1px solid rgba(0,229,255,.15);
+  border-radius: 20px 20px 0 0;
+  padding: 0 0 calc(16px + env(safe-area-inset-bottom));
+  transform: translateY(100%);
+  transition: transform .3s cubic-bezier(.22,1,.36,1);
+  max-height: 85vh;
+  overflow-y: auto;
+}
+#dash-drawer.open {
+  display: block;
+  transform: translateY(0);
+}
+
+/* Handle visuel */
+#dash-drawer-handle {
+  width: 40px; height: 4px;
+  background: rgba(255,255,255,.15);
+  border-radius: 2px;
+  margin: 14px auto 20px;
+}
+
+/* Titre du drawer */
+#dash-drawer-title {
+  font-size: 10px; font-weight: 700;
+  letter-spacing: .15em; text-transform: uppercase;
+  color: var(--text2); padding: 0 20px; margin-bottom: 12px;
+}
+
+/* Onglets principaux dans le drawer */
+.ddrawer-tab {
+  display: flex; align-items: center; gap: 14px;
+  width: 100%; padding: 14px 20px;
+  background: none; border: none;
+  font-family: inherit; cursor: pointer;
+  color: var(--text2); font-size: 14px; font-weight: 600;
+  text-align: left; transition: background .15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.ddrawer-tab:active { background: rgba(255,255,255,.04); }
+.ddrawer-tab.active {
+  color: var(--cyan);
+  background: rgba(34,211,200,.06);
+}
+.ddrawer-tab-icon { font-size: 22px; flex-shrink: 0; width: 28px; text-align: center; }
+.ddrawer-tab-label { flex: 1; }
+.ddrawer-tab-arrow { font-size: 12px; color: var(--text2); opacity: .5; }
+.ddrawer-tab.active .ddrawer-tab-arrow { color: var(--cyan); opacity: 1; }
+
+/* Sous-onglets (synthèse / KPIs) */
+.ddrawer-subs {
+  display: none;
+  flex-wrap: wrap; gap: 8px;
+  padding: 4px 20px 16px 62px;
+}
+.ddrawer-subs.open { display: flex; }
+.ddrawer-sub {
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 11px; font-weight: 600;
+  color: var(--text2);
+  cursor: pointer;
+  font-family: inherit;
+  -webkit-tap-highlight-color: transparent;
+  transition: all .15s;
+}
+.ddrawer-sub.active {
+  background: rgba(34,211,200,.12);
+  border-color: rgba(34,211,200,.3);
+  color: var(--cyan);
+}
+
+/* Séparateur */
+.ddrawer-sep {
+  height: 1px; background: rgba(255,255,255,.06);
+  margin: 8px 20px;
+}
+
+/* Section filtres dans le drawer */
+.ddrawer-filters-title {
+  font-size: 9px; font-weight: 700;
+  letter-spacing: .15em; text-transform: uppercase;
+  color: var(--text2); padding: 12px 20px 8px;
+}
+.ddrawer-filters {
+  display: flex; flex-direction: column; gap: 10px;
+  padding: 0 20px 8px;
+}
+.ddrawer-filter label {
+  display: block; font-size: 10px; font-weight: 700;
+  letter-spacing: .08em; text-transform: uppercase;
+  color: var(--text2); margin-bottom: 5px;
+}
+.ddrawer-filter select {
+  width: 100%; background: var(--bg3);
+  border: 1px solid var(--border2); border-radius: 8px;
+  color: var(--text); font-family: inherit;
+  font-size: 14px; padding: 10px 12px;
+  outline: none; appearance: none; -webkit-appearance: none;
+  min-height: 44px;
+}
+
+@media (max-width: 768px) {
+  /* Cacher la topbar desktop du dashboard */
+  body.dash-mode #dash-topbar { display: none !important; }
+
+  /* Afficher le FAB */
+  #dash-mobile-fab {
+    display: flex !important;
+    position: fixed; bottom: calc(72px + env(safe-area-inset-bottom));
+    right: 16px; z-index: 400;
+    background: var(--cyan);
+    color: #060a12;
+    border: none; border-radius: 14px;
+    padding: 12px 18px;
+    font-size: 12px; font-weight: 800;
+    letter-spacing: .04em; text-transform: uppercase;
+    cursor: pointer; font-family: inherit;
+    box-shadow: 0 4px 20px rgba(34,211,200,.35);
+    align-items: center; gap: 8px;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Dashboard content — no top padding needed (topbar hidden) */
+  body.dash-mode .app { padding-top: 16px !important; }
+}
+
+
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
@@ -1637,6 +1790,128 @@ body.dash-mode #sc6 { padding: 0; }
   <!-- Export -->
   <button class="btn btn-outline" onclick="exportDashboardExcel()" style="font-size:11px;padding:6px 14px;margin-left:12px;white-space:nowrap;flex-shrink:0">⬇ Excel</button>
 </div>
+
+
+<!-- ══ MOBILE DASHBOARD DRAWER ══ -->
+<div id="dash-drawer-overlay" onclick="closeDashDrawer()"></div>
+<div id="dash-drawer">
+  <div id="dash-drawer-handle"></div>
+  <div id="dash-drawer-title">Navigation Dashboard</div>
+
+  <!-- Synthèse -->
+  <button class="ddrawer-tab active" data-tab="synthese" onclick="dashDrawerTab(this)">
+    <span class="ddrawer-tab-icon">💰</span>
+    <span class="ddrawer-tab-label">Synthèse</span>
+    <span class="ddrawer-tab-arrow">▾</span>
+  </button>
+  <div class="ddrawer-subs open" id="ddrawer-subs-synthese">
+    <button class="ddrawer-sub active" data-stab="recap" onclick="dashDrawerSub(this,'synthese')">📊 Récap</button>
+    <button class="ddrawer-sub" data-stab="ca" onclick="dashDrawerSub(this,'synthese')">CA</button>
+    <button class="ddrawer-sub" data-stab="depenses" onclick="dashDrawerSub(this,'synthese')">Dépenses</button>
+    <button class="ddrawer-sub" data-stab="tresorerie" onclick="dashDrawerSub(this,'synthese')">Trésorerie</button>
+    <button class="ddrawer-sub" data-stab="resultat" onclick="dashDrawerSub(this,'synthese')">Résultat net</button>
+  </div>
+
+  <!-- Bilan -->
+  <button class="ddrawer-tab" data-tab="bilan" onclick="dashDrawerTab(this)">
+    <span class="ddrawer-tab-icon">⚖️</span>
+    <span class="ddrawer-tab-label">Bilan</span>
+    <span class="ddrawer-tab-arrow">›</span>
+  </button>
+  <div class="ddrawer-subs" id="ddrawer-subs-bilan">
+    <div class="ddrawer-filter">
+      <label>Année</label>
+      <select id="m-bil-year" onchange="document.getElementById('bil-year').value=this.value;renderBilan()">
+        <option value="all">Dernière période</option>
+      </select>
+    </div>
+    <div class="ddrawer-filter">
+      <label>SCI</label>
+      <select id="m-bil-sci" onchange="document.getElementById('bil-sci').value=this.value;renderBilan()">
+        <option value="all">Toutes</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Résultat -->
+  <button class="ddrawer-tab" data-tab="resultat" onclick="dashDrawerTab(this)">
+    <span class="ddrawer-tab-icon">📋</span>
+    <span class="ddrawer-tab-label">Résultat</span>
+    <span class="ddrawer-tab-arrow">›</span>
+  </button>
+  <div class="ddrawer-subs" id="ddrawer-subs-resultat">
+    <div class="ddrawer-filter">
+      <label>Année</label>
+      <select id="m-res-year" onchange="document.getElementById('res-year').value=this.value;renderResultat()">
+        <option value="all">Toutes années</option>
+      </select>
+    </div>
+    <div class="ddrawer-filter">
+      <label>SCI</label>
+      <select id="m-res-sci" onchange="document.getElementById('res-sci').value=this.value;renderResultat()">
+        <option value="all">Toutes</option>
+      </select>
+    </div>
+    <div class="ddrawer-filter">
+      <label>Granularité</label>
+      <select id="m-res-gran" onchange="document.getElementById('res-gran').value=this.value;renderResultat()">
+        <option value="annuel">Annuel</option>
+        <option value="mensuel">Mensuel</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- KPIs -->
+  <button class="ddrawer-tab" data-tab="kpis" onclick="dashDrawerTab(this)">
+    <span class="ddrawer-tab-icon">📈</span>
+    <span class="ddrawer-tab-label">KPIs</span>
+    <span class="ddrawer-tab-arrow">›</span>
+  </button>
+  <div class="ddrawer-subs" id="ddrawer-subs-kpis">
+    <button class="ddrawer-sub active" data-ktab="lcd" onclick="switchNavKpi(this,'lcd');closeDashDrawer()">🏠 Courte durée</button>
+    <button class="ddrawer-sub" data-ktab="lld" onclick="switchNavKpi(this,'lld');closeDashDrawer()">🏡 Longue durée</button>
+    <div style="width:100%">
+      <div class="ddrawer-filter">
+        <label>Année</label>
+        <select id="m-kpi-year" onchange="document.getElementById('kpi-year').value=this.value;renderKpis()">
+          <option value="all">Toutes années</option>
+        </select>
+      </div>
+      <div class="ddrawer-filter" style="margin-top:10px">
+        <label>Bien</label>
+        <select id="m-kpi-bien" onchange="document.getElementById('kpi-bien').value=this.value;renderKpis()">
+          <option value="all">Tous les biens</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Plateformes -->
+  <button class="ddrawer-tab" data-tab="plateformes" onclick="dashDrawerTab(this)">
+    <span class="ddrawer-tab-icon">🏠</span>
+    <span class="ddrawer-tab-label">Plateformes</span>
+    <span class="ddrawer-tab-arrow">›</span>
+  </button>
+  <div class="ddrawer-subs" id="ddrawer-subs-plateformes">
+    <div class="ddrawer-filter">
+      <label>Année</label>
+      <select id="m-plt-year" onchange="document.getElementById('plt-year') && (document.getElementById('plt-year').value=this.value,renderPlateformes())">
+        <option value="all">Toutes années</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="ddrawer-sep"></div>
+  <button class="ddrawer-tab" onclick="exitDashboard();closeDashDrawer()" style="color:rgba(34,211,200,.7)">
+    <span class="ddrawer-tab-icon">🏠</span>
+    <span class="ddrawer-tab-label">Retour à l'accueil</span>
+  </button>
+</div>
+
+<!-- FAB bouton -->
+<button id="dash-mobile-fab" onclick="openDashDrawer()">
+  <span>☰</span> <span id="dash-fab-label">Synthèse</span>
+</button>
 
 <div class="dash-inner">
 
@@ -6685,6 +6960,70 @@ function _initHomeDate() {
 //  HOME - LIENS MÉDIAS (vrais sources, 0 API)
 // ════════════════════════════════════════════
 
+
+</script>
+
+<script>
+
+// ══ DASHBOARD MOBILE DRAWER ══
+function openDashDrawer() {
+  document.getElementById('dash-drawer').classList.add('open');
+  document.getElementById('dash-drawer-overlay').classList.add('open');
+  // Sync mirror selects with real selects
+  _syncMirrorSelects();
+}
+function closeDashDrawer() {
+  document.getElementById('dash-drawer').classList.remove('open');
+  document.getElementById('dash-drawer-overlay').classList.remove('open');
+}
+function dashDrawerTab(btn) {
+  const tab = btn.dataset.tab;
+  // Update visual state
+  document.querySelectorAll('.ddrawer-tab').forEach(b => {
+    b.classList.remove('active');
+    b.querySelector('.ddrawer-tab-arrow').textContent = '›';
+  });
+  document.querySelectorAll('.ddrawer-subs').forEach(d => d.classList.remove('open'));
+  btn.classList.add('active');
+  btn.querySelector('.ddrawer-tab-arrow').textContent = '▾';
+  const subs = document.getElementById('ddrawer-subs-' + tab);
+  if (subs) subs.classList.add('open');
+  // Update FAB label
+  const label = btn.querySelector('.ddrawer-tab-label').textContent;
+  const fabLabel = document.getElementById('dash-fab-label');
+  if (fabLabel) fabLabel.textContent = label;
+  // Trigger the real desktop tab switch
+  const desktopBtn = document.querySelector('.dnav-head[data-tab="' + tab + '"]');
+  if (desktopBtn) switchNavHead(desktopBtn);
+  // Close drawer after short delay so user sees the selection
+  if (!['synthese','kpis'].includes(tab)) setTimeout(closeDashDrawer, 200);
+}
+function dashDrawerSub(btn, group) {
+  document.querySelectorAll('#ddrawer-subs-' + group + ' .ddrawer-sub').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  // Trigger the real sub switch
+  const stab = btn.dataset.stab;
+  const desktopBtn = document.querySelector('.dnav-sub[data-stab="' + stab + '"]');
+  if (desktopBtn) switchNavSub(desktopBtn, group);
+  setTimeout(closeDashDrawer, 150);
+}
+function _syncMirrorSelects() {
+  // Copy options from real selects to mirror selects in drawer
+  const pairs = [
+    ['bil-year','m-bil-year'],['bil-sci','m-bil-sci'],
+    ['res-year','m-res-year'],['res-sci','m-res-sci'],['res-gran','m-res-gran'],
+    ['kpi-year','m-kpi-year'],['kpi-bien','m-kpi-bien'],
+    ['plt-year','m-plt-year'],
+  ];
+  pairs.forEach(([realId, mirrorId]) => {
+    const real = document.getElementById(realId);
+    const mirror = document.getElementById(mirrorId);
+    if (!real || !mirror) return;
+    const curVal = real.value;
+    mirror.innerHTML = real.innerHTML;
+    mirror.value = curVal;
+  });
+}
 
 </script>
 
