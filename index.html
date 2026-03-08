@@ -291,261 +291,97 @@ body.dash-mode #sc6 { padding: 0; }
 ═══════════════════════════════════════ */
 @media (max-width: 768px) {
 
-  /* ── Topbar home ── */
-  .ht-bar {
-    padding: 0 16px;
-    height: 52px;
-  }
-  .ht-nav {
-    display: none !important;
-  }
-  .ht-logo-text {
-    font-size: 13px;
-  }
+  /* Prevent horizontal overflow */
+  body { overflow-x: hidden !important; }
 
-  /* ── Centrage global ── */
-  body {
-    overflow-x: hidden !important;
-  }
-  #homeScreen {
-    width: 100% !important;
-    flex: 1;
-  }
+  /* Home topbar */
+  #home-topbar { padding: 10px 16px !important; }
+  #home-topbar .ht-nav { display: none !important; }
 
-  /* ── Home topbar ── */
-  #home-topbar {
-    padding: 10px 16px !important;
-  }
-
-  /* ── Home hero grid : empilé ── */
+  /* Home hero: stack columns */
   #home-hero-grid {
     grid-template-columns: 1fr !important;
-    gap: 24px !important;
-    margin-bottom: 24px !important;
+    gap: 20px !important;
   }
 
-  /* ── Home main container ── */
+  /* Home main container padding */
   #home-main-container {
     padding: 70px 16px 32px !important;
     max-width: 100% !important;
   }
 
-  /* ── KPI strip ── */
-  .h-kpi-strip {
-    flex-direction: column;
-    padding: 0 20px;
-  }
-  .h-kpi-item {
-    max-width: 100%;
-    padding: 24px 16px;
-    border-right: none;
-    border-bottom: 1px solid rgba(255,255,255,.06);
-  }
-  .h-kpi-num { font-size: 32px; }
-
-  /* ── Sections ── */
-  .h-section {
-    padding: 60px 20px;
-  }
-  .h-section-title {
-    font-size: clamp(24px, 6vw, 36px) !important;
+  /* Home ARTEMIS title */
+  #home-artemis-title {
+    font-size: clamp(32px, 9vw, 52px) !important;
   }
 
-  /* ── Two-col : empilé ── */
-  .h-two-col {
-    grid-template-columns: 1fr !important;
-    gap: 32px;
-    margin-top: 40px;
-  }
-  .h-two-col.reverse { direction: ltr; }
+  /* Home sections */
+  [style*="grid-template-columns:repeat(auto-fit,minmax(300px"] { grid-template-columns: 1fr !important; }
+  [style*="grid-template-columns:repeat(auto-fit,minmax(260px"] { grid-template-columns: 1fr !important; }
+  [style*="grid-template-columns:repeat(auto-fit,minmax(220px"] { grid-template-columns: 1fr !important; }
 
-  /* ── Features grid : 1 colonne ── */
-  .h-features {
-    grid-template-columns: 1fr !important;
-  }
+  /* Home news grid */
+  .h-news-grid { grid-template-columns: 1fr !important; }
+  .h-features  { grid-template-columns: 1fr !important; }
 
-  /* ── News grid : 1 colonne ── */
-  .h-news-grid {
-    grid-template-columns: 1fr !important;
-  }
-
-  /* ── Footer ── */
-  .h-footer {
-    flex-direction: column;
-    gap: 12px;
-    text-align: center;
-    padding: 40px 20px;
-  }
-
-  /* ── Outils : sidebar remplacée par bottom nav ── */
-  .sidebar {
-    display: none !important;
-  }
+  /* Sidebar hidden on mobile — bottom nav replaces it */
+  .sidebar { display: none !important; }
   .app {
     margin-left: 0 !important;
     width: 100% !important;
     flex: 1 !important;
-    min-width: 0 !important;
     padding-bottom: 70px !important;
   }
 
-  /* ── Bottom nav mobile pour Outils ── */
-  #mobile-bottom-nav.visible {
-    display: flex !important;
-  }
-
-  /* ── Header outils ── */
+  /* Tools header */
   header {
     padding: 0 16px !important;
     height: auto !important;
-    min-height: 56px !important;
+    min-height: 52px !important;
     flex-wrap: wrap !important;
   }
-  .logo h1 {
-    font-size: 13px !important;
-  }
-  .logo p {
-    font-size: 10px !important;
-  }
+  .logo h1 { font-size: 13px !important; }
+  .logo p  { font-size: 10px !important; }
 
-  /* ── Stepper ── */
-  #stepper {
-    overflow-x: auto !important;
-    padding: 6px 12px !important;
-    gap: 4px !important;
-    flex-shrink: 0 !important;
-  }
-  .step-item {
-    font-size: 10px !important;
-    padding: 4px 8px !important;
-    white-space: nowrap;
-  }
-  .step-num {
-    width: 18px !important;
-    height: 18px !important;
-    font-size: 9px !important;
-    margin-right: 4px !important;
-  }
+  /* Stepper scrollable */
+  #stepper { overflow-x: auto !important; padding: 6px 12px !important; }
+  .step-item { font-size: 10px !important; white-space: nowrap; }
 
-  /* ── Cards internes ── */
-  .card {
-    padding: 14px !important;
-  }
+  /* Import grid: 1 column */
+  .import-grid { grid-template-columns: 1fr !important; }
 
-  /* ── Import drop zones : 1 colonne ── */
-  .imp-cards-grid,
-  .import-grid {
-    grid-template-columns: 1fr !important;
-  }
+  /* Dashboard topbar scrollable */
+  #dash-topbar { overflow-x: auto !important; }
 
-  /* ── Dashboard topbar ── */
-  #dash-topbar {
-    padding: 0 8px !important;
-    overflow-x: auto !important;
-    gap: 4px !important;
-  }
-  .dnav-head {
-    font-size: 11px !important;
-    padding: 0 10px !important;
-  }
-  .dnav-sub {
-    font-size: 9px !important;
-    padding: 2px 7px !important;
-  }
+  /* Tables: horizontal scroll */
+  table { display: block; overflow-x: auto; white-space: nowrap; }
 
-  /* ── Dashboard inner ── */
-  .dash-inner {
-    padding: 12px 14px 40px !important;
-  }
-
-  /* ── Filtres ── */
-  .dash-filters, #syn-filters {
-    flex-direction: column;
-    gap: 8px;
-  }
-  .dash-filter-group {
-    width: 100%;
-  }
-  .dash-filter-group select,
-  .dash-filter-group input {
-    width: 100%;
-  }
-
-  /* ── Grilles recap ── */
-  [style*="grid-template-columns:repeat(4"] {
-    grid-template-columns: repeat(2, 1fr) !important;
-  }
-  [style*="grid-template-columns:repeat(auto-fit,minmax(240px"] {
-    grid-template-columns: 1fr !important;
-  }
-
-  /* ── Tableaux : scroll horizontal ── */
-  table {
-    display: block;
-    overflow-x: auto;
-    white-space: nowrap;
-  }
-
-  /* ── About cards ── */
-  [style*="grid-template-columns:repeat(auto-fit,minmax(300px"] {
-    grid-template-columns: 1fr !important;
-  }
-  [style*="grid-template-columns:repeat(auto-fit,minmax(260px"] {
-    grid-template-columns: 1fr !important;
-  }
-  [style*="grid-template-columns:repeat(auto-fit,minmax(220px"] {
-    grid-template-columns: 1fr !important;
-  }
-
-  /* ── Marketplace ── */
-  #marketplaceScreen h1 {
-    font-size: clamp(28px, 7vw, 40px) !important;
-  }
-
-  /* ── Home ARTEMIS title ── */
-  #home-artemis-title {
-    font-size: clamp(32px, 9vw, 52px) !important;
-    word-break: break-word;
-  }
-
-  /* ── Home badge ── */
-  #home-main-container > div:first-child > div:first-child {
-    font-size: 9px !important;
-  }
+  /* Bottom nav: shown only when .visible */
+  #mobile-bottom-nav.visible { display: flex !important; }
 }
 
-/* Bottom nav — caché par défaut, visible seulement mobile */
+/* Bottom nav base styles */
 #mobile-bottom-nav {
   display: none;
   position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  bottom: 0; left: 0; right: 0;
   height: 64px;
-  background: rgba(14,18,30,0.97);
+  background: rgba(10,14,26,0.97);
   border-top: 1px solid rgba(255,255,255,.08);
   z-index: 500;
   align-items: center;
   justify-content: space-around;
-  padding: 0 8px;
   backdrop-filter: blur(12px);
 }
 .mbn-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3px;
-  padding: 6px 10px;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: background .15s;
-  min-width: 48px;
+  display: flex; flex-direction: column; align-items: center;
+  gap: 3px; padding: 6px 8px; border-radius: 8px; cursor: pointer;
+  min-width: 44px;
 }
-.mbn-item:active { background: rgba(255,255,255,.08); }
-.mbn-item.active .mbn-icon { color: var(--cyan); }
+.mbn-icon  { font-size: 18px; line-height: 1; }
+.mbn-label { font-size: 9px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--text2); }
+.mbn-item.active .mbn-icon,
 .mbn-item.active .mbn-label { color: var(--cyan); }
-.mbn-icon { font-size: 20px; line-height: 1; }
-.mbn-label { font-size: 9px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--text2); }
 </style>
 </head>
 <body>
@@ -864,8 +700,153 @@ async function doLogin(){
           <div style="margin-top:18px;font-size:10px;font-weight:700;color:#f5b731;letter-spacing:.08em">ACCÉDER →</div>
         </button>
       </div>
-    </div>
+    
+  </div><!-- end home-main-container -->
 
+  <!-- LANDING PAGE SECTIONS -->
+  <div style="position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:0 40px 120px">
+
+    <!-- FEATURES -->
+    <section id="section-features" style="padding:80px 0;border-top:1px solid rgba(255,255,255,.06)">
+      <div class="h-section-eyebrow">Fonctionnalités</div>
+      <h2 class="h-section-title">Tout ce dont vous avez<br><em>besoin, rien de superflu.</em></h2>
+      <div style="margin-top:56px;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px">
+        <div style="background:rgba(34,211,200,.04);border:1px solid rgba(34,211,200,.1);border-radius:16px;padding:28px 24px">
+          <div style="font-size:24px;margin-bottom:14px">📥</div>
+          <div style="font-size:14px;font-weight:700;color:#eaf0ff;margin-bottom:10px">Import bancaire universel</div>
+          <div style="font-size:12px;color:rgba(200,216,240,.45);line-height:1.7">Importez vos relevés CSV ou XLSX depuis n'importe quelle banque. Le mapping intelligent reconnaît vos règles et ventile automatiquement.</div>
+        </div>
+        <div style="background:rgba(155,110,243,.04);border:1px solid rgba(155,110,243,.1);border-radius:16px;padding:28px 24px">
+          <div style="font-size:24px;margin-bottom:14px">📊</div>
+          <div style="font-size:14px;font-weight:700;color:#eaf0ff;margin-bottom:10px">Dashboard P&L complet</div>
+          <div style="font-size:12px;color:rgba(200,216,240,.45);line-height:1.7">Synthèse, Bilan, Résultat, KPIs, Plateformes. Chaque onglet répond à une vraie question de gestion patrimoniale.</div>
+        </div>
+        <div style="background:rgba(245,183,49,.04);border:1px solid rgba(245,183,49,.1);border-radius:16px;padding:28px 24px">
+          <div style="font-size:24px;margin-bottom:14px">🏢</div>
+          <div style="font-size:14px;font-weight:700;color:#eaf0ff;margin-bottom:10px">Multi-SCI, multi-biens</div>
+          <div style="font-size:12px;color:rgba(200,216,240,.45);line-height:1.7">Gérez plusieurs SCI et biens en parallèle. Chaque lot, chaque bien, chaque société dispose de son propre suivi analytique.</div>
+        </div>
+        <div style="background:rgba(240,86,106,.04);border:1px solid rgba(240,86,106,.1);border-radius:16px;padding:28px 24px">
+          <div style="font-size:24px;margin-bottom:14px">🔒</div>
+          <div style="font-size:14px;font-weight:700;color:#eaf0ff;margin-bottom:10px">100% local, 100% privé</div>
+          <div style="font-size:12px;color:rgba(200,216,240,.45);line-height:1.7">Vos données ne quittent jamais votre appareil. Aucun serveur, aucune synchronisation cloud, aucun abonnement obligatoire.</div>
+        </div>
+        <div style="background:rgba(34,211,200,.04);border:1px solid rgba(34,211,200,.1);border-radius:16px;padding:28px 24px">
+          <div style="font-size:24px;margin-bottom:14px">📋</div>
+          <div style="font-size:14px;font-weight:700;color:#eaf0ff;margin-bottom:10px">Export expert-comptable</div>
+          <div style="font-size:12px;color:rgba(200,216,240,.45);line-height:1.7">Générez un fichier Excel structuré prêt à transmettre à votre expert-comptable. Gain de temps garanti en période fiscale.</div>
+        </div>
+        <div style="background:rgba(255,180,0,.04);border:1px solid rgba(255,180,0,.1);border-radius:16px;padding:28px 24px">
+          <div style="font-size:24px;margin-bottom:14px">⚡</div>
+          <div style="font-size:14px;font-weight:700;color:#eaf0ff;margin-bottom:10px">Suivi LCD / LLD / Airbnb</div>
+          <div style="font-size:12px;color:rgba(200,216,240,.45);line-height:1.7">Réconciliez automatiquement vos revenus Airbnb et Booking avec vos relevés bancaires. Taux d'occupation, revenus nets, charges.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- À PROPOS -->
+    <section id="section-about" style="padding:80px 0;border-top:1px solid rgba(255,255,255,.06)">
+      <div class="h-section-eyebrow">Qui sommes-nous</div>
+      <h2 class="h-section-title">Finance, immobilier &amp;<br><em>technologie réunis.</em></h2>
+      <p class="h-section-body" style="max-width:700px">
+        Artemis est né d'un constat simple : les investisseurs immobiliers sérieux méritent des outils à la hauteur de leurs ambitions. Pas des tableurs bricolés. Pas des logiciels comptables pensés pour des cabinets. Un outil construit <em style="color:rgba(200,216,240,.8)">par des investisseurs, pour des investisseurs</em>, avec la rigueur de la finance d'entreprise et la profondeur du terrain immobilier.
+      </p>
+
+      <div style="margin-top:56px;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px">
+        <div style="background:rgba(34,211,200,.04);border:1px solid rgba(34,211,200,.1);border-radius:16px;padding:28px 24px">
+          <div style="font-size:24px;margin-bottom:14px">🏦</div>
+          <div style="font-size:14px;font-weight:700;color:#eaf0ff;margin-bottom:10px">Comptabilité analytique réelle</div>
+          <div style="font-size:12px;color:rgba(200,216,240,.45);line-height:1.7">La plupart des investisseurs ignorent leur vrai P&amp;L. Artemis ventile chaque euro par bien, par SCI, par lot, avec la granularité d'un contrôleur de gestion.</div>
+        </div>
+        <div style="background:rgba(155,110,243,.04);border:1px solid rgba(155,110,243,.1);border-radius:16px;padding:28px 24px">
+          <div style="font-size:24px;margin-bottom:14px">⚡</div>
+          <div style="font-size:14px;font-weight:700;color:#eaf0ff;margin-bottom:10px">Décision en temps réel</div>
+          <div style="font-size:12px;color:rgba(200,216,240,.45);line-height:1.7">Résultat net, trésorerie, EBIT, rendement par bien, disponibles instantanément après chaque import bancaire. Fini l'attente du bilan annuel.</div>
+        </div>
+        <div style="background:rgba(255,180,0,.04);border:1px solid rgba(255,180,0,.1);border-radius:16px;padding:28px 24px">
+          <div style="font-size:24px;margin-bottom:14px">🎯</div>
+          <div style="font-size:14px;font-weight:700;color:#eaf0ff;margin-bottom:10px">Conçu pour évoluer</div>
+          <div style="font-size:12px;color:rgba(200,216,240,.45);line-height:1.7">Artemis n'est pas figé. Chaque module (outils, dashboard, marketplace) s'enrichit au fil des retours d'utilisateurs réels qui gèrent un patrimoine réel.</div>
+        </div>
+      </div>
+
+      <!-- TEAM -->
+      <div style="margin-top:80px">
+        <div class="h-section-eyebrow" style="margin-bottom:8px">L'équipe fondatrice</div>
+        <h3 style="font-family:'DM Serif Display',serif;font-size:28px;color:#eaf0ff;margin-bottom:40px;line-height:1.2">Deux frères, une vision,<br><em style="color:rgba(200,216,240,.45)">une synergie rare.</em></h3>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px">
+
+          <!-- Enzo -->
+          <div style="background:linear-gradient(135deg,rgba(34,211,200,.06),rgba(34,211,200,.02));border:1px solid rgba(34,211,200,.15);border-radius:20px;padding:36px 32px;position:relative;overflow:hidden">
+            <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#22d3c8,rgba(34,211,200,.2))"></div>
+            <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px">
+              <div style="width:52px;height:52px;border-radius:14px;background:rgba(34,211,200,.12);border:1px solid rgba(34,211,200,.25);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">📊</div>
+              <div>
+                <div style="font-size:16px;font-weight:800;color:#eaf0ff">Enzo</div>
+                <div style="font-size:11px;color:#22d3c8;font-weight:600;letter-spacing:.04em;margin-top:2px">Finance · Contrôle de gestion · SI</div>
+              </div>
+            </div>
+            <p style="font-size:13px;color:rgba(200,216,240,.55);line-height:1.8;margin-bottom:20px">Expert en finance d'entreprise et contrôle de gestion, Enzo apporte la rigueur analytique qu'on attend d'un CFO, appliquée au patrimoine privé. Sa maîtrise des systèmes d'information lui a permis de concevoir Artemis de A à Z : architecture de données, schéma de gestion, logique comptable, reporting.</p>
+            <p style="font-size:13px;color:rgba(200,216,240,.55);line-height:1.8">C'est lui qui a posé la question que beaucoup d'investisseurs ignorent : <em style="color:rgba(200,216,240,.8)">"Quel est mon vrai résultat net, par bien, après toutes les charges réelles ?"</em> Et qui a construit l'outil pour y répondre.</p>
+            <div style="margin-top:20px;display:flex;gap:8px;flex-wrap:wrap">
+              <span style="background:rgba(34,211,200,.08);border:1px solid rgba(34,211,200,.15);color:#22d3c8;border-radius:8px;padding:3px 10px;font-size:10px;font-weight:600">P&amp;L</span>
+              <span style="background:rgba(34,211,200,.08);border:1px solid rgba(34,211,200,.15);color:#22d3c8;border-radius:8px;padding:3px 10px;font-size:10px;font-weight:600">EBIT</span>
+              <span style="background:rgba(34,211,200,.08);border:1px solid rgba(34,211,200,.15);color:#22d3c8;border-radius:8px;padding:3px 10px;font-size:10px;font-weight:600">Reporting</span>
+              <span style="background:rgba(34,211,200,.08);border:1px solid rgba(34,211,200,.15);color:#22d3c8;border-radius:8px;padding:3px 10px;font-size:10px;font-weight:600">Systèmes d'info</span>
+            </div>
+          </div>
+
+          <!-- Médy -->
+          <div style="background:linear-gradient(135deg,rgba(255,180,0,.06),rgba(255,140,0,.02));border:1px solid rgba(255,180,0,.15);border-radius:20px;padding:36px 32px;position:relative;overflow:hidden">
+            <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#ffb400,rgba(255,180,0,.2))"></div>
+            <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px">
+              <div style="width:52px;height:52px;border-radius:14px;background:rgba(255,180,0,.1);border:1px solid rgba(255,180,0,.25);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">🏠</div>
+              <div>
+                <div style="font-size:16px;font-weight:800;color:#eaf0ff">Médy</div>
+                <div style="font-size:11px;color:#ffb400;font-weight:600;letter-spacing:.04em;margin-top:2px">Investissement immobilier · Stratégie locative</div>
+              </div>
+            </div>
+            <p style="font-size:13px;color:rgba(200,216,240,.55);line-height:1.8;margin-bottom:20px">Investisseur immobilier aguerri, Médy connaît les réalités du terrain : la négociation d'un bien, la gestion locative au quotidien, les arbitrages LCD/LLD, la fiscalité SCI. Il a vécu les limites des outils existants avant même qu'Artemis n'existe.</p>
+            <p style="font-size:13px;color:rgba(200,216,240,.55);line-height:1.8">Son expertise immobilière est le filtre de réalité d'Artemis : chaque fonctionnalité est validée par quelqu'un qui <em style="color:rgba(200,216,240,.8)">gère réellement des biens, des locataires, des charges et des déclarations fiscales.</em></p>
+            <div style="margin-top:20px;display:flex;gap:8px;flex-wrap:wrap">
+              <span style="background:rgba(255,180,0,.08);border:1px solid rgba(255,180,0,.15);color:#ffb400;border-radius:8px;padding:3px 10px;font-size:10px;font-weight:600">LCD / LLD</span>
+              <span style="background:rgba(255,180,0,.08);border:1px solid rgba(255,180,0,.15);color:#ffb400;border-radius:8px;padding:3px 10px;font-size:10px;font-weight:600">SCI</span>
+              <span style="background:rgba(255,180,0,.08);border:1px solid rgba(255,180,0,.15);color:#ffb400;border-radius:8px;padding:3px 10px;font-size:10px;font-weight:600">Gestion locative</span>
+              <span style="background:rgba(255,180,0,.08);border:1px solid rgba(255,180,0,.15);color:#ffb400;border-radius:8px;padding:3px 10px;font-size:10px;font-weight:600">Fiscalité</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Synergie -->
+        <div style="margin-top:24px;background:linear-gradient(135deg,rgba(34,211,200,.04),rgba(255,180,0,.04));border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:28px 32px;display:flex;align-items:center;gap:24px">
+          <div style="font-size:32px;flex-shrink:0">⚡</div>
+          <div>
+            <div style="font-size:13px;font-weight:700;color:#eaf0ff;margin-bottom:8px">La synergie qui fait la différence</div>
+            <p style="font-size:13px;color:rgba(200,216,240,.5);line-height:1.7;margin:0">Un contrôleur de gestion sans ancrage terrain produit des tableaux de bord déconnectés de la réalité. Un investisseur immobilier sans culture financière pilote à l'aveugle. Ensemble, Enzo et Médy ont conçu un outil où <span style="color:rgba(200,216,240,.85)">chaque indicateur a un sens concret</span>, chaque écran répond à une vraie question d'investisseur.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ACTUALITÉS -->
+    <div class="h-divider"></div>
+    <section class="h-section anim" id="section-news" style="padding:80px 0">
+      <div class="h-section-eyebrow">Actualités réglementaires</div>
+      <h2 class="h-section-title">Restez informé,<br><em>anticipez les changements.</em></h2>
+      <div class="h-news-grid" id="home-news-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:40px"></div>
+    </section>
+
+    <!-- FOOTER -->
+    <div class="h-divider" style="margin-top:40px"></div>
+    <footer class="h-footer" style="padding:48px 48px 80px;border-top:1px solid rgba(255,255,255,.05);display:flex;justify-content:space-between;align-items:center;max-width:1100px;margin:0 auto;opacity:.5">
+      <div style="font-family:'DM Serif Display',serif;font-size:16px;color:#eaf0ff">ARTEM<span style="color:#22d3c8">IS</span></div>
+      <div style="font-size:11px;color:#2a3a50;letter-spacing:.06em">© 2024–2026 Artemis · Tous droits réservés</div>
+    </footer>
+
+  </div><!-- end landing sections -->
 
 
 <nav class="sidebar" id="sidebar">
