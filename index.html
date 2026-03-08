@@ -1907,6 +1907,199 @@ body.dash-mode #sc6 { padding: 0; }
 @keyframes progressLoad {
   from { width: 0; }
 }
+
+/* ═══════════════════════════════════════
+   MOBILE — max-width 768px
+═══════════════════════════════════════ */
+@media (max-width: 768px) {
+
+  /* ── Topbar home ── */
+  .ht-bar {
+    padding: 0 16px;
+    height: 52px;
+  }
+  .ht-nav {
+    display: none !important;
+  }
+  .ht-logo-text {
+    font-size: 13px;
+  }
+
+  /* ── Hero ── */
+  .h-hero {
+    padding: 80px 20px 40px;
+  }
+  .h-hero-title {
+    font-size: clamp(28px, 8vw, 42px) !important;
+    margin-bottom: 14px;
+  }
+  .h-hero-sub {
+    font-size: 14px !important;
+  }
+
+  /* ── Hero cards : 1 colonne ── */
+  .h-hero-cards {
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+  }
+  .h-entry-card {
+    width: 100% !important;
+    max-width: 340px;
+    padding: 20px 18px;
+  }
+
+  /* ── KPI strip ── */
+  .h-kpi-strip {
+    flex-direction: column;
+    padding: 0 20px;
+  }
+  .h-kpi-item {
+    max-width: 100%;
+    padding: 24px 16px;
+    border-right: none;
+    border-bottom: 1px solid rgba(255,255,255,.06);
+  }
+  .h-kpi-num { font-size: 32px; }
+
+  /* ── Sections ── */
+  .h-section {
+    padding: 60px 20px;
+  }
+  .h-section-title {
+    font-size: clamp(24px, 6vw, 36px) !important;
+  }
+
+  /* ── Two-col : empilé ── */
+  .h-two-col {
+    grid-template-columns: 1fr !important;
+    gap: 32px;
+    margin-top: 40px;
+  }
+  .h-two-col.reverse { direction: ltr; }
+
+  /* ── Features grid : 1 colonne ── */
+  .h-features {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* ── News grid : 1 colonne ── */
+  .h-news-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* ── Footer ── */
+  .h-footer {
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+    padding: 40px 20px;
+  }
+
+  /* ── Outils sidebar caché sur mobile ── */
+  .sidebar {
+    display: none !important;
+  }
+  .app {
+    margin-left: 0 !important;
+    width: 100% !important;
+  }
+  header {
+    padding: 0 16px !important;
+  }
+
+  /* ── Stepper compressé ── */
+  #stepper {
+    overflow-x: auto;
+    padding: 8px 16px;
+  }
+  .step-item {
+    min-width: 60px;
+  }
+  .step-label {
+    display: none;
+  }
+
+  /* ── Cards internes ── */
+  .card {
+    padding: 14px !important;
+  }
+
+  /* ── Import cards : 1 colonne ── */
+  #import-cards-row {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* ── Dashboard topbar ── */
+  #dash-topbar {
+    padding: 0 10px;
+    overflow-x: auto;
+  }
+  .dnav-head {
+    font-size: 11px !important;
+    padding: 0 10px !important;
+  }
+  .dnav-sub {
+    font-size: 9px !important;
+    padding: 2px 7px !important;
+  }
+
+  /* ── Dashboard inner ── */
+  .dash-inner {
+    padding: 12px 14px 40px !important;
+  }
+
+  /* ── Filtres ── */
+  .dash-filters, #syn-filters {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .dash-filter-group, .syn-filter-group {
+    width: 100%;
+  }
+  .dash-filter-group select,
+  .dash-filter-group input,
+  #syn-filters select,
+  #syn-filters input {
+    width: 100%;
+  }
+
+  /* ── Grilles recap ── */
+  [style*="grid-template-columns:repeat(4"] {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  [style*="grid-template-columns:repeat(auto-fit,minmax(240px"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* ── Tableaux : scroll horizontal ── */
+  table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  /* ── Section qui sommes nous cards ── */
+  [style*="grid-template-columns:repeat(auto-fit,minmax(300px"] {
+    grid-template-columns: 1fr !important;
+  }
+  [style*="grid-template-columns:repeat(auto-fit,minmax(260px"] {
+    grid-template-columns: 1fr !important;
+  }
+  [style*="grid-template-columns:repeat(auto-fit,minmax(220px"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* ── Marketplace screen ── */
+  #marketplaceScreen {
+    padding: 0;
+  }
+  #marketplaceScreen h1 {
+    font-size: clamp(28px, 7vw, 40px) !important;
+  }
+
+}
 </style>
 </head>
 <body>
