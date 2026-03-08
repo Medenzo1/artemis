@@ -435,6 +435,10 @@ body.dash-mode #sc6 { padding: 0; }
 .news-meta{font-size:10px;color:#2a3a50}
 
 
+
+/* Bottom nav — caché par défaut, visible sur mobile via media query */
+#mobile-bottom-nav { display: none; }
+
 /* ══ Force visibility — animations ne doivent jamais cacher le contenu ══ */
 .h-hero-eyebrow,
 .h-hero-title,
@@ -622,6 +626,44 @@ body.dash-mode #sc6 { padding: 0; }
   #homeScreen > div[style*="position:fixed"][style*="padding:14px"] {
     padding: 10px 14px !important;
     left: 0 !important; right: 0 !important;
+  }
+
+  /* ── Centrage du contenu — padding symétrique ── */
+  .app {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+    box-sizing: border-box !important;
+  }
+
+  /* ── Bottom nav visible ── */
+  #mobile-bottom-nav {
+    display: flex !important;
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    z-index: 300;
+    background: rgba(6,10,18,0.96);
+    border-top: 1px solid rgba(0,229,255,0.12);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    padding: 6px 0 calc(6px + env(safe-area-inset-bottom));
+    justify-content: space-around;
+    align-items: center;
+  }
+  .mn-item {
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    cursor: pointer; padding: 6px 12px; border-radius: 10px;
+    color: var(--text2); font-size: 9px; font-weight: 600;
+    letter-spacing: .04em; text-transform: uppercase; min-width: 52px;
+    position: relative;
+    -webkit-tap-highlight-color: transparent; user-select: none;
+  }
+  .mn-item:active { background: rgba(255,255,255,0.06); transform: scale(0.95); }
+  .mn-item.active { color: var(--cyan); }
+  .mn-icon { font-size: 20px; line-height: 1; }
+  .mn-item.active::after {
+    content: ''; position: absolute; bottom: -2px; left: 50%;
+    transform: translateX(-50%); width: 20px; height: 2px;
+    background: var(--cyan); border-radius: 2px; box-shadow: 0 0 8px var(--cyan);
   }
 
 }
@@ -1833,269 +1875,6 @@ body.dash-mode #sc6 { padding: 0; }
 </div>
 
 </div>
-
-TYP
-
-E html>
-<html lang="fr">
-
-<div id="loginScreen" class="login-wrap" style="display:none">
-<canvas id="loginCanvas" class="login-canvas"></canvas>
-<div class="lc-card">
-<div style="text-align:center;margin-bottom:28px">
-<img src="data:image/webp;base64,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" style="width:52px;height:52px;object-fit:contain;border-radius:12px;margin-bottom:14px;display:block;margin-left:auto;margin-right:auto">
-<h2 style="font-size:22px;font-weight:800;color:#eaf0ff;letter-spacing:-.01em">ARTEMIS</h2>
-<p style="font-size:10px;color:#4a6080;margin-top:4px;letter-spacing:.12em;text-transform:uppercase">SCI · Gestion locative</p>
-</div>
-<div style="display:flex;flex-direction:column;gap:14px">
-<div>
-<label class="lbl" style="color:#4a6080">Utilisateur</label>
-<input id="loginUser" type="text" placeholder="admin" autocomplete="username" class="li" onkeydown="if(event.key==='Enter')document.getElementById('loginPass').focus()">
-</div>
-<div>
-<label class="lbl" style="color:#4a6080">Mot de passe</label>
-<input id="loginPass" type="password" placeholder="••••••••" autocomplete="current-password" class="li" onkeydown="if(event.key==='Enter')doLogin()">
-</div>
-<div id="loginError" style="display:none;background:rgba(240,86,106,.12);border:1px solid rgba(240,86,106,.3);border-radius:8px;padding:10px 14px;font-size:12px;color:#f0566a;text-align:center">Identifiants incorrects</div>
-<button onclick="doLogin()" class="lc-btn">Connexion →</button>
-</div>
-</div>
-</div>
-<script>
-
-
-const USERS={
- 'admin':'f9cd16a379b4d70b65dde8e47101ffbc74fd5437734099ab7119bfc9d1038949',
- 'enzo':'f9cd16a379b4d70b65dde8e47101ffbc74fd5437734099ab7119bfc9d1038949'
-};
-async function sha256(str){
- const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(str));
- return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
-}
-async function doLogin(){
- const user=document.getElementById('loginUser').value.trim().toLowerCase();
- const pass=document.getElementById('loginPass').value;
- const hash=await sha256(pass);
- if(USERS[user]&&USERS[user]===hash){
-  sessionStorage.setItem('artemis_auth','1');
-  document.getElementById('loginScreen').style.display='none';
-  document.getElementById('mainContent').style.display='flex';
-  document.getElementById('mainContent').style.width='100%';
-  showHome(); _initHomeBackBtn();
- }else{
-  const err=document.getElementById('loginError');
-  err.style.display='block';
-  document.getElementById('loginPass').value='';
-  document.getElementById('loginPass').focus();
-  setTimeout(()=>err.style.display='none', 3000);
- }
-}
-(function(){
- const cv=document.getElementById('loginCanvas');
- if(!cv)return;
- const cx=cv.getContext('2d');
- let W,H,t=0,pts=[];
-
- function resize(){
-  W=cv.width=innerWidth;
-  H=cv.height=innerHeight;
-  pts=Array.from({length:120},()=>mkPt());
- }
- function mkPt(){
-  return {x:Math.random()*W,y:Math.random()*H,r:Math.random()*.9+.1,a:Math.random()*.7+.1,vx:(Math.random()-.5)*.15,vy:(Math.random()-.5)*.15};
- }
- function draw(){
-  t+=.005;
-  cx.clearRect(0,0,W,H);
-
-  // Deep background
-  const bg=cx.createLinearGradient(0,0,W*.3,H);
-  bg.addColorStop(0,'#010b14');
-  bg.addColorStop(.5,'#020d1c');
-  bg.addColorStop(1,'#010810');
-  cx.fillStyle=bg;cx.fillRect(0,0,W,H);
-
-  // Aurora blobs
-  function blob(x,y,rx,ry,ro,go,bo,alpha){
-   const mx=Math.max(rx,ry);
-   const g=cx.createRadialGradient(x,y,0,x,y,mx);
-   g.addColorStop(0,'rgba('+ro+','+go+','+bo+','+alpha+')');
-   g.addColorStop(1,'rgba(0,0,0,0)');
-   cx.save();cx.transform(rx/mx,0,0,ry/mx,x*(1-rx/mx),y*(1-ry/mx));
-   cx.beginPath();cx.arc(x,y,mx,0,6.28);
-   cx.fillStyle=g;cx.fill();cx.restore();
-  }
-
-  const a1=Math.sin(t*.6), a2=Math.sin(t*.4+1.2), a3=Math.sin(t*.5+2.4);
-
-  // Vibrant aurora layers
-  blob(W*(.15+a1*.04), H*(.35+a2*.06), W*.55, H*.4,  0,160,255, .11+a1*.04);
-  blob(W*(.6+a2*.05),  H*(.2+a3*.05),  W*.5,  H*.35, 0,80,200,  .09+a2*.03);
-  blob(W*(.85+a3*.04), H*(.5+a1*.05),  W*.4,  H*.3,  0,200,220, .08+a3*.03);
-  blob(W*.45,          H*.6,           W*.7,  H*.4,  0,40,120,  .15);
-  // Warm accent (cyan-teal)
-  blob(W*(.3+a2*.03),  H*(.15+a1*.04), W*.3,  H*.2,  0,220,200, .07+a2*.02);
-
-  // Grid
-  cx.strokeStyle='rgba(0,150,220,.022)';cx.lineWidth=.6;
-  for(let x=0;x<W;x+=55){cx.beginPath();cx.moveTo(x,0);cx.lineTo(x,H);cx.stroke();}
-  for(let y=0;y<H;y+=55){cx.beginPath();cx.moveTo(0,y);cx.lineTo(W,y);cx.stroke();}
-
-  // Stars
-  pts.forEach(p=>{
-   p.x+=p.vx;p.y+=p.vy;
-   if(p.x<0||p.x>W)p.vx*=-1;
-   if(p.y<0||p.y>H)p.vy*=-1;
-   cx.globalAlpha=p.a*(0.5+0.5*Math.sin(t*2+p.x));
-   cx.fillStyle='#a0d8ff';
-   cx.beginPath();cx.arc(p.x,p.y,p.r,0,6.28);cx.fill();
-  });
-  cx.globalAlpha=1;
-
-  // Bright orb top-right
-  const ox=W*.82,oy=H*.1,or=Math.min(W,H)*.09;
-  const og=cx.createRadialGradient(ox,oy,0,ox,oy,or*3);
-  og.addColorStop(0,'rgba(0,200,255,.2)');
-  og.addColorStop(.35,'rgba(0,140,220,.07)');
-  og.addColorStop(1,'rgba(0,0,0,0)');
-  cx.fillStyle=og;cx.beginPath();cx.arc(ox,oy,or*3,0,6.28);cx.fill();
-  const oc=cx.createRadialGradient(ox,oy,0,ox,oy,or*.6);
-  oc.addColorStop(0,'rgba(180,240,255,.35)');
-  oc.addColorStop(1,'rgba(0,180,220,.0)');
-  cx.fillStyle=oc;cx.beginPath();cx.arc(ox,oy,or*.6,0,6.28);cx.fill();
-
-  // ── Skyline ──
-  const GH=H*.86; // ground horizon
-  // Precomputed buildings (seeded from W so they resize correctly)
-  if(!draw._bld||draw._bldW!==W){
-   draw._bldW=W;
-   const seed=[
-    // [xFrac, wFrac, hFrac, floors, windowCols, glowR,glowG,glowB]
-    [.00,.055,.48,6,2, 0,160,220],
-    [.05,.04, .32,4,1, 0,120,180],
-    [.09,.06, .58,7,2, 0,180,230],
-    [.14,.035,.28,3,1, 0,100,160],
-    [.17,.07, .72,9,3, 0,200,255],
-    [.23,.05, .42,5,2, 0,140,200],
-    [.27,.04, .30,4,1, 0,120,180],
-    [.30,.09, .65,8,3, 0,180,240],
-    [.38,.05, .38,5,2, 0,130,190],
-    [.42,.04, .26,3,1, 0,100,160],
-    [.45,.06, .55,7,2, 0,160,220],
-    [.50,.045,.35,4,1, 0,120,180],
-    [.54,.08, .80,10,3,0,210,255], // tallest center
-    [.61,.05, .45,6,2, 0,150,210],
-    [.65,.04, .28,3,1, 0,100,160],
-    [.68,.07, .62,8,3, 0,180,235],
-    [.74,.05, .38,5,2, 0,140,200],
-    [.78,.04, .24,3,1, 0,110,170],
-    [.81,.065,.50,6,2, 0,160,220],
-    [.86,.04, .30,4,1, 0,120,180],
-    [.89,.07, .68,8,3, 0,190,245],
-    [.95,.05, .40,5,2, 0,140,200],
-    [.99,.04, .22,3,1, 0,100,160],
-   ];
-   draw._bld=seed.map(([xf,wf,hf,fl,wc,r,g,b])=>({
-    x:xf*W, w:wf*W, h:hf*GH*.85,
-    fl,wc,r,g,b,
-    // randomise some window lights
-    wins:Array.from({length:fl*wc},(_,i)=>({
-      lit:Math.random()>.35,
-      col:Math.floor(Math.random()*3),        // current color index 0=yellow 1=blue 2=orange
-      nextSwitch:Math.random()*300+60,         // frame countdown to next color change
-      timer:Math.floor(Math.random()*300)      // staggered start
-     }))
-   }));
-  }
-
-  const blds=draw._bld;
-
-  // Ground glow (reflected city light on the "water/street")
-  const gg=cx.createLinearGradient(0,GH,0,GH+H*.12);
-  gg.addColorStop(0,'rgba(0,120,200,.12)');
-  gg.addColorStop(1,'rgba(0,0,0,0)');
-  cx.fillStyle=gg; cx.fillRect(0,GH,W,H*.12);
-
-  // Draw buildings back→front (darker ones first for depth)
-  blds.forEach((b,bi)=>{
-   const by=GH-b.h;
-   const depth=1-b.h/(GH*.85); // 0=tall(front) 1=short(back)
-
-   // Building body - gradient from slightly lighter top to dark base
-   const bg2=cx.createLinearGradient(0,by,0,GH);
-   const br=Math.round(3+depth*6), bg=Math.round(8+depth*16), bb2=Math.round(16+depth*28);
-   bg2.addColorStop(0,`rgb(${br+8},${bg+14},${bb2+22})`);
-   bg2.addColorStop(1,`rgb(${br},${bg},${bb2})`);
-   cx.fillStyle=bg2;
-   cx.fillRect(b.x,by,b.w,b.h);
-
-   // Subtle left-edge highlight
-   cx.fillStyle=`rgba(0,160,230,${.06+depth*.04})`;
-   cx.fillRect(b.x,by,2,b.h);
-
-   // Windows - blink & cycle yellow / blue / orange
-   const wPal=[[255,210,70],[70,160,255],[255,130,30]];
-   const ww=b.w/(b.wc*2+1);
-   const wh=ww*1.1;
-   const rowH=b.h/b.fl;
-   b.wins.forEach((w,i)=>{
-    // Advance timer and switch color+state when it hits zero
-    w.timer--;
-    if(w.timer<=0){
-     w.lit=!w.lit;
-     if(w.lit) w.col=(w.col+1)%3;   // change color each time window turns on
-     w.timer=w.lit
-      ? Math.floor(400+Math.random()*800)   // on duration  (400–1200 frames)
-      : Math.floor(100+Math.random()*300);  // off duration (100–400 frames)
-    }
-    if(!w.lit) return;
-    const gc=i%b.wc, row=Math.floor(i/b.wc);
-    const wx=b.x+ww*(gc*2+.8);
-    const wy=by+row*rowH+rowH*.25;
-    if(wy+wh>GH) return;
-    const [wr,wg,wb]=wPal[w.col];
-    // Soft fade-in using sin ramp from timer
-    const age=1-w.timer/300;
-    const alpha=Math.min(age*4,.88);
-    cx.fillStyle=`rgba(${wr},${wg},${wb},${alpha})`;
-    cx.fillRect(wx,wy,ww*.9,wh*.75);
-    cx.fillStyle=`rgba(255,255,255,${alpha*.1})`;
-    cx.fillRect(wx+1,wy+1,ww*.9-2,wh*.75-2);
-   });
-
-   // Rooftop antenna on tall buildings
-   if(b.h>GH*.55){
-    const ax=b.x+b.w/2;
-    cx.strokeStyle=`rgba(${b.r},${b.g},${b.b},.4)`;
-    cx.lineWidth=1.2;
-    cx.beginPath();cx.moveTo(ax,by);cx.lineTo(ax,by-18);cx.stroke();
-    // Blinking red light
-    const blink=.5+.5*Math.sin(t*3+bi);
-    cx.fillStyle=`rgba(255,80,80,${blink*.9})`;
-    cx.beginPath();cx.arc(ax,by-18,2,0,6.28);cx.fill();
-   }
-  });
-
-  // Ground line
-  const gl=cx.createLinearGradient(0,GH-1,0,GH+3);
-  gl.addColorStop(0,'rgba(0,180,230,.35)');
-  gl.addColorStop(1,'rgba(0,0,0,0)');
-  cx.fillStyle=gl; cx.fillRect(0,GH-1,W,4);
-
-  // (reflection removed)
-
-  // Bottom vignette (over everything)
-  const vg=cx.createLinearGradient(0,GH+H*.02,0,H);
-  vg.addColorStop(0,'rgba(1,8,18,0)');
-  vg.addColorStop(1,'rgba(1,6,14,1)');
-  cx.fillStyle=vg;cx.fillRect(0,GH+H*.02,W,H);
-
-  if (!window._homeCanvasStop) requestAnimationFrame(draw);
- }
- window.addEventListener('resize',resize);
- resize(); draw();
-})();
-</script>
 
 <div id="mainContent" style="display:none">
 
