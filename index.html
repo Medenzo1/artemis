@@ -799,8 +799,8 @@ body.dash-mode #sc6 { padding: 0; }
   /* Cacher la topbar desktop du dashboard */
   body.dash-mode #dash-topbar { display: none !important; }
 
-  /* Afficher le FAB */
-  #dash-mobile-fab {
+  /* Afficher le FAB uniquement en dash-mode */
+  body.dash-mode #dash-mobile-fab {
     display: flex !important;
     position: fixed; bottom: calc(72px + env(safe-area-inset-bottom));
     right: 16px; z-index: 400;
@@ -6969,7 +6969,6 @@ function _initHomeDate() {
 function openDashDrawer() {
   document.getElementById('dash-drawer').classList.add('open');
   document.getElementById('dash-drawer-overlay').classList.add('open');
-  // Sync mirror selects with real selects
   _syncMirrorSelects();
 }
 function closeDashDrawer() {
@@ -6978,37 +6977,41 @@ function closeDashDrawer() {
 }
 function dashDrawerTab(btn) {
   const tab = btn.dataset.tab;
-  // Update visual state
+  // Visual state in drawer
   document.querySelectorAll('.ddrawer-tab').forEach(b => {
     b.classList.remove('active');
-    b.querySelector('.ddrawer-tab-arrow').textContent = '›';
+    const arr = b.querySelector('.ddrawer-tab-arrow');
+    if (arr) arr.textContent = '›';
   });
   document.querySelectorAll('.ddrawer-subs').forEach(d => d.classList.remove('open'));
   btn.classList.add('active');
-  btn.querySelector('.ddrawer-tab-arrow').textContent = '▾';
+  const arr = btn.querySelector('.ddrawer-tab-arrow');
+  if (arr) arr.textContent = '▾';
   const subs = document.getElementById('ddrawer-subs-' + tab);
   if (subs) subs.classList.add('open');
   // Update FAB label
   const label = btn.querySelector('.ddrawer-tab-label').textContent;
   const fabLabel = document.getElementById('dash-fab-label');
   if (fabLabel) fabLabel.textContent = label;
-  // Trigger the real desktop tab switch
-  const desktopBtn = document.querySelector('.dnav-head[data-tab="' + tab + '"]');
-  if (desktopBtn) switchNavHead(desktopBtn);
-  // Close drawer after short delay so user sees the selection
-  if (!['synthese','kpis'].includes(tab)) setTimeout(closeDashDrawer, 200);
+  // Switch panel DIRECTLY — no need for desktop button
+  _dashTab = tab;
+  document.querySelectorAll('.dash-panel').forEach(p => p.style.display = 'none');
+  const panel = document.getElementById('dp-' + tab);
+  if (panel) panel.style.display = 'block';
+  _renderDashTab();
+  // If no sub-items, close immediately
+  if (!['synthese','kpis'].includes(tab)) setTimeout(closeDashDrawer, 180);
 }
 function dashDrawerSub(btn, group) {
   document.querySelectorAll('#ddrawer-subs-' + group + ' .ddrawer-sub').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  // Trigger the real sub switch
-  const stab = btn.dataset.stab;
-  const desktopBtn = document.querySelector('.dnav-sub[data-stab="' + stab + '"]');
-  if (desktopBtn) switchNavSub(desktopBtn, group);
+  // Switch sub tab directly
+  _synTab = btn.dataset.stab;
+  try { _adjustSynFilters(); } catch(e) {}
+  try { renderSynTab(); } catch(e) {}
   setTimeout(closeDashDrawer, 150);
 }
 function _syncMirrorSelects() {
-  // Copy options from real selects to mirror selects in drawer
   const pairs = [
     ['bil-year','m-bil-year'],['bil-sci','m-bil-sci'],
     ['res-year','m-res-year'],['res-sci','m-res-sci'],['res-gran','m-res-gran'],
@@ -7019,9 +7022,8 @@ function _syncMirrorSelects() {
     const real = document.getElementById(realId);
     const mirror = document.getElementById(mirrorId);
     if (!real || !mirror) return;
-    const curVal = real.value;
     mirror.innerHTML = real.innerHTML;
-    mirror.value = curVal;
+    mirror.value = real.value;
   });
 }
 
