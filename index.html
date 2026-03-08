@@ -5,6 +5,12 @@ E html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#04080f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Artemis">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
 <title>ARTEMIS · Gestion Locative SCI</title>
 <meta name="description" content="ARTEMIS · Outil de gestion locative SCI : import bancaire, mapping Airbnb/Booking, tableau de bord financier.">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -1621,6 +1627,12 @@ E html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#04080f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Artemis">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
 <title>ARTEMIS · Gestion Locative SCI</title>
 <meta name="description" content="ARTEMIS · Outil de gestion locative SCI : import bancaire, mapping Airbnb/Booking, tableau de bord financier.">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -6968,6 +6980,15 @@ function _initHomeDate() {
 // ════════════════════════════════════════════
 
 
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js')
+      .then(reg => console.log('Artemis SW registered'))
+      .catch(err => console.log('SW error:', err));
+  });
+}
 </script>
 </body>
 </html>
