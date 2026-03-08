@@ -1,6 +1,4 @@
-<!DOCTYP
-
-E html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
@@ -1925,9 +1923,23 @@ body.dash-mode #sc6 { padding: 0; }
     font-size: 13px;
   }
 
+  /* ── Centrage global ── */
+  #homeScreen, #mainContent, body {
+    width: 100% !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+  }
+  #mainContent {
+    justify-content: center !important;
+  }
+
   /* ── Hero ── */
   .h-hero {
     padding: 80px 20px 40px;
+    text-align: center;
+    align-items: center;
+    display: flex;
+    flex-direction: column;
   }
   .h-hero-title {
     font-size: clamp(28px, 8vw, 42px) !important;
@@ -1937,17 +1949,18 @@ body.dash-mode #sc6 { padding: 0; }
     font-size: 14px !important;
   }
 
-  /* ── Hero cards : 1 colonne ── */
+  /* ── Hero cards : 1 colonne, centrées ── */
   .h-hero-cards {
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-    width: 100%;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 12px !important;
+    width: 100% !important;
   }
   .h-entry-card {
     width: 100% !important;
-    max-width: 340px;
-    padding: 20px 18px;
+    max-width: 320px !important;
+    margin: 0 auto !important;
+    padding: 20px 18px !important;
   }
 
   /* ── KPI strip ── */
@@ -1997,28 +2010,52 @@ body.dash-mode #sc6 { padding: 0; }
     padding: 40px 20px;
   }
 
-  /* ── Outils sidebar caché sur mobile ── */
+  /* ── Outils : sidebar remplacée par bottom nav ── */
   .sidebar {
     display: none !important;
   }
   .app {
     margin-left: 0 !important;
     width: 100% !important;
-  }
-  header {
-    padding: 0 16px !important;
+    padding-bottom: 70px !important;
   }
 
-  /* ── Stepper compressé ── */
+  /* ── Bottom nav mobile pour Outils ── */
+  #mobile-bottom-nav {
+    display: flex !important;
+  }
+
+  /* ── Header outils ── */
+  header {
+    padding: 0 16px !important;
+    height: auto !important;
+    min-height: 56px !important;
+    flex-wrap: wrap !important;
+  }
+  .logo h1 {
+    font-size: 13px !important;
+  }
+  .logo p {
+    font-size: 10px !important;
+  }
+
+  /* ── Stepper ── */
   #stepper {
-    overflow-x: auto;
-    padding: 8px 16px;
+    overflow-x: auto !important;
+    padding: 6px 12px !important;
+    gap: 4px !important;
+    flex-shrink: 0 !important;
   }
   .step-item {
-    min-width: 60px;
+    font-size: 10px !important;
+    padding: 4px 8px !important;
+    white-space: nowrap;
   }
-  .step-label {
-    display: none;
+  .step-num {
+    width: 18px !important;
+    height: 18px !important;
+    font-size: 9px !important;
+    margin-right: 4px !important;
   }
 
   /* ── Cards internes ── */
@@ -2026,15 +2063,17 @@ body.dash-mode #sc6 { padding: 0; }
     padding: 14px !important;
   }
 
-  /* ── Import cards : 1 colonne ── */
-  #import-cards-row {
+  /* ── Import drop zones : 1 colonne ── */
+  .imp-cards-grid,
+  .import-grid {
     grid-template-columns: 1fr !important;
   }
 
   /* ── Dashboard topbar ── */
   #dash-topbar {
-    padding: 0 10px;
-    overflow-x: auto;
+    padding: 0 8px !important;
+    overflow-x: auto !important;
+    gap: 4px !important;
   }
   .dnav-head {
     font-size: 11px !important;
@@ -2055,13 +2094,11 @@ body.dash-mode #sc6 { padding: 0; }
     flex-direction: column;
     gap: 8px;
   }
-  .dash-filter-group, .syn-filter-group {
+  .dash-filter-group {
     width: 100%;
   }
   .dash-filter-group select,
-  .dash-filter-group input,
-  #syn-filters select,
-  #syn-filters input {
+  .dash-filter-group input {
     width: 100%;
   }
 
@@ -2080,7 +2117,7 @@ body.dash-mode #sc6 { padding: 0; }
     white-space: nowrap;
   }
 
-  /* ── Section qui sommes nous cards ── */
+  /* ── About cards ── */
   [style*="grid-template-columns:repeat(auto-fit,minmax(300px"] {
     grid-template-columns: 1fr !important;
   }
@@ -2091,15 +2128,44 @@ body.dash-mode #sc6 { padding: 0; }
     grid-template-columns: 1fr !important;
   }
 
-  /* ── Marketplace screen ── */
-  #marketplaceScreen {
-    padding: 0;
-  }
+  /* ── Marketplace ── */
   #marketplaceScreen h1 {
     font-size: clamp(28px, 7vw, 40px) !important;
   }
-
 }
+
+/* Bottom nav — caché par défaut, visible seulement mobile */
+#mobile-bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
+  background: rgba(14,18,30,0.97);
+  border-top: 1px solid rgba(255,255,255,.08);
+  z-index: 500;
+  align-items: center;
+  justify-content: space-around;
+  padding: 0 8px;
+  backdrop-filter: blur(12px);
+}
+.mbn-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background .15s;
+  min-width: 48px;
+}
+.mbn-item:active { background: rgba(255,255,255,.08); }
+.mbn-item.active .mbn-icon { color: var(--cyan); }
+.mbn-item.active .mbn-label { color: var(--cyan); }
+.mbn-icon { font-size: 20px; line-height: 1; }
+.mbn-label { font-size: 9px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--text2); }
 </style>
 </head>
 <body>
@@ -4490,6 +4556,15 @@ const el = document.getElementById('header-section');
 if(el) el.textContent = titles[n] || 'Import';
 const stepper = document.getElementById('stepper');
 if(stepper) stepper.style.display = n >= 4 ? 'none' : 'flex';
+
+  // Show bottom nav when in tools
+  const mbnEl = document.getElementById('mobile-bottom-nav');
+  if(mbnEl) mbnEl.style.display = '';
+  // Sync mobile bottom nav
+  ['import','mapping','validation','base','params'].forEach((id,i) => {
+    const el = document.getElementById('mbn-' + id);
+    if(el) el.classList.toggle('active', i+1 === n);
+  });
 }
 function updateDBBadge(){
 const db=getDB();
@@ -6851,6 +6926,7 @@ function exportDashboardExcel() {
 
 
 function enterDashboard() {
+  const mbn2 = document.getElementById('mobile-bottom-nav'); if(mbn2) mbn2.style.display='none';
   // Hide home screen and canvas
   const hs = document.getElementById('homeScreen');
   if (hs) hs.style.display = 'none';
@@ -6950,6 +7026,8 @@ function showHome() {
   const hs  = document.getElementById('homeScreen');
   const sb  = document.getElementById('sidebar');
   const app = document.querySelector('.app');
+  const mbn = document.getElementById('mobile-bottom-nav');
+  if (mbn) mbn.style.display = 'none';
   if (ls)  ls.style.display  = 'none';
   if (hs)  hs.style.display  = 'block';
   if (sb)  sb.style.display  = 'none';
@@ -7174,6 +7252,31 @@ function _initHomeDate() {
 
 
 </script>
+
+<!-- Mobile bottom navigation for Outils -->
+<div id="mobile-bottom-nav">
+  <div class="mbn-item active" id="mbn-import" onclick="navTo(1)">
+    <span class="mbn-icon">📥</span>
+    <span class="mbn-label">Import</span>
+  </div>
+  <div class="mbn-item" id="mbn-mapping" onclick="navTo(2)">
+    <span class="mbn-icon">🗂️</span>
+    <span class="mbn-label">Mapping</span>
+  </div>
+  <div class="mbn-item" id="mbn-validation" onclick="navTo(3)">
+    <span class="mbn-icon">✅</span>
+    <span class="mbn-label">Validation</span>
+  </div>
+  <div class="mbn-item" id="mbn-base" onclick="navTo(4)">
+    <span class="mbn-icon">📦</span>
+    <span class="mbn-label">Base</span>
+  </div>
+  <div class="mbn-item" id="mbn-params" onclick="navTo(5)">
+    <span class="mbn-icon">⚙️</span>
+    <span class="mbn-label">Params</span>
+  </div>
+</div>
+
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
