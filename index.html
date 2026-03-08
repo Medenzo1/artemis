@@ -302,10 +302,28 @@ body.dash-mode #sc6 { padding: 0; }
     padding: 0 16px 100px !important;
   }
 
-  /* mainContent pleine largeur */
+  /* mainContent pleine largeur — overrides flex layout */
   #mainContent {
     width: 100% !important;
     margin-left: 0 !important;
+    flex-direction: column !important;
+  }
+
+  /* homeScreen pleine largeur absolue */
+  #homeScreen {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    margin-left: 0 !important;
+    left: 0 !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Le topbar fixe du home doit couvrir toute la largeur */
+  #home-topbar-bar {
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
   }
 
   /* Header compact */
@@ -865,53 +883,59 @@ async function doLogin(){
 <div id="homeScreen">
   <canvas id="homeCanvas"></canvas>
 
-  <!-- TOP NAR -->
-  <div style="position:fixed;top:0;left:0;right:0;z-index:10;display:flex;align-items:center;justify-content:space-between;padding:14px 32px;background:rgba(4,8,18,.7);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.05)">
-    <div style="display:flex;align-items:center;gap:12px">
-      <img src="data:image/webp;base64,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" style="width:32px;height:32px;border-radius:8px;object-fit:contain" alt="Artemis">
-      <span style="font-size:14px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#eaf0ff">ARTEM<span style="color:#22d3c8">IS</span></span>
+  <!-- TOPBAR — compact, pas de padding excessif -->
+  <div id="home-topbar-bar" style="position:fixed;top:0;left:0;right:0;z-index:10;display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:rgba(4,8,18,.85);backdrop-filter:blur(16px);border-bottom:1px solid rgba(255,255,255,.06);">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <img src="data:image/webp;base64,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" style="width:28px;height:28px;border-radius:7px;object-fit:contain;" alt="Artemis">
+      <span style="font-size:13px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#eaf0ff;">ARTEM<span style="color:#22d3c8;">IS</span></span>
     </div>
-    <div style="font-size:10px;color:#2a3a50;letter-spacing:.1em;text-transform:uppercase" id="home-date"></div>
-    <button onclick="sessionStorage.removeItem('artemis_auth');document.getElementById('mainContent').style.display='none';document.getElementById('loginScreen').style.display='flex';" style="background:rgba(240,86,106,.08);border:1px solid rgba(240,86,106,.2);color:rgba(240,86,106,.7);font-size:11px;font-weight:700;padding:7px 16px;border-radius:8px;cursor:pointer;font-family:inherit;letter-spacing:.05em;transition:all .2s;display:flex;align-items:center;gap:6px" onmouseover="this.style.background='rgba(240,86,106,.15)';this.style.color='#f0566a'" onmouseout="this.style.background='rgba(240,86,106,.08)';this.style.color='rgba(240,86,106,.7)'">⏻ Déconnexion</button>
+    <div id="home-date" style="font-size:9px;color:#2a3a50;letter-spacing:.1em;text-transform:uppercase;text-align:center;flex:1;padding:0 8px;"></div>
+    <button onclick="sessionStorage.removeItem('artemis_auth');document.getElementById('mainContent').style.display='none';document.getElementById('loginScreen').style.display='flex';" style="background:rgba(240,86,106,.08);border:1px solid rgba(240,86,106,.25);color:rgba(240,86,106,.8);font-size:10px;font-weight:700;padding:6px 12px;border-radius:8px;cursor:pointer;font-family:inherit;letter-spacing:.04em;">⏻</button>
   </div>
 
-  <!-- SCROLLABLE CONTENT -->
-  <div style="position:relative;z-index:1;min-height:100vh;padding:90px 40px 60px;max-width:1400px;margin:0 auto">
+  <!-- CONTENU PRINCIPAL -->
+  <div style="position:relative;z-index:1;padding:70px 20px 100px;width:100%;box-sizing:border-box;max-width:600px;margin:0 auto;">
 
-    <!-- HERO + QUOTE -->
-    <div style="display:grid;grid-template-columns:1fr 420px;gap:40px;align-items:center;margin-bottom:48px">
-      <div>
-        <div style="font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:#22d3c8;margin-bottom:16px">Gestion locative · SCI · Reporting</div>
-        <div style="font-size:52px;font-weight:800;letter-spacing:-.03em;line-height:1.05;color:#eaf0ff;margin-bottom:20px">ARTEM<span style="color:#22d3c8">IS</span><br><span style="font-size:28px;color:#4a6080;font-weight:600">Pilotage patrimonial</span></div>
-        <div id="home-quote-block" style="border-left:2px solid rgba(34,211,200,.4);padding:16px 20px;background:rgba(34,211,200,.04);border-radius:0 10px 10px 0;margin-bottom:28px">
-          <div id="home-quote-text" style="font-size:15px;font-style:italic;color:#c8d8f0;line-height:1.6;margin-bottom:8px">…</div>
-          <div id="home-quote-author" style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#22d3c8">…</div>
-        </div>
-        <!-- KPI cards row -->
-        <div class="home-kpis" id="home-kpis"></div>
-      </div>
-      <!-- ENTRY CARDS -->
-      <div style="display:flex;flex-direction:column;gap:16px">
-        <button class="home-btn home-btn-tools" onclick="enterTools()" style="text-align:left;padding:28px 30px">
-          <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">
-            <span style="font-size:28px">⚙️</span>
-            <span class="home-btn-label" style="font-size:16px">Outils</span>
-          </div>
-          <div style="font-size:11px;color:rgba(255,255,255,.5);line-height:1.7">Import mensuel · Mapping<br>Validation · Base · Paramètres</div>
-          <div style="margin-top:18px;font-size:10px;font-weight:700;color:#22d3c8;letter-spacing:.08em">ACCÉDER →</div>
-        </button>
-        <button class="home-btn home-btn-dash" onclick="document.getElementById('homeScreen').style.display='none';window._dashPrevScreen=0;enterDashboard()" style="text-align:left;padding:28px 30px">
-          <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">
-            <span style="font-size:28px">📊</span>
-            <span class="home-btn-label" style="font-size:16px">Dashboard</span>
-          </div>
-          <div style="font-size:11px;color:rgba(255,255,255,.5);line-height:1.7">Synthèse · Bilan · Résultat<br>KPIs · Plateformes</div>
-          <div style="margin-top:18px;font-size:10px;font-weight:700;color:#9b6ef3;letter-spacing:.08em">ACCÉDER →</div>
-        </button>
-      </div>
+    <!-- HERO TEXT -->
+    <div style="text-align:center;margin-bottom:32px;">
+      <div style="font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#22d3c8;margin-bottom:14px;">Gestion locative · SCI · Reporting</div>
+      <div style="font-size:42px;font-weight:800;letter-spacing:-.03em;line-height:1.05;color:#eaf0ff;margin-bottom:8px;">ARTEM<span style="color:#22d3c8;">IS</span></div>
+      <div style="font-size:18px;color:#4a6080;font-weight:600;margin-bottom:24px;">Pilotage patrimonial</div>
     </div>
 
+    <!-- CITATION -->
+    <div id="home-quote-block" style="border-left:2px solid rgba(34,211,200,.4);padding:14px 18px;background:rgba(34,211,200,.04);border-radius:0 10px 10px 0;margin-bottom:28px;">
+      <div id="home-quote-text" style="font-size:13px;font-style:italic;color:#c8d8f0;line-height:1.6;margin-bottom:6px;">…</div>
+      <div id="home-quote-author" style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#22d3c8;">…</div>
+    </div>
 
+    <!-- KPI CARDS -->
+    <div class="home-kpis" id="home-kpis" style="margin-bottom:28px;"></div>
+
+    <!-- BOUTONS NAVIGATION -->
+    <div style="display:flex;flex-direction:column;gap:14px;margin-bottom:32px;">
+
+      <button class="home-btn home-btn-tools" onclick="enterTools()" style="display:flex;align-items:center;gap:16px;padding:20px 22px;border-radius:14px;text-align:left;width:100%;background:linear-gradient(135deg,rgba(34,211,200,.12),rgba(34,211,200,.04));border:1px solid rgba(34,211,200,.25);color:#eaf0ff;">
+        <span style="font-size:26px;flex-shrink:0;">⚙️</span>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:15px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;margin-bottom:4px;">Outils</div>
+          <div style="font-size:11px;color:rgba(255,255,255,.45);line-height:1.5;">Import · Mapping · Validation · Base · Paramètres</div>
+        </div>
+        <span style="font-size:16px;color:#22d3c8;flex-shrink:0;">→</span>
+      </button>
+
+      <button class="home-btn home-btn-dash" onclick="document.getElementById('homeScreen').style.display='none';window._dashPrevScreen=0;enterDashboard()" style="display:flex;align-items:center;gap:16px;padding:20px 22px;border-radius:14px;text-align:left;width:100%;background:linear-gradient(135deg,rgba(155,110,243,.12),rgba(155,110,243,.04));border:1px solid rgba(155,110,243,.25);color:#eaf0ff;">
+        <span style="font-size:26px;flex-shrink:0;">📊</span>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:15px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;margin-bottom:4px;">Dashboard</div>
+          <div style="font-size:11px;color:rgba(255,255,255,.45);line-height:1.5;">Synthèse · Bilan · Résultat · KPIs · Plateformes</div>
+        </div>
+        <span style="font-size:16px;color:#9b6ef3;flex-shrink:0;">→</span>
+      </button>
+
+    </div>
+
+  </div>
 
 <nav class="sidebar" id="sidebar">
 <img src="data:image/webp;base64,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" id="mainLogo" class="sb-logo" alt="Artemis">
