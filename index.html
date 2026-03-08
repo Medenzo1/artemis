@@ -163,7 +163,7 @@ body.dash-mode #sc6 { padding: 0; }
 .dash-inner { padding: 24px 32px 60px; }
 
 /* ── Home Screen ── */
-#homeScreen{position:relative;min-height:100vh;z-index:500;display:none;overflow-y:auto;background:#060a12;width:100%}
+#homeScreen{position:relative;min-height:100vh;display:none;overflow-y:auto;background:#060a12;width:100%}
 #homeCanvas{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:-1;display:none}
 .home-kpis{display:flex;gap:12px;flex-wrap:wrap}
 .home-kpi{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:16px 20px;min-width:140px;backdrop-filter:blur(8px)}
@@ -5305,7 +5305,7 @@ function enterDashboard() {
 
   // Make sure the app container is visible
   const app = document.querySelector('.app');
-  if (app) { app.style.display = 'block'; app.style.flex = '1'; app.style.minHeight = '100vh'; }
+  if (app) { app.removeAttribute('style'); app.style.display = 'block'; app.style.minHeight = '100vh'; app.style.width = '100%'; }
 
   document.body.classList.add('dash-mode');
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -5424,10 +5424,12 @@ function enterTools() {
   const hc = document.getElementById('homeCanvas');
   if (hc) hc.style.display = 'none';
   window._homeCanvasStop = true;
+  // On mobile: sidebar stays hidden (CSS !important), only .app needed
   document.getElementById('sidebar').style.display = '';
   const appEl = document.querySelector('.app');
-  if (appEl) { appEl.style.display = 'block'; appEl.style.flex = '1'; appEl.style.minHeight = '100vh'; }
-  // Restore header
+  if (appEl) {
+    appEl.removeAttribute('style'); appEl.style.display = 'block'; appEl.style.minHeight = '100vh'; appEl.style.width = '100%';
+  }
   const hdr = document.querySelector('header');
   if (hdr) hdr.style.display = '';
   setTimeout(() => { navTo(1); renderRecentActivity(); }, 0);
@@ -5624,6 +5626,23 @@ function _initHomeDate() {
 </script>
 
 <!-- Mobile bottom navigation for Outils -->
+<div id="marketplaceScreen" style="display:none;min-height:100vh;background:var(--bg);padding:80px 24px 100px;box-sizing:border-box">
+  <div style="max-width:900px;margin:0 auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;flex-wrap:wrap;gap:12px">
+      <div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:#f5b731;margin-bottom:8px">Marketplace</div>
+        <h1 style="font-size:clamp(28px,5vw,42px);font-weight:800;color:#eaf0ff;margin:0">Opportunités<br><em style="font-style:italic;color:rgba(200,216,240,.4)">d'investissement</em></h1>
+      </div>
+      <button onclick="exitMarketplace()" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#eaf0ff;padding:10px 20px;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">← Accueil</button>
+    </div>
+    <div style="background:rgba(245,183,49,.06);border:1px solid rgba(245,183,49,.2);border-radius:16px;padding:32px;text-align:center">
+      <div style="font-size:40px;margin-bottom:16px">🚧</div>
+      <div style="font-size:16px;font-weight:700;color:#eaf0ff;margin-bottom:8px">Bientôt disponible</div>
+      <div style="font-size:13px;color:rgba(200,216,240,.5);line-height:1.6">La marketplace d'opportunités d'investissement immobilier est en cours de développement.<br>Elle permettra d'analyser les rendements, comparer les biens et identifier les meilleures opportunités.</div>
+    </div>
+  </div>
+</div>
+
 <div id="mobile-bottom-nav">
   <div class="mbn-item" id="mbn-home" onclick="showHome()">
     <span class="mbn-icon">🏠</span>
