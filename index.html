@@ -60,7 +60,7 @@ header{background:linear-gradient(180deg,rgba(0,229,255,.03) 0%,transparent 100%
 .sidebar::before{content:'';position:absolute;top:0;left:0;right:0;height:96px;background:radial-gradient(ellipse at 50% 0%,rgba(0,229,255,.09) 0%,transparent 70%);pointer-events:none}
 .lbl{font-size:11px;font-weight:700;color:#7a8aaa;text-transform:uppercase;letter-spacing:.08em;display:block;margin-bottom:6px}
 /* ===== LOGIN ===== */
-.login-wrap{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center}
+.login-wrap{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:#04080f}
 .login-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:0}
 .lc-card{position:relative;z-index:1;width:min(90%,400px);max-width:400px;background:rgba(5,14,30,.85);border:1px solid rgba(0,180,230,.2);border-radius:20px;padding:40px 36px;backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);box-shadow:0 32px 80px rgba(0,0,0,.8),0 0 0 1px rgba(0,180,230,.05),inset 0 1px 0 rgba(255,255,255,.04);animation:cardRise .5s cubic-bezier(.22,1,.36,1) both}
 @keyframes cardRise{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
@@ -177,6 +177,8 @@ body.dash-mode #sc6 { padding: 0; }
 .home-btn-tools:hover{box-shadow:0 12px 40px rgba(34,211,200,.18);border-color:rgba(34,211,200,.5)}
 .home-btn-dash{background:linear-gradient(135deg,rgba(155,110,243,.12),rgba(155,110,243,.04));border:1px solid rgba(155,110,243,.25);color:#eaf0ff}
 .home-btn-dash:hover{box-shadow:0 12px 40px rgba(155,110,243,.18);border-color:rgba(155,110,243,.5)}
+.home-btn-market{background:linear-gradient(135deg,rgba(245,183,49,.12),rgba(245,183,49,.04));border:1px solid rgba(245,183,49,.25);color:#eaf0ff}
+.home-btn-market:hover{box-shadow:0 12px 40px rgba(245,183,49,.18);border-color:rgba(245,183,49,.5)}
 .news-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:20px;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;gap:10px;user-select:none}
 .news-card:hover{background:rgba(255,255,255,.055);border-color:rgba(34,211,200,.2);transform:translateY(-2px)}
 .news-tag{display:inline-block;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 8px;border-radius:4px}
@@ -499,6 +501,17 @@ body.dash-mode #sc6 { padding: 0; }
   #marketplaceScreen h1 {
     font-size: clamp(28px, 7vw, 40px) !important;
   }
+
+  /* ── Home ARTEMIS title ── */
+  #home-artemis-title {
+    font-size: clamp(32px, 9vw, 52px) !important;
+    word-break: break-word;
+  }
+
+  /* ── Home badge ── */
+  #home-main-container > div:first-child > div:first-child {
+    font-size: 9px !important;
+  }
 }
 
 /* Bottom nav — caché par défaut, visible seulement mobile */
@@ -816,7 +829,7 @@ async function doLogin(){
     <div id="home-hero-grid" style="display:grid;grid-template-columns:1fr 420px;gap:40px;align-items:center;margin-bottom:48px">
       <div>
         <div style="font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:#22d3c8;margin-bottom:16px">Gestion locative · SCI · Reporting</div>
-        <div style="font-size:52px;font-weight:800;letter-spacing:-.03em;line-height:1.05;color:#eaf0ff;margin-bottom:20px">ARTEM<span style="color:#22d3c8">IS</span><br><span style="font-size:28px;color:#4a6080;font-weight:600">Pilotage patrimonial</span></div>
+        <div id="home-artemis-title" style="font-size:52px;font-weight:800;letter-spacing:-.03em;line-height:1.05;color:#eaf0ff;margin-bottom:20px">ARTEM<span style="color:#22d3c8">IS</span><br><span style="font-size:28px;color:#4a6080;font-weight:600">Pilotage patrimonial</span></div>
         <div id="home-quote-block" style="border-left:2px solid rgba(34,211,200,.4);padding:16px 20px;background:rgba(34,211,200,.04);border-radius:0 10px 10px 0;margin-bottom:28px">
           <div id="home-quote-text" style="font-size:15px;font-style:italic;color:#c8d8f0;line-height:1.6;margin-bottom:8px">…</div>
           <div id="home-quote-author" style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#22d3c8">…</div>
