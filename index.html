@@ -329,7 +329,7 @@ body.dash-mode #sc6 { padding: 0; }
   .app {
     margin-left: 0 !important;
     width: 100% !important;
-    flex: 1 !important;
+    min-height: 100vh !important;
     padding-bottom: 70px !important;
   }
 
@@ -5295,7 +5295,7 @@ function exportDashboardExcel() {
 
 
 function enterDashboard() {
-  const mbn2 = document.getElementById('mobile-bottom-nav'); if(mbn2) { mbn2.style.display=''; mbn2.classList.remove('visible'); }
+  const mbn2 = document.getElementById('mobile-bottom-nav'); if(mbn2) { mbn2.style.removeProperty('display'); mbn2.classList.remove('visible'); }
   // Hide home screen and canvas
   const hs = document.getElementById('homeScreen');
   if (hs) hs.style.display = 'none';
@@ -5305,7 +5305,7 @@ function enterDashboard() {
 
   // Make sure the app container is visible
   const app = document.querySelector('.app');
-  if (app) { app.removeAttribute('style'); app.style.display = 'block'; app.style.minHeight = '100vh'; app.style.width = '100%'; }
+  if (app) app.style.removeProperty('display');
 
   document.body.classList.add('dash-mode');
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -5396,7 +5396,7 @@ function showHome() {
   const sb  = document.getElementById('sidebar');
   const app = document.querySelector('.app');
   const mbn = document.getElementById('mobile-bottom-nav');
-  if (mbn) { mbn.style.display = ''; mbn.classList.remove('visible'); }
+  if (mbn) { mbn.style.removeProperty('display'); mbn.classList.remove('visible'); }
   if (ls)  ls.style.display  = 'none';
   if (hs)  hs.style.display  = 'block';
   if (sb)  sb.style.display  = 'none';
@@ -5424,14 +5424,11 @@ function enterTools() {
   const hc = document.getElementById('homeCanvas');
   if (hc) hc.style.display = 'none';
   window._homeCanvasStop = true;
-  // On mobile: sidebar stays hidden (CSS !important), only .app needed
-  document.getElementById('sidebar').style.display = '';
-  const appEl = document.querySelector('.app');
-  if (appEl) {
-    appEl.removeAttribute('style'); appEl.style.display = 'block'; appEl.style.minHeight = '100vh'; appEl.style.width = '100%';
-  }
+  document.getElementById('sidebar').style.removeProperty('display');
+  const _app = document.querySelector('.app');
+  if (_app) _app.style.removeProperty('display');
   const hdr = document.querySelector('header');
-  if (hdr) hdr.style.display = '';
+  if (hdr) hdr.style.removeProperty('display');
   setTimeout(() => { navTo(1); renderRecentActivity(); }, 0);
 }
 
