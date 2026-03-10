@@ -6620,12 +6620,12 @@ function _renderSynCA() {
   });
 
   // Draw area chart on canvas
-  requestAnimationFrame(() => {
+  const _drawAreaChart = () => {
     const cv = document.getElementById(chartId);
     if (!cv) return;
     const dpr = window.devicePixelRatio || 1;
     const rect = cv.parentElement.getBoundingClientRect();
-    const W = rect.width; const H = rect.height;
+    const W = rect.width || cv.parentElement.clientWidth; const H = rect.height || 220;
     cv.width  = W * dpr; cv.height = H * dpr;
     cv.style.width  = W + 'px'; cv.style.height = H + 'px';
     const cx = cv.getContext('2d');
@@ -6714,7 +6714,14 @@ function _renderSynCA() {
     for (let i = 0; i < labels.length; i += step) {
       cx.fillText(labels[i], xOf(i), PAD.top + cH + 16);
     }
-  });
+  }; // end _drawAreaChart
+  requestAnimationFrame(_drawAreaChart);
+
+  // Re-draw area chart on resize
+  if (window._caAreaRO) window._caAreaRO.disconnect();
+  window._caAreaRO = new ResizeObserver(() => requestAnimationFrame(_drawAreaChart));
+  const areaCv = document.getElementById(chartId);
+  if (areaCv) window._caAreaRO.observe(areaCv.parentElement);
 
   // ── Donut répartition par catégorie ─────────
   requestAnimationFrame(() => {
@@ -6731,6 +6738,8 @@ function _renderSynCA() {
     if (!total) return;
 
     const PALETTE = ['#22d3c8','#22c97a','#9b6ef3','#f5b731','#f0566a','#38bdf8','#a3e635','#fb923c','#e879f9','#34d399'];
+
+    const resizeAndDraw = () => {
     const dpr = window.devicePixelRatio || 1;
     const W = cv.parentElement.clientWidth;
     const H = 260;
@@ -6899,6 +6908,17 @@ function _renderSynCA() {
     // Expose draw for legend hover
     window._caDonutDraw  = draw;
     window._caDonutSlices = slices;
+    }; // end resizeAndDraw
+
+    resizeAndDraw();
+
+    // Re-draw on resize
+    if (window._caDonutRO) window._caDonutRO.disconnect();
+    window._caDonutRO = new ResizeObserver(() => {
+      resizeAndDraw();
+      if (window._caDonutDraw) window._caDonutDraw(null);
+    });
+    window._caDonutRO.observe(cv.parentElement);
   });
 
   // ── Waterfall drivers ────────────────────────
@@ -7036,7 +7056,7 @@ function _renderCaWaterfall(el) {
     '<canvas id="'+wfId+'" style="width:100%;height:'+Math.max(drivers.length*52+40, 120)+'px;display:block"></canvas>'+
     '<div id="ca-wf-narrative" style="margin-top:16px;border-top:1px solid var(--border);padding-top:4px"></div>';
 
-  requestAnimationFrame(() => {
+  const _drawWaterfall = () => {
     const cv = document.getElementById(wfId);
     if (!cv) return;
     const dpr = window.devicePixelRatio || 1;
@@ -7045,6 +7065,7 @@ function _renderCaWaterfall(el) {
     const H   = drivers.length * rowH + 40;
     cv.width  = W * dpr; cv.height = H * dpr;
     cv.style.width  = W + 'px'; cv.style.height = H + 'px';
+    cv.style.height = H + 'px'; // also fix HTML height
     const cx = cv.getContext('2d');
     cx.scale(dpr, dpr);
 
@@ -7124,6 +7145,15 @@ function _renderCaWaterfall(el) {
       }
     });
 
+  }; // end _drawWaterfall
+  requestAnimationFrame(_drawWaterfall);
+
+  // Re-draw waterfall on resize
+  if (window._caWfRO) window._caWfRO.disconnect();
+  window._caWfRO = new ResizeObserver(() => requestAnimationFrame(_drawWaterfall));
+  const wfCv = document.getElementById(wfId);
+  if (wfCv) window._caWfRO.observe(wfCv.parentElement);
+
     // ── Narrative bullets ────────────────────
     const narrativeEl = document.getElementById('ca-wf-narrative');
     if (!narrativeEl) return;
@@ -7200,7 +7230,6 @@ function _renderCaWaterfall(el) {
         '<span style="font-size:11px;color:var(--text2);line-height:1.6">'+b.text+'</span>'+
       '</div>'
     ).join('');
-  });
 }
 
 // ── DÉPENSES (placeholder) ─────────────────────
