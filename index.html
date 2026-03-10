@@ -5047,7 +5047,7 @@ function consultPeriod(periodKey) {
       <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px" title="${(l.full||l.libelle||'').replace(/"/g,'')}">${l.full||l.libelle||'-'}</td>
       <td><span style="background:rgba(34,211,200,.08);border:1px solid rgba(34,211,200,.15);color:var(--cyan);font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px">${l.cat||'-'}</span></td>
       <td style="font-size:10px;color:var(--text2)">${schema.n2||''}</td>
-      <td style="text-align:right;font-family:monospace;font-weight:700;${cls}">${amt>=0?'+':''}${amt.toFixed(2)} €</td>
+      <td style="text-align:right;font-family:monospace;font-weight:700;${cls}">${amt>=0?'+':''}${(()=>{const _v=amt;const _a=Math.abs(_v);const _i=Math.floor(_a);const _d=Math.round((_a-_i)*100).toString().padStart(2,'0');return ((_v<0?'-':'')+String(_i).replace(/\B(?=(\d{3})+(?!\d))/g,'\u202f')+','+_d+'\u202f€')})()} €</td>
       <td style="font-size:10px;color:var(--text2)">${l.bienName||l.bien||'-'}</td>
     </tr>`;
   }).join('');
@@ -5062,9 +5062,9 @@ function consultPeriod(periodKey) {
 
   document.getElementById('consultTitle').textContent = (MONTH_NAMES[p.month]||'') + ' ' + p.year + ' - ' + lines.length + ' opérations';
   document.getElementById('consultSummary').innerHTML = `
-    <span style="margin-right:16px">💰 <b style="color:var(--green)">CA : +${totalCA.toFixed(2)} €</b></span>
-    <span style="margin-right:16px">📉 <b style="color:var(--red)">Charges : ${totalChg.toFixed(2)} €</b></span>
-    <span>⚖️ <b style="color:${total>=0?'var(--cyan)':'var(--red)'}">Net : ${total>=0?'+':''}${total.toFixed(2)} €</b></span>
+    <span style="margin-right:16px">💰 <b style="color:var(--green)">CA : +${(()=>{const _v=totalCA;const _a=Math.abs(_v);const _i=Math.floor(_a);const _d=Math.round((_a-_i)*100).toString().padStart(2,'0');return ((_v<0?'-':'')+String(_i).replace(/\B(?=(\d{3})+(?!\d))/g,'\u202f')+','+_d+'\u202f€')})()} €</b></span>
+    <span style="margin-right:16px">📉 <b style="color:var(--red)">Charges : ${(()=>{const _v=totalChg;const _a=Math.abs(_v);const _i=Math.floor(_a);const _d=Math.round((_a-_i)*100).toString().padStart(2,'0');return ((_v<0?'-':'')+String(_i).replace(/\B(?=(\d{3})+(?!\d))/g,'\u202f')+','+_d+'\u202f€')})()} €</b></span>
+    <span>⚖️ <b style="color:${total>=0?'var(--cyan)':'var(--red)'}">Net : ${total>=0?'+':''}${(()=>{const _v=total;const _a=Math.abs(_v);const _i=Math.floor(_a);const _d=Math.round((_a-_i)*100).toString().padStart(2,'0');return ((_v<0?'-':'')+String(_i).replace(/\B(?=(\d{3})+(?!\d))/g,'\u202f')+','+_d+'\u202f€')})()} €</b></span>
   `;
   body.innerHTML = `
     <div style="overflow-x:auto">
@@ -5210,7 +5210,7 @@ function openEditModal(periodKey) {
           <option value="">-</option>${lotOptions(l.lot, getParams())}
         </select>
       </td>
-      <td style="padding:6px 8px;text-align:right;font-family:monospace;font-weight:700;font-size:11px;${amtCls}">${amt>=0?'+':''}${amt.toFixed(2)} €</td>
+      <td style="padding:6px 8px;text-align:right;font-family:monospace;font-weight:700;font-size:11px;${amtCls}">${amt>=0?'+':''}${(()=>{const _v=amt;const _a=Math.abs(_v);const _i=Math.floor(_a);const _d=Math.round((_a-_i)*100).toString().padStart(2,'0');return ((_v<0?'-':'')+String(_i).replace(/\B(?=(\d{3})+(?!\d))/g,'\u202f')+','+_d+'\u202f€')})()} €</td>
     </tr>`;
   }).join('');
 
@@ -5634,7 +5634,7 @@ function updateLimPreview(){
   var iC=+document.getElementById("lim-col-cap").value;
   var iI=+document.getElementById("lim-col-int").value;
   var data=_limRows.slice(1).filter(Boolean).slice(0,3);
-  var f=function(v){return parseFloat(v||0).toFixed(2)+" €";};
+  var f=function(v){return (()=>{const _v=parseFloat(v||0);const _a=Math.abs(_v);const _i=Math.floor(_a);const _d=Math.round((_a-_i)*100).toString().padStart(2,'0');return ((_v<0?'-':'')+String(_i).replace(/\B(?=(\d{3})+(?!\d))/g,'\u202f')+','+_d+'\u202f€')})()+" €";};
   document.getElementById("lim-preview").innerHTML=
     "<div style='font-size:9px;color:var(--text2);margin-bottom:8px'>Aperçu - 3 premières lignes</div>"+
     (data.length?data.map(function(r){
@@ -5968,16 +5968,103 @@ function _dashPeriods(yearSel, sciSel) {
 
 function _getV(id) { const el = document.getElementById(id); return el ? el.value : 'all'; }
 
-function _fmtK(n) { return new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(n||0); }
-function _fmtDec(n) { return new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR',maximumFractionDigits:2}).format(n||0); }
+function _fmtK(n) {
+  const abs = Math.round(Math.abs(n||0));
+  const s = String(abs).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+  return (n < 0 ? '-' : '') + s + ' €';
+}
+function _fmtDec(n) {
+  const v = n || 0;
+  const abs = Math.abs(v);
+  const intPart = Math.floor(abs);
+  const dec = Math.round((abs - intPart) * 100).toString().padStart(2, '0');
+  const s = String(intPart).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ',' + dec;
+  return (v < 0 ? '-' : '') + s + ' €';
+}
 function _pct(n) { return (n||0).toFixed(1) + ' %'; }
 
-function _kpiCard(icon, label, value, color, sub) {
+function _kpiCard(icon, label, value, color, sub, varBadges) {
+  // varBadges: [{delta, pct, label, isGood}]
+  const badgeHtml = varBadges && varBadges.length ? varBadges.map(b => {
+    if (b.nodata) return (
+      '<div style="display:flex;align-items:center;justify-content:space-between;gap:6px;padding:3px 7px;border-radius:5px;background:rgba(126,143,168,0.06);margin-top:4px">'+
+        '<span style="font-size:11px;color:rgba(126,143,168,0.55);font-weight:600">'+b.label+'</span>'+
+        '<span style="font-size:11px;color:rgba(126,143,168,0.4)">n/d</span>'+
+      '</div>'
+    );
+    const arrow  = b.isGood ? '▲' : '▼';
+    const col    = b.isGood ? '#22c97a' : '#f0566a';
+    const bgCol  = b.isGood ? 'rgba(34,201,122,0.08)' : 'rgba(240,86,106,0.08)';
+    const sign   = b.delta >= 0 ? '+' : '';
+    const fmtD   = (()=>{const _v=Math.round(b.delta);const _s=String(Math.abs(_v)).replace(/\B(?=(\d{3})+(?!\d))/g,'\u202f');return sign+_s+' €';})();
+    const fmtP   = (b.pct >= 0 ? '+' : '')+b.pct.toFixed(0)+'%';
+    return (
+      '<div style="display:flex;align-items:center;justify-content:space-between;gap:6px;padding:3px 7px;border-radius:5px;background:'+bgCol+';margin-top:4px">'+
+        '<span style="font-size:11px;color:rgba(126,143,168,0.65);font-weight:600">'+b.label+'</span>'+
+        '<span style="font-size:12px;font-weight:700;color:'+col+';font-family:monospace;white-space:nowrap">'+arrow+' '+fmtD+'</span>'+
+        '<span style="font-size:12px;font-weight:600;color:'+col+';font-family:monospace">'+fmtP+'</span>'+
+      '</div>'
+    );
+  }).join('') : '';
   return `<div class="card kpi-card">
     <div class="kpi-icon">${icon}</div>
     <div class="kpi-label">${label}</div>
     <div class="kpi-val" style="color:${color}">${value}</div>
-    <div style="font-size:10px;color:var(--text2);margin-top:4px;height:14px;overflow:hidden">${sub||''}</div>
+    <div style="font-size:10px;color:var(--text2);margin-top:4px;min-height:14px;overflow:hidden">${sub||''}</div>
+    ${badgeHtml ? '<div style="margin-top:4px">'+badgeHtml+'</div>' : ''}
+  </div>`;
+}
+
+// Helper: compute M-1 and N-1 variation badges for a given value and period map
+function _varBadges(currentVal, currentPeriod, periodMap, higherIsBetter) {
+  // currentPeriod: 'YYYY-MM', periodMap: {'YYYY-MM': value}
+  if (!currentPeriod || !periodMap) return [];
+  const [y, m] = currentPeriod.split('-').map(Number);
+  const badges = [];
+
+  // M-1
+  const pm1 = new Date(y, m-2, 1); // month is 0-indexed
+  const pm1Key = pm1.getFullYear()+'-'+String(pm1.getMonth()+1).padStart(2,'0');
+  if (periodMap[pm1Key] != null && periodMap[pm1Key] !== 0) {
+    const prev = periodMap[pm1Key];
+    const delta = currentVal - prev;
+    const pct = (delta / Math.abs(prev)) * 100;
+    badges.push({ delta, pct, label: 'vs M-1', isGood: higherIsBetter ? delta >= 0 : delta <= 0 });
+  } else {
+    badges.push({ nodata: true, label: 'M-1' });
+  }
+
+  // N-1 (same month, previous year)
+  const pn1Key = (y-1)+'-'+String(m).padStart(2,'0');
+  if (periodMap[pn1Key] != null && periodMap[pn1Key] !== 0) {
+    const prev = periodMap[pn1Key];
+    const delta = currentVal - prev;
+    const pct = (delta / Math.abs(prev)) * 100;
+    badges.push({ delta, pct, label: 'vs N-1', isGood: higherIsBetter ? delta >= 0 : delta <= 0 });
+  } else {
+    badges.push({ nodata: true, label: 'N-1' });
+  }
+
+  return badges;
+}
+
+function _kpiCardBig(icon, label, value, color) {
+  return `<div class="card kpi-card">
+    <div style="font-size:34px;margin-bottom:6px">${icon}</div>
+    <div class="kpi-label">${label}</div>
+    <div style="font-size:38px;font-weight:800;color:${color};line-height:1.1;margin-top:4px">${value}</div>
+  </div>`;
+}
+
+function _kpiCardTop(icon, label, name, color, amount, pct) {
+  return `<div class="card kpi-card">
+    <div class="kpi-icon">${icon}</div>
+    <div class="kpi-label">${label}</div>
+    <div style="font-size:15px;font-weight:800;color:${color};margin-top:4px;line-height:1.3;word-break:break-word;text-align:center">${name}</div>
+    <div style="display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap;justify-content:center">
+      <span style="font-size:16px;font-weight:800;font-family:monospace;color:${color}">${amount}</span>
+      ${pct ? '<span style="font-size:12px;font-weight:600;color:rgba(226,232,243,0.5);background:rgba(255,255,255,0.05);border-radius:5px;padding:2px 7px">'+pct+'</span>' : ''}
+    </div>
   </div>`;
 }
 
@@ -6531,12 +6618,20 @@ function _renderSynCA() {
 
   const chartId = 'ca-area-chart-' + Date.now();
 
+  // Build monthly CA map for M-1 / N-1 badges
+  const caPeriodMap = {};
+  periods.forEach(p => {
+    caPeriodMap[p.period] = (p.lines||[]).filter(l => isCA(l) && +l.montant > 0).reduce((s,l) => s+(+l.montant), 0);
+  });
+  const lastCaPeriod = periods.length ? periods[periods.length-1].period : null;
+  const lastCaVal = lastCaPeriod ? (caPeriodMap[lastCaPeriod]||0) : totalCA;
+
   el.innerHTML =
     '<div class="dash-grid-4" style="margin-bottom:20px">'+
-      _kpiCard('💰','CA total','+'+_fmtK(totalCA),'var(--green)',pEntries.length+' période'+(pEntries.length>1?'s':''))+
-      _kpiCard('🏠','Nb biens actifs',bienEntries.length,'var(--cyan)')+
-      _kpiCard('📈','Moy / période','+'+_fmtK(totalCA/Math.max(pEntries.length,1)),'var(--gold)')+
-      _kpiCard('🥇','Meilleur bien',bienEntries[0]?.[0]||'-','var(--purple)',bienEntries[0]?'+'+_fmtK(bienEntries[0][1]):'')+
+      _kpiCard('💰','CA total','+'+_fmtK(totalCA),'var(--green)',pEntries.length+' période'+(pEntries.length>1?'s':''), _varBadges(lastCaVal, lastCaPeriod, caPeriodMap, true))+
+      _kpiCardBig('🏠','Nb biens actifs',''+bienEntries.length,'var(--cyan)')+
+      _kpiCard('📈','Moy / période','+'+_fmtK(totalCA/Math.max(pEntries.length,1)),'var(--gold)', '', (()=>{ const moyMap={}; Object.entries(caPeriodMap).forEach(([p,v])=>{ moyMap[p]=v; }); return _varBadges(lastCaVal, lastCaPeriod, moyMap, true); })())+
+      _kpiCardTop('🥇','Meilleur bien',bienEntries[0]?.[0]||'-','var(--purple)', bienEntries[0]?'+'+_fmtK(bienEntries[0][1]):'-', bienEntries[0]&&totalCA?((bienEntries[0][1]/totalCA)*100).toFixed(1)+'% du CA':'')+
     '</div>'+
     '<div class="card" style="margin-bottom:18px">'+
       '<div class="card-title">CA — évolution '+gran+'</div>'+
@@ -6662,7 +6757,7 @@ function _renderSynCA() {
     for (let i = 0; i <= yTicks; i++) {
       const v = minV + (range * (yTicks - i) / yTicks);
       const y = PAD.top + (i / yTicks) * cH;
-      const lbl = v >= 1000 ? Math.round(v/1000) + 'K€' : Math.round(v) + '€';
+      const lbl = Math.round(v).toLocaleString('fr-FR')+' €';
       cx.fillText(lbl, PAD.left - 8, y + 3.5);
     }
 
@@ -6700,7 +6795,7 @@ function _renderSynCA() {
       cx.strokeStyle = '#0b0d12'; cx.lineWidth = 1.5; cx.stroke();
       // Value label above dot
       if (vals[i] > 0) {
-        const lbl = vals[i] >= 1000 ? (vals[i]/1000).toFixed(1).replace('.0','') + 'K€' : Math.round(vals[i]) + '€';
+        const lbl = Math.round(vals[i]).toLocaleString('fr-FR')+' €';
         cx.fillStyle = 'rgba(34,211,200,0.9)';
         cx.fillText(lbl, x, y - 10);
       }
@@ -6749,7 +6844,7 @@ function _renderSynCA() {
     ctx.scale(dpr, dpr);
 
     const cx0 = W / 2, cy0 = H / 2 - 5;
-    const R = Math.min(W, H) / 2 - 14;
+    const R = Math.max(10, Math.min(W, H) / 2 - 14);
     const r = R * 0.52;
 
     // Build slice data with start/end angles
@@ -6789,7 +6884,7 @@ function _renderSynCA() {
         ctx.font = 'bold 13px Outfit,sans-serif';
         ctx.fillStyle = s.color;
         ctx.textAlign = 'center';
-        const fmtV = s.val>=1000?(s.val/1000).toFixed(1)+'K€':Math.round(s.val)+'€';
+        const fmtV = Math.round(s.val).toLocaleString('fr-FR')+' €';
         ctx.fillText('+'+fmtV, cx0, cy0 + 2);
         ctx.font = '9px Outfit,sans-serif';
         ctx.fillStyle = 'rgba(126,143,168,0.8)';
@@ -6798,7 +6893,7 @@ function _renderSynCA() {
         ctx.font = 'bold 13px Outfit,sans-serif';
         ctx.fillStyle = '#e2e8f3';
         ctx.textAlign = 'center';
-        const fmtT = total>=1000?(total/1000).toFixed(1)+'K€':Math.round(total)+'€';
+        const fmtT = Math.round(total).toLocaleString('fr-FR')+' €';
         ctx.fillText('+'+fmtT, cx0, cy0 + 2);
         ctx.font = '9px Outfit,sans-serif';
         ctx.fillStyle = 'rgba(126,143,168,0.8)';
@@ -6841,7 +6936,7 @@ function _renderSynCA() {
       if (idx >= 0 && tip) {
         const s = slices[idx];
         const pct = ((s.val/total)*100).toFixed(1);
-        const fmtV = s.val.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2});
+        const fmtV = (()=>{const _v=s.val;const _a=Math.abs(_v);const _i=Math.floor(_a);const _d=Math.round((_a-_i)*100).toString().padStart(2,'0');return ((_v<0?'-':'')+String(_i).replace(/\B(?=(\d{3})+(?!\d))/g,'\u202f')+','+_d+'\u202f€')})();
         tip.style.display = 'block';
         tip.style.width = '170px';
         tip.innerHTML =
@@ -6876,7 +6971,7 @@ function _renderSynCA() {
       legend.innerHTML = entries.slice(0,6).map(([cat, val], i) => {
         const pct = ((val/total)*100).toFixed(1);
         const color = PALETTE[i % PALETTE.length];
-        const fmtV = val>=1000?(val/1000).toFixed(1)+'K€':Math.round(val)+'€';
+        const fmtV = Math.round(val).toLocaleString('fr-FR')+' €';
         return '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:pointer" onmouseenter="_donutHover('+i+')" onmouseleave="_donutHover(null)">'+
           '<div style="display:flex;align-items:center;gap:6px;min-width:0">'+
             '<div style="width:8px;height:8px;border-radius:50%;background:'+color+';flex-shrink:0"></div>'+
@@ -6891,7 +6986,7 @@ function _renderSynCA() {
       if (entries.length > 6) {
         const rest = entries.slice(6).reduce((s,[,v])=>s+v,0);
         const pct  = ((rest/total)*100).toFixed(1);
-        const fmtV = rest>=1000?(rest/1000).toFixed(1)+'K€':Math.round(rest)+'€';
+        const fmtV = Math.round(rest).toLocaleString('fr-FR')+' €';
         legend.innerHTML += '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px">'+
           '<div style="display:flex;align-items:center;gap:6px">'+
             '<div style="width:8px;height:8px;border-radius:50%;background:rgba(126,143,168,0.4);flex-shrink:0"></div>'+
@@ -7053,14 +7148,17 @@ function _renderCaWaterfall(el) {
       '</div>'+
       '<div style="font-size:12px;font-weight:700;color:'+(totalDelta>=0?'var(--green)':'var(--red)')+'">'+(totalDelta>=0?'+':'')+totalDelta.toLocaleString('fr-FR',{minimumFractionDigits:0,maximumFractionDigits:0})+' €</div>'+
     '</div>'+
-    '<canvas id="'+wfId+'" style="width:100%;height:'+Math.max(drivers.length*52+40, 120)+'px;display:block"></canvas>'+
+    '<div style="overflow:hidden;width:100%">'+
+      '<canvas id="'+wfId+'" style="display:block;max-width:100%;height:'+Math.max(drivers.length*52+40, 120)+'px"></canvas>'+
+    '</div>'+
     '<div id="ca-wf-narrative" style="margin-top:16px;border-top:1px solid var(--border);padding-top:4px"></div>';
 
   const _drawWaterfall = () => {
     const cv = document.getElementById(wfId);
     if (!cv) return;
     const dpr = window.devicePixelRatio || 1;
-    const W   = cv.parentElement.clientWidth;
+    // Use the card element width to avoid measuring an already-oversized canvas
+    const W = Math.floor(wfEl.clientWidth - 32); // subtract card padding
     const rowH = 52;
     const H   = drivers.length * rowH + 40;
     cv.width  = W * dpr; cv.height = H * dpr;
@@ -7069,68 +7167,82 @@ function _renderCaWaterfall(el) {
     const cx = cv.getContext('2d');
     cx.scale(dpr, dpr);
 
-    const PAD_L = 10, PAD_R = 110, BAR_START = 200;
-    const barMaxW = W - BAR_START - PAD_R;
+    // Bidirectional: positive → right (green), negative → left (red)
+    const LBL_W = 160, VAL_W = 90, PAD_L = 8, PAD_R = 4;
+    // Bar zone: from LBL_W to W, split in half at AXIS_X
+    // Each half = (W - LBL_W) / 2, minus VAL_W for the value label
+    const HALF_ZONE = (W - LBL_W) / 2;
+    const AXIS_X = LBL_W + HALF_ZONE;
+    const halfMax = Math.max(10, HALF_ZONE - VAL_W);
+
+    // Clip everything to canvas bounds
+    cx.save(); cx.beginPath(); cx.rect(0, 0, W, H); cx.clip();
+
+    // Draw centre axis line
+    cx.strokeStyle = 'rgba(255,255,255,0.12)';
+    cx.lineWidth = 1; cx.setLineDash([]);
+    cx.beginPath(); cx.moveTo(AXIS_X, 0); cx.lineTo(AXIS_X, H); cx.stroke();
 
     drivers.forEach((d, i) => {
       const y = i * rowH + 10;
+      // CA: positive delta = good (green right), negative = bad (red left)
       const isPos = d.delta >= 0;
       const color = isPos ? '#22c97a' : '#f0566a';
       const colorFill = isPos ? 'rgba(34,201,122,0.18)' : 'rgba(240,86,106,0.18)';
-      const barW = Math.max(4, (Math.abs(d.delta) / maxAbs) * barMaxW);
+      const barW = Math.min(halfMax, Math.max(4, (Math.abs(d.delta) / maxAbs) * halfMax));
       const pct  = d.p2 > 0 ? ((d.delta/d.p2)*100) : (d.delta > 0 ? 100 : -100);
+      // Bar starts at axis, goes right (pos) or left (neg)
+      const barX = isPos ? AXIS_X : AXIS_X - barW;
 
-      // Label key (cat · bien)
+      // Label (left side)
       const parts = d.key.split(' · ');
-      const catLbl  = parts[0] || d.key;
-      const bienLbl = parts[1] || '';
-
-      cx.font = 'bold 10px Outfit,sans-serif';
-      cx.fillStyle = 'rgba(226,232,243,0.9)';
-      cx.textAlign = 'left';
-      // Truncate if too long
-      const maxLblW = BAR_START - PAD_L - 8;
+      const catLbl = parts[0] || d.key, bienLbl = parts[1] || '';
+      const maxLblW = LBL_W - PAD_L - 6;
+      cx.font = 'bold 10px Outfit,sans-serif'; cx.fillStyle = 'rgba(226,232,243,0.9)'; cx.textAlign = 'left';
       let catTxt = catLbl;
       while (cx.measureText(catTxt).width > maxLblW && catTxt.length > 4) catTxt = catTxt.slice(0,-1);
       if (catTxt !== catLbl) catTxt += '…';
       cx.fillText(catTxt, PAD_L, y + 13);
-
       if (bienLbl) {
-        cx.font = '9px Outfit,sans-serif';
-        cx.fillStyle = 'rgba(126,143,168,0.8)';
+        cx.font = '9px Outfit,sans-serif'; cx.fillStyle = 'rgba(126,143,168,0.8)';
         let bTxt = bienLbl;
         while (cx.measureText(bTxt).width > maxLblW && bTxt.length > 4) bTxt = bTxt.slice(0,-1);
         if (bTxt !== bienLbl) bTxt += '…';
         cx.fillText(bTxt, PAD_L, y + 26);
       }
 
-      // Bar background
-      cx.fillStyle = 'rgba(255,255,255,0.04)';
+      // Bar background = exactly the half zone (clip handles the rest)
+      const bgW = W - AXIS_X - 2;  // right half available
+      cx.fillStyle = 'rgba(255,255,255,0.03)';
       cx.beginPath();
-      cx.roundRect(BAR_START, y+2, barMaxW, rowH - 16, 4);
+      if (isPos) cx.roundRect(AXIS_X, y+2, bgW, rowH-16, [0,4,4,0]);
+      else       cx.roundRect(LBL_W, y+2, AXIS_X - LBL_W, rowH-16, [4,0,0,4]);
       cx.fill();
 
       // Bar fill
-      cx.fillStyle = colorFill;
-      cx.strokeStyle = color;
-      cx.lineWidth = 1;
-      cx.beginPath();
-      cx.roundRect(BAR_START, y+2, barW, rowH-16, 4);
-      cx.fill();
-      cx.stroke();
+      cx.fillStyle = colorFill; cx.strokeStyle = color; cx.lineWidth = 1;
+      cx.beginPath(); cx.roundRect(barX, y+2, barW, rowH-16, 4); cx.fill(); cx.stroke();
 
-      // Delta value
-      cx.font = 'bold 11px Outfit,monospace';
-      cx.fillStyle = color;
-      cx.textAlign = 'left';
-      const deltaStr = (isPos?'+':'')+d.delta.toLocaleString('fr-FR',{minimumFractionDigits:0,maximumFractionDigits:0})+' €';
-      cx.fillText(deltaStr, BAR_START + barW + 8, y + 14);
-
-      // Pct
-      cx.font = '9px Outfit,sans-serif';
-      cx.fillStyle = 'rgba(126,143,168,0.7)';
+      // Value label: outside bar tip
+      cx.font = 'bold 11px Outfit,monospace'; cx.fillStyle = color;
+      const deltaStr = (d.delta>=0?'+':'')+Math.round(d.delta).toLocaleString('fr-FR')+' €';
       const pctStr = (pct>=0?'+':'')+pct.toFixed(0)+'%';
-      cx.fillText(pctStr, BAR_START + barW + 8, y + 26);
+      if (isPos) {
+        // Value to the right of bar, clamped to canvas right edge
+        const vx = Math.min(AXIS_X + barW + 6, W - VAL_W + 2);
+        cx.textAlign = 'left';
+        cx.fillText(deltaStr, vx, y + 14);
+        cx.font = '9px Outfit,sans-serif'; cx.fillStyle = 'rgba(126,143,168,0.7)';
+        cx.fillText(pctStr, vx, y + 26);
+      } else {
+        // Value to the left of bar, clamped to left edge (LBL_W)
+        const vx = Math.max(AXIS_X - barW - 6, LBL_W + 2);
+        cx.textAlign = 'right';
+        cx.fillText(deltaStr, vx, y + 14);
+        cx.font = '9px Outfit,sans-serif'; cx.fillStyle = 'rgba(126,143,168,0.7)';
+        cx.fillText(pctStr, vx, y + 26);
+      }
+      cx.textAlign = 'left';
 
       // Separator
       if (i < drivers.length - 1) {
@@ -7158,7 +7270,7 @@ function _renderCaWaterfall(el) {
     const narrativeEl = document.getElementById('ca-wf-narrative');
     if (!narrativeEl) return;
 
-    const fmtAmt = v => (v>=1000?(v/1000).toFixed(1)+'K€':Math.round(v)+'€');
+    const fmtAmt = v => ((v>=0?'+':'')+Math.round(v).toLocaleString('fr-FR')+' €');
     const fmtPct = (delta, base) => base > 0 ? ((delta/base)*100).toFixed(0)+'%' : (delta>0?'+100%':'-100%');
     const mthLabel = n => n===1?'1 mois':n+' mois';
     const p1Label = fmtFR(p1Min)+' → '+fmtFR(p1Max);
@@ -7295,12 +7407,20 @@ function _renderSynDepenses() {
 
   const chartId = 'dep-area-chart-' + Date.now();
 
+  // Build monthly dep map for M-1 / N-1 badges
+  const depPeriodMap = {};
+  periods.forEach(p => {
+    depPeriodMap[p.period] = (p.lines||[]).filter(l => isDep(l) && +l.montant < 0).reduce((s,l) => s+Math.abs(+l.montant), 0);
+  });
+  const lastDepPeriod = periods.length ? periods[periods.length-1].period : null;
+  const lastDepVal = lastDepPeriod ? (depPeriodMap[lastDepPeriod]||0) : totalDep;
+
   el.innerHTML =
     '<div class="dash-grid-4" style="margin-bottom:20px">'+
-      _kpiCard('💸','Dépenses totales','-'+_fmtK(totalDep),'var(--red)',pEntries.length+' période'+(pEntries.length>1?'s':''))+
-      _kpiCard('🏠','Nb biens',''+bienEntries.length,'var(--cyan)')+
-      _kpiCard('📉','Moy / période','-'+_fmtK(totalDep/Math.max(pEntries.length,1)),'var(--gold)')+
-      _kpiCard('⚠️','Poste principal',catEntries[0]?.[0]||'-','var(--purple)',catEntries[0]?'-'+_fmtK(catEntries[0][1]):'')+
+      _kpiCard('💸','Dépenses totales','-'+_fmtK(totalDep),'var(--red)',pEntries.length+' période'+(pEntries.length>1?'s':''), _varBadges(lastDepVal, lastDepPeriod, depPeriodMap, false))+
+      _kpiCardBig('🏠','Nb biens',''+bienEntries.length,'var(--cyan)')+
+      _kpiCard('📉','Moy / période','-'+_fmtK(totalDep/Math.max(pEntries.length,1)),'var(--gold)', '', _varBadges(lastDepVal, lastDepPeriod, depPeriodMap, false))+
+      _kpiCardTop('⚠️','Poste principal',catEntries[0]?.[0]||'-','var(--purple)', catEntries[0]?'-'+_fmtK(catEntries[0][1]):'-', catEntries[0]&&totalDep?((catEntries[0][1]/totalDep)*100).toFixed(1)+'% des charges':'')+
     '</div>'+
     '<div class="card" style="margin-bottom:18px">'+
       '<div class="card-title">Dépenses — évolution '+gran+'</div>'+
@@ -7311,7 +7431,7 @@ function _renderSynDepenses() {
     '<div class="dash-grid-2" style="align-items:stretch">'+
       '<div class="card" style="display:flex;flex-direction:column;height:100%">'+
         '<div class="card-title">Opérations dépenses</div>'+
-        '<div style="overflow-y:auto;max-height:340px;border-radius:8px;border:1px solid var(--border)">'+
+        '<div id="dep-ops-wrap" style="overflow-y:auto;max-height:660px;border-radius:8px;border:1px solid var(--border)">'+
           '<table id="dep-ops-table" style="width:100%;border-collapse:collapse;font-size:11px;table-layout:fixed">'+
             '<colgroup>'+
               '<col style="width:90px"><col style="width:115px"><col style="width:130px"><col style="width:130px"><col style="width:95px">'+
@@ -7340,19 +7460,30 @@ function _renderSynDepenses() {
         '</div>'+
         '<div style="padding:10px 0 2px;font-size:10px;color:var(--text2);text-align:right">'+lines.length+' opération'+(lines.length>1?'s':'')+' · total <span style="color:var(--red);font-weight:700">-'+_fmtK(totalDep)+'</span></div>'+
       '</div>'+
-      '<div class="card">'+
-        '<div class="card-title">Détail dépenses par bien</div>'+
-        '<div class="tbl-wrap"><table>'+
-          '<thead><tr><th>Bien</th><th style="text-align:right">Dépenses</th><th style="text-align:right">Part</th></tr></thead>'+
-          '<tbody>'+bienRows+'</tbody>'+
-          '<tfoot><tr style="border-top:2px solid var(--border2)">'+
-            '<td style="font-weight:700">Total</td>'+
-            '<td style="text-align:right;font-weight:700;color:var(--red)">-'+_fmtK(totalDep)+'</td>'+
-            '<td style="text-align:right;color:var(--text2)">100%</td>'+
-          '</tr></tfoot>'+
-        '</table></div>'+
+      '<div style="display:flex;flex-direction:column;gap:16px;height:100%">'+
+        '<div class="card">'+
+          '<div class="card-title">Détail dépenses par bien</div>'+
+          '<div class="tbl-wrap"><table>'+
+            '<thead><tr><th>Bien</th><th style="text-align:right">Dépenses</th><th style="text-align:right">Part</th></tr></thead>'+
+            '<tbody>'+bienRows+'</tbody>'+
+            '<tfoot><tr style="border-top:2px solid var(--border2)">'+
+              '<td style="font-weight:700">Total</td>'+
+              '<td style="text-align:right;font-weight:700;color:var(--red)">-'+_fmtK(totalDep)+'</td>'+
+              '<td style="text-align:right;color:var(--text2)">100%</td>'+
+            '</tr></tfoot>'+
+          '</table></div>'+
+        '</div>'+
+        '<div class="card" id="dep-cat-donut-card" style="flex:1;display:flex;flex-direction:column">'+
+          '<div class="card-title">Répartition par catégorie</div>'+
+          '<div style="position:relative;display:inline-block;width:100%">'+
+            '<canvas id="dep-donut-cv" style="display:block;width:100%;height:260px;cursor:default"></canvas>'+
+            '<div id="dep-donut-tip" style="display:none;position:absolute;pointer-events:none;background:var(--bg2);border:1px solid var(--border2);border-radius:8px;padding:8px 12px;font-size:11px;box-shadow:0 8px 24px rgba(0,0,0,.5);min-width:140px;z-index:10"></div>'+
+          '</div>'+
+          '<div id="dep-donut-legend" style="margin-top:12px;display:flex;flex-direction:column;gap:5px"></div>'+
+        '</div>'+
       '</div>'+
-    '</div>';
+    '</div>'+
+    '<div class="card" id="dep-wf-card" style="margin-top:18px"></div>';
 
   // Equalise KPI card heights
   requestAnimationFrame(() => {
@@ -7365,12 +7496,12 @@ function _renderSynDepenses() {
   });
 
   // Draw area chart — RED theme for depenses
-  requestAnimationFrame(() => {
+  const _drawDepArea = () => {
     const cv = document.getElementById(chartId);
     if (!cv) return;
     const dpr = window.devicePixelRatio || 1;
     const rect = cv.parentElement.getBoundingClientRect();
-    const W = rect.width; const H = rect.height;
+    const W = rect.width || cv.parentElement.clientWidth; const H = rect.height || 220;
     cv.width = W*dpr; cv.height = H*dpr;
     cv.style.width = W+'px'; cv.style.height = H+'px';
     const cx = cv.getContext('2d');
@@ -7394,7 +7525,7 @@ function _renderSynDepenses() {
     cx.font='10px Outfit,sans-serif'; cx.fillStyle='rgba(126,143,168,0.8)'; cx.textAlign='right';
     for(let i=0;i<=5;i++){
       const v=maxV*(5-i)/5; const y=PAD.top+(i/5)*cH;
-      cx.fillText(v>=1000?Math.round(v/1000)+'K€':Math.round(v)+'€', PAD.left-8, y+3.5);
+      cx.fillText(Math.round(v).toLocaleString('fr-FR')+' €', PAD.left-8, y+3.5);
     }
 
     // Area fill — red gradient
@@ -7419,7 +7550,7 @@ function _renderSynDepenses() {
       cx.beginPath();cx.arc(x,y,3.5,0,Math.PI*2);
       cx.fillStyle='#f0566a';cx.fill();
       cx.strokeStyle='#0b0d12';cx.lineWidth=1.5;cx.stroke();
-      if(vals[i]>0){ const lbl=vals[i]>=1000?(vals[i]/1000).toFixed(1).replace('.0','')+'K€':Math.round(vals[i])+'€';
+      if(vals[i]>0){ const lbl=Math.round(vals[i]).toLocaleString('fr-FR')+' €';
         cx.fillStyle='rgba(240,86,106,0.9)'; cx.fillText(lbl,x,y-10); }
     }
 
@@ -7427,7 +7558,358 @@ function _renderSynDepenses() {
     cx.font='9px Outfit,sans-serif'; cx.fillStyle='rgba(126,143,168,0.7)'; cx.textAlign='center';
     const step=vals.length<=12?1:Math.ceil(vals.length/12);
     for(let i=0;i<labels.length;i+=step) cx.fillText(labels[i],xOf(i),PAD.top+cH+16);
+  }; // end _drawDepArea
+  requestAnimationFrame(_drawDepArea);
+  if (window._depAreaRO) window._depAreaRO.disconnect();
+  window._depAreaRO = new ResizeObserver(() => requestAnimationFrame(_drawDepArea));
+  const depAreaCv = document.getElementById(chartId);
+  if (depAreaCv) window._depAreaRO.observe(depAreaCv.parentElement);
+
+  // ── Donut dépenses par catégorie ─────────────
+  requestAnimationFrame(() => {
+    const cv = document.getElementById('dep-donut-cv');
+    if (!cv) return;
+    const DEP_PALETTE = ['#f0566a','#f5b731','#9b6ef3','#fb923c','#38bdf8','#22d3c8','#a3e635','#e879f9','#34d399','#22c97a'];
+    const total = catEntries.reduce((s,[,v])=>s+v, 0);
+    if (!total) return;
+
+    const depDonutDraw = (hovered) => {
+      const dpr = window.devicePixelRatio || 1;
+      const W = cv.parentElement.clientWidth;
+      const H = 260;
+      cv.width  = W*dpr; cv.height = H*dpr;
+      cv.style.width = W+'px'; cv.style.height = H+'px';
+      const ctx = cv.getContext('2d');
+      ctx.scale(dpr, dpr);
+      const cx0 = W/2, cy0 = H/2-5;
+      const R = Math.max(10, Math.min(W,H)/2-14);
+      const r = R*0.52;
+      const slices = [];
+      let angle = -Math.PI/2;
+      catEntries.forEach(([cat,val],i) => {
+        const sweep = (val/total)*Math.PI*2;
+        slices.push({cat,val,color:DEP_PALETTE[i%DEP_PALETTE.length],a0:angle,a1:angle+sweep});
+        angle += sweep;
+      });
+      ctx.clearRect(0,0,W,H);
+      slices.forEach((s,i) => {
+        const isHov = i===hovered;
+        ctx.beginPath(); ctx.moveTo(cx0,cy0);
+        ctx.arc(cx0,cy0,isHov?R+6:R,s.a0,s.a1); ctx.closePath();
+        ctx.fillStyle = isHov ? s.color : s.color+'cc'; ctx.fill();
+        ctx.strokeStyle='#111318'; ctx.lineWidth=isHov?2:1.5; ctx.stroke();
+      });
+      ctx.beginPath(); ctx.arc(cx0,cy0,r,0,Math.PI*2);
+      ctx.fillStyle='#111318'; ctx.fill();
+      if (hovered!==null && hovered>=0 && slices[hovered]) {
+        const s=slices[hovered];
+        const pct=((s.val/total)*100).toFixed(1);
+        ctx.font='bold 13px Outfit,sans-serif'; ctx.fillStyle=s.color; ctx.textAlign='center';
+        ctx.fillText('-'+Math.round(s.val).toLocaleString('fr-FR')+' €',cx0,cy0+2);
+        ctx.font='9px Outfit,sans-serif'; ctx.fillStyle='rgba(126,143,168,0.8)';
+        ctx.fillText(pct+'%',cx0,cy0+15);
+      } else {
+        ctx.font='bold 13px Outfit,sans-serif'; ctx.fillStyle='#e2e8f3'; ctx.textAlign='center';
+        ctx.fillText('-'+(Math.round(total).toLocaleString('fr-FR')+' €'),cx0,cy0+2);
+        ctx.font='9px Outfit,sans-serif'; ctx.fillStyle='rgba(126,143,168,0.8)';
+        ctx.fillText('Dép. totales',cx0,cy0+15);
+      }
+      window._depDonutDraw   = depDonutDraw;
+      window._depDonutSlices = slices;
+      window._depDonutW = W; window._depDonutH = H;
+    };
+    depDonutDraw(null);
+
+    const tip = document.getElementById('dep-donut-tip');
+    const hitTest = (mx,my,W,H) => {
+      const cx0=W/2, cy0=H/2-5;
+      const R=Math.max(10,Math.min(W,H)/2-14), r=R*0.52;
+      const dx=mx-cx0, dy=my-cy0;
+      const dist=Math.sqrt(dx*dx+dy*dy);
+      if (dist<r||dist>R+8) return -1;
+      let a=Math.atan2(dy,dx);
+      const aNorm=((a+Math.PI/2)+Math.PI*2)%(Math.PI*2);
+      const slices=window._depDonutSlices||[];
+      for(let i=0;i<slices.length;i++){
+        const a0=((slices[i].a0+Math.PI/2)+Math.PI*2)%(Math.PI*2);
+        const a1=((slices[i].a1+Math.PI/2)+Math.PI*2)%(Math.PI*2);
+        if(a0<=a1?(aNorm>=a0&&aNorm<a1):(aNorm>=a0||aNorm<a1)) return i;
+      }
+      return -1;
+    };
+    cv.onmousemove = (e) => {
+      const rect=cv.getBoundingClientRect();
+      const W=window._depDonutW||cv.parentElement.clientWidth;
+      const H=window._depDonutH||260;
+      const mx=(e.clientX-rect.left)*(W/rect.width);
+      const my=(e.clientY-rect.top)*(H/rect.height);
+      const idx=hitTest(mx,my,W,H);
+      if(window._depDonutDraw) window._depDonutDraw(idx>=0?idx:null);
+      cv.style.cursor=idx>=0?'pointer':'default';
+      if(idx>=0&&tip){
+        const sl=(window._depDonutSlices||[])[idx];
+        if(!sl){tip.style.display='none';return;}
+        const pct=((sl.val/total)*100).toFixed(1);
+        const fmtV=(()=>{const _v=sl.val;const _a=Math.abs(_v);const _i=Math.floor(_a);const _d=Math.round((_a-_i)*100).toString().padStart(2,'0');return ((_v<0?'-':'')+String(_i).replace(/\B(?=(\d{3})+(?!\d))/g,'\u202f')+','+_d+'\u202f€')})();
+        tip.style.display='block'; tip.style.width='170px';
+        tip.innerHTML=
+          '<div style="display:flex;align-items:center;gap:7px;margin-bottom:7px">'+
+            '<div style="width:9px;height:9px;border-radius:50%;background:'+sl.color+';flex-shrink:0"></div>'+
+            '<span style="font-weight:700;color:#e2e8f3;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+sl.cat+'</span>'+
+          '</div>'+
+          '<div style="font-family:monospace;font-size:14px;font-weight:800;color:var(--red)">-'+fmtV+' €</div>'+
+          '<div style="font-size:10px;color:var(--text2);margin-top:4px">'+pct+'% des dépenses</div>';
+        const tipW=182,tipH=82;
+        let tx=(e.clientX-rect.left)+14, ty=(e.clientY-rect.top)-30;
+        if(tx+tipW>rect.width) tx=(e.clientX-rect.left)-tipW-10;
+        if(ty<4) ty=4;
+        if(ty+tipH>rect.height) ty=rect.height-tipH-4;
+        tip.style.left=tx+'px'; tip.style.top=ty+'px';
+      } else if(tip) tip.style.display='none';
+    };
+    cv.onmouseleave = () => { if(window._depDonutDraw)window._depDonutDraw(null); cv.style.cursor='default'; if(tip)tip.style.display='none'; };
+
+    // Legend
+    const legend=document.getElementById('dep-donut-legend');
+    if(legend){
+      legend.innerHTML=catEntries.slice(0,6).map(([cat,val],i)=>{
+        const pct=((val/total)*100).toFixed(1);
+        const color=DEP_PALETTE[i%DEP_PALETTE.length];
+        const fmtV=Math.round(val).toLocaleString('fr-FR')+' €';
+        return '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:pointer" onmouseenter="_depDonutHover('+i+')" onmouseleave="_depDonutHover(null)">'+
+          '<div style="display:flex;align-items:center;gap:6px;min-width:0">'+
+            '<div style="width:8px;height:8px;border-radius:50%;background:'+color+';flex-shrink:0"></div>'+
+            '<span style="font-size:10px;color:rgba(226,232,243,0.8);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+cat+'</span>'+
+          '</div>'+
+          '<div style="display:flex;gap:8px;flex-shrink:0">'+
+            '<span style="font-size:10px;font-family:monospace;color:var(--red);font-weight:600">-'+fmtV+'</span>'+
+            '<span style="font-size:10px;color:var(--text2);width:36px;text-align:right">'+pct+'%</span>'+
+          '</div>'+
+        '</div>';
+      }).join('');
+      if(catEntries.length>6){
+        const rest=catEntries.slice(6).reduce((s,[,v])=>s+v,0);
+        const pct=((rest/total)*100).toFixed(1);
+        const fmtV=Math.round(rest).toLocaleString('fr-FR')+' €';
+        legend.innerHTML+='<div style="display:flex;align-items:center;justify-content:space-between;gap:8px">'+
+          '<div style="display:flex;align-items:center;gap:6px">'+
+            '<div style="width:8px;height:8px;border-radius:50%;background:rgba(126,143,168,0.4);flex-shrink:0"></div>'+
+            '<span style="font-size:10px;color:var(--text2)">Autres ('+(catEntries.length-6)+')</span>'+
+          '</div>'+
+          '<div style="display:flex;gap:8px;flex-shrink:0">'+
+            '<span style="font-size:10px;font-family:monospace;color:var(--red)">-'+fmtV+'</span>'+
+            '<span style="font-size:10px;color:var(--text2);width:36px;text-align:right">'+pct+'%</span>'+
+          '</div>'+
+        '</div>';
+      }
+    }
+    // ResizeObserver for donut
+    if(window._depDonutRO) window._depDonutRO.disconnect();
+    window._depDonutRO=new ResizeObserver(()=>{if(window._depDonutDraw)window._depDonutDraw(null);});
+    window._depDonutRO.observe(cv.parentElement);
   });
+
+  // ── Waterfall Dépenses P1 vs P2 ──────────────
+  requestAnimationFrame(() => _renderDepWaterfall(el));
+}
+
+function _depDonutHover(idx) {
+  if (window._depDonutDraw) window._depDonutDraw(idx);
+}
+
+function _renderDepWaterfall(el) {
+  const wfEl = document.getElementById('dep-wf-card');
+  if (!wfEl) return;
+
+  const rawMax = _getV('syn-date-max');
+  const driver = parseInt(_getV('syn-driver')||'3');
+  const parseYMD = s => { const [y,m,d]=(s||'').split('-'); return new Date(+y,+m-1,+d); };
+  const addMonths = (d,n) => { const r=new Date(d); r.setMonth(r.getMonth()+n); return r; };
+  const fmtFR = d => d ? (String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear()) : '';
+  const firstOfMonth = d => new Date(d.getFullYear(),d.getMonth(),1);
+  const lastOfMonth  = d => new Date(d.getFullYear(),d.getMonth()+1,0);
+
+  let p1Max, p1Min, p2Max, p2Min;
+  if (rawMax) {
+    p1Max = lastOfMonth(parseYMD(rawMax));
+  } else {
+    const db = _getDB();
+    const periods = Object.keys(db.periods||{}).sort();
+    if (!periods.length) { wfEl.innerHTML = '<div class="dash-empty">Aucune donnée</div>'; return; }
+    const last = periods[periods.length-1];
+    const [ly,lm] = last.split('-');
+    p1Max = new Date(+ly,+lm,0);
+  }
+  p1Min = firstOfMonth(addMonths(new Date(p1Max),-(driver-1)));
+  p2Max = lastOfMonth(addMonths(new Date(p1Min),-1));
+  p2Min = firstOfMonth(addMonths(new Date(p2Max),-(driver-1)));
+
+  const inRange = (d,mn,mx) => d>=mn && d<=mx;
+  const toDate = s => { if(!s) return null; if(/^\d{4}-\d{2}-\d{2}/.test(s)) return new Date(s.slice(0,10)); if(/^(\d{2})[\/-](\d{2})[\/-](\d{4})/.test(s)){const[,dd,mm,yy]=s.match(/^(\d{2})[\/-](\d{2})[\/-](\d{4})/);return new Date(+yy,+mm-1,+dd);} return null; };
+
+  const allLines = _synLines();
+  const DEP_CATS2 = new Set(Object.entries(SCHEMA).filter(([,s])=>s.n1==='Compte de résultat'&&(s.n2||'').includes('Charges')).map(([k])=>k));
+  const depLines = allLines.filter(l=>DEP_CATS2.has(l.cat||l.categorie||'')&&+l.montant<0);
+
+  const aggP = (mn,mx) => {
+    const map={};
+    depLines.forEach(l=>{
+      const d=toDate(l.date||l._period+'-01');
+      if(!d||!inRange(d,mn,mx)) return;
+      const key=(l.cat||l.categorie||'Autre')+' · '+(l.bienName||l.bien||'Non attribué');
+      map[key]=(map[key]||0)+Math.abs(+l.montant);
+    });
+    return map;
+  };
+  const p1map=aggP(p1Min,p1Max), p2map=aggP(p2Min,p2Max);
+  const allKeys=new Set([...Object.keys(p1map),...Object.keys(p2map)]);
+  const deltas=[];
+  allKeys.forEach(k=>{ const d=(p1map[k]||0)-(p2map[k]||0); if(Math.abs(d)>0.01) deltas.push({key:k,delta:d,p1:p1map[k]||0,p2:p2map[k]||0}); });
+  deltas.sort((a,b)=>b.delta-a.delta);
+  const top3pos=deltas.filter(d=>d.delta>0).slice(0,3);
+  const top3neg=deltas.filter(d=>d.delta<0).slice(-3).reverse();
+  const drivers=[...top3pos,...top3neg];
+  const totalDelta=drivers.reduce((s,d)=>s+d.delta,0);
+  const maxAbs=Math.max(...drivers.map(d=>Math.abs(d.delta)),1);
+  const wfId='dep-wf-canvas-'+Date.now();
+
+  wfEl.innerHTML=
+    '<div class="card-title">📊 Drivers Dépenses — P1 vs P2</div>'+
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">'+
+      '<div style="display:flex;gap:16px">'+
+        '<div style="font-size:10px;color:var(--text2)">P1 <span style="color:var(--red);font-weight:700;font-family:monospace">'+fmtFR(p1Min)+' → '+fmtFR(p1Max)+'</span></div>'+
+        '<div style="font-size:10px;color:var(--text2)">P2 <span style="color:var(--text);font-weight:600;font-family:monospace">'+fmtFR(p2Min)+' → '+fmtFR(p2Max)+'</span></div>'+
+      '</div>'+
+      '<div style="font-size:12px;font-weight:700;color:'+(totalDelta<=0?'var(--green)':'var(--red)')+'">'+(totalDelta<=0?'':'+')+(totalDelta).toLocaleString('fr-FR',{minimumFractionDigits:0,maximumFractionDigits:0})+' €</div>'+
+    '</div>'+
+    '<div style="overflow:hidden;width:100%">'+
+      '<canvas id="'+wfId+'" style="display:block;max-width:100%;height:'+Math.max(drivers.length*52+40,120)+'px"></canvas>'+
+    '</div>'+
+    '<div id="dep-wf-narrative" style="margin-top:16px;border-top:1px solid var(--border);padding-top:4px"></div>';
+
+  const _drawDepWaterfall = () => {
+    const cv=document.getElementById(wfId); if(!cv) return;
+    const dpr=window.devicePixelRatio||1;
+    const W=Math.floor(wfEl.clientWidth-32);
+    const rowH=52, H=drivers.length*rowH+40;
+    cv.width=W*dpr; cv.height=H*dpr;
+    cv.style.width=W+'px'; cv.style.height=H+'px';
+    const cx=cv.getContext('2d'); cx.scale(dpr,dpr);
+    // Bidirectional: cost increase (bad) → left (red), cost decrease (good) → right (green)
+    const LBL_W=160, VAL_W=90, PAD_L=8, PAD_R=4;
+    const HALF_ZONE=(W-LBL_W)/2;
+    const AXIS_X=LBL_W+HALF_ZONE;
+    const halfMax=Math.max(10,HALF_ZONE-VAL_W);
+
+    cx.save(); cx.beginPath(); cx.rect(0,0,W,H); cx.clip();
+    cx.strokeStyle='rgba(255,255,255,0.12)'; cx.lineWidth=1; cx.setLineDash([]);
+    cx.beginPath(); cx.moveTo(AXIS_X,0); cx.lineTo(AXIS_X,H); cx.stroke();
+
+    drivers.forEach((d,i)=>{
+      const y=i*rowH+10;
+      // Dépenses: delta<0 = costs down = good (green right), delta>0 = costs up = bad (red left)
+      const isGood=d.delta<=0;
+      const color=isGood?'#22c97a':'#f0566a';
+      const colorFill=isGood?'rgba(34,201,122,0.18)':'rgba(240,86,106,0.18)';
+      const barW=Math.min(halfMax, Math.max(4,(Math.abs(d.delta)/maxAbs)*halfMax));
+      const pct=d.p2>0?((d.delta/d.p2)*100):(d.delta>0?100:-100);
+      const barX=isGood?AXIS_X:AXIS_X-barW;
+      const parts=d.key.split(' · ');
+      const catLbl=parts[0]||d.key, bienLbl=parts[1]||'';
+      const maxLblW=LBL_W-PAD_L-6;
+      cx.font='bold 10px Outfit,sans-serif'; cx.fillStyle='rgba(226,232,243,0.9)'; cx.textAlign='left';
+      let cTxt=catLbl;
+      while(cx.measureText(cTxt).width>maxLblW&&cTxt.length>4) cTxt=cTxt.slice(0,-1);
+      if(cTxt!==catLbl) cTxt+='…';
+      cx.fillText(cTxt,PAD_L,y+13);
+      if(bienLbl){
+        cx.font='9px Outfit,sans-serif'; cx.fillStyle='rgba(126,143,168,0.8)';
+        let bTxt=bienLbl;
+        while(cx.measureText(bTxt).width>maxLblW&&bTxt.length>4) bTxt=bTxt.slice(0,-1);
+        if(bTxt!==bienLbl) bTxt+='…';
+        cx.fillText(bTxt,PAD_L,y+26);
+      }
+      const bgW=W-AXIS_X-2;
+      cx.fillStyle='rgba(255,255,255,0.03)'; cx.beginPath();
+      if(isGood) cx.roundRect(AXIS_X,y+2,bgW,rowH-16,[0,4,4,0]);
+      else       cx.roundRect(LBL_W,y+2,AXIS_X-LBL_W,rowH-16,[4,0,0,4]);
+      cx.fill();
+      cx.fillStyle=colorFill; cx.strokeStyle=color; cx.lineWidth=1;
+      cx.beginPath(); cx.roundRect(barX,y+2,barW,rowH-16,4); cx.fill(); cx.stroke();
+      cx.font='bold 11px Outfit,monospace'; cx.fillStyle=color;
+      const deltaStr=(d.delta>0?'+':'')+d.delta.toLocaleString('fr-FR',{minimumFractionDigits:0,maximumFractionDigits:0})+' €';
+      const pctStr=(pct>=0?'+':'')+pct.toFixed(0)+'%';
+      if(isGood){
+        const vx=Math.min(AXIS_X+barW+6, W-VAL_W+2);
+        cx.textAlign='left';
+        cx.fillText(deltaStr,vx,y+14);
+        cx.font='9px Outfit,sans-serif'; cx.fillStyle='rgba(126,143,168,0.7)';
+        cx.fillText(pctStr,vx,y+26);
+      } else {
+        const vx=Math.max(AXIS_X-barW-6, LBL_W+2);
+        cx.textAlign='right';
+        cx.fillText(deltaStr,vx,y+14);
+        cx.font='9px Outfit,sans-serif'; cx.fillStyle='rgba(126,143,168,0.7)';
+        cx.fillText(pctStr,vx,y+26);
+      }
+      cx.textAlign='left';
+      if(i<drivers.length-1){
+        cx.strokeStyle='rgba(35,42,56,0.8)'; cx.lineWidth=1; cx.setLineDash([3,4]);
+        cx.beginPath(); cx.moveTo(0,y+rowH-2); cx.lineTo(W,y+rowH-2); cx.stroke();
+        cx.setLineDash([]);
+      }
+    });
+  };
+  requestAnimationFrame(_drawDepWaterfall);
+  if(window._depWfRO) window._depWfRO.disconnect();
+  window._depWfRO=new ResizeObserver(()=>requestAnimationFrame(_drawDepWaterfall));
+  const depWfCv=document.getElementById(wfId);
+  if(depWfCv) window._depWfRO.observe(depWfCv.parentElement);
+
+  // ── Narrative bullets ──────────────────────
+  const narrativeEl=document.getElementById('dep-wf-narrative');
+  if(!narrativeEl) return;
+  const fmtAmt=v=>((v>=0?'+':'')+Math.round(v).toLocaleString('fr-FR')+' €');
+  const fmtPct=(delta,base)=>base>0?((delta/base)*100).toFixed(0)+'%':(delta>0?'+100%':'-100%');
+  const mthLabel=n=>n===1?'1 mois':n+' mois';
+  const bullets=[];
+  const sign=totalDelta>=0?'+':'';
+  const trend=totalDelta<=0?'↓ Réduction des charges':'↑ Hausse des charges';
+  const trendColor=totalDelta<=0?'var(--green)':'var(--red)';
+  bullets.push({
+    icon:totalDelta<=0?'📉':'📈',
+    text:'<strong>'+trend+'</strong> — Les dépenses de P1 ('+fmtFR(p1Min)+' → '+fmtFR(p1Max)+') '+
+         (totalDelta<=0?'reculent de <strong style="color:var(--green)">-'+fmtAmt(Math.abs(totalDelta))+'</strong>':'progressent de <strong style="color:var(--red)">+'+fmtAmt(Math.abs(totalDelta))+'</strong>')+
+         ' vs P2 ('+fmtFR(p2Min)+' → '+fmtFR(p2Max)+') sur <strong>'+mthLabel(driver)+'</strong>.'
+  });
+  if(top3pos.length){
+    const items=top3pos.map(d=>{
+      const parts=d.key.split(' · ');
+      return '<em>'+parts[0]+(parts[1]?' · '+parts[1]:'')+'</em> (<span style="color:var(--red)">+'+fmtAmt(d.delta)+', '+fmtPct(d.delta,d.p2)+'</span>)';
+    });
+    bullets.push({icon:'⚠️',text:'<strong>Postes en hausse</strong> — '+items.join(' ; ')+'.'});
+  }
+  if(top3neg.length){
+    const items=top3neg.map(d=>{
+      const parts=d.key.split(' · ');
+      return '<em>'+parts[0]+(parts[1]?' · '+parts[1]:'')+'</em> (<span style="color:var(--green)">'+fmtAmt(d.delta)+', '+fmtPct(d.delta,d.p2)+'</span>)';
+    });
+    bullets.push({icon:'✅',text:'<strong>Postes en baisse</strong> — '+items.join(' ; ')+'.'});
+  } else {
+    bullets.push({icon:'✅',text:'<strong>Postes en baisse</strong> — Aucune réduction de charges significative sur la période.'});
+  }
+  const topKey=top3pos[0]||top3neg[0];
+  if(topKey&&totalDelta!==0){
+    const share=Math.abs(topKey.delta/totalDelta*100).toFixed(0);
+    const parts=topKey.key.split(' · ');
+    bullets.push({icon:'🔍',text:'<strong>Concentration</strong> — Le principal driver (<em>'+(parts[0])+(parts[1]?' · '+parts[1]:'')+'</em>) représente <strong>'+share+'%</strong> de la variation totale.'});
+  }
+  narrativeEl.innerHTML=bullets.map(b=>
+    '<div style="display:flex;gap:10px;align-items:flex-start;padding:7px 0;border-bottom:1px solid var(--border)">'+
+      '<span style="font-size:13px;flex-shrink:0;margin-top:1px">'+b.icon+'</span>'+
+      '<span style="font-size:11px;color:var(--text2);line-height:1.6">'+b.text+'</span>'+
+    '</div>'
+  ).join('');
 }
 
 function _buildDepOpsRows(rows) {
@@ -7437,7 +7919,7 @@ function _buildDepOpsRows(rows) {
       '<td style="padding:7px 10px;font-size:11px;word-break:break-word;line-height:1.4">'+l.bien+'</td>'+
       '<td style="padding:7px 10px;color:var(--text2);font-size:10px;word-break:break-word;line-height:1.4">'+l.cat+'</td>'+
       '<td style="padding:7px 10px;font-size:10px;color:var(--text2);word-break:break-word;line-height:1.4">'+l.lib+'</td>'+
-      '<td style="padding:7px 10px;text-align:right;font-family:monospace;font-weight:600;color:var(--red);white-space:nowrap">-'+l.amt.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+'</td>'+
+      '<td style="padding:7px 10px;text-align:right;font-family:monospace;font-weight:600;color:var(--red);white-space:nowrap">'+(()=>{const _v=l.amt;const _a=Math.abs(_v);const _i=Math.floor(_a);const _d=Math.round((_a-_i)*100).toString().padStart(2,'0');return String(_i).replace(/\B(?=(\d{3})+(?!\d))/g,' ')+','+_d+' €'})()+'</td>'+
     '</tr>'
   ).join('');
 }
@@ -7464,14 +7946,584 @@ function _sortDepOps(th, col) {
   if(tbody) tbody.innerHTML = _buildDepOpsRows(rows);
 }
 
-// ── TRÉSORERIE (placeholder) ───────────────────
+// ── TRÉSORERIE ────────────────────────────────
 function _renderSynTresorerie() {
-  document.getElementById('syn-content').innerHTML =
-    '<div class="dash-empty" style="flex-direction:column;gap:8px">'+
-      '<div style="font-size:24px">🚧</div>'+
-      '<div style="font-weight:600">Trésorerie - en cours de construction</div>'+
-      '<div style="font-size:11px;color:var(--text2)">À définir avec les sous-catégories Power BI</div>'+
-    '</div>';
+  const el = document.getElementById('syn-content'); if (!el) return;
+  const gran = _getV('syn-gran') || 'mensuel';
+
+  const allLines = _synLines();
+  if (!allLines.length) { el.innerHTML = _emptyState('Aucune donnée pour cette sélection'); return; }
+
+  // All lines — no filter, 100% of operations
+  const lines = allLines;
+
+  const totalIn  = lines.filter(l => +l.montant > 0).reduce((s,l) => s + (+l.montant), 0);
+  const totalOut = lines.filter(l => +l.montant < 0).reduce((s,l) => s + Math.abs(+l.montant), 0);
+  const solde    = totalIn - totalOut;
+
+  // By période
+  const periods = [...new Set(lines.map(l => l._period))].sort();
+  const mNames = ['Jan','Fév','Mar','Avr','Mai','Juin','Juil','Aoû','Sep','Oct','Nov','Déc'];
+  const pEntries = periods.map(p => {
+    const pLines = lines.filter(l => l._period === p);
+    const inn  = pLines.filter(l => +l.montant > 0).reduce((s,l) => s + (+l.montant), 0);
+    const out  = pLines.filter(l => +l.montant < 0).reduce((s,l) => s + Math.abs(+l.montant), 0);
+    const net  = inn - out;
+    const [pY, pM] = p.split('-');
+    const lbl = gran === 'mensuel' ? (mNames[(parseInt(pM)||1)-1] + ' ' + pY) : pY;
+    return { p, lbl, inn, out, net };
+  });
+
+  // Cumulative solde
+  let cumul = 0;
+  const cumulVals = pEntries.map(e => { cumul += e.net; return cumul; });
+
+  // Bien map for detail table
+  const bienMap = {};
+  lines.forEach(l => {
+    const k = l.bienName||l.bien||'Non attribué';
+    if (!bienMap[k]) bienMap[k] = { inn:0, out:0 };
+    if (+l.montant > 0) bienMap[k].inn += +l.montant;
+    else bienMap[k].out += Math.abs(+l.montant);
+  });
+  const bienEntries = Object.entries(bienMap).sort((a,b) => (b[1].inn-b[1].out) - (a[1].inn-a[1].out));
+
+  const bienRows = bienEntries.map(([b,v]) => {
+    const net = v.inn - v.out;
+    return '<tr>'+
+      '<td>'+b+'</td>'+
+      '<td style="text-align:right;color:var(--green);font-family:monospace">+'+_fmtK(v.inn)+'</td>'+
+      '<td style="text-align:right;color:var(--red);font-family:monospace">-'+_fmtK(v.out)+'</td>'+
+      '<td style="text-align:right;font-family:monospace;font-weight:700;color:'+(net>=0?'var(--cyan)':'var(--red)')+'">'+(net>=0?'+':'')+_fmtK(net)+'</td>'+
+    '</tr>';
+  }).join('');
+
+  // Ops table — all ops sorted by date desc
+  const opsLines = lines.slice().map(l => ({
+    d: (()=>{ const r=l.date||''; if(/^\d{4}-\d{2}-\d{2}/.test(r)) return r.slice(0,10); if(/^(\d{2})[\/-](\d{2})[\/-](\d{4})/.test(r)){const[,dd,mm,yy]=r.match(/^(\d{2})[\/-](\d{2})[\/-](\d{4})/);return yy+'-'+mm+'-'+dd;} return l._period||''; })(),
+    dDisplay: (()=>{ const r=l.date||''; if(/^\d{4}-\d{2}-\d{2}/.test(r)){const[y,m,d]=r.slice(0,10).split('-');return d+'/'+m+'/'+y;} if(/^(\d{2})[\/-](\d{2})[\/-](\d{4})/.test(r)) return r.slice(0,10); return l._period||'-'; })(),
+    bien: l.bienName||l.bien||'—',
+    cat:  l.cat||l.categorie||'—',
+    lib:  (typeof normaliseLib==='function'?normaliseLib(l.libelle||l.label||''):(l.libelle||l.label||'—'))||'—',
+    amt:  +l.montant
+  })).sort((a,b) => b.d.localeCompare(a.d));
+  window._tresOpsLines = opsLines;
+
+  const chartId = 'tres-area-chart-' + Date.now();
+
+  // Build monthly maps for badges
+  const tresPeriodMapIn  = {}, tresPeriodMapOut = {}, tresPeriodMapSolde = {};
+  pEntries.forEach(e => {
+    tresPeriodMapIn[e.p]    = e.inn;
+    tresPeriodMapOut[e.p]   = e.out;
+    tresPeriodMapSolde[e.p] = e.net;
+  });
+  const lastTresPeriod = pEntries.length ? pEntries[pEntries.length-1].p : null;
+  const lastIn    = lastTresPeriod ? (tresPeriodMapIn[lastTresPeriod]||0)    : totalIn;
+  const lastOut   = lastTresPeriod ? (tresPeriodMapOut[lastTresPeriod]||0)   : totalOut;
+  const lastSolde = lastTresPeriod ? (tresPeriodMapSolde[lastTresPeriod]||0) : solde;
+
+  el.innerHTML =
+    '<div class="dash-grid-4" style="margin-bottom:20px">'+
+      _kpiCard('💰','Total entrées','+'+_fmtK(totalIn),'var(--green)', periods.length+' période'+(periods.length>1?'s':''), _varBadges(lastIn, lastTresPeriod, tresPeriodMapIn, true))+
+      _kpiCard('💸','Total sorties','-'+_fmtK(totalOut),'var(--red)', '', _varBadges(lastOut, lastTresPeriod, tresPeriodMapOut, false))+
+      _kpiCard('📊','Solde net',(solde>=0?'+':'')+_fmtK(solde), solde>=0?'var(--cyan)':'var(--red)', '', _varBadges(lastSolde, lastTresPeriod, tresPeriodMapSolde, true))+
+      _kpiCard('🔢','Nb opérations',''+lines.length,'var(--gold)')+
+    '</div>'+
+    '<div class="card" style="margin-bottom:18px">'+
+      '<div class="card-title">Trésorerie — solde cumulé</div>'+
+      '<div style="position:relative;width:100%;height:220px">'+
+        '<canvas id="'+chartId+'" style="width:100%;height:100%"></canvas>'+
+      '</div>'+
+    '</div>'+
+    '<div class="dash-grid-2" style="align-items:stretch">'+
+      '<div class="card" style="display:flex;flex-direction:column;height:100%">'+
+        '<div class="card-title">Opérations</div>'+
+        '<div id="tres-ops-wrap" style="overflow-y:auto;max-height:660px;border-radius:8px;border:1px solid var(--border)">'+
+          '<table id="tres-ops-table" style="width:100%;border-collapse:collapse;font-size:11px;table-layout:fixed">'+
+            '<colgroup>'+
+              '<col style="width:90px"><col style="width:115px"><col style="width:130px"><col style="width:130px"><col style="width:95px">'+
+            '</colgroup>'+
+            '<thead style="position:sticky;top:0;z-index:2">'+
+              '<tr style="background:var(--bg3);border-bottom:1px solid var(--border2)">'+
+                '<th onclick="_sortTresOps(this,0)" style="padding:8px 10px;text-align:left;font-size:9px;font-weight:700;letter-spacing:.08em;color:var(--text2);cursor:pointer;user-select:none" data-sort-col="0" data-sort-dir="desc">DATE <span class="sort-arrow">↓</span></th>'+
+                '<th onclick="_sortTresOps(this,1)" style="padding:8px 10px;text-align:left;font-size:9px;font-weight:700;letter-spacing:.08em;color:var(--text2);cursor:pointer;user-select:none" data-sort-col="1" data-sort-dir="">BIEN <span class="sort-arrow" style="opacity:.3">↕</span></th>'+
+                '<th onclick="_sortTresOps(this,2)" style="padding:8px 10px;text-align:left;font-size:9px;font-weight:700;letter-spacing:.08em;color:var(--text2);cursor:pointer;user-select:none" data-sort-col="2" data-sort-dir="">CATÉGORIE <span class="sort-arrow" style="opacity:.3">↕</span></th>'+
+                '<th onclick="_sortTresOps(this,3)" style="padding:8px 10px;text-align:left;font-size:9px;font-weight:700;letter-spacing:.08em;color:var(--text2);cursor:pointer;user-select:none" data-sort-col="3" data-sort-dir="">LIBELLÉ <span class="sort-arrow" style="opacity:.3">↕</span></th>'+
+                '<th onclick="_sortTresOps(this,4)" style="padding:8px 10px;text-align:right;font-size:9px;font-weight:700;letter-spacing:.08em;color:var(--text2);cursor:pointer;user-select:none" data-sort-col="4" data-sort-dir="">MONTANT <span class="sort-arrow" style="opacity:.3">↕</span></th>'+
+              '</tr>'+
+            '</thead>'+
+            '<tbody id="tres-ops-body">'+_buildTresOpsRows(opsLines)+'</tbody>'+
+          '</table>'+
+        '</div>'+
+        '<div style="padding:10px 0 2px;font-size:10px;color:var(--text2);text-align:right">'+lines.length+' opération'+(lines.length>1?'s':'')+' · solde <span style="color:'+(solde>=0?'var(--cyan)':'var(--red)')+';font-weight:700">'+(solde>=0?'+':'')+_fmtK(solde)+'</span></div>'+
+      '</div>'+
+      '<div style="display:flex;flex-direction:column;gap:16px;height:100%">'+
+        '<div class="card">'+
+          '<div class="card-title">Détail par bien</div>'+
+          '<div class="tbl-wrap"><table>'+
+            '<thead><tr><th>Bien</th><th style="text-align:right">Entrées</th><th style="text-align:right">Sorties</th><th style="text-align:right">Solde</th></tr></thead>'+
+            '<tbody>'+bienRows+'</tbody>'+
+            '<tfoot><tr style="border-top:2px solid var(--border2)">'+
+              '<td style="font-weight:700">Total</td>'+
+              '<td style="text-align:right;color:var(--green);font-weight:700">+'+_fmtK(totalIn)+'</td>'+
+              '<td style="text-align:right;color:var(--red);font-weight:700">-'+_fmtK(totalOut)+'</td>'+
+              '<td style="text-align:right;font-weight:700;color:'+(solde>=0?'var(--cyan)':'var(--red)')+'">'+(solde>=0?'+':'')+_fmtK(solde)+'</td>'+
+            '</tr></tfoot>'+
+          '</table></div>'+
+        '</div>'+
+        '<div class="card" id="tres-cat-donut-card" style="flex:1;display:flex;flex-direction:column">'+
+          '<div class="card-title">Répartition entrées par catégorie</div>'+
+          '<div style="position:relative;display:inline-block;width:100%">'+
+            '<canvas id="tres-donut-cv" style="display:block;width:100%;height:260px;cursor:default"></canvas>'+
+            '<div id="tres-donut-tip" style="display:none;position:absolute;pointer-events:none;background:var(--bg2);border:1px solid var(--border2);border-radius:8px;padding:8px 12px;font-size:11px;box-shadow:0 8px 24px rgba(0,0,0,.5);min-width:140px;z-index:10"></div>'+
+          '</div>'+
+          '<div id="tres-donut-legend" style="margin-top:12px;display:flex;flex-direction:column;gap:5px"></div>'+
+        '</div>'+
+      '</div>'+
+    '</div>'+
+    '<div class="card" id="tres-wf-card" style="margin-top:18px"></div>';
+
+  // ── DEBUG: show _fmtK output
+  console.log('[DEBUG] _fmtK(3524)=', JSON.stringify(_fmtK(3524)), '_fmtK(9579)=', JSON.stringify(_fmtK(9579)));
+
+  // ── KPI equalizer
+  requestAnimationFrame(() => {
+    const kpis = el.querySelectorAll('.kpi-card');
+    if (kpis.length > 1) {
+      kpis.forEach(k => k.style.height = '');
+      const maxH = Math.max(...[...kpis].map(k => k.offsetHeight));
+      kpis.forEach(k => k.style.height = maxH + 'px');
+    }
+  });
+
+  // ── Area chart — cumul solde (cyan/teal)
+  const _drawTresArea = () => {
+    const cv = document.getElementById(chartId); if (!cv) return;
+    const dpr = window.devicePixelRatio || 1;
+    const W = cv.parentElement.clientWidth || 600; const H = 220;
+    cv.width = W*dpr; cv.height = H*dpr;
+    cv.style.width = W+'px'; cv.style.height = H+'px';
+    const cx = cv.getContext('2d'); cx.scale(dpr, dpr);
+
+    const PAD = { top:28, right:24, bottom:44, left:64 };
+    const cW = W-PAD.left-PAD.right, cH = H-PAD.top-PAD.bottom;
+    const vals = cumulVals;
+    const labels = pEntries.map(e => e.lbl);
+    const maxV = Math.max(...vals, 1), minV = Math.min(...vals, 0);
+    const range = maxV - minV || 1;
+    const xOf = i => PAD.left+(i/Math.max(vals.length-1,1))*cW;
+    const yOf = v => PAD.top + cH - ((v - minV) / range) * cH;
+
+    // Grid
+    cx.setLineDash([3,5]); cx.lineWidth=1; cx.strokeStyle='rgba(255,255,255,0.06)';
+    for(let i=0;i<=5;i++){ const y=PAD.top+(i/5)*cH; cx.beginPath();cx.moveTo(PAD.left,y);cx.lineTo(PAD.left+cW,y);cx.stroke(); }
+    cx.setLineDash([]);
+
+    // Zero line if needed
+    if (minV < 0 && maxV > 0) {
+      const y0 = yOf(0);
+      cx.strokeStyle='rgba(255,255,255,0.15)'; cx.lineWidth=1;
+      cx.beginPath(); cx.moveTo(PAD.left,y0); cx.lineTo(PAD.left+cW,y0); cx.stroke();
+    }
+
+    // Y labels
+    cx.font='10px Outfit,sans-serif'; cx.fillStyle='rgba(126,143,168,0.8)'; cx.textAlign='right';
+    for(let i=0;i<=5;i++){
+      const v=minV+(range*(5-i)/5);
+      cx.fillText(Math.round(v).toLocaleString('fr-FR')+' €', PAD.left-8, PAD.top+(i/5)*cH+3.5);
+    }
+
+    // Area fill — cyan gradient
+    const grad = cx.createLinearGradient(0,PAD.top,0,PAD.top+cH);
+    grad.addColorStop(0,'rgba(245,183,49,0.28)');
+    grad.addColorStop(0.5,'rgba(245,183,49,0.08)');
+    grad.addColorStop(1,'rgba(245,183,49,0.00)');
+    cx.beginPath(); cx.moveTo(xOf(0),yOf(vals[0]));
+    for(let i=1;i<vals.length;i++) cx.lineTo(xOf(i),yOf(vals[i]));
+    cx.lineTo(xOf(vals.length-1),yOf(0)); cx.lineTo(xOf(0),yOf(0));
+    cx.closePath(); cx.fillStyle=grad; cx.fill();
+
+    // Line
+    cx.beginPath(); cx.moveTo(xOf(0),yOf(vals[0]));
+    for(let i=1;i<vals.length;i++) cx.lineTo(xOf(i),yOf(vals[i]));
+    cx.strokeStyle='#f5b731'; cx.lineWidth=2.5; cx.lineJoin='round'; cx.stroke();
+
+    // Points + labels
+    cx.font='bold 9px Outfit,monospace'; cx.textAlign='center';
+    for(let i=0;i<vals.length;i++){
+      const x=xOf(i),y=yOf(vals[i]);
+      const col = vals[i] >= 0 ? '#f5b731' : '#f0566a';
+      cx.beginPath();cx.arc(x,y,3.5,0,Math.PI*2);
+      cx.fillStyle=col;cx.fill();
+      cx.strokeStyle='#0b0d12';cx.lineWidth=1.5;cx.stroke();
+      const lbl=Math.round(vals[i]).toLocaleString('fr-FR')+' €';
+      cx.fillStyle=col+'cc'; cx.fillText(lbl,x,y-10);
+    }
+
+    // X labels
+    cx.font='9px Outfit,sans-serif'; cx.fillStyle='rgba(126,143,168,0.7)'; cx.textAlign='center';
+    const step=vals.length<=12?1:Math.ceil(vals.length/12);
+    for(let i=0;i<labels.length;i+=step) cx.fillText(labels[i],xOf(i),PAD.top+cH+16);
+  };
+  requestAnimationFrame(_drawTresArea);
+  if(window._tresAreaRO) window._tresAreaRO.disconnect();
+  window._tresAreaRO = new ResizeObserver(() => requestAnimationFrame(_drawTresArea));
+  const tresAreaCv = document.getElementById(chartId);
+  if(tresAreaCv) window._tresAreaRO.observe(tresAreaCv.parentElement);
+
+  // ── Donut entrées par catégorie ───────────────
+  requestAnimationFrame(() => {
+    const cv = document.getElementById('tres-donut-cv'); if (!cv) return;
+    const TRES_PALETTE = ['#22d3c8','#22c97a','#38bdf8','#9b6ef3','#f5b731','#f0566a','#a3e635','#fb923c','#e879f9','#34d399'];
+    const catMapT = {};
+    lines.filter(l => +l.montant > 0).forEach(l => {
+      const k = l.cat||l.categorie||'Autre';
+      catMapT[k] = (catMapT[k]||0) + (+l.montant);
+    });
+    const catEntriesT = Object.entries(catMapT).sort((a,b) => b[1]-a[1]);
+    const totalT = catEntriesT.reduce((s,[,v]) => s+v, 0);
+    if (!totalT) return;
+
+    const tresDonutDraw = (hovered) => {
+      const dpr = window.devicePixelRatio||1;
+      const W = cv.parentElement.clientWidth; const H = 260;
+      cv.width=W*dpr; cv.height=H*dpr;
+      cv.style.width=W+'px'; cv.style.height=H+'px';
+      const ctx = cv.getContext('2d'); ctx.scale(dpr,dpr);
+      const cx0=W/2, cy0=H/2-5;
+      const R=Math.max(10,Math.min(W,H)/2-14), r=R*0.52;
+      const slices=[];
+      let angle=-Math.PI/2;
+      catEntriesT.forEach(([cat,val],i) => {
+        const sweep=(val/totalT)*Math.PI*2;
+        slices.push({cat,val,color:TRES_PALETTE[i%TRES_PALETTE.length],a0:angle,a1:angle+sweep});
+        angle+=sweep;
+      });
+      ctx.clearRect(0,0,W,H);
+      slices.forEach((s,i) => {
+        const isHov=i===hovered;
+        ctx.beginPath(); ctx.moveTo(cx0,cy0);
+        ctx.arc(cx0,cy0,isHov?R+6:R,s.a0,s.a1); ctx.closePath();
+        ctx.fillStyle=isHov?s.color:s.color+'cc'; ctx.fill();
+        ctx.strokeStyle='#111318'; ctx.lineWidth=isHov?2:1.5; ctx.stroke();
+      });
+      ctx.beginPath(); ctx.arc(cx0,cy0,r,0,Math.PI*2);
+      ctx.fillStyle='#111318'; ctx.fill();
+      if(hovered!==null && hovered>=0 && slices[hovered]){
+        const s=slices[hovered];
+        const pct=((s.val/totalT)*100).toFixed(1);
+        ctx.font='bold 13px Outfit,sans-serif'; ctx.fillStyle=s.color; ctx.textAlign='center';
+        ctx.fillText('+'+Math.round(s.val).toLocaleString('fr-FR')+' €',cx0,cy0+2);
+        ctx.font='9px Outfit,sans-serif'; ctx.fillStyle='rgba(126,143,168,0.8)';
+        ctx.fillText(pct+'%',cx0,cy0+15);
+      } else {
+        ctx.font='bold 13px Outfit,sans-serif'; ctx.fillStyle='#e2e8f3'; ctx.textAlign='center';
+        ctx.fillText('+'+Math.round(totalT).toLocaleString('fr-FR')+' €',cx0,cy0+2);
+        ctx.font='9px Outfit,sans-serif'; ctx.fillStyle='rgba(126,143,168,0.8)';
+        ctx.fillText('Entrées',cx0,cy0+15);
+      }
+      window._tresDonutDraw=tresDonutDraw;
+      window._tresDonutSlices=slices;
+      window._tresDonutW=W; window._tresDonutH=H;
+    };
+    tresDonutDraw(null);
+
+    const tip=document.getElementById('tres-donut-tip');
+    cv.onmousemove=(e)=>{
+      const rect=cv.getBoundingClientRect();
+      const W=window._tresDonutW||cv.parentElement.clientWidth, H=window._tresDonutH||260;
+      const mx=(e.clientX-rect.left)*(W/rect.width), my=(e.clientY-rect.top)*(H/rect.height);
+      const cx0=W/2, cy0=H/2-5;
+      const R=Math.max(10,Math.min(W,H)/2-14), r=R*0.52;
+      const dx=mx-cx0, dy=my-cy0, dist=Math.sqrt(dx*dx+dy*dy);
+      let idx=-1;
+      if(dist>=r && dist<=R+8){
+        let a=Math.atan2(dy,dx);
+        const aN=((a+Math.PI/2)+Math.PI*2)%(Math.PI*2);
+        const sl=window._tresDonutSlices||[];
+        for(let i=0;i<sl.length;i++){
+          const a0=((sl[i].a0+Math.PI/2)+Math.PI*2)%(Math.PI*2);
+          const a1=((sl[i].a1+Math.PI/2)+Math.PI*2)%(Math.PI*2);
+          if(a0<=a1?(aN>=a0&&aN<a1):(aN>=a0||aN<a1)){idx=i;break;}
+        }
+      }
+      if(window._tresDonutDraw) window._tresDonutDraw(idx>=0?idx:null);
+      cv.style.cursor=idx>=0?'pointer':'default';
+      if(idx>=0&&tip){
+        const sl=(window._tresDonutSlices||[])[idx]; if(!sl){tip.style.display='none';return;}
+        const pct=((sl.val/totalT)*100).toFixed(1);
+        const fmtV=(()=>{const _v=sl.val;const _a=Math.abs(_v);const _i=Math.floor(_a);const _d=Math.round((_a-_i)*100).toString().padStart(2,'0');return ((_v<0?'-':'')+String(_i).replace(/\B(?=(\d{3})+(?!\d))/g,'\u202f')+','+_d+'\u202f€')})();
+        tip.style.display='block'; tip.style.width='170px';
+        tip.innerHTML='<div style="display:flex;align-items:center;gap:7px;margin-bottom:7px">'+
+          '<div style="width:9px;height:9px;border-radius:50%;background:'+sl.color+';flex-shrink:0"></div>'+
+          '<span style="font-weight:700;color:#e2e8f3;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+sl.cat+'</span>'+
+          '</div>'+
+          '<div style="font-family:monospace;font-size:14px;font-weight:800;color:var(--green)">+'+fmtV+' €</div>'+
+          '<div style="font-size:10px;color:var(--text2);margin-top:4px">'+pct+'% des entrées</div>';
+        const tipW=182,tipH=82;
+        let tx=(e.clientX-rect.left)+14, ty=(e.clientY-rect.top)-30;
+        if(tx+tipW>rect.width) tx=(e.clientX-rect.left)-tipW-10;
+        if(ty<4) ty=4; if(ty+tipH>rect.height) ty=rect.height-tipH-4;
+        tip.style.left=tx+'px'; tip.style.top=ty+'px';
+      } else if(tip) tip.style.display='none';
+    };
+    cv.onmouseleave=()=>{ if(window._tresDonutDraw)window._tresDonutDraw(null); cv.style.cursor='default'; if(tip)tip.style.display='none'; };
+
+    const legend=document.getElementById('tres-donut-legend');
+    if(legend){
+      legend.innerHTML=catEntriesT.slice(0,6).map(([cat,val],i)=>{
+        const pct=((val/totalT)*100).toFixed(1);
+        const color=TRES_PALETTE[i%TRES_PALETTE.length];
+        const fmtV=Math.round(val).toLocaleString('fr-FR')+' €';
+        return '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:pointer" onmouseenter="_tresDonutHover('+i+')" onmouseleave="_tresDonutHover(null)">'+
+          '<div style="display:flex;align-items:center;gap:6px;min-width:0">'+
+            '<div style="width:8px;height:8px;border-radius:50%;background:'+color+';flex-shrink:0"></div>'+
+            '<span style="font-size:10px;color:rgba(226,232,243,0.8);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+cat+'</span>'+
+          '</div>'+
+          '<div style="display:flex;gap:8px;flex-shrink:0">'+
+            '<span style="font-size:10px;font-family:monospace;color:var(--green);font-weight:600">+'+fmtV+'</span>'+
+            '<span style="font-size:10px;color:var(--text2);width:36px;text-align:right">'+pct+'%</span>'+
+          '</div>'+
+        '</div>';
+      }).join('');
+      if(catEntriesT.length>6){
+        const rest=catEntriesT.slice(6).reduce((s,[,v])=>s+v,0);
+        const pct=((rest/totalT)*100).toFixed(1);
+        const fmtV=Math.round(rest).toLocaleString('fr-FR')+' €';
+        legend.innerHTML+='<div style="display:flex;align-items:center;justify-content:space-between;gap:8px">'+
+          '<div style="display:flex;align-items:center;gap:6px">'+
+            '<div style="width:8px;height:8px;border-radius:50%;background:rgba(126,143,168,0.4);flex-shrink:0"></div>'+
+            '<span style="font-size:10px;color:var(--text2)">Autres ('+(catEntriesT.length-6)+')</span>'+
+          '</div>'+
+          '<div style="display:flex;gap:8px;flex-shrink:0">'+
+            '<span style="font-size:10px;font-family:monospace;color:var(--green)">+'+fmtV+'</span>'+
+            '<span style="font-size:10px;color:var(--text2);width:36px;text-align:right">'+pct+'%</span>'+
+          '</div>'+
+        '</div>';
+      }
+    }
+    if(window._tresDonutRO) window._tresDonutRO.disconnect();
+    window._tresDonutRO=new ResizeObserver(()=>{ if(window._tresDonutDraw)window._tresDonutDraw(null); });
+    window._tresDonutRO.observe(cv.parentElement);
+  });
+
+  // ── Waterfall Trésorerie P1 vs P2 ─────────────
+  requestAnimationFrame(() => _renderTresWaterfall(el));
+}
+
+function _tresDonutHover(idx) { if(window._tresDonutDraw) window._tresDonutDraw(idx); }
+
+function _buildTresOpsRows(rows) {
+  return rows.map(l => {
+    const isIn = l.amt >= 0;
+    const col = isIn ? 'var(--green)' : 'var(--red)';
+    const amtStr = (isIn?'+':'')+(()=>{const _v=l.amt;const _a=Math.abs(_v);const _i=Math.floor(_a);const _d=Math.round((_a-_i)*100).toString().padStart(2,'0');return String(_i).replace(/\B(?=(\d{3})+(?!\d))/g,' ')+','+_d+' €'})();
+    return '<tr style="border-bottom:1px solid var(--border);transition:background .12s" onmouseover="this.style.background=\'rgba(255,255,255,.03)\'" onmouseout="this.style.background=\'\'">'+
+      '<td style="padding:7px 10px;color:var(--text2);font-size:10px;white-space:nowrap;font-family:monospace">'+l.dDisplay+'</td>'+
+      '<td style="padding:7px 10px;font-size:11px;word-break:break-word;line-height:1.4">'+l.bien+'</td>'+
+      '<td style="padding:7px 10px;color:var(--text2);font-size:10px;word-break:break-word;line-height:1.4">'+l.cat+'</td>'+
+      '<td style="padding:7px 10px;font-size:10px;color:var(--text2);word-break:break-word;line-height:1.4">'+l.lib+'</td>'+
+      '<td style="padding:7px 10px;text-align:right;font-family:monospace;font-weight:600;color:'+col+';white-space:nowrap">'+amtStr+'</td>'+
+    '</tr>';
+  }).join('');
+}
+
+function _sortTresOps(th, col) {
+  const table = document.getElementById('tres-ops-table'); if (!table) return;
+  const allTh = table.querySelectorAll('thead th[data-sort-col]');
+  const newDir = th.dataset.sortDir==='asc' ? 'desc' : 'asc';
+  allTh.forEach(h => { h.dataset.sortDir=''; const a=h.querySelector('.sort-arrow'); if(a){a.textContent='↕';a.style.opacity='.3';} });
+  th.dataset.sortDir=newDir;
+  const arr=th.querySelector('.sort-arrow'); if(arr){arr.textContent=newDir==='asc'?'↑':'↓';arr.style.opacity='1';}
+  const rows=(window._tresOpsLines||[]).slice();
+  rows.sort((a,b)=>{
+    if(col===0) return newDir==='asc'?a.d.localeCompare(b.d):b.d.localeCompare(a.d);
+    if(col===1) return newDir==='asc'?a.bien.localeCompare(b.bien,'fr'):b.bien.localeCompare(a.bien,'fr');
+    if(col===2) return newDir==='asc'?a.cat.localeCompare(b.cat,'fr'):b.cat.localeCompare(a.cat,'fr');
+    if(col===3) return newDir==='asc'?a.lib.localeCompare(b.lib,'fr'):b.lib.localeCompare(a.lib,'fr');
+    if(col===4) return newDir==='asc'?a.amt-b.amt:b.amt-a.amt;
+    return 0;
+  });
+  const tbody=document.getElementById('tres-ops-body'); if(tbody) tbody.innerHTML=_buildTresOpsRows(rows);
+}
+
+function _renderTresWaterfall(el) {
+  const wfEl = document.getElementById('tres-wf-card'); if (!wfEl) return;
+  const rawMax = _getV('syn-date-max');
+  const driver = parseInt(_getV('syn-driver')||'3');
+  const parseYMD = s => { const [y,m,d]=(s||'').split('-'); return new Date(+y,+m-1,+d); };
+  const addMonths = (d,n) => { const r=new Date(d); r.setMonth(r.getMonth()+n); return r; };
+  const fmtFR = d => d ? (String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear()) : '';
+  const firstOfMonth = d => new Date(d.getFullYear(),d.getMonth(),1);
+  const lastOfMonth  = d => new Date(d.getFullYear(),d.getMonth()+1,0);
+
+  let p1Max, p1Min, p2Max, p2Min;
+  if (rawMax) {
+    p1Max = lastOfMonth(parseYMD(rawMax));
+  } else {
+    const db=_getDB(), periods=Object.keys(db.periods||{}).sort();
+    if(!periods.length){wfEl.innerHTML='<div class="dash-empty">Aucune donnée</div>';return;}
+    const [ly,lm]=periods[periods.length-1].split('-');
+    p1Max=new Date(+ly,+lm,0);
+  }
+  p1Min=firstOfMonth(addMonths(new Date(p1Max),-(driver-1)));
+  p2Max=lastOfMonth(addMonths(new Date(p1Min),-1));
+  p2Min=firstOfMonth(addMonths(new Date(p2Max),-(driver-1)));
+
+  const inRange=(d,mn,mx)=>d>=mn&&d<=mx;
+  const toDate=s=>{ if(!s)return null; if(/^\d{4}-\d{2}-\d{2}/.test(s))return new Date(s.slice(0,10)); if(/^(\d{2})[\/-](\d{2})[\/-](\d{4})/.test(s)){const[,dd,mm,yy]=s.match(/^(\d{2})[\/-](\d{2})[\/-](\d{4})/);return new Date(+yy,+mm-1,+dd);} return null; };
+
+  const allLines=_synLines();
+  const aggP=(mn,mx)=>{
+    const map={};
+    allLines.forEach(l=>{
+      const d=toDate(l.date||l._period+'-01');
+      if(!d||!inRange(d,mn,mx))return;
+      const key=(l.cat||l.categorie||'Autre')+' · '+(l.bienName||l.bien||'Non attribué');
+      map[key]=(map[key]||0)+(+l.montant);
+    });
+    return map;
+  };
+  const p1map=aggP(p1Min,p1Max), p2map=aggP(p2Min,p2Max);
+  const allKeys=new Set([...Object.keys(p1map),...Object.keys(p2map)]);
+  const deltas=[];
+  allKeys.forEach(k=>{ const d=(p1map[k]||0)-(p2map[k]||0); if(Math.abs(d)>0.01) deltas.push({key:k,delta:d,p1:p1map[k]||0,p2:p2map[k]||0}); });
+  deltas.sort((a,b)=>b.delta-a.delta);
+  const top3pos=deltas.filter(d=>d.delta>0).slice(0,3);
+  const top3neg=deltas.filter(d=>d.delta<0).slice(-3).reverse();
+  const drivers=[...top3pos,...top3neg];
+  const totalDelta=drivers.reduce((s,d)=>s+d.delta,0);
+  const maxAbs=Math.max(...drivers.map(d=>Math.abs(d.delta)),1);
+  const wfId='tres-wf-canvas-'+Date.now();
+
+  wfEl.innerHTML=
+    '<div class="card-title">📊 Drivers Trésorerie — P1 vs P2</div>'+
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">'+
+      '<div style="display:flex;gap:16px">'+
+        '<div style="font-size:10px;color:var(--text2)">P1 <span style="color:var(--cyan);font-weight:700;font-family:monospace">'+fmtFR(p1Min)+' → '+fmtFR(p1Max)+'</span></div>'+
+        '<div style="font-size:10px;color:var(--text2)">P2 <span style="color:var(--text);font-weight:600;font-family:monospace">'+fmtFR(p2Min)+' → '+fmtFR(p2Max)+'</span></div>'+
+      '</div>'+
+      '<div style="font-size:12px;font-weight:700;color:'+(totalDelta>=0?'var(--green)':'var(--red)')+'\">'+(totalDelta>=0?'+':'')+totalDelta.toLocaleString('fr-FR',{minimumFractionDigits:0,maximumFractionDigits:0})+' €</div>'+
+    '</div>'+
+    '<div style="overflow:hidden;width:100%">'+
+      '<canvas id="'+wfId+'" style="display:block;max-width:100%;height:'+Math.max(drivers.length*52+40,120)+'px"></canvas>'+
+    '</div>'+
+    '<div id="tres-wf-narrative" style="margin-top:16px;border-top:1px solid var(--border);padding-top:4px"></div>';
+
+  const _drawTresWaterfall=()=>{
+    const cv=document.getElementById(wfId); if(!cv) return;
+    const dpr=window.devicePixelRatio||1;
+    const W=Math.floor(wfEl.clientWidth-32);
+    const rowH=52, H=drivers.length*rowH+40;
+    cv.width=W*dpr; cv.height=H*dpr;
+    cv.style.width=W+'px'; cv.style.height=H+'px';
+    const cx=cv.getContext('2d'); cx.scale(dpr,dpr);
+    cx.save(); cx.beginPath(); cx.rect(0,0,W,H); cx.clip();
+
+    const LBL_W=160, VAL_W=90, PAD_L=8;
+    const HALF_ZONE=(W-LBL_W)/2;
+    const AXIS_X=LBL_W+HALF_ZONE;
+    const halfMax=Math.max(10,HALF_ZONE-VAL_W);
+
+    cx.strokeStyle='rgba(255,255,255,0.12)'; cx.lineWidth=1; cx.setLineDash([]);
+    cx.beginPath(); cx.moveTo(AXIS_X,0); cx.lineTo(AXIS_X,H); cx.stroke();
+
+    drivers.forEach((d,i)=>{
+      const y=i*rowH+10;
+      const isPos=d.delta>=0;
+      const color=isPos?'#22c97a':'#f0566a';
+      const colorFill=isPos?'rgba(34,201,122,0.18)':'rgba(240,86,106,0.18)';
+      const barW=Math.min(halfMax,Math.max(4,(Math.abs(d.delta)/maxAbs)*halfMax));
+      const pct=d.p2!==0?((d.delta/Math.abs(d.p2))*100):(d.delta>0?100:-100);
+      const barX=isPos?AXIS_X:AXIS_X-barW;
+      const parts=d.key.split(' · ');
+      const catLbl=parts[0]||d.key, bienLbl=parts[1]||'';
+      const maxLblW=LBL_W-PAD_L-6;
+      cx.font='bold 10px Outfit,sans-serif'; cx.fillStyle='rgba(226,232,243,0.9)'; cx.textAlign='left';
+      let cTxt=catLbl; while(cx.measureText(cTxt).width>maxLblW&&cTxt.length>4) cTxt=cTxt.slice(0,-1);
+      if(cTxt!==catLbl) cTxt+='…'; cx.fillText(cTxt,PAD_L,y+13);
+      if(bienLbl){
+        cx.font='9px Outfit,sans-serif'; cx.fillStyle='rgba(126,143,168,0.8)';
+        let bTxt=bienLbl; while(cx.measureText(bTxt).width>maxLblW&&bTxt.length>4) bTxt=bTxt.slice(0,-1);
+        if(bTxt!==bienLbl) bTxt+='…'; cx.fillText(bTxt,PAD_L,y+26);
+      }
+      const bgW=W-AXIS_X-2;
+      cx.fillStyle='rgba(255,255,255,0.03)'; cx.beginPath();
+      if(isPos) cx.roundRect(AXIS_X,y+2,bgW,rowH-16,[0,4,4,0]);
+      else      cx.roundRect(LBL_W,y+2,AXIS_X-LBL_W,rowH-16,[4,0,0,4]);
+      cx.fill();
+      cx.fillStyle=colorFill; cx.strokeStyle=color; cx.lineWidth=1;
+      cx.beginPath(); cx.roundRect(barX,y+2,barW,rowH-16,4); cx.fill(); cx.stroke();
+      cx.font='bold 11px Outfit,monospace'; cx.fillStyle=color;
+      const deltaStr=(d.delta>=0?'+':'')+Math.round(d.delta).toLocaleString('fr-FR')+' €';
+      const pctStr=(pct>=0?'+':'')+pct.toFixed(0)+'%';
+      if(isPos){
+        const vx=Math.min(AXIS_X+barW+6,W-VAL_W+2); cx.textAlign='left';
+        cx.fillText(deltaStr,vx,y+14);
+        cx.font='9px Outfit,sans-serif'; cx.fillStyle='rgba(126,143,168,0.7)';
+        cx.fillText(pctStr,vx,y+26);
+      } else {
+        const vx=Math.max(AXIS_X-barW-6,LBL_W+2); cx.textAlign='right';
+        cx.fillText(deltaStr,vx,y+14);
+        cx.font='9px Outfit,sans-serif'; cx.fillStyle='rgba(126,143,168,0.7)';
+        cx.fillText(pctStr,vx,y+26);
+      }
+      cx.textAlign='left';
+      if(i<drivers.length-1){
+        cx.strokeStyle='rgba(35,42,56,0.8)'; cx.lineWidth=1; cx.setLineDash([3,4]);
+        cx.beginPath(); cx.moveTo(0,y+rowH-2); cx.lineTo(W,y+rowH-2); cx.stroke();
+        cx.setLineDash([]);
+      }
+    });
+  };
+  requestAnimationFrame(_drawTresWaterfall);
+  if(window._tresWfRO) window._tresWfRO.disconnect();
+  window._tresWfRO=new ResizeObserver(()=>requestAnimationFrame(_drawTresWaterfall));
+  const tresWfCv=document.getElementById(wfId);
+  if(tresWfCv) window._tresWfRO.observe(tresWfCv.parentElement);
+
+  // ── Narrative bullets ──────────────────────────
+  const narrativeEl=document.getElementById('tres-wf-narrative'); if(!narrativeEl) return;
+  const fmtAmt=v=>((v>=0?'+':'')+Math.round(v).toLocaleString('fr-FR')+' €');
+  const fmtPct=(delta,base)=>Math.abs(base)>0?((delta/Math.abs(base))*100).toFixed(0)+'%':(delta>0?'+100%':'-100%');
+  const mthLabel=n=>n===1?'1 mois':n+' mois';
+  const bullets=[];
+  const trendUp=totalDelta>=0;
+  bullets.push({
+    icon:trendUp?'📈':'📉',
+    text:'<strong>'+(trendUp?'↑ Amélioration':'↓ Détérioration')+' de la trésorerie</strong> — Le solde net de P1 ('+fmtFR(p1Min)+' → '+fmtFR(p1Max)+') '+
+         (trendUp?'progresse de <strong style="color:var(--green)">+'+fmtAmt(Math.abs(totalDelta))+'</strong>':'recule de <strong style="color:var(--red)">'+fmtAmt(-Math.abs(totalDelta))+'</strong>')+
+         ' vs P2 ('+fmtFR(p2Min)+' → '+fmtFR(p2Max)+') sur <strong>'+mthLabel(driver)+'</strong>.'
+  });
+  if(top3pos.length){
+    const items=top3pos.map(d=>{
+      const parts=d.key.split(' · ');
+      return '<em>'+parts[0]+(parts[1]?' · '+parts[1]:'')+'</em> (<span style="color:var(--green)">+'+fmtAmt(d.delta)+', '+fmtPct(d.delta,d.p2)+'</span>)';
+    });
+    bullets.push({icon:'✅',text:'<strong>Moteurs de hausse</strong> — '+items.join(' ; ')+'.'});
+  }
+  if(top3neg.length){
+    const items=top3neg.map(d=>{
+      const parts=d.key.split(' · ');
+      return '<em>'+parts[0]+(parts[1]?' · '+parts[1]:'')+'</em> (<span style="color:var(--red)">'+fmtAmt(d.delta)+', '+fmtPct(d.delta,d.p2)+'</span>)';
+    });
+    bullets.push({icon:'⚠️',text:'<strong>Points de vigilance</strong> — '+items.join(' ; ')+'.'});
+  } else {
+    bullets.push({icon:'✅',text:'<strong>Points de vigilance</strong> — Aucune variation négative significative sur la période.'});
+  }
+  const topKey=top3pos[0]||top3neg[0];
+  if(topKey&&totalDelta!==0){
+    const share=Math.abs(topKey.delta/totalDelta*100).toFixed(0);
+    const parts=topKey.key.split(' · ');
+    bullets.push({icon:'🔍',text:'<strong>Concentration</strong> — Le principal driver (<em>'+parts[0]+(parts[1]?' · '+parts[1]:'')+'</em>) représente <strong>'+share+'%</strong> de la variation.'});
+  }
+  narrativeEl.innerHTML=bullets.map(b=>
+    '<div style="display:flex;gap:10px;align-items:flex-start;padding:7px 0;border-bottom:1px solid var(--border)">'+
+      '<span style="font-size:13px;flex-shrink:0;margin-top:1px">'+b.icon+'</span>'+
+      '<span style="font-size:11px;color:var(--text2);line-height:1.6">'+b.text+'</span>'+
+    '</div>'
+  ).join('');
 }
 
 // ── RÉSULTAT NET (placeholder) ─────────────────
@@ -8301,7 +9353,7 @@ function _buildCAOpsRows(rows) {
       '<td style="padding:7px 10px;font-size:11px;word-break:break-word;line-height:1.4">'+l.bien+'</td>'+
       '<td style="padding:7px 10px;color:var(--text2);font-size:10px;word-break:break-word;line-height:1.4">'+l.cat+'</td>'+
       '<td style="padding:7px 10px;font-size:10px;color:var(--text2);word-break:break-word;line-height:1.4">'+l.lib+'</td>'+
-      '<td style="padding:7px 10px;text-align:right;font-family:monospace;font-weight:600;color:var(--green);white-space:nowrap">+'+amt.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+'</td>'+
+      '<td style="padding:7px 10px;text-align:right;font-family:monospace;font-weight:600;color:var(--green);white-space:nowrap">+'+(()=>{const _v=amt;const _a=Math.abs(_v);const _i=Math.floor(_a);const _d=Math.round((_a-_i)*100).toString().padStart(2,'0');return ((_v<0?'-':'')+String(_i).replace(/\B(?=(\d{3})+(?!\d))/g,'\u202f')+','+_d+'\u202f€')})()+'</td>'+
     '</tr>';
   }).join('');
 }
