@@ -1,22 +1,10 @@
-const USERS={
- 'admin':'f9cd16a379b4d70b65dde8e47101ffbc74fd5437734099ab7119bfc9d1038949',
- 'enzo':'f9cd16a379b4d70b65dde8e47101ffbc74fd5437734099ab7119bfc9d1038949'
-};
-async function sha256(str){
- const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(str));
- return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
-}
 async function doLogin(){
- const user=document.getElementById('loginUser').value.trim().toLowerCase();
+ const user=document.getElementById('loginUser').value.trim();
  const pass=document.getElementById('loginPass').value;
- const hash=await sha256(pass);
- if(USERS[user]&&USERS[user]===hash){
-  sessionStorage.setItem('artemis_auth','1');
-  document.getElementById('loginScreen').style.display='none';
-  document.getElementById('mainContent').style.display='flex';
-  document.getElementById('mainContent').style.width='100%';
-  showHome(); _initHomeBackBtn();
- }else{
+ try{
+  await _auth.signInWithEmailAndPassword(user, pass);
+  // L'écran d'accueil est affiché par le listener onAuthStateChanged (js/02-state-core.js)
+ }catch(e){
   const err=document.getElementById('loginError');
   err.style.display='block';
   document.getElementById('loginPass').value='';

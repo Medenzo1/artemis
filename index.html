@@ -50,8 +50,8 @@
 </div>
 <div style="display:flex;flex-direction:column;gap:14px">
 <div>
-<label class="lbl" style="color:#4a6080">Utilisateur</label>
-<input id="loginUser" type="text" placeholder="admin" autocomplete="username" class="li" onkeydown="if(event.key==='Enter')document.getElementById('loginPass').focus()">
+<label class="lbl" style="color:#4a6080">Email</label>
+<input id="loginUser" type="email" placeholder="vous@exemple.com" autocomplete="username" class="li" onkeydown="if(event.key==='Enter')document.getElementById('loginPass').focus()">
 </div>
 <div>
 <label class="lbl" style="color:#4a6080">Mot de passe</label>
@@ -62,6 +62,10 @@
 </div>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<script src="js/00-firebase-config.js"></script>
 <script src="js/01-login.js"></script>
 </div>
 
@@ -84,7 +88,7 @@
     </nav>
     <div class="ht-actions">
       <div style="font-size:11px;font-weight:500;color:rgba(255,255,255,.3);letter-spacing:.04em" id="home-date"></div>
-      <button class="ht-btn-logout" onclick="sessionStorage.removeItem('artemis_auth');document.getElementById('mainContent').style.display='none';document.getElementById('loginScreen').style.display='flex';">⏻</button>
+      <button class="ht-btn-logout" onclick="logout();">⏻</button>
     </div>
   </div>
 
@@ -524,7 +528,7 @@
 <div class="sb-item" id="nav-amort" onclick="navTo(5);document.querySelectorAll('.sb-item').forEach(e=>e.classList.remove('active'));document.getElementById('nav-amort').classList.add('active');setTimeout(()=>{document.querySelectorAll('.param-tab').forEach(t=>t.style.display='none');document.querySelectorAll('.ptab').forEach(b=>b.classList.remove('active'));const t=document.getElementById('tab-amort');if(t)t.style.display='';loadAmortOnOpen();},50)" tabindex="0" role="button" aria-label="Amortissements"><span class="sb-icon">📉</span><span class="sb-label">Amortissements</span></div>
 
 <div class="sb-sep"></div>
-<div class="sb-item" onclick="sessionStorage.removeItem('artemis_auth');document.getElementById('mainContent').style.display='none';document.getElementById('loginScreen').style.display='flex';" tabindex="0" role="button" aria-label="Déconnexion" style="color:rgba(240,86,106,.6)"><span class="sb-icon">⏻</span><span class="sb-label">Déconnexion</span></div>
+<div class="sb-item" onclick="logout();" tabindex="0" role="button" aria-label="Déconnexion" style="color:rgba(240,86,106,.6)"><span class="sb-icon">⏻</span><span class="sb-label">Déconnexion</span></div>
 </nav>
 <div class="app">
 <header>
@@ -1444,7 +1448,7 @@
       <span style="font-size:14px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#eaf0ff">ARTEM<span style="color:#22d3c8">IS</span></span>
     </div>
     <div style="font-size:10px;color:#2a3a50;letter-spacing:.1em;text-transform:uppercase" id="home-date"></div>
-    <button onclick="sessionStorage.removeItem('artemis_auth');document.getElementById('mainContent').style.display='none';document.getElementById('loginScreen').style.display='flex';" style="background:rgba(240,86,106,.08);border:1px solid rgba(240,86,106,.2);color:rgba(240,86,106,.7);font-size:11px;font-weight:700;padding:7px 16px;border-radius:8px;cursor:pointer;font-family:inherit;letter-spacing:.05em;transition:all .2s;display:flex;align-items:center;gap:6px" onmouseover="this.style.background='rgba(240,86,106,.15)';this.style.color='#f0566a'" onmouseout="this.style.background='rgba(240,86,106,.08)';this.style.color='rgba(240,86,106,.7)'">⏻ Déconnexion</button>
+    <button onclick="logout();" style="background:rgba(240,86,106,.08);border:1px solid rgba(240,86,106,.2);color:rgba(240,86,106,.7);font-size:11px;font-weight:700;padding:7px 16px;border-radius:8px;cursor:pointer;font-family:inherit;letter-spacing:.05em;transition:all .2s;display:flex;align-items:center;gap:6px" onmouseover="this.style.background='rgba(240,86,106,.15)';this.style.color='#f0566a'" onmouseout="this.style.background='rgba(240,86,106,.08)';this.style.color='rgba(240,86,106,.7)'">⏻ Déconnexion</button>
   </div>
 
   <!-- SCROLLABLE CONTENT -->
@@ -1503,7 +1507,7 @@
 
 <div class="sb-sep"></div>
 <div class="sb-sep"></div>
-<div class="sb-item" onclick="sessionStorage.removeItem('artemis_auth');document.getElementById('mainContent').style.display='none';document.getElementById('loginScreen').style.display='flex';" tabindex="0" role="button" aria-label="Déconnexion" style="color:rgba(240,86,106,.6)"><span class="sb-icon">⏻</span><span class="sb-label">Déconnexion</span></div>
+<div class="sb-item" onclick="logout();" tabindex="0" role="button" aria-label="Déconnexion" style="color:rgba(240,86,106,.6)"><span class="sb-icon">⏻</span><span class="sb-label">Déconnexion</span></div>
 </nav>
 <div class="app">
 <header>

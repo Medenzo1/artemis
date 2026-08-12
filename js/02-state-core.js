@@ -370,25 +370,23 @@ function _rebuildLiveVars(p) {
 
 
 document.addEventListener('DOMContentLoaded', function(){
-(function checkSession(){
-  if(sessionStorage.getItem('artemis_auth')==='1'){
+_auth.onAuthStateChanged(async function(user){
+  if (user) {
     document.getElementById('loginScreen').style.display='none';
     document.getElementById('mainContent').style.display='flex';
     document.getElementById('mainContent').style.width='100%';
+    await _pullCloudData(); // récupère les dernières données partagées avant de peupler l'écran
+    _rebuildLiveVars();
+    initPeriodPicker();
+    restorePlatformIndexes();  // reload Airbnb/Booking from localStorage
+    renderDatabase();
+    renderRecentActivity();
     showHome();
-    setTimeout(renderRecentActivity, 0);
+    try { _initHomeBackBtn(); } catch(e) {}
   } else {
     document.getElementById('loginScreen').style.display='flex';
   }
-})();
-
-(function init() {
-_rebuildLiveVars();
-initPeriodPicker();
-restorePlatformIndexes();  // reload Airbnb/Booking from localStorage
-renderDatabase();
-renderRecentActivity();
-})();
+});
 });
 
 function setupDropZone(dzId, inputId, onLoad) {
