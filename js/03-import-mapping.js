@@ -17,7 +17,10 @@ function getHistoryIndex() {
   const db = getDB();
   const recentPeriodKeys = Object.keys(db.periods).sort().slice(-HISTORY_MONTHS_LOOKBACK);
   const recentLines = recentPeriodKeys.flatMap(k => db.periods[k].lines || []);
-  const valid = recentLines.filter(l => l.cat && l.libelle);
+  // N'apprendre que des lignes elles-mêmes complètes (même règle que la validation) :
+  // une ligne historique où "bien" ou "lot" a été laissé vide propagerait ce trou
+  // sur tous les mois suivants au lieu de le corriger.
+  const valid = recentLines.filter(l => l.cat && l.libelle && (l.bienName || l.bien) && l.lot);
   const idx = {};
   valid.forEach(l => {
     const key = _libKey(l.libelle);
