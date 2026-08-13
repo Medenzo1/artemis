@@ -2,6 +2,29 @@
 //  MARKETPLACE — annonces + baromètre d'opportunité
 // ══════════════════════════════════════════════
 
+// ── Photos (Cloudinary, plan gratuit — pas de carte bancaire requise) ──
+const CLOUDINARY_CLOUD_NAME = 'rebyba7d';
+const CLOUDINARY_UPLOAD_PRESET = 'Artemis-Image';
+const MKT_MAX_PHOTOS = 4;
+
+async function uploadPhotoToCloudinary(file) {
+  const fd = new FormData();
+  fd.append('file', file);
+  fd.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+  const res = await fetch('https://api.cloudinary.com/v1_1/' + CLOUDINARY_CLOUD_NAME + '/image/upload', { method: 'POST', body: fd });
+  if (!res.ok) {
+    const errBody = await res.json().catch(() => null);
+    throw new Error('Échec de l\'envoi de la photo' + (errBody && errBody.error ? ' : ' + errBody.error.message : ''));
+  }
+  const data = await res.json();
+  return data.secure_url;
+}
+// Insère une transformation Cloudinary (redimensionnement à la volée) dans l'URL.
+function mktCldUrl(url, transform) {
+  if (!url) return url;
+  return url.replace('/upload/', '/upload/' + transform + '/');
+}
+
 // ── Questionnaire pondéré ─────────────────────
 // Le score final combine : rendement brut (20%, calculé), DPE (8%, dérivé du
 // champ DPE), et ces questions à choix multiple (poids total 72%).
@@ -246,6 +269,30 @@ let _mktCurrentGeocode = null;
 let _mktCurrentDvf = null;
 let _mktAddrSuggestions = [];
 let _mktAddrTimer = null;
+let _mktPhotoFiles = [];
+
+function mktRenderPhotoSlots() {
+  const el = document.getElementById('mkt-photo-slots');
+  if (!el) return;
+  const slots = [];
+  for (let i = 0; i < MKT_MAX_PHOTOS; i++) {
+    const file = _mktPhotoFiles[i];
+    if (file) {
+      const url = URL.createObjectURL(file);
+      slots.push('<div class="mkt-photo-slot"><img src="' + url + '"><div class="mkt-photo-remove" onclick="event.stopPropagation();mktRemovePhoto(' + i + ')">✕</div></div>');
+    } else {
+      slots.push('<div class="mkt-photo-slot" onclick="mktPickPhoto(' + i + ')">+ Photo</div>');
+    }
+  }
+  el.innerHTML = slots.join('');
+}
+function mktPickPhoto(i) {
+  const input = document.createElement('input');
+  input.type = 'file'; input.accept = 'image/*';
+  input.onchange = () => { if (input.files[0]) { _mktPhotoFiles[i] = input.files[0]; mktRenderPhotoSlots(); } };
+  input.click();
+}
+function mktRemovePhoto(i) { _mktPhotoFiles[i] = null; mktRenderPhotoSlots(); }
 
 function mktRenderQuestionnaire() {
   const el = document.getElementById('mkt-questionnaire');
@@ -360,6 +407,7 @@ async function mktRunDvfLookup() {
 function mktOpenForm() {
   _mktAnswers = {};
   _mktCurrentGeocode = null; _mktCurrentDvf = null;
+  _mktPhotoFiles = [];
   ['mkt-f-adresse', 'mkt-f-prix', 'mkt-f-surface', 'mkt-f-pieces', 'mkt-f-loyer', 'mkt-f-description', 'mkt-f-dpe'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = '';
   });
@@ -367,6 +415,7 @@ function mktOpenForm() {
   document.getElementById('mkt-dvf-status').textContent = '';
   const box = document.getElementById('mkt-addr-suggestions');
   if (box) { box.innerHTML = ''; box.style.display = 'none'; }
+  mktRenderPhotoSlots();
   mktRenderQuestionnaire();
   mktUpdateScorePreview();
   mktShowView('mkt-form-view');
@@ -385,6 +434,13 @@ async function mktSubmitListing() {
     let geo = _mktCurrentGeocode;
     if (!geo) geo = await geocodeAddress(data.adresse);
     const { score, breakdown } = computeScore(data);
+    const photoFiles = _mktPhotoFiles.filter(Boolean).slice(0, MKT_MAX_PHOTOS);
+    let photos = [];
+    if (photoFiles.length) {
+      btn.textContent = 'Envoi des photos...';
+      photos = await Promise.all(photoFiles.map(uploadPhotoToCloudinary));
+    }
+    btn.textContent = 'Publication...';
     const listingData = {
       ...data,
       ville: geo ? geo.ville : '',
@@ -394,6 +450,7 @@ async function mktSubmitListing() {
       lon: geo ? geo.lon : null,
       dvfComparatif: _mktCurrentDvf,
       score, scoreBreakdown: breakdown,
+      photos,
     };
     await createListing(listingData);
     showToast('✅ Annonce publiée');
@@ -427,7 +484,9 @@ async function mktRefreshGrid() {
     }
     el.innerHTML = listings.map(l =>
       '<div class="mkt-listing-card" onclick="mktOpenDetail(\'' + l.id + '\')">' +
-      '<div class="mkt-listing-photo">🏠</div>' +
+      (l.photos && l.photos[0]
+        ? '<div class="mkt-listing-photo" style="background-image:url(\'' + mktCldUrl(l.photos[0], 'w_400,h_220,c_fill,q_auto,f_auto') + '\');background-size:cover;background-position:center"></div>'
+        : '<div class="mkt-listing-photo">🏠</div>') +
       '<div style="padding:14px">' +
       '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:8px">' +
       '<div><div style="font-size:13px;font-weight:700;color:#eaf0ff">' + escHtml(l.type || 'Bien') + ' · ' + escHtml(l.ville || '—') + '</div>' +
@@ -454,6 +513,9 @@ async function mktOpenDetail(id) {
     const doc = await _fs.collection('listings').doc(id).get();
     if (!doc.exists) { el.innerHTML = '<div style="color:var(--red)">Annonce introuvable.</div>'; return; }
     const l = { id: doc.id, ...doc.data() };
+    const galleryHtml = (l.photos && l.photos.length)
+      ? '<div class="mkt-gallery">' + l.photos.map(u => '<img src="' + mktCldUrl(u, 'w_600,h_400,c_fill,q_auto,f_auto') + '">').join('') + '</div>'
+      : '';
     const breakdownHtml = (l.scoreBreakdown || []).map(b =>
       '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px">' +
       '<div><div style="color:var(--text)">' + escHtml(b.label) + '</div><div style="color:var(--text2);font-size:11px">' + escHtml(b.detail || '') + ' · poids ' + b.weight + '%</div></div>' +
@@ -461,6 +523,7 @@ async function mktOpenDetail(id) {
     ).join('');
     el.innerHTML =
       '<button class="btn btn-outline" onclick="mktCloseDetail()" style="margin-bottom:16px">← Retour</button>' +
+      galleryHtml +
       '<div class="card">' +
       '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">' +
       '<div><div style="font-size:20px;font-weight:800;color:#eaf0ff">' + escHtml(l.type || '') + ' · ' + escHtml(l.ville || '') + '</div>' +
