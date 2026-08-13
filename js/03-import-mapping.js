@@ -637,6 +637,28 @@ showToast(`🚫 ${loanBlockedVal} ligne(s) emprunt introuvable(s) dans les table
 return;
 }
 
+// Catégorie, bien et lot sont obligatoires sur toute ligne saisie manuellement :
+// sans ce contrôle, une ligne incomplète disparaît silencieusement de l'import
+// au lieu d'être bloquée.
+let incompleteCount = 0;
+let missingFgRuleCount = 0;
+rowMeta.forEach((r, i) => {
+if(r.isAirbnb || r.isBooking || r.isLoan) return;
+const cat  = document.getElementById('cat-'+i)?.value  || '';
+const bien = document.getElementById('bien-'+i)?.value || '';
+const lot  = document.getElementById('lot-'+i)?.value  || '';
+if(!cat || !bien || !lot) { incompleteCount++; return; }
+if(bien === 'Frais généraux' && !QP[cat]?.find(m => m.lot === lot)) missingFgRuleCount++;
+});
+if(incompleteCount > 0) {
+showToast(`🚫 ${incompleteCount} ligne(s) incomplète(s) — catégorie, bien et lot doivent être renseignés`, '#f0566a');
+return;
+}
+if(missingFgRuleCount > 0) {
+showToast(`🚫 ${missingFgRuleCount} ligne(s) "Frais généraux" sans quote-part configurée pour ce lot — vérifie Paramètres > Quote-parts`, '#f0566a');
+return;
+}
+
 ventilLines = [];
 
 rowMeta.forEach((r, i) => {
