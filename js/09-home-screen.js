@@ -35,33 +35,7 @@ function _checkHomeReveal(hs) {
   });
 }
 
-function enterMarketplace() {
-  const hs = document.getElementById('homeScreen');
-  const ms = document.getElementById('marketplaceScreen');
-  if (hs) hs.style.display = 'none';
-  if (ms) ms.style.display = 'block';
-  window.scrollTo(0,0);
-}
-
-function exitMarketplace() {
-  const ms = document.getElementById('marketplaceScreen');
-  if (ms) ms.style.display = 'none';
-  showHome();
-}
-
-function showMarketplace() {
-  const ms = document.getElementById('marketplaceScreen');
-  const hs = document.getElementById('homeScreen');
-  if (hs) hs.style.display = 'none';
-  if (ms) ms.style.display = 'block';
-  window.scrollTo(0,0);
-}
-
-function hideMarketplace() {
-  const ms = document.getElementById('marketplaceScreen');
-  if (ms) ms.style.display = 'none';
-  showHome();
-}
+// showMarketplace()/exitMarketplace() : voir js/14-marketplace.js
 
 function showHome() {
   const ls  = document.getElementById('loginScreen');

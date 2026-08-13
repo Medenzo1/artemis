@@ -360,157 +360,75 @@
 ══════════════════════════════════════ -->
 <div id="marketplaceScreen" style="display:none;position:fixed;inset:0;z-index:600;background:#04080f;overflow-y:auto;font-family:'DM Sans',system-ui,sans-serif">
 
-  <!-- Topbar -->
-  <div style="position:sticky;top:0;z-index:10;background:rgba(4,8,15,.95);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,180,0,.12);padding:0 40px;height:56px;display:flex;align-items:center;justify-content:space-between">
-    <div style="display:flex;align-items:center;gap:12px">
-      <span style="font-size:20px">🏷️</span>
-      <span style="font-size:14px;font-weight:800;letter-spacing:.06em;color:#fff">ARTEM<span style="color:var(--cyan)">IS</span> <span style="color:rgba(255,180,0,.9)">MARKETPLACE</span></span>
-    </div>
-    <button onclick="exitMarketplace()"
-      style="background:none;border:none;color:rgba(34,211,200,.8);font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;font-family:inherit;letter-spacing:.04em;padding:8px 0"
-      onmouseover="this.style.color='var(--cyan)'" onmouseout="this.style.color='rgba(34,211,200,.8)'">
-      🏠 Accueil
-    </button>
-  </div>
-
-  <!-- Construction content -->
-  <div style="min-height:calc(100vh - 56px);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 40px;text-align:center">
-
-    <!-- Animated badge -->
-    <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,180,0,.08);border:1px solid rgba(255,180,0,.2);border-radius:100px;padding:6px 16px;margin-bottom:32px">
-      <div style="width:6px;height:6px;border-radius:50%;background:#ffb400;animation:pulse 1.5s ease-in-out infinite"></div>
-      <span style="font-size:10px;font-weight:700;letter-spacing:.1em;color:rgba(255,180,0,.9);text-transform:uppercase">En cours de construction</span>
-    </div>
-
-    <!-- Icon -->
-    <div style="font-size:72px;margin-bottom:24px;filter:drop-shadow(0 0 30px rgba(255,180,0,.3))">🏗️</div>
-
-    <!-- Title -->
-    <h1 style="font-family:'DM Serif Display',serif;font-size:clamp(32px,4vw,56px);color:#eaf0ff;margin:0 0 16px;line-height:1.1">
-      La MarketPlace arrive<br><em style="color:rgba(255,180,0,.9)">bientôt.</em>
-    </h1>
-    <p style="font-size:15px;color:rgba(180,200,230,.6);max-width:560px;line-height:1.7;margin:0 0 48px">
-      Un espace dédié aux opportunités immobilières : biens à vendre, rendements analysés,
-      baromètres d'opportunité et alertes personnalisées pour les abonnés Artemis.
-    </p>
-
-    <!-- Feature preview cards -->
-    <div style="display:flex;flex-wrap:wrap;gap:14px;justify-content:center;max-width:760px;margin-bottom:52px">
-      <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:10px 18px;font-size:12px;color:rgba(180,200,230,.5);font-weight:600">🏠 Biens à vendre</div>
-      <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:10px 18px;font-size:12px;color:rgba(180,200,230,.5);font-weight:600">📊 Rendement locatif</div>
-      <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:10px 18px;font-size:12px;color:rgba(180,200,230,.5);font-weight:600">🌡️ Baromètre opportunité</div>
-      <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:10px 18px;font-size:12px;color:rgba(180,200,230,.5);font-weight:600">🔔 Alertes abonnés</div>
-      <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:10px 18px;font-size:12px;color:rgba(180,200,230,.5);font-weight:600">📍 Carte interactive</div>
-      <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:10px 18px;font-size:12px;color:rgba(180,200,230,.5);font-weight:600">💰 Estimation prix</div>
-    </div>
-
-    <!-- Progress bar -->
-    <div style="width:min(400px,80%);margin-bottom:12px">
-      <div style="display:flex;justify-content:space-between;margin-bottom:8px">
-        <span style="font-size:10px;font-weight:700;letter-spacing:.08em;color:rgba(255,180,0,.7)">DÉVELOPPEMENT</span>
-        <span style="font-size:10px;font-weight:700;color:rgba(255,180,0,.7)">35%</span>
-      </div>
-      <div style="height:4px;background:rgba(255,255,255,.06);border-radius:4px;overflow:hidden">
-        <div style="height:100%;width:35%;background:linear-gradient(90deg,rgba(255,180,0,.6),rgba(255,140,0,.9));border-radius:4px;animation:progressLoad .8s ease .3s both"></div>
-      </div>
-    </div>
-    <p style="font-size:11px;color:rgba(180,200,230,.3);margin-bottom:40px">Lancement prévu au Printemps 2026</p>
-
-    <!-- Back button -->
-    <button onclick="exitMarketplace()"
-      style="background:linear-gradient(135deg,rgba(255,180,0,.15),rgba(255,140,0,.08));border:1px solid rgba(255,180,0,.3);color:rgba(255,180,0,.9);font-size:13px;font-weight:700;padding:14px 36px;border-radius:12px;cursor:pointer;font-family:inherit;letter-spacing:.04em;transition:all .2s"
-      onmouseover="this.style.background='linear-gradient(135deg,rgba(255,180,0,.25),rgba(255,140,0,.15))';"
-      onmouseout="this.style.background='linear-gradient(135deg,rgba(255,180,0,.15),rgba(255,140,0,.08))';">
-      ← Retour à l'accueil
-    </button>
-
-  </div>
-</div>
-
-<!-- MARKETPLACE SCREEN -->
-<div id="marketplaceScreen" style="display:none;position:fixed;inset:0;z-index:600;background:#04080f;overflow-y:auto;font-family:'DM Sans',system-ui,sans-serif">
-
-  <!-- Topbar -->
   <div style="position:sticky;top:0;z-index:10;background:rgba(4,8,15,.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,180,0,.1);padding:0 32px;height:56px;display:flex;align-items:center;justify-content:space-between">
     <div style="display:flex;align-items:center;gap:12px">
-      <button onclick="hideMarketplace()" style="background:none;border:none;color:rgba(255,180,0,.7);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;padding:0" onmouseover="this.style.color='#ffb400'" onmouseout="this.style.color='rgba(255,180,0,.7)'">🏠 Accueil</button>
+      <button onclick="exitMarketplace()" style="background:none;border:none;color:rgba(255,180,0,.7);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;padding:0" onmouseover="this.style.color='#ffb400'" onmouseout="this.style.color='rgba(255,180,0,.7)'">🏠 Accueil</button>
       <span style="color:rgba(255,255,255,.15)">·</span>
       <span style="font-size:13px;font-weight:700;color:#eaf0ff;letter-spacing:.04em">ARTEM<span style="color:#ffb400">IS</span> <span style="color:rgba(255,180,0,.6)">Marketplace</span></span>
     </div>
-    <div style="font-size:10px;font-weight:700;letter-spacing:.15em;color:rgba(255,180,0,.5);text-transform:uppercase">Bêta privée · 2026</div>
+    <button class="btn btn-gold" onclick="mktOpenForm()">+ Déposer une annonce</button>
   </div>
 
-  <!-- Hero construction -->
-  <div style="min-height:calc(100vh - 56px);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 32px;text-align:center;position:relative;overflow:hidden">
+  <div style="max-width:1100px;margin:0 auto;padding:32px">
 
-    <!-- Background glow -->
-    <div style="position:absolute;top:20%;left:50%;transform:translateX(-50%);width:600px;height:300px;background:radial-gradient(ellipse,rgba(255,180,0,.06),transparent 70%);pointer-events:none"></div>
-
-    <!-- Badge -->
-    <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,180,0,.08);border:1px solid rgba(255,180,0,.2);border-radius:20px;padding:6px 16px;margin-bottom:32px">
-      <span style="width:6px;height:6px;border-radius:50%;background:#ffb400;animation:mktPulse 2s ease infinite;display:inline-block"></span>
-      <span style="font-size:10px;font-weight:700;letter-spacing:.15em;color:#ffb400;text-transform:uppercase">En cours de développement</span>
+    <!-- Vue liste -->
+    <div id="mkt-grid-view">
+      <div id="mkt-listings" class="grid3" style="gap:18px"></div>
     </div>
 
-    <!-- Title -->
-    <h1 style="font-family:'DM Serif Display',serif;font-size:clamp(36px,5vw,64px);color:#eaf0ff;line-height:1.05;margin-bottom:16px;max-width:700px">
-      La marketplace<br><em style="color:#ffb400;font-style:italic">immobilière intelligente.</em>
-    </h1>
+    <!-- Vue formulaire -->
+    <div id="mkt-form-view" style="display:none;max-width:640px;margin:0 auto">
+      <div class="card mkt-form">
+        <div class="card-title gold">Nouvelle annonce</div>
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div class="grid2">
+            <div><label class="lbl">Type</label>
+              <select id="mkt-f-type"><option value="Appartement">Appartement</option><option value="Maison">Maison</option></select>
+            </div>
+            <div><label class="lbl">DPE</label>
+              <select id="mkt-f-dpe" onchange="mktUpdateScorePreview()">
+                <option value="">—</option>
+                <option value="A">A</option><option value="B">B</option><option value="C">C</option>
+                <option value="D">D</option><option value="E">E</option><option value="F">F</option><option value="G">G</option>
+              </select>
+            </div>
+          </div>
+          <div><label class="lbl">Adresse</label>
+            <input id="mkt-f-adresse" placeholder="ex : 12 rue de la Paix, 35000 Rennes" onblur="mktOnAddressBlur()">
+          </div>
+          <div class="grid3">
+            <div><label class="lbl">Prix (€)</label><input type="number" id="mkt-f-prix" oninput="mktUpdateScorePreview()"></div>
+            <div><label class="lbl">Surface (m²)</label><input type="number" id="mkt-f-surface" oninput="mktUpdateScorePreview()"></div>
+            <div><label class="lbl">Pièces</label><input type="number" id="mkt-f-pieces"></div>
+          </div>
+          <div><label class="lbl">Loyer mensuel estimé (€, optionnel — sert au calcul de rendement)</label>
+            <input type="number" id="mkt-f-loyer" oninput="mktUpdateScorePreview()">
+          </div>
+          <div><label class="lbl">Description</label>
+            <textarea id="mkt-f-description" rows="3" style="resize:vertical"></textarea>
+          </div>
 
-    <p style="font-size:16px;color:rgba(200,216,240,.5);max-width:520px;line-height:1.8;margin-bottom:56px">
-      Trouvez les meilleures opportunités d'investissement, scorées automatiquement selon vos critères : rendement, tension locative, fiscalité, potentiel LCD/LLD.
-    </p>
+          <div class="sep-title">Baromètre d'opportunité</div>
+          <div id="mkt-dvf-status" style="font-size:11px;color:var(--text2)"></div>
+          <div id="mkt-questionnaire" style="display:flex;flex-direction:column;gap:14px"></div>
 
-    <!-- Feature cards -->
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;max-width:900px;width:100%;margin-bottom:64px">
+          <div class="card" style="background:var(--bg3);text-align:center;padding:18px">
+            <div style="font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Score estimé</div>
+            <div id="mkt-score-preview" style="font-size:32px;font-weight:800;color:var(--gold)">—</div>
+          </div>
 
-      <div style="background:rgba(255,180,0,.05);border:1px solid rgba(255,180,0,.12);border-radius:16px;padding:28px 24px;text-align:left">
-        <div style="font-size:28px;margin-bottom:14px">📊</div>
-        <div style="font-size:14px;font-weight:700;color:#eaf0ff;margin-bottom:8px">Baromètre d'opportunité</div>
-        <div style="font-size:12px;color:rgba(200,216,240,.45);line-height:1.6">Score de 0 à 100 basé sur le rendement brut, la tension locative et la fiscalité locale.</div>
-      </div>
-
-      <div style="background:rgba(34,211,200,.04);border:1px solid rgba(34,211,200,.1);border-radius:16px;padding:28px 24px;text-align:left">
-        <div style="font-size:28px;margin-bottom:14px">🏠</div>
-        <div style="font-size:14px;font-weight:700;color:#eaf0ff;margin-bottom:8px">LCD vs LLD</div>
-        <div style="font-size:12px;color:rgba(200,216,240,.45);line-height:1.6">Comparaison automatique du potentiel en location courte et longue durée pour chaque bien.</div>
-      </div>
-
-      <div style="background:rgba(155,110,243,.04);border:1px solid rgba(155,110,243,.1);border-radius:16px;padding:28px 24px;text-align:left">
-        <div style="font-size:28px;margin-bottom:14px">🔍</div>
-        <div style="font-size:14px;font-weight:700;color:#eaf0ff;margin-bottom:8px">Filtres avancés</div>
-        <div style="font-size:12px;color:rgba(200,216,240,.45);line-height:1.6">Prix, surface, ville, rendement min, zone tendue, DPE, et bien d'autres critères à venir.</div>
-      </div>
-
-      <div style="background:rgba(240,86,106,.04);border:1px solid rgba(240,86,106,.1);border-radius:16px;padding:28px 24px;text-align:left">
-        <div style="font-size:28px;margin-bottom:14px">🔔</div>
-        <div style="font-size:14px;font-weight:700;color:#eaf0ff;margin-bottom:8px">Alertes personnalisées</div>
-        <div style="font-size:12px;color:rgba(200,216,240,.45);line-height:1.6">Soyez notifié dès qu'un bien correspond exactement à vos critères d'investissement.</div>
-      </div>
-
-    </div>
-
-    <!-- Timeline -->
-    <div style="background:rgba(255,180,0,.04);border:1px solid rgba(255,180,0,.1);border-radius:16px;padding:32px 40px;max-width:600px;width:100%">
-      <div style="font-size:11px;font-weight:700;letter-spacing:.15em;color:#ffb400;text-transform:uppercase;margin-bottom:20px">Roadmap</div>
-      <div style="display:flex;flex-direction:column;gap:14px;text-align:left">
-        <div style="display:flex;align-items:center;gap:14px">
-          <div style="width:28px;height:28px;border-radius:50%;background:rgba(34,211,200,.15);border:1px solid var(--cyan);display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0">✓</div>
-          <div><div style="font-size:12px;font-weight:600;color:#eaf0ff">Artemis Outils & Dashboard</div><div style="font-size:10px;color:rgba(200,216,240,.4)">Disponible · Mars 2026</div></div>
-        </div>
-        <div style="display:flex;align-items:center;gap:14px">
-          <div style="width:28px;height:28px;border-radius:50%;background:rgba(255,180,0,.12);border:1px solid rgba(255,180,0,.3);display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;color:#ffb400">⟳</div>
-          <div><div style="font-size:12px;font-weight:600;color:#eaf0ff">Marketplace · Bêta privée abonnés</div><div style="font-size:10px;color:rgba(200,216,240,.4)">En développement · Prévu T3 2026</div></div>
-        </div>
-        <div style="display:flex;align-items:center;gap:14px">
-          <div style="width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;color:rgba(255,255,255,.2)">○</div>
-          <div><div style="font-size:12px;font-weight:600;color:rgba(200,216,240,.5)">Simulation & financement intégré</div><div style="font-size:10px;color:rgba(200,216,240,.3)">À venir · 2027</div></div>
+          <div style="display:flex;gap:10px;justify-content:flex-end">
+            <button class="btn btn-outline" onclick="mktCloseForm()">Annuler</button>
+            <button class="btn btn-gold" id="mkt-submit-btn" onclick="mktSubmitListing()">Publier l'annonce</button>
+          </div>
         </div>
       </div>
     </div>
+
+    <!-- Vue détail -->
+    <div id="mkt-detail-view" style="display:none;max-width:720px;margin:0 auto"></div>
 
   </div>
-
 </div>
 
 
@@ -2247,5 +2165,6 @@
 <!-- ══ MOBILE NAV SCRIPT ══ -->
 <script src="js/12-mobile-nav.js"></script>
 <script src="js/13-init-patch.js"></script>
+<script src="js/14-marketplace.js"></script>
 </body>
 </html>
