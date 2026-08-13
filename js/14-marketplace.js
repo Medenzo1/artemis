@@ -332,6 +332,9 @@ function mktGatherFormData() {
     loyerEstime: parseFloat(document.getElementById('mkt-f-loyer').value) || 0,
     description: document.getElementById('mkt-f-description').value.trim(),
     adresse: document.getElementById('mkt-f-adresse').value.trim(),
+    contactNom: document.getElementById('mkt-f-contact-nom').value.trim(),
+    contactTel: document.getElementById('mkt-f-contact-tel').value.trim(),
+    contactEmail: document.getElementById('mkt-f-contact-email').value.trim(),
     answers: _mktAnswers,
   };
 }
@@ -415,7 +418,7 @@ function mktOpenForm() {
   _mktAnswers = {};
   _mktCurrentGeocode = null; _mktCurrentDvf = null;
   _mktPhotoFiles = [];
-  ['mkt-f-adresse', 'mkt-f-prix', 'mkt-f-surface', 'mkt-f-pieces', 'mkt-f-loyer', 'mkt-f-description', 'mkt-f-dpe'].forEach(id => {
+  ['mkt-f-adresse', 'mkt-f-prix', 'mkt-f-surface', 'mkt-f-pieces', 'mkt-f-loyer', 'mkt-f-description', 'mkt-f-dpe', 'mkt-f-contact-nom', 'mkt-f-contact-tel', 'mkt-f-contact-email'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = '';
   });
   document.getElementById('mkt-f-type').value = 'Appartement';
@@ -520,17 +523,29 @@ async function mktOpenDetail(id) {
     const doc = await _fs.collection('listings').doc(id).get();
     if (!doc.exists) { el.innerHTML = '<div style="color:var(--red)">Annonce introuvable.</div>'; return; }
     const l = { id: doc.id, ...doc.data() };
+    _mktDetailPhotos = l.photos || [];
     const galleryHtml = (l.photos && l.photos.length)
-      ? '<div class="mkt-gallery">' + l.photos.map(u => '<img src="' + mktCldUrl(u, 'w_600,h_400,c_fill,q_auto,f_auto') + '">').join('') + '</div>'
+      ? '<div class="mkt-gallery">' + l.photos.map((u, i) => '<img src="' + mktCldUrl(u, 'w_600,h_400,c_fill,q_auto,f_auto') + '" onclick="mktOpenLightbox(' + i + ')">').join('') + '</div>'
       : '';
     const breakdownHtml = (l.scoreBreakdown || []).map(b =>
       '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px">' +
       '<div><div style="color:var(--text)">' + escHtml(b.label) + '</div><div style="color:var(--text2);font-size:11px">' + escHtml(b.detail || '') + ' · poids ' + b.weight + '%</div></div>' +
       '<div style="font-family:monospace;font-weight:700">' + b.points + '/10</div></div>'
     ).join('');
+    const hasContact = l.contactNom || l.contactTel || l.contactEmail;
+    const contactHtml = hasContact ? (
+      '<div class="sep-title">Contact</div>' +
+      '<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px;font-size:13px">' +
+      (l.contactNom ? '<div>👤 ' + escHtml(l.contactNom) + '</div>' : '') +
+      (l.contactTel ? '<div>📞 <a href="tel:' + escHtml(l.contactTel) + '" style="color:var(--cyan)">' + escHtml(l.contactTel) + '</a></div>' : '') +
+      (l.contactEmail ? '<div>✉️ <a href="mailto:' + escHtml(l.contactEmail) + '" style="color:var(--cyan)">' + escHtml(l.contactEmail) + '</a></div>' : '') +
+      '</div>'
+    ) : '';
+    const mapHtml = (l.lat && l.lon) ? '<div id="mkt-detail-map" style="height:280px;border-radius:12px;margin-bottom:20px"></div>' : '';
     el.innerHTML =
       '<button class="btn btn-outline" onclick="mktCloseDetail()" style="margin-bottom:16px">← Retour</button>' +
       galleryHtml +
+      mapHtml +
       '<div class="card">' +
       '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">' +
       '<div><div style="font-size:20px;font-weight:800;color:#eaf0ff">' + escHtml(l.type || '') + ' · ' + escHtml(l.ville || '') + '</div>' +
@@ -544,15 +559,66 @@ async function mktOpenDetail(id) {
       '</div>' +
       (l.description ? '<p style="font-size:13px;color:var(--text2);margin-bottom:14px">' + escHtml(l.description) + '</p>' : '') +
       (l.dvfComparatif ? '<div class="chip chip-gold" style="margin-bottom:14px">📊 Marché secteur : ' + l.dvfComparatif.prixM2Marche + ' €/m² (' + l.dvfComparatif.nbVentes + ' ventes)</div>' : '') +
+      contactHtml +
       '<div class="sep-title">Détail du score</div>' +
       breakdownHtml +
       '<div style="display:flex;justify-content:flex-end;margin-top:16px">' +
       '<button class="btn btn-red" onclick="mktDeleteListing(\'' + l.id + '\')">🗑 Supprimer</button>' +
       '</div></div>';
+    if (l.lat && l.lon) mktInitDetailMap(l.lat, l.lon);
   } catch (e) {
     console.error(e);
     el.innerHTML = '<div style="color:var(--red)">Erreur de chargement.</div>';
   }
+}
+
+// ── Carte (Leaflet, déjà utilisé ailleurs dans l'app — vue satellite Esri gratuite,
+// sans clé, + plan OpenStreetMap en option) ──
+function mktInitDetailMap(lat, lon) {
+  setTimeout(() => {
+    const el = document.getElementById('mkt-detail-map');
+    if (!el || typeof L === 'undefined') return;
+    const map = L.map('mkt-detail-map', { zoomControl: true }).setView([lat, lon], 18);
+    const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+      maxZoom: 19, attribution: '© Esri'
+    }).addTo(map);
+    const streets = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19, attribution: '© OpenStreetMap'
+    });
+    L.control.layers({ 'Satellite': satellite, 'Plan': streets }).addTo(map);
+    L.marker([lat, lon]).addTo(map);
+  }, 50); // laisse le temps au conteneur d'obtenir ses dimensions avant l'init Leaflet
+}
+
+// ── Lightbox photos (plein écran, navigation ‹ › comme un site d'annonces) ──
+let _mktDetailPhotos = [];
+function mktOpenLightbox(startIndex) {
+  const photos = _mktDetailPhotos;
+  if (!photos.length) return;
+  let idx = startIndex;
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.92);display:flex;align-items:center;justify-content:center';
+  function render() {
+    overlay.innerHTML =
+      '<div style="position:absolute;top:20px;right:24px;color:#fff;font-size:28px;cursor:pointer;line-height:1" id="mkt-lb-close">✕</div>' +
+      (photos.length > 1 ? '<div style="position:absolute;left:16px;top:50%;transform:translateY(-50%);color:#fff;font-size:40px;cursor:pointer;user-select:none" id="mkt-lb-prev">‹</div>' : '') +
+      '<img src="' + mktCldUrl(photos[idx], 'w_1600,q_auto,f_auto') + '" style="max-width:88vw;max-height:82vh;object-fit:contain;border-radius:6px">' +
+      (photos.length > 1 ? '<div style="position:absolute;right:16px;top:50%;transform:translateY(-50%);color:#fff;font-size:40px;cursor:pointer;user-select:none" id="mkt-lb-next">›</div>' : '') +
+      (photos.length > 1 ? '<div style="position:absolute;bottom:20px;color:#fff;font-size:12px;opacity:.7">' + (idx + 1) + ' / ' + photos.length + '</div>' : '');
+    document.getElementById('mkt-lb-close').onclick = close;
+    const prev = document.getElementById('mkt-lb-prev'); if (prev) prev.onclick = e => { e.stopPropagation(); idx = (idx - 1 + photos.length) % photos.length; render(); };
+    const next = document.getElementById('mkt-lb-next'); if (next) next.onclick = e => { e.stopPropagation(); idx = (idx + 1) % photos.length; render(); };
+  }
+  function onKey(e) {
+    if (e.key === 'Escape') close();
+    else if (e.key === 'ArrowLeft' && photos.length > 1) { idx = (idx - 1 + photos.length) % photos.length; render(); }
+    else if (e.key === 'ArrowRight' && photos.length > 1) { idx = (idx + 1) % photos.length; render(); }
+  }
+  function close() { overlay.remove(); document.removeEventListener('keydown', onKey); }
+  overlay.onclick = e => { if (e.target === overlay) close(); };
+  document.addEventListener('keydown', onKey);
+  document.body.appendChild(overlay);
+  render();
 }
 function mktCloseDetail() { mktShowView('mkt-grid-view'); mktRefreshGrid(); }
 function mktDeleteListing(id) {
