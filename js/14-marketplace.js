@@ -287,9 +287,16 @@ function mktRenderPhotoSlots() {
   el.innerHTML = slots.join('');
 }
 function mktPickPhoto(i) {
+  // L'input doit être dans le DOM (même invisible) : sur Safari, un <input type=file>
+  // jamais attaché ne redéclenche pas toujours l'événement change une fois le fichier choisi.
   const input = document.createElement('input');
   input.type = 'file'; input.accept = 'image/*';
-  input.onchange = () => { if (input.files[0]) { _mktPhotoFiles[i] = input.files[0]; mktRenderPhotoSlots(); } };
+  input.style.cssText = 'position:fixed;top:-9999px;left:-9999px';
+  document.body.appendChild(input);
+  input.onchange = () => {
+    if (input.files[0]) { _mktPhotoFiles[i] = input.files[0]; mktRenderPhotoSlots(); }
+    input.remove();
+  };
   input.click();
 }
 function mktRemovePhoto(i) { _mktPhotoFiles[i] = null; mktRenderPhotoSlots(); }
