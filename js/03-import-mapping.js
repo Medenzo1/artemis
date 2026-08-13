@@ -207,14 +207,14 @@ function preMapRow(r) {
 
 function applyPreMapping() {
   if (!rowMeta.length) return;
-  let applied = 0, skipped = 0;
+  let applied = 0;
 
   rowMeta.forEach((r, i) => {
     if (r.isAirbnb || r.isBooking || r.isLoan) return;
     if (r._cat && r._bien && r._lot) return; // already filled
 
     const s = preMapRow(r);
-    if (!s) { skipped++; return; }
+    if (!s) return;
 
     r._cat  = s.cat  || r._cat  || '';
     r._bien = s.bien || r._bien || '';
@@ -226,11 +226,18 @@ function applyPreMapping() {
   });
 
   buildMappingTable();
-  const msg = applied
-    ? '✨ ' + applied + ' ligne' + (applied>1?'s':'') + ' pré-mappée' + (applied>1?'s':'')
-        + (skipped ? ' · ' + skipped + ' sans suggestion' : '')
-    : 'Aucune suggestion trouvée';
-  showToast(msg, applied ? 'var(--cyan)' : '#f0566a');
+
+  // Même règle que goValidate() : catégorie + bien + lot obligatoires. On le
+  // signale ici pour ne pas laisser croire que tout est prêt après le pré-mapping.
+  const incomplete = rowMeta.filter(r => !r.isAirbnb && !r.isBooking && !r.isLoan
+    && (!r._cat || !r._bien || !r._lot)).length;
+
+  let msg, color;
+  if (applied && !incomplete) { msg = '✨ ' + applied + ' ligne' + (applied>1?'s':'') + ' pré-mappée' + (applied>1?'s':'') + ' — tout est complet'; color = 'var(--cyan)'; }
+  else if (applied)           { msg = '✨ ' + applied + ' ligne' + (applied>1?'s':'') + ' pré-mappée' + (applied>1?'s':'') + ' · ⚠️ ' + incomplete + ' encore à compléter'; color = '#f5b731'; }
+  else if (incomplete)        { msg = '⚠️ Aucune suggestion — ' + incomplete + ' ligne(s) à compléter manuellement'; color = '#f0566a'; }
+  else                        { msg = 'Rien à pré-mapper'; color = '#f0566a'; }
+  showToast(msg, color);
 }
 
 function startMapping() {
