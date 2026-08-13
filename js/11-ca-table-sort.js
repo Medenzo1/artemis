@@ -8,7 +8,7 @@ function _buildCAOpsRows(rows) {
       '<td style="padding:7px 10px;font-size:11px;word-break:break-word;line-height:1.4">'+l.bien+'</td>'+
       '<td style="padding:7px 10px;color:var(--text2);font-size:10px;word-break:break-word;line-height:1.4">'+l.cat+'</td>'+
       '<td style="padding:7px 10px;font-size:10px;color:var(--text2);word-break:break-word;line-height:1.4">'+l.lib+'</td>'+
-      '<td style="padding:7px 10px;text-align:right;font-family:monospace;font-weight:600;color:var(--green);white-space:nowrap">+'+(()=>{const _v=amt;const _a=Math.abs(_v);const _i=Math.floor(_a);const _d=Math.round((_a-_i)*100).toString().padStart(2,'0');return ((_v<0?'-':'')+String(_i).replace(/\B(?=(\d{3})+(?!\d))/g,'\u202f')+','+_d+'\u202f€')})()+'</td>'+
+      '<td style="padding:7px 10px;text-align:right;font-family:monospace;font-weight:600;color:'+(amt<0?'var(--red)':'var(--green)')+';white-space:nowrap">'+(amt>=0?'+':'')+(()=>{const _v=amt;const _a=Math.abs(_v);const _i=Math.floor(_a);const _d=Math.round((_a-_i)*100).toString().padStart(2,'0');return ((_v<0?'-':'')+String(_i).replace(/\B(?=(\d{3})+(?!\d))/g,'\u202f')+','+_d+'\u202f€')})()+'</td>'+
     '</tr>';
   }).join('');
 }
