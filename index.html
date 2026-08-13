@@ -393,8 +393,9 @@
               </select>
             </div>
           </div>
-          <div><label class="lbl">Adresse</label>
-            <input id="mkt-f-adresse" placeholder="ex : 12 rue de la Paix, 35000 Rennes" onblur="mktOnAddressBlur()">
+          <div style="position:relative"><label class="lbl">Adresse</label>
+            <input id="mkt-f-adresse" placeholder="ex : 12 rue de la Paix, 35000 Rennes" oninput="mktOnAddressInput()" onblur="mktOnAddressBlur()" autocomplete="off">
+            <div id="mkt-addr-suggestions" style="display:none"></div>
           </div>
           <div class="grid3">
             <div><label class="lbl">Prix (€)</label><input type="number" id="mkt-f-prix" oninput="mktUpdateScorePreview()"></div>

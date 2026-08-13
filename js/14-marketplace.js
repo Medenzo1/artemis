@@ -3,11 +3,11 @@
 // ══════════════════════════════════════════════
 
 // ── Questionnaire pondéré ─────────────────────
-// Le score final combine : rendement brut (25%, calculé), DPE (10%, dérivé du
-// champ DPE), et ces 5 questions à choix multiple (poids total 65%).
+// Le score final combine : rendement brut (20%, calculé), DPE (8%, dérivé du
+// champ DPE), et ces questions à choix multiple (poids total 72%).
 const MARKETPLACE_QUESTIONS = [
   {
-    id: 'q_prix_marche', label: 'Prix au m² vs marché', weight: 20,
+    id: 'q_prix_marche', label: 'Prix au m² vs marché', weight: 15,
     options: [
       { id: 'a1', label: 'Nettement au-dessus du marché (+15% ou plus)', points: 2 },
       { id: 'a2', label: 'Au-dessus du marché (+5 à +15%)', points: 5 },
@@ -17,7 +17,7 @@ const MARKETPLACE_QUESTIONS = [
     ],
   },
   {
-    id: 'q_etat', label: 'État du bien / travaux à prévoir', weight: 15,
+    id: 'q_etat', label: 'État du bien / travaux à prévoir', weight: 10,
     options: [
       { id: 'a1', label: 'Neuf ou rénové, aucun travaux', points: 10 },
       { id: 'a2', label: 'Bon état, travaux mineurs (< 5% du prix)', points: 7 },
@@ -26,7 +26,7 @@ const MARKETPLACE_QUESTIONS = [
     ],
   },
   {
-    id: 'q_tension', label: 'Tension locative de la zone', weight: 15,
+    id: 'q_tension', label: 'Tension locative de la zone', weight: 10,
     options: [
       { id: 'a1', label: 'Très tendue (grande métropole, forte demande)', points: 10 },
       { id: 'a2', label: 'Tendue (ville moyenne dynamique)', points: 7 },
@@ -35,12 +35,54 @@ const MARKETPLACE_QUESTIONS = [
     ],
   },
   {
-    id: 'q_lcd', label: 'Potentiel location courte durée (LCD)', weight: 10,
+    id: 'q_localisation', label: 'Localisation / proximité commodités', weight: 8,
+    options: [
+      { id: 'a1', label: 'Hyper-centre, tout à pied (transports, commerces, écoles)', points: 10 },
+      { id: 'a2', label: 'Bon accès aux commodités, transports à proximité', points: 7 },
+      { id: 'a3', label: 'Périphérie, dépendant de la voiture', points: 4 },
+      { id: 'a4', label: 'Isolé, peu de commodités à proximité', points: 1 },
+    ],
+  },
+  {
+    id: 'q_lcd', label: 'Potentiel location courte durée (LCD)', weight: 8,
     options: [
       { id: 'a1', label: 'Zone touristique/étudiante, forte demande, réglementation favorable', points: 10 },
       { id: 'a2', label: 'LCD possible mais réglementé/plafonné', points: 6 },
       { id: 'a3', label: 'LLD uniquement pertinent', points: 5 },
       { id: 'a4', label: 'Zone réglementée défavorable (quota atteint...)', points: 2 },
+    ],
+  },
+  {
+    id: 'q_occupation', label: "Statut d'occupation", weight: 6,
+    options: [
+      { id: 'a1', label: 'Loué, bail récent, loyer cohérent avec le marché', points: 10 },
+      { id: 'a2', label: 'Libre immédiatement', points: 8 },
+      { id: 'a3', label: 'Loué, loyer sous le marché (bail ancien)', points: 5 },
+      { id: 'a4', label: 'Loué, risque d\'impayés ou procédure en cours', points: 1 },
+    ],
+  },
+  {
+    id: 'q_exterieur', label: 'Extérieur (balcon / terrasse / jardin)', weight: 4,
+    options: [
+      { id: 'a1', label: 'Terrasse ou jardin spacieux (> 10 m²)', points: 10 },
+      { id: 'a2', label: 'Balcon ou petite terrasse', points: 7 },
+      { id: 'a3', label: 'Aucun extérieur', points: 3 },
+    ],
+  },
+  {
+    id: 'q_stationnement', label: 'Stationnement', weight: 3,
+    options: [
+      { id: 'a1', label: 'Garage ou box fermé', points: 10 },
+      { id: 'a2', label: 'Place de parking extérieure', points: 7 },
+      { id: 'a3', label: 'Aucun stationnement dédié', points: 3 },
+    ],
+  },
+  {
+    id: 'q_etage', label: 'Étage & accès', weight: 3,
+    options: [
+      { id: 'a1', label: 'Rez-de-chaussée ou ascenseur présent', points: 9 },
+      { id: 'a2', label: '1er ou 2e étage sans ascenseur', points: 7 },
+      { id: 'a3', label: 'Étage élevé (3e et plus) sans ascenseur', points: 4 },
     ],
   },
   {
@@ -53,8 +95,8 @@ const MARKETPLACE_QUESTIONS = [
   },
 ];
 
-const MKT_RENDEMENT_WEIGHT = 25;
-const MKT_DPE_WEIGHT = 10;
+const MKT_RENDEMENT_WEIGHT = 20;
+const MKT_DPE_WEIGHT = 8;
 const MKT_DPE_POINTS = { A: 10, B: 10, C: 7, D: 7, E: 4, F: 2, G: 0 };
 
 function _mktBandRendement(pct) {
@@ -73,7 +115,7 @@ function _pickPrixMarcheOptionId(ecartPct) {
   return 'a5';
 }
 
-// Ligne non répondue = exclue du calcul (pas pénalisante) : permet un aperçu
+// Question non répondue = exclue du calcul (pas pénalisante) : permet un aperçu
 // du score en temps réel pendant que le formulaire se remplit.
 function computeScore(listing) {
   const breakdown = [];
@@ -106,7 +148,7 @@ function computeScore(listing) {
   return { score, breakdown };
 }
 
-// ── Géocodage (API Adresse — gouvernemental, gratuit, CORS activé) ──
+// ── Géocodage + autocomplétion (API Adresse — gouvernemental, gratuit, CORS activé) ──
 async function geocodeAddress(query) {
   if (!query) return null;
   try {
@@ -115,18 +157,21 @@ async function geocodeAddress(query) {
     const data = await res.json();
     const f = data.features && data.features[0];
     if (!f) return null;
-    return {
-      label: f.properties.label,
-      ville: f.properties.city,
-      codePostal: f.properties.postcode,
-      inseeCode: f.properties.citycode,
-      lat: f.geometry.coordinates[1],
-      lon: f.geometry.coordinates[0],
-    };
+    return _mktFeatureToGeo(f);
   } catch (e) {
     console.warn('[marketplace] géocodage indisponible', e);
     return null;
   }
+}
+function _mktFeatureToGeo(f) {
+  return {
+    label: f.properties.label,
+    ville: f.properties.city,
+    codePostal: f.properties.postcode,
+    inseeCode: f.properties.citycode,
+    lat: f.geometry.coordinates[1],
+    lon: f.geometry.coordinates[0],
+  };
 }
 
 // ── Comparatif DVF (best-effort — service communautaire non garanti,
@@ -196,27 +241,34 @@ function exitMarketplace() {
 }
 
 // ── Formulaire ──
+let _mktAnswers = {};
 let _mktCurrentGeocode = null;
 let _mktCurrentDvf = null;
+let _mktAddrSuggestions = [];
+let _mktAddrTimer = null;
 
 function mktRenderQuestionnaire() {
   const el = document.getElementById('mkt-questionnaire');
   if (!el) return;
-  el.innerHTML = MARKETPLACE_QUESTIONS.map(q =>
-    '<div class="mkt-q-row"><label class="lbl">' + escHtml(q.label) +
-    ' <span style="color:var(--text2);font-weight:400;text-transform:none">(poids ' + q.weight + '%)</span></label>' +
-    '<select id="mkt-q-' + q.id + '" onchange="mktUpdateScorePreview()"><option value="">— Choisir —</option>' +
-    q.options.map(o => '<option value="' + o.id + '">' + escHtml(o.label) + '</option>').join('') +
-    '</select></div>'
-  ).join('');
+  el.innerHTML = MARKETPLACE_QUESTIONS.map(q => {
+    const choices = q.options.map(o => {
+      const selected = _mktAnswers[q.id] === o.id;
+      return '<div class="mkt-choice' + (selected ? ' selected' : '') + '" onclick="mktSelectAnswer(\'' + q.id + '\',\'' + o.id + '\')">' +
+        '<span class="mkt-choice-dot"></span><span>' + escHtml(o.label) + '</span></div>';
+    }).join('');
+    const autoNote = (q.id === 'q_prix_marche' && _mktCurrentDvf) ? ' <span style="color:var(--gold);font-weight:400">· estimé via DVF, modifiable</span>' : '';
+    return '<div class="mkt-q-card"><span class="mkt-q-title">' + escHtml(q.label) + '</span>' +
+      '<span class="mkt-q-weight">Poids ' + q.weight + '%' + autoNote + '</span>' +
+      '<div class="mkt-choice-group">' + choices + '</div></div>';
+  }).join('');
+}
+function mktSelectAnswer(qId, aId) {
+  _mktAnswers[qId] = aId;
+  mktRenderQuestionnaire();
+  mktUpdateScorePreview();
 }
 
 function mktGatherFormData() {
-  const answers = {};
-  MARKETPLACE_QUESTIONS.forEach(q => {
-    const el = document.getElementById('mkt-q-' + q.id);
-    if (el && el.value) answers[q.id] = el.value;
-  });
   return {
     type: document.getElementById('mkt-f-type').value,
     dpe: document.getElementById('mkt-f-dpe').value,
@@ -226,7 +278,7 @@ function mktGatherFormData() {
     loyerEstime: parseFloat(document.getElementById('mkt-f-loyer').value) || 0,
     description: document.getElementById('mkt-f-description').value.trim(),
     adresse: document.getElementById('mkt-f-adresse').value.trim(),
-    answers,
+    answers: _mktAnswers,
   };
 }
 
@@ -237,19 +289,55 @@ function mktUpdateScorePreview() {
   if (el) el.textContent = score != null ? (score.toFixed(1) + ' / 10') : '—';
 }
 
-async function mktOnAddressBlur() {
+// ── Autocomplétion d'adresse ──
+function mktOnAddressInput() {
+  _mktCurrentGeocode = null; _mktCurrentDvf = null;
+  clearTimeout(_mktAddrTimer);
   const q = document.getElementById('mkt-f-adresse').value.trim();
+  const box = document.getElementById('mkt-addr-suggestions');
+  if (q.length < 4) { box.innerHTML = ''; box.style.display = 'none'; return; }
+  _mktAddrTimer = setTimeout(async () => {
+    try {
+      const res = await fetch('https://api-adresse.data.gouv.fr/search/?q=' + encodeURIComponent(q) + '&limit=5');
+      if (!res.ok) { box.style.display = 'none'; return; }
+      const data = await res.json();
+      _mktAddrSuggestions = data.features || [];
+      if (!_mktAddrSuggestions.length) { box.style.display = 'none'; return; }
+      box.innerHTML = _mktAddrSuggestions.map((f, i) =>
+        '<div class="mkt-addr-suggestion" onmousedown="mktPickSuggestion(' + i + ')">' + escHtml(f.properties.label) + '</div>'
+      ).join('');
+      box.style.display = 'block';
+    } catch (e) { box.style.display = 'none'; }
+  }, 300);
+}
+async function mktPickSuggestion(i) {
+  const f = _mktAddrSuggestions[i];
+  const box = document.getElementById('mkt-addr-suggestions');
+  if (box) box.style.display = 'none';
+  if (!f) return;
+  document.getElementById('mkt-f-adresse').value = f.properties.label;
+  _mktCurrentGeocode = _mktFeatureToGeo(f);
+  await mktRunDvfLookup();
+}
+function mktOnAddressBlur() {
+  setTimeout(async () => {
+    const box = document.getElementById('mkt-addr-suggestions');
+    if (box) box.style.display = 'none';
+    if (_mktCurrentGeocode) return; // déjà résolu via une suggestion cliquée
+    const q = document.getElementById('mkt-f-adresse').value.trim();
+    const statusEl = document.getElementById('mkt-dvf-status');
+    if (!q) return;
+    statusEl.textContent = "📍 Recherche de l'adresse...";
+    const geo = await geocodeAddress(q);
+    _mktCurrentGeocode = geo;
+    if (!geo) { statusEl.textContent = '⚠️ Adresse non reconnue — le comparatif de prix ne sera pas automatique.'; return; }
+    await mktRunDvfLookup();
+  }, 200);
+}
+async function mktRunDvfLookup() {
   const statusEl = document.getElementById('mkt-dvf-status');
-  const sel = document.getElementById('mkt-q-q_prix_marche');
-  if (!q) return;
-  statusEl.textContent = "📍 Recherche de l'adresse...";
-  const geo = await geocodeAddress(q);
-  _mktCurrentGeocode = geo;
-  if (!geo) {
-    statusEl.textContent = '⚠️ Adresse non reconnue — le comparatif de prix ne sera pas automatique.';
-    if (sel) sel.disabled = false;
-    return;
-  }
+  const geo = _mktCurrentGeocode;
+  if (!geo) return;
   statusEl.textContent = '📍 ' + geo.label + ' — recherche de ventes comparables...';
   const type = document.getElementById('mkt-f-type').value;
   const dvf = await fetchDvfComparatif(geo.inseeCode, type);
@@ -258,25 +346,27 @@ async function mktOnAddressBlur() {
     statusEl.textContent = '📊 Prix moyen du secteur : ' + dvf.prixM2Marche + ' €/m² (' + dvf.nbVentes + ' vente(s) trouvée(s))';
     const prix = parseFloat(document.getElementById('mkt-f-prix').value) || 0;
     const surface = parseFloat(document.getElementById('mkt-f-surface').value) || 0;
-    if (prix > 0 && surface > 0 && sel) {
+    if (prix > 0 && surface > 0) {
       const ecartPct = ((prix / surface - dvf.prixM2Marche) / dvf.prixM2Marche) * 100;
-      sel.value = _pickPrixMarcheOptionId(ecartPct);
-      sel.disabled = true;
+      _mktAnswers.q_prix_marche = _pickPrixMarcheOptionId(ecartPct);
     }
   } else {
     statusEl.textContent = '⚠️ Comparatif automatique indisponible — choisis une estimation ci-dessous.';
-    if (sel) sel.disabled = false;
   }
+  mktRenderQuestionnaire();
   mktUpdateScorePreview();
 }
 
 function mktOpenForm() {
+  _mktAnswers = {};
   _mktCurrentGeocode = null; _mktCurrentDvf = null;
   ['mkt-f-adresse', 'mkt-f-prix', 'mkt-f-surface', 'mkt-f-pieces', 'mkt-f-loyer', 'mkt-f-description', 'mkt-f-dpe'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = '';
   });
   document.getElementById('mkt-f-type').value = 'Appartement';
   document.getElementById('mkt-dvf-status').textContent = '';
+  const box = document.getElementById('mkt-addr-suggestions');
+  if (box) { box.innerHTML = ''; box.style.display = 'none'; }
   mktRenderQuestionnaire();
   mktUpdateScorePreview();
   mktShowView('mkt-form-view');
@@ -349,7 +439,9 @@ async function mktRefreshGrid() {
     ).join('');
   } catch (e) {
     console.error('[marketplace] échec de chargement des annonces', e);
-    el.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--red);font-size:12px;padding:40px 0">Échec du chargement des annonces.</div>';
+    const reason = (e && (e.code || e.message)) ? (e.code || e.message) : String(e);
+    el.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--red);font-size:12px;padding:40px 0">' +
+      'Échec du chargement des annonces.<br><span style="color:var(--text2);font-size:11px">' + escHtml(reason) + '</span></div>';
   }
 }
 
