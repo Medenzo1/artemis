@@ -350,7 +350,22 @@ function mktSelectAnswer(qId, aId) {
   mktUpdateScorePreview();
 }
 
+function mktToggleLinkedBien() {
+  const checked = document.getElementById('mkt-f-linked').checked;
+  const wrap = document.getElementById('mkt-linked-bien-wrap');
+  wrap.style.display = checked ? '' : 'none';
+  if (checked) {
+    const sel = document.getElementById('mkt-f-linked-bien');
+    const biens = (getParams().biens || []);
+    sel.innerHTML = biens.map(b => '<option value="' + escHtml(b.id) + '">' + escHtml(b.nom || b.name || b.id) + '</option>').join('');
+  }
+}
+
 function mktGatherFormData() {
+  const linked = document.getElementById('mkt-f-linked').checked;
+  const linkedSel = document.getElementById('mkt-f-linked-bien');
+  const linkedBienId = linked ? linkedSel.value : null;
+  const linkedBienNom = linked && linkedBienId ? (linkedSel.options[linkedSel.selectedIndex] ? linkedSel.options[linkedSel.selectedIndex].textContent : '') : null;
   return {
     type: document.getElementById('mkt-f-type').value,
     dpe: document.getElementById('mkt-f-dpe').value,
@@ -363,6 +378,7 @@ function mktGatherFormData() {
     contactNom: document.getElementById('mkt-f-contact-nom').value.trim(),
     contactTel: document.getElementById('mkt-f-contact-tel').value.trim(),
     contactEmail: document.getElementById('mkt-f-contact-email').value.trim(),
+    linkedBienId, linkedBienNom,
     answers: _mktAnswers,
   };
 }
@@ -451,6 +467,8 @@ function mktOpenForm() {
   });
   document.getElementById('mkt-f-type').value = 'Appartement';
   document.getElementById('mkt-dvf-status').textContent = '';
+  document.getElementById('mkt-f-linked').checked = false;
+  document.getElementById('mkt-linked-bien-wrap').style.display = 'none';
   const box = document.getElementById('mkt-addr-suggestions');
   if (box) { box.innerHTML = ''; box.style.display = 'none'; }
   mktRenderPhotoSlots();
@@ -589,6 +607,108 @@ function mktGenerateComment(l) {
   return '<div class="mkt-comment"><div class="mkt-comment-label">💬 Analyse Artemis</div><p>' + parts.join(' ') + '</p></div>';
 }
 
+// ── Rapport financier PDF (bien suivi dans Artemis, données réelles importées) ──
+function mktBuildBienStats(bienId) {
+  const db = getDB();
+  const periodKeys = Object.keys(db.periods || {}).sort();
+  const rows = [];
+  const catTotals = {};
+  periodKeys.forEach(k => {
+    const lines = (db.periods[k].lines || []).filter(l => l.bienId === bienId);
+    if (!lines.length) return;
+    const ca = lines.filter(l => _isCA(l)).reduce((s, l) => s + (+l.montant || 0), 0);
+    const dep = lines.filter(l => _isDep(l)).reduce((s, l) => s + (+l.montant || 0), 0); // négatif
+    lines.filter(l => _isDep(l)).forEach(l => {
+      const cat = l.cat || 'Autre';
+      catTotals[cat] = (catTotals[cat] || 0) + Math.abs(+l.montant || 0);
+    });
+    rows.push({ period: k, ca, dep, resultat: ca + dep });
+  });
+  return { rows, catTotals };
+}
+
+function mktDrawReportChart(rows) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 900; canvas.height = 300;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, 900, 300);
+  const maxVal = Math.max(1, ...rows.map(r => Math.max(r.ca, Math.abs(r.dep))));
+  const barW = 900 / rows.length;
+  rows.forEach((r, i) => {
+    const x = i * barW;
+    const caH = (r.ca / maxVal) * 220;
+    const depH = (Math.abs(r.dep) / maxVal) * 220;
+    ctx.fillStyle = '#22c97a';
+    ctx.fillRect(x + barW * 0.15, 240 - caH, barW * 0.3, caH);
+    ctx.fillStyle = '#f0566a';
+    ctx.fillRect(x + barW * 0.55, 240 - depH, barW * 0.3, depH);
+  });
+  ctx.fillStyle = '#22c97a'; ctx.fillRect(10, 270, 14, 14);
+  ctx.fillStyle = '#333'; ctx.font = '16px sans-serif'; ctx.fillText("Chiffre d'affaires", 30, 282);
+  ctx.fillStyle = '#f0566a'; ctx.fillRect(220, 270, 14, 14);
+  ctx.fillStyle = '#333'; ctx.fillText('Charges', 240, 282);
+  return canvas.toDataURL('image/png');
+}
+
+function mktGenerateReport(bienId, bienNom) {
+  if (!window.jspdf) { showToast('⚠️ Génération PDF indisponible', '#f0566a'); return; }
+  const { jsPDF } = window.jspdf;
+  const { rows, catTotals } = mktBuildBienStats(bienId);
+  if (!rows.length) { showToast('⚠️ Aucune donnée trouvée pour ce bien dans la base Artemis', '#f0566a'); return; }
+
+  const totalCa = rows.reduce((s, r) => s + r.ca, 0);
+  const totalDep = rows.reduce((s, r) => s + r.dep, 0);
+  const totalRes = totalCa + totalDep;
+
+  const doc = new jsPDF();
+  const pageW = doc.internal.pageSize.getWidth();
+  let y = 20;
+
+  doc.setFontSize(18); doc.setTextColor(20, 20, 20);
+  doc.text('Rapport financier — ' + bienNom, 14, y); y += 8;
+  doc.setFontSize(10); doc.setTextColor(120, 120, 120);
+  doc.text('Généré depuis Artemis le ' + new Date().toLocaleDateString('fr-FR'), 14, y); y += 12;
+
+  doc.setFontSize(11); doc.setTextColor(20, 20, 20);
+  doc.text("Chiffre d'affaires cumulé : " + Math.round(totalCa).toLocaleString('fr-FR') + ' €', 14, y); y += 7;
+  doc.text('Charges cumulées : ' + Math.round(Math.abs(totalDep)).toLocaleString('fr-FR') + ' €', 14, y); y += 7;
+  doc.text('Résultat net cumulé : ' + Math.round(totalRes).toLocaleString('fr-FR') + ' €', 14, y); y += 7;
+  doc.text('Période couverte : ' + rows[0].period + ' à ' + rows[rows.length - 1].period + ' (' + rows.length + ' mois)', 14, y); y += 12;
+
+  const chartImg = mktDrawReportChart(rows);
+  doc.addImage(chartImg, 'PNG', 14, y, pageW - 28, 60);
+  y += 68;
+
+  doc.setFontSize(11); doc.text('Détail mensuel', 14, y); y += 6;
+  doc.setFontSize(9);
+  doc.setFillColor(230, 230, 230);
+  doc.rect(14, y, pageW - 28, 7, 'F');
+  doc.text('Période', 16, y + 5); doc.text('CA', 90, y + 5); doc.text('Charges', 130, y + 5); doc.text('Résultat', 170, y + 5);
+  y += 9;
+  rows.forEach(r => {
+    if (y > 270) { doc.addPage(); y = 20; }
+    doc.text(r.period, 16, y);
+    doc.text(Math.round(r.ca).toLocaleString('fr-FR') + ' €', 90, y);
+    doc.text(Math.round(Math.abs(r.dep)).toLocaleString('fr-FR') + ' €', 130, y);
+    doc.text(Math.round(r.resultat).toLocaleString('fr-FR') + ' €', 170, y);
+    y += 6;
+  });
+
+  if (y > 240) { doc.addPage(); y = 20; }
+  y += 6;
+  doc.setFontSize(11); doc.text('Répartition des charges par catégorie', 14, y); y += 7;
+  doc.setFontSize(9);
+  const totalDepAbs = Math.abs(totalDep) || 1;
+  Object.entries(catTotals).sort((a, b) => b[1] - a[1]).forEach(([cat, amt]) => {
+    if (y > 280) { doc.addPage(); y = 20; }
+    const pct = (amt / totalDepAbs * 100).toFixed(1);
+    doc.text(cat + ' — ' + Math.round(amt).toLocaleString('fr-FR') + ' € (' + pct + '%)', 16, y);
+    y += 6;
+  });
+
+  doc.save('rapport-' + bienNom.replace(/[^a-z0-9]+/gi, '-').toLowerCase() + '.pdf');
+}
+
 async function mktOpenDetail(id) {
   const el = document.getElementById('mkt-detail-view');
   el.innerHTML = '<div style="color:var(--text2)">Chargement...</div>';
@@ -617,6 +737,9 @@ async function mktOpenDetail(id) {
       '</div>'
     ) : '';
     const mapHtml = (l.lat && l.lon) ? '<div id="mkt-detail-map" style="height:280px;border-radius:12px;margin-bottom:20px"></div>' : '';
+    const reportHtml = l.linkedBienId
+      ? '<div class="chip chip-cyan" style="margin-bottom:14px;cursor:pointer" onclick="mktGenerateReport(\'' + l.linkedBienId + '\',\'' + escHtml(l.linkedBienNom || '') + '\')">📄 Télécharger le rapport financier (' + escHtml(l.linkedBienNom || '') + ')</div>'
+      : '';
     el.innerHTML =
       '<button class="btn btn-outline" onclick="mktCloseDetail()" style="margin-bottom:16px">← Retour</button>' +
       galleryHtml +
@@ -634,6 +757,7 @@ async function mktOpenDetail(id) {
       '</div>' +
       (l.description ? '<p style="font-size:13px;color:var(--text2);margin-bottom:14px">' + escHtml(l.description) + '</p>' : '') +
       (l.dvfComparatif ? '<div class="chip chip-gold" style="margin-bottom:14px">📊 Marché secteur : ' + l.dvfComparatif.prixM2Marche + ' €/m² (' + l.dvfComparatif.nbVentes + ' ventes)</div>' : '') +
+      reportHtml +
       contactHtml +
       '<div class="sep-title">Détail du score</div>' +
       breakdownHtml +

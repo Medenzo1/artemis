@@ -420,6 +420,17 @@
             <div><label class="lbl">Email</label><input type="email" id="mkt-f-contact-email" placeholder="toi@exemple.com"></div>
           </div>
 
+          <div class="sep-title">Rapport financier</div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+            <input type="checkbox" id="mkt-f-linked" onchange="mktToggleLinkedBien()" style="width:auto">
+            <label for="mkt-f-linked" style="font-size:12px;color:var(--text);cursor:pointer">Ce bien est suivi dans Artemis (Outils · Dashboard)</label>
+          </div>
+          <div id="mkt-linked-bien-wrap" style="display:none">
+            <label class="lbl">Bien correspondant</label>
+            <select id="mkt-f-linked-bien"></select>
+            <div style="font-size:11px;color:var(--text2);margin-top:6px">Un rapport PDF (revenus, charges, résultat) sera généré à partir des données réelles importées pour ce bien, téléchargeable depuis l'annonce.</div>
+          </div>
+
           <div class="sep-title">Baromètre d'opportunité</div>
           <div id="mkt-dvf-status" style="font-size:11px;color:var(--text2)"></div>
           <div id="mkt-questionnaire" style="display:flex;flex-direction:column;gap:14px"></div>
@@ -2177,6 +2188,7 @@
 <!-- ══ MOBILE NAV SCRIPT ══ -->
 <script src="js/12-mobile-nav.js"></script>
 <script src="js/13-init-patch.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="js/14-marketplace.js"></script>
 </body>
 </html>
