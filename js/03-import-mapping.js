@@ -1,18 +1,26 @@
 // ════════════════════════════════════════════
 //  PRÉ-MAPPING PAR RÈGLES
 // ════════════════════════════════════════════
-// Build a history index once per session for fast lookups
+// Historique basé sur le libellé court (colonne "Libellé" de la banque) :
+// pour une charge récurrente (loyer, abonnement, prélèvement...), la banque
+// réutilise le même libellé court d'un mois à l'autre, contrairement au
+// libellé complet qui contient des références/dates qui varient. On compare
+// donc ce libellé court tel quel (juste espaces/casse normalisés) aux
+// lignes déjà validées des 5 derniers mois, et on reprend exactement le
+// même mapping trouvé le plus récemment.
+const HISTORY_MONTHS_LOOKBACK = 5;
 let _historyIndex = null;
+function _libKey(s) { return String(s || '').toLowerCase().trim().replace(/\s+/g, ' '); }
+
 function getHistoryIndex() {
   if (_historyIndex) return _historyIndex;
   const db = getDB();
-  const allPast = Object.values(db.periods).flatMap(p => p.lines);
-  // Only keep lines that are fully validated (have cat + bienName + lot)
-  const valid = allPast.filter(l => l.cat && (l.bienName || l.bien) && l.lot);
-  // Build a map: normalised libelle → most recent match
+  const recentPeriodKeys = Object.keys(db.periods).sort().slice(-HISTORY_MONTHS_LOOKBACK);
+  const recentLines = recentPeriodKeys.flatMap(k => db.periods[k].lines || []);
+  const valid = recentLines.filter(l => l.cat && l.libelle);
   const idx = {};
   valid.forEach(l => {
-    const key = normaliseLib(l.libelle || '');
+    const key = _libKey(l.libelle);
     if (!idx[key]) idx[key] = [];
     idx[key].push(l);
   });
@@ -21,7 +29,8 @@ function getHistoryIndex() {
 }
 
 function normaliseLib(s) {
-  // Remove amounts, dates, reference numbers - keep the meaningful words
+  // Nettoyage utilisé pour l'affichage (tableaux du dashboard) : retire montants,
+  // dates et références pour ne garder que les mots utiles.
   return s.toLowerCase()
     .replace(/\d{2}\/\d{2}\/\d{4}/g, '')   // dates
     .replace(/\d+[.,]\d+/g, '')               // amounts
@@ -32,53 +41,17 @@ function normaliseLib(s) {
     .trim();
 }
 
-function similarityScore(a, b) {
-  // Word-overlap Jaccard similarity
-  const wa = new Set(a.split(' ').filter(w => w.length > 2));
-  const wb = new Set(b.split(' ').filter(w => w.length > 2));
-  if (!wa.size || !wb.size) return 0;
-  let inter = 0;
-  wa.forEach(w => { if (wb.has(w)) inter++; });
-  return inter / (wa.size + wb.size - inter);
-}
-
 function lookupHistory(r) {
   const idx = getHistoryIndex();
-  const libNorm = normaliseLib(r.libelle || '');
+  const key = _libKey(r.libelle);
+  if (!key || !idx[key] || !idx[key].length) return null;
+  const m = idx[key][idx[key].length - 1]; // occurrence la plus récente
+  return { cat: m.cat, bien: m.bienName || m.bien, lot: m.lot, sci: m.sci || sciForBien(m.bienName || m.bien || ''), conf: 'high', fromHistory: true };
+}
 
-  // 1. Exact normalised match
-  if (idx[libNorm] && idx[libNorm].length) {
-    const m = idx[libNorm][idx[libNorm].length - 1]; // most recent
-    return { cat: m.cat, bien: m.bienName || m.bien, lot: m.lot, sci: m.sci||sciForBien(m.bienName||m.bien||''), conf: 'high', fromHistory: true };
-  }
-
-  // 2. High-similarity match (Jaccard ≥ 0.55)
-  let bestScore = 0, bestMatch = null;
-  Object.entries(idx).forEach(([key, lines]) => {
-    const score = similarityScore(libNorm, key);
-    if (score > bestScore) { bestScore = score; bestMatch = lines[lines.length - 1]; }
-  });
-  if (bestScore >= 0.55 && bestMatch) {
-    return { cat: bestMatch.cat, bien: bestMatch.bienName || bestMatch.bien, lot: bestMatch.lot,
-             sci: bestMatch.sci||'', conf: bestScore >= 0.8 ? 'high' : 'medium', fromHistory: true };
-  }
-
-  // 3. Partial word match - if 2+ significant words match
-  const words = libNorm.split(' ').filter(w => w.length > 3);
-  if (words.length >= 2) {
-    let topScore = 0, topMatch = null;
-    Object.entries(idx).forEach(([key, lines]) => {
-      const matched = words.filter(w => key.includes(w)).length;
-      const ratio = matched / words.length;
-      if (ratio > topScore) { topScore = ratio; topMatch = lines[lines.length - 1]; }
-    });
-    if (topScore >= 0.6 && topMatch) {
-      return { cat: topMatch.cat, bien: topMatch.bienName || topMatch.bien, lot: topMatch.lot,
-               conf: 'medium', fromHistory: true };
-    }
-  }
-
-  return null;
+function sciForBien(nomOrId) {
+  const b = BIENS.find(b=>b.id===nomOrId || b.nom===nomOrId || b.name===nomOrId);
+  return b ? b.sci : '';
 }
 
 function preMapRow(r) {
@@ -88,10 +61,6 @@ function preMapRow(r) {
   // helpers
   function bienNom(id)  { return BIENS.find(b=>b.id===id)?.nom || ''; }
   function bienSci(id)  { return BIENS.find(b=>b.id===id)?.sci || ''; }
-  function sciForBien(nomOrId) {
-    const b = BIENS.find(b=>b.id===nomOrId || b.nom===nomOrId || b.name===nomOrId);
-    return b ? b.sci : '';
-  }
   // Shortcut: return {cat,bien,lot,sci,conf} with sci auto-filled
   function hit(cat, bienId, lot, conf) {
     const b = BIENS.find(x=>x.id===bienId);
@@ -1197,6 +1166,7 @@ linesCount: ventilLines.length,
 savedAt: new Date().toISOString(),
 };
 saveDB(db);
+_historyIndex = null; // ce mois vient d'être enregistré : le prochain pré-mapping doit en tenir compte
 
 // Détecter les lignes Immobilisation et créer des entrées pending dans amortissements
 const immoLines = ventilLines.filter(v => v.cat && v.cat.startsWith('Immobilisation - '));
