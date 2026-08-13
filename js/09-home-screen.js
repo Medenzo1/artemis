@@ -157,9 +157,13 @@ function _renderHomeKpis() {
   var caSpark=keys.map(function(k){return caPM[k];});
   var depSpark=keys.map(function(k){return Math.abs(depPM[k]||0);});
   var solSpark=keys.map(function(k){return soldePM[k];});
+  // depPM garde le signe d'origine (n\u00e9gatif) pour les autres \u00e9crans, mais "dep" ci-dessus
+  // est affich\u00e9 en valeur absolue : il faut comparer M-1 sur la m\u00eame base, sinon l'\u00e9cart
+  // calcul\u00e9 (positif - n\u00e9gatif) est artificiellement gonfl\u00e9.
+  var depAbsPM={}; keys.forEach(function(k){ depAbsPM[k]=Math.abs(depPM[k]||0); });
   el.innerHTML =
     _kpiCard('CA', "Chiffre d'affaires", periods.length?fmt(ca):'\u2014', 'var(--green)', '', _varBadges(ca,last,caPM,true), caSpark) +
-    _kpiCard('DE', 'Charges totales', periods.length?'-'+fmt(dep):'\u2014', 'var(--red)', '', _varBadges(dep,last,depPM,false), depSpark) +
+    _kpiCard('DE', 'Charges totales', periods.length?'-'+fmt(dep):'\u2014', 'var(--red)', '', _varBadges(dep,last,depAbsPM,false), depSpark) +
     _kpiCard('TR', 'Solde net', periods.length?(sol>=0?'+':'')+fmt(sol):'\u2014', sol>=0?'var(--cyan)':'var(--red)', '', _varBadges(sol,last,soldePM,true), solSpark);
 }
 
