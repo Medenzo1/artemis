@@ -1544,6 +1544,10 @@ function askConfirm(msg, onYes, yesLabel, yesColor) {
   msgEl.textContent = msg;
   if (yesLabel) yesBtn.textContent = yesLabel;
   if (yesColor) { yesBtn.style.background = yesColor; yesBtn.style.borderColor = yesColor; }
+  // Replacé à la racine du <body> avant chaque ouverture : certains écrans plein
+  // écran (ex. Marketplace) vivent dans un conteneur flex dont l'ordre d'empilement
+  // piège les enfants sous Safari, rendant la popup invisible malgré son z-index.
+  if (modal.parentElement !== document.body) document.body.appendChild(modal);
   modal.style.display = 'flex';
   const close = () => { modal.style.display = 'none'; yesBtn.onclick = null; noBtn.onclick = null; };
   yesBtn.onclick = () => { close(); onYes(); };
