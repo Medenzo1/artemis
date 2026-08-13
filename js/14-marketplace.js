@@ -543,6 +543,52 @@ async function mktRefreshGrid() {
 }
 
 // ── Détail ──
+// ── Analyse automatique (texte généré à partir des données calculées, pas
+// d'IA rédactrice : quelques phrases construites selon le score, le rendement,
+// l'écart au marché DVF et les points forts/faibles du questionnaire) ──
+function mktGenerateComment(l) {
+  const parts = [];
+
+  if (l.score != null) {
+    let verdict;
+    if (l.score >= 7.5) verdict = "une très bonne opportunité d'investissement";
+    else if (l.score >= 6) verdict = "une opportunité correcte, avec quelques points de vigilance";
+    else if (l.score >= 4.5) verdict = "un investissement à examiner avec prudence";
+    else verdict = "un investissement présentant plusieurs points faibles";
+    parts.push('Avec une note de <b>' + l.score.toFixed(1) + '/10</b>, ce bien représente ' + verdict + '.');
+  }
+
+  const rendementItem = (l.scoreBreakdown || []).find(b => b.id === 'rendement');
+  if (rendementItem) {
+    const niveau = rendementItem.points >= 8 ? 'nettement au-dessus'
+      : rendementItem.points >= 6 ? 'dans la moyenne haute'
+      : rendementItem.points >= 4 ? 'dans la moyenne'
+      : 'en-dessous';
+    parts.push('Le rendement brut estimé (' + rendementItem.detail + ') est ' + niveau + " des standards d'un investissement locatif classique (repère usuel : 4 à 6 % brut).");
+  }
+
+  if (l.dvfComparatif && l.prix && l.surface) {
+    const prixM2Bien = Math.round(l.prix / l.surface);
+    const ecart = Math.round(((prixM2Bien - l.dvfComparatif.prixM2Marche) / l.dvfComparatif.prixM2Marche) * 100);
+    const comparaison = ecart > 3 ? (ecart + '% au-dessus') : ecart < -3 ? ((-ecart) + '% en-dessous') : 'proche';
+    parts.push(
+      'Le prix affiché (' + prixM2Bien.toLocaleString('fr-FR') + ' €/m²) est ' + comparaison +
+      ' du prix moyen constaté sur le secteur via DVF (' + l.dvfComparatif.prixM2Marche.toLocaleString('fr-FR') + ' €/m², ' + l.dvfComparatif.nbVentes + ' vente(s) sur 2 ans). ' +
+      'Cette donnée reste <b>à prendre avec précaution</b> : échantillon parfois limité, biens pas toujours comparables (état, étage, exposition...).'
+    );
+  }
+
+  const bd = (l.scoreBreakdown || []).slice().sort((a, b) => b.points - a.points);
+  if (bd.length >= 2) {
+    const best = bd[0], worst = bd[bd.length - 1];
+    if (best.points >= 7 && best.id !== 'rendement') parts.push('Point fort : <b>' + best.label.toLowerCase() + '</b> (' + best.detail + ').');
+    if (worst.points <= 4) parts.push('Point de vigilance : <b>' + worst.label.toLowerCase() + '</b> (' + worst.detail + ').');
+  }
+
+  if (!parts.length) return '';
+  return '<div class="mkt-comment"><div class="mkt-comment-label">💬 Analyse Artemis</div><p>' + parts.join(' ') + '</p></div>';
+}
+
 async function mktOpenDetail(id) {
   const el = document.getElementById('mkt-detail-view');
   el.innerHTML = '<div style="color:var(--text2)">Chargement...</div>';
@@ -560,6 +606,7 @@ async function mktOpenDetail(id) {
       '<div><div style="color:var(--text)">' + escHtml(b.label) + '</div><div style="color:var(--text2);font-size:11px">' + escHtml(b.detail || '') + ' · poids ' + b.weight + '%</div></div>' +
       '<div style="font-family:monospace;font-weight:700">' + b.points + '/10</div></div>'
     ).join('');
+    const commentHtml = mktGenerateComment(l);
     const hasContact = l.contactNom || l.contactTel || l.contactEmail;
     const contactHtml = hasContact ? (
       '<div class="sep-title">Contact</div>' +
@@ -590,6 +637,7 @@ async function mktOpenDetail(id) {
       contactHtml +
       '<div class="sep-title">Détail du score</div>' +
       breakdownHtml +
+      commentHtml +
       '<div style="display:flex;justify-content:flex-end;margin-top:16px">' +
       '<button class="btn btn-red" onclick="mktDeleteListing(\'' + l.id + '\')">🗑 Supprimer</button>' +
       '</div></div>';
