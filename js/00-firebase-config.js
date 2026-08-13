@@ -33,11 +33,15 @@ const _origRemoveItem = Storage.prototype.removeItem.bind(localStorage);
 let _pendingPush = {};
 let _pushTimer = null;
 function _flushCloudPush() {
-  if (!_auth.currentUser) return;
+  if (!_auth.currentUser) { console.warn('[artemis] sync ignorée : utilisateur non authentifié'); return; }
   const data = _pendingPush;
   _pendingPush = {};
   _fs.collection('sync').doc('shared').set(data, { merge: true })
-    .catch(e => console.error('[artemis] échec de synchronisation cloud', e));
+    .then(() => { try { showToast('☁ Synchronisé'); } catch(e) {} })
+    .catch(e => {
+      console.error('[artemis] échec de synchronisation cloud', e);
+      try { showToast('⚠ Échec de synchro cloud : ' + (e && e.code || e), '#f0566a'); } catch(_) { alert('Échec de synchro cloud : ' + e); }
+    });
 }
 function _scheduleCloudPush(key, value) {
   _pendingPush[key] = value;
@@ -60,13 +64,16 @@ localStorage.removeItem = function (key) {
 async function _pullCloudData() {
   try {
     const snap = await _fs.collection('sync').doc('shared').get();
-    if (!snap.exists) return;
+    if (!snap.exists) { console.warn('[artemis] aucune donnée cloud trouvée (document sync/shared inexistant)'); return; }
     const data = snap.data();
+    let applied = 0;
     _SYNC_KEYS.forEach(k => {
-      if (typeof data[k] === 'string') _origSetItem(k, data[k]);
+      if (typeof data[k] === 'string') { _origSetItem(k, data[k]); applied++; }
     });
+    console.log('[artemis] données cloud récupérées :', applied, 'clé(s)');
   } catch (e) {
     console.error('[artemis] échec de récupération cloud, utilisation des données locales', e);
+    try { showToast('⚠ Échec de récupération cloud : ' + (e && e.code || e), '#f0566a'); } catch(_) {}
   }
 }
 
