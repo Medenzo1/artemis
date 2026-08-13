@@ -197,29 +197,57 @@ function _mktFeatureToGeo(f) {
   };
 }
 
-// ── Comparatif DVF (best-effort — service communautaire non garanti,
-// jamais bloquant : en cas d'échec le formulaire retombe sur une saisie manuelle) ──
-async function fetchDvfComparatif(inseeCode, typeLocal) {
-  if (!inseeCode) return null;
+// ── Comparatif DVF officiel (Etalab, app.dvf.etalab.gouv.fr — gouvernemental,
+// CORS activé, vérifié en direct). Contrairement au service communautaire testé
+// avant, cette API demande la section cadastrale exacte plutôt qu'un simple code
+// commune : on géolocalise donc d'abord le point dans les sections cadastrales
+// de la commune (cadastre.data.gouv.fr) avant d'interroger les ventes.
+// Toujours best-effort — en cas d'échec le formulaire retombe sur une saisie manuelle.
+function _mktPointInRing(pt, ring) {
+  let inside = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const xi = ring[i][0], yi = ring[i][1], xj = ring[j][0], yj = ring[j][1];
+    const intersect = ((yi > pt[1]) !== (yj > pt[1])) && (pt[0] < (xj - xi) * (pt[1] - yi) / (yj - yi) + xi);
+    if (intersect) inside = !inside;
+  }
+  return inside;
+}
+function _mktPointInFeature(pt, feature) {
+  const geom = feature && feature.geometry;
+  if (!geom) return false;
+  const polys = geom.type === 'Polygon' ? [geom.coordinates] : geom.type === 'MultiPolygon' ? geom.coordinates : [];
+  return polys.some(poly => poly.length && _mktPointInRing(pt, poly[0]));
+}
+
+async function fetchDvfComparatif(lat, lon, inseeCode, typeLocal) {
+  if (!inseeCode || lat == null || lon == null) return null;
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 8000);
   try {
-    const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), 5000);
-    const url = 'https://api.cquest.org/dvf?code_commune=' + encodeURIComponent(inseeCode) +
-      '&nature_mutation=Vente&type_local=' + encodeURIComponent(typeLocal || 'Appartement');
-    const res = await fetch(url, { signal: ctrl.signal });
-    clearTimeout(timer);
-    if (!res.ok) return null;
-    const data = await res.json();
-    const rows = Array.isArray(data) ? data : (data.features ? data.features.map(f => f.properties || f) : []);
-    const valid = rows
-      .map(r => ({ valeur: parseFloat(r.valeur_fonciere), surface: parseFloat(r.surface_reelle_bati) }))
-      .filter(r => r.valeur > 0 && r.surface > 0);
+    const sectionsRes = await fetch('https://cadastre.data.gouv.fr/bundler/cadastre-etalab/communes/' + inseeCode + '/geojson/sections', { signal: ctrl.signal });
+    if (!sectionsRes.ok) return null;
+    const sectionsGeo = await sectionsRes.json();
+    const pt = [lon, lat];
+    const section = (sectionsGeo.features || []).find(f => _mktPointInFeature(pt, f));
+    if (!section) return null;
+    const sectionPrefixee = (section.properties.prefixe || '000') + section.properties.code;
+    const mutRes = await fetch('https://app.dvf.etalab.gouv.fr/api/mutations3/' + inseeCode + '/' + sectionPrefixee, { signal: ctrl.signal });
+    if (!mutRes.ok) return null;
+    const mutData = await mutRes.json();
+    const cutoff = new Date(); cutoff.setFullYear(cutoff.getFullYear() - 2);
+    const cutoffStr = cutoff.toISOString().slice(0, 10);
+    const valid = (mutData.mutations || [])
+      .filter(m => m.nature_mutation === 'Vente' && m.type_local === (typeLocal || 'Appartement') && m.date_mutation >= cutoffStr)
+      .map(m => ({ valeur: parseFloat(m.valeur_fonciere), surface: parseFloat(m.surface_reelle_bati) }))
+      .filter(m => m.valeur > 1000 && m.surface > 5);
     if (!valid.length) return null;
-    const prixM2Moyen = valid.reduce((s, r) => s + r.valeur / r.surface, 0) / valid.length;
+    const prixM2Moyen = valid.reduce((s, m) => s + m.valeur / m.surface, 0) / valid.length;
     return { prixM2Marche: Math.round(prixM2Moyen), nbVentes: valid.length };
   } catch (e) {
     console.warn('[marketplace] comparatif DVF indisponible', e);
     return null;
+  } finally {
+    clearTimeout(timer);
   }
 }
 
@@ -397,7 +425,7 @@ async function mktRunDvfLookup() {
   if (!geo) return;
   statusEl.textContent = '📍 ' + geo.label + ' — recherche de ventes comparables...';
   const type = document.getElementById('mkt-f-type').value;
-  const dvf = await fetchDvfComparatif(geo.inseeCode, type);
+  const dvf = await fetchDvfComparatif(geo.lat, geo.lon, geo.inseeCode, type);
   _mktCurrentDvf = dvf;
   if (dvf) {
     statusEl.textContent = '📊 Prix moyen du secteur : ' + dvf.prixM2Marche + ' €/m² (' + dvf.nbVentes + ' vente(s) trouvée(s))';
