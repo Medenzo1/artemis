@@ -608,6 +608,46 @@ function mktGenerateComment(l) {
 }
 
 // ── Rapport financier PDF (bien suivi dans Artemis, données réelles importées) ──
+// Design "dossier bancaire" : page de couverture + synthèse KPI + graphique
+// vectoriel + tableau détaillé + répartition des charges, aux couleurs Artemis.
+const PDF_NAVY   = [13, 23, 46];
+const PDF_NAVY2  = [23, 35, 68];
+const PDF_CYAN   = [34, 211, 200];
+const PDF_GOLD   = [245, 183, 49];
+const PDF_GREEN  = [34, 201, 122];
+const PDF_RED    = [240, 86, 106];
+const PDF_PURPLE = [155, 110, 243];
+const PDF_BGSOFT = [244, 246, 250];
+const PDF_LINE   = [226, 231, 239];
+const PDF_TEXT   = [23, 28, 40];
+const PDF_MUTED  = [110, 122, 145];
+const PDF_CAT_COLORS = [PDF_GOLD, PDF_CYAN, PDF_PURPLE, PDF_RED, PDF_GREEN, PDF_NAVY2];
+const PDF_TYPE_LABELS = { LCD: 'Location courte durée', LLD: 'Location longue durée', SC: 'Sous-colocation' };
+const PDF_MONTHS = ['Janv.', 'Févr.', 'Mars', 'Avr.', 'Mai', 'Juin', 'Juil.', 'Août', 'Sept.', 'Oct.', 'Nov.', 'Déc.'];
+
+function mktFmtPeriod(period, short) {
+  const [y, m] = String(period).split('-');
+  const mi = (+m || 1) - 1;
+  if (short) return (m || '01') + '/' + String(y).slice(-2);
+  return (PDF_MONTHS[mi] || m) + ' ' + y;
+}
+// Les polices standard des PDF (WinAnsi) ne supportent pas l'espace fine insécable
+// (U+202F) utilisée par défaut par toLocaleString('fr-FR') pour grouper les milliers :
+// jsPDF retombe alors sur un caractère parasite ("/"). On la remplace par un espace normal.
+function mktFmtNum(n, opts) { return n.toLocaleString('fr-FR', opts).replace(/[  ]/g, ' '); }
+function mktFmtEUR(n) { return mktFmtNum(Math.round(n)) + ' €'; }
+function mktFmtK(n) {
+  if (Math.abs(n) >= 1000) return mktFmtNum(n / 1000, { maximumFractionDigits: 1 }) + ' k€';
+  return mktFmtNum(Math.round(n)) + ' €';
+}
+function mktNiceMax(v) {
+  if (v <= 0) return 100;
+  const exp = Math.pow(10, Math.floor(Math.log10(v)));
+  const f = v / exp;
+  const nf = f <= 1 ? 1 : f <= 2 ? 2 : f <= 5 ? 5 : 10;
+  return nf * exp;
+}
+
 function mktBuildBienStats(bienId) {
   const db = getDB();
   const periodKeys = Object.keys(db.periods || {}).sort();
@@ -627,88 +667,289 @@ function mktBuildBienStats(bienId) {
   return { rows, catTotals };
 }
 
-function mktDrawReportChart(rows) {
-  const canvas = document.createElement('canvas');
-  canvas.width = 900; canvas.height = 300;
-  const ctx = canvas.getContext('2d');
-  ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, 900, 300);
-  const maxVal = Math.max(1, ...rows.map(r => Math.max(r.ca, Math.abs(r.dep))));
-  const barW = 900 / rows.length;
-  rows.forEach((r, i) => {
-    const x = i * barW;
-    const caH = (r.ca / maxVal) * 220;
-    const depH = (Math.abs(r.dep) / maxVal) * 220;
-    ctx.fillStyle = '#22c97a';
-    ctx.fillRect(x + barW * 0.15, 240 - caH, barW * 0.3, caH);
-    ctx.fillStyle = '#f0566a';
-    ctx.fillRect(x + barW * 0.55, 240 - depH, barW * 0.3, depH);
+// Charge une image (logo local ou photo Cloudinary) et la convertit en dataURL exploitable par jsPDF.
+function mktLoadImage(url) {
+  return new Promise(resolve => {
+    if (!url) { resolve(null); return; }
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      try {
+        const c = document.createElement('canvas');
+        c.width = img.naturalWidth; c.height = img.naturalHeight;
+        c.getContext('2d').drawImage(img, 0, 0);
+        resolve({ dataUrl: c.toDataURL('image/png'), w: img.naturalWidth, h: img.naturalHeight });
+      } catch (e) { resolve(null); }
+    };
+    img.onerror = () => resolve(null);
+    img.src = url;
   });
-  ctx.fillStyle = '#22c97a'; ctx.fillRect(10, 270, 14, 14);
-  ctx.fillStyle = '#333'; ctx.font = '16px sans-serif'; ctx.fillText("Chiffre d'affaires", 30, 282);
-  ctx.fillStyle = '#f0566a'; ctx.fillRect(220, 270, 14, 14);
-  ctx.fillStyle = '#333'; ctx.fillText('Charges', 240, 282);
-  return canvas.toDataURL('image/png');
 }
 
-function mktGenerateReport(bienId, bienNom) {
+function mktPdfHeaderBand(doc, logo, bienNom) {
+  const pageW = doc.internal.pageSize.getWidth();
+  doc.setFillColor(...PDF_NAVY); doc.rect(0, 0, pageW, 20, 'F');
+  if (logo) doc.addImage(logo.dataUrl, 'PNG', 14, 5, 10, 10);
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(255, 255, 255);
+  doc.text('ARTEMIS', 28, 12);
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(...PDF_CYAN);
+  doc.text('Rapport financier · ' + bienNom, pageW - 14, 9, { align: 'right' });
+  doc.setTextColor(200, 208, 225);
+  doc.text('Généré le ' + new Date().toLocaleDateString('fr-FR'), pageW - 14, 14.5, { align: 'right' });
+  return 30;
+}
+
+function mktPdfFooters(doc) {
+  const pageW = doc.internal.pageSize.getWidth();
+  const pageH = doc.internal.pageSize.getHeight();
+  const total = doc.internal.getNumberOfPages();
+  for (let p = 1; p <= total; p++) {
+    doc.setPage(p);
+    doc.setDrawColor(...PDF_LINE); doc.setLineWidth(0.3);
+    doc.line(14, pageH - 13, pageW - 14, pageH - 13);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); doc.setTextColor(...PDF_MUTED);
+    doc.text('Artemis · Document confidentiel — usage interne et bancaire', 14, pageH - 8);
+    doc.text('Page ' + p + ' / ' + total, pageW - 14, pageH - 8, { align: 'right' });
+  }
+}
+
+// Carte KPI arrondie avec liseré coloré, style tableau de bord bancaire.
+function mktPdfKpiCard(doc, x, y, w, h, label, value, color) {
+  doc.setFillColor(...PDF_BGSOFT); doc.roundedRect(x, y, w, h, 2, 2, 'F');
+  doc.setFillColor(...color); doc.roundedRect(x, y, 2.2, h, 1.1, 1.1, 'F');
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(7.2); doc.setTextColor(...PDF_MUTED);
+  doc.text(label.toUpperCase(), x + 7, y + 8);
+  const fs = value.length > 13 ? 11 : value.length > 10 ? 13 : 15;
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(fs); doc.setTextColor(...PDF_TEXT);
+  doc.text(value, x + 7, y + h - 6);
+}
+
+function mktPdfSectionTitle(doc, x, y, title) {
+  doc.setFillColor(...PDF_GOLD); doc.rect(x, y - 4, 1.4, 5, 'F');
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(11.5); doc.setTextColor(...PDF_NAVY);
+  doc.text(title, x + 4, y);
+}
+
+// Graphique en barres 100% vectoriel (net à l'impression, pas de flou de rastérisation).
+function mktPdfBarChart(doc, x, y, w, h, rows) {
+  const leftPad = 20, bottomPad = 14;
+  const plotX = x + leftPad, plotW = w - leftPad, plotH = h - bottomPad;
+  const maxVal = mktNiceMax(Math.max(1, ...rows.map(r => Math.max(r.ca, Math.abs(r.dep)))));
+  doc.setLineWidth(0.2);
+  for (let i = 0; i <= 4; i++) {
+    const gy = y + plotH - (plotH * i / 4);
+    doc.setDrawColor(...(i === 0 ? PDF_MUTED : PDF_LINE));
+    doc.line(plotX, gy, x + w, gy);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(7); doc.setTextColor(...PDF_MUTED);
+    doc.text(mktFmtK(maxVal * i / 4), plotX - 3, gy + 1, { align: 'right' });
+  }
+  const n = rows.length;
+  const groupW = plotW / n;
+  const barW = Math.min(9, groupW * 0.32);
+  const gap = barW * 0.3;
+  const shortLabels = n > 6;
+  rows.forEach((r, i) => {
+    const gx = plotX + groupW * i + groupW / 2;
+    const caH = (r.ca / maxVal) * plotH;
+    const depH = (Math.abs(r.dep) / maxVal) * plotH;
+    doc.setFillColor(...PDF_GREEN);
+    doc.roundedRect(gx - barW - gap / 2, y + plotH - caH, barW, Math.max(caH, 0.3), 0.6, 0.6, 'F');
+    doc.setFillColor(...PDF_RED);
+    doc.roundedRect(gx + gap / 2, y + plotH - depH, barW, Math.max(depH, 0.3), 0.6, 0.6, 'F');
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(n > 10 ? 6 : 7); doc.setTextColor(...PDF_MUTED);
+    doc.text(mktFmtPeriod(r.period, shortLabels), gx, y + plotH + 7, { align: 'center' });
+  });
+}
+
+function mktPdfLegendDot(doc, x, y, color, label) {
+  doc.setFillColor(...color); doc.roundedRect(x, y - 2.6, 3.2, 3.2, 0.8, 0.8, 'F');
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(...PDF_TEXT);
+  doc.text(label, x + 5, y);
+}
+
+async function mktGenerateReport(bienId, bienNom) {
   if (!window.jspdf) { showToast('⚠️ Génération PDF indisponible', '#f0566a'); return; }
   const { jsPDF } = window.jspdf;
   const { rows, catTotals } = mktBuildBienStats(bienId);
   if (!rows.length) { showToast('⚠️ Aucune donnée trouvée pour ce bien dans la base Artemis', '#f0566a'); return; }
 
+  showToast('📄 Génération du rapport en cours…', '#22d3c8');
+
+  const bien = (getParams().biens || []).find(b => b.id === bienId) || {};
+  const listing = (_mktCurrentListing && _mktCurrentListing.linkedBienId === bienId) ? _mktCurrentListing : null;
+
+  const [logo, photo] = await Promise.all([
+    mktLoadImage('icon-192.png'),
+    (listing && listing.photos && listing.photos[0]) ? mktLoadImage(mktCldUrl(listing.photos[0], 'w_1000,h_650,c_fill,q_auto,f_auto')) : Promise.resolve(null)
+  ]);
+
   const totalCa = rows.reduce((s, r) => s + r.ca, 0);
   const totalDep = rows.reduce((s, r) => s + r.dep, 0);
   const totalRes = totalCa + totalDep;
+  const totalDepAbs = Math.abs(totalDep) || 1;
+  const moyMensuelle = totalRes / rows.length;
 
   const doc = new jsPDF();
   const pageW = doc.internal.pageSize.getWidth();
-  let y = 20;
+  const pageH = doc.internal.pageSize.getHeight();
+  const marginX = 14;
+  const contentW = pageW - marginX * 2;
 
-  doc.setFontSize(18); doc.setTextColor(20, 20, 20);
-  doc.text('Rapport financier — ' + bienNom, 14, y); y += 8;
-  doc.setFontSize(10); doc.setTextColor(120, 120, 120);
-  doc.text('Généré depuis Artemis le ' + new Date().toLocaleDateString('fr-FR'), 14, y); y += 12;
+  // ═══ PAGE DE COUVERTURE ═══
+  doc.setFillColor(...PDF_NAVY); doc.rect(0, 0, pageW, pageH, 'F');
+  doc.setFillColor(...PDF_GOLD); doc.rect(0, 0, pageW * 0.28, 1.4, 'F');
 
-  doc.setFontSize(11); doc.setTextColor(20, 20, 20);
-  doc.text("Chiffre d'affaires cumulé : " + Math.round(totalCa).toLocaleString('fr-FR') + ' €', 14, y); y += 7;
-  doc.text('Charges cumulées : ' + Math.round(Math.abs(totalDep)).toLocaleString('fr-FR') + ' €', 14, y); y += 7;
-  doc.text('Résultat net cumulé : ' + Math.round(totalRes).toLocaleString('fr-FR') + ' €', 14, y); y += 7;
-  doc.text('Période couverte : ' + rows[0].period + ' à ' + rows[rows.length - 1].period + ' (' + rows.length + ' mois)', 14, y); y += 12;
+  if (logo) {
+    doc.setFillColor(255, 255, 255); doc.roundedRect(pageW / 2 - 17, 34, 34, 34, 4, 4, 'F');
+    doc.addImage(logo.dataUrl, 'PNG', pageW / 2 - 13, 38, 26, 26);
+  }
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(20); doc.setTextColor(255, 255, 255);
+  doc.text('A R T E M I S', pageW / 2, 84, { align: 'center' });
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(...PDF_CYAN);
+  doc.text('G E S T I O N   L O C A T I V E   &   S C I', pageW / 2, 91, { align: 'center' });
 
-  const chartImg = mktDrawReportChart(rows);
-  doc.addImage(chartImg, 'PNG', 14, y, pageW - 28, 60);
-  y += 68;
+  doc.setDrawColor(...PDF_GOLD); doc.setLineWidth(0.6);
+  doc.line(pageW / 2 - 14, 100, pageW / 2 + 14, 100);
 
-  doc.setFontSize(11); doc.text('Détail mensuel', 14, y); y += 6;
-  doc.setFontSize(9);
-  doc.setFillColor(230, 230, 230);
-  doc.rect(14, y, pageW - 28, 7, 'F');
-  doc.text('Période', 16, y + 5); doc.text('CA', 90, y + 5); doc.text('Charges', 130, y + 5); doc.text('Résultat', 170, y + 5);
-  y += 9;
-  rows.forEach(r => {
-    if (y > 270) { doc.addPage(); y = 20; }
-    doc.text(r.period, 16, y);
-    doc.text(Math.round(r.ca).toLocaleString('fr-FR') + ' €', 90, y);
-    doc.text(Math.round(Math.abs(r.dep)).toLocaleString('fr-FR') + ' €', 130, y);
-    doc.text(Math.round(r.resultat).toLocaleString('fr-FR') + ' €', 170, y);
-    y += 6;
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(28); doc.setTextColor(255, 255, 255);
+  doc.text('Rapport financier', pageW / 2, 118, { align: 'center' });
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(15); doc.setTextColor(...PDF_CYAN);
+  doc.text(bienNom, pageW / 2, 128, { align: 'center' });
+
+  if (photo) {
+    const pw = 120, ph = 78, px = pageW / 2 - pw / 2, py = 140;
+    doc.setFillColor(255, 255, 255); doc.roundedRect(px - 1.5, py - 1.5, pw + 3, ph + 3, 3, 3, 'F');
+    doc.addImage(photo.dataUrl, 'PNG', px, py, pw, ph);
+  }
+
+  const factsY = photo ? 232 : 150;
+  const facts = [
+    ['SCI', bien.sci || '—'],
+    ['Type', PDF_TYPE_LABELS[bien.type] || bien.type || '—'],
+    ['Adresse', listing ? ([listing.adresse, listing.ville].filter(Boolean).join(', ') || '—') : '—'],
+    ['Période couverte', mktFmtPeriod(rows[0].period) + ' → ' + mktFmtPeriod(rows[rows.length - 1].period)]
+  ];
+  doc.setFillColor(255, 255, 255); doc.roundedRect(marginX + 10, factsY, contentW - 20, 34, 3, 3, 'F');
+  const colW = (contentW - 20) / 2;
+  facts.forEach((f, i) => {
+    const fx = marginX + 10 + 8 + (i % 2) * colW;
+    const fy = factsY + 12 + Math.floor(i / 2) * 14;
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); doc.setTextColor(...PDF_MUTED);
+    doc.text(f[0].toUpperCase(), fx, fy - 4);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(10.5); doc.setTextColor(...PDF_TEXT);
+    doc.text(String(f[1]), fx, fy + 2);
   });
 
-  if (y > 240) { doc.addPage(); y = 20; }
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(150, 160, 182);
+  doc.text('Document confidentiel généré automatiquement par Artemis le ' + new Date().toLocaleDateString('fr-FR'), pageW / 2, pageH - 14, { align: 'center' });
+
+  // ═══ PAGE 2 — SYNTHÈSE ═══
+  doc.addPage();
+  let y = mktPdfHeaderBand(doc, logo, bienNom);
   y += 6;
-  doc.setFontSize(11); doc.text('Répartition des charges par catégorie', 14, y); y += 7;
-  doc.setFontSize(9);
-  const totalDepAbs = Math.abs(totalDep) || 1;
-  Object.entries(catTotals).sort((a, b) => b[1] - a[1]).forEach(([cat, amt]) => {
-    if (y > 280) { doc.addPage(); y = 20; }
-    const pct = (amt / totalDepAbs * 100).toFixed(1);
-    doc.text(cat + ' — ' + Math.round(amt).toLocaleString('fr-FR') + ' € (' + pct + '%)', 16, y);
-    y += 6;
+
+  mktPdfSectionTitle(doc, marginX, y, 'Synthèse financière');
+  y += 8;
+
+  const cardGap = 5;
+  const cardW = (contentW - cardGap * 3) / 4;
+  const cardH = 26;
+  mktPdfKpiCard(doc, marginX, y, cardW, cardH, "Chiffre d'affaires", mktFmtEUR(totalCa), PDF_GREEN);
+  mktPdfKpiCard(doc, marginX + (cardW + cardGap), y, cardW, cardH, 'Charges', mktFmtEUR(totalDepAbs), PDF_RED);
+  mktPdfKpiCard(doc, marginX + (cardW + cardGap) * 2, y, cardW, cardH, 'Résultat net', mktFmtEUR(totalRes), totalRes >= 0 ? PDF_GOLD : PDF_RED);
+  mktPdfKpiCard(doc, marginX + (cardW + cardGap) * 3, y, cardW, cardH, 'Moyenne mensuelle', mktFmtEUR(moyMensuelle), PDF_CYAN);
+  y += cardH + 14;
+
+  mktPdfSectionTitle(doc, marginX, y, 'Évolution mensuelle');
+  mktPdfLegendDot(doc, pageW - 14 - 95, y, PDF_GREEN, "Chiffre d'affaires");
+  mktPdfLegendDot(doc, pageW - 14 - 28, y, PDF_RED, 'Charges');
+  y += 10;
+  const chartH = 66;
+  mktPdfBarChart(doc, marginX, y, contentW, chartH, rows);
+  y += chartH + 12;
+
+  // Tableau détail mensuel (avec saut de page automatique + en-tête répété)
+  const tableTop = () => {
+    mktPdfSectionTitle(doc, marginX, y, 'Détail mensuel');
+    y += 7;
+    doc.setFillColor(...PDF_NAVY); doc.rect(marginX, y, contentW, 8, 'F');
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(8.5); doc.setTextColor(255, 255, 255);
+    doc.text('PÉRIODE', marginX + 4, y + 5.5);
+    doc.text("CHIFFRE D'AFFAIRES", marginX + contentW * 0.52, y + 5.5, { align: 'right' });
+    doc.text('CHARGES', marginX + contentW * 0.74, y + 5.5, { align: 'right' });
+    doc.text('RÉSULTAT', marginX + contentW - 4, y + 5.5, { align: 'right' });
+    y += 8;
+  };
+  if (y + 8 > pageH - 24) { doc.addPage(); y = mktPdfHeaderBand(doc, logo, bienNom); }
+  tableTop();
+
+  const rowH = 7.2;
+  rows.forEach((r, i) => {
+    if (y + rowH > pageH - 24) {
+      doc.addPage();
+      y = mktPdfHeaderBand(doc, logo, bienNom);
+      tableTop();
+    }
+    if (i % 2 === 1) { doc.setFillColor(...PDF_BGSOFT); doc.rect(marginX, y, contentW, rowH, 'F'); }
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor(...PDF_TEXT);
+    doc.text(mktFmtPeriod(r.period), marginX + 4, y + 5);
+    doc.text(mktFmtEUR(r.ca), marginX + contentW * 0.52, y + 5, { align: 'right' });
+    doc.setTextColor(...PDF_RED);
+    doc.text(mktFmtEUR(Math.abs(r.dep)), marginX + contentW * 0.74, y + 5, { align: 'right' });
+    doc.setTextColor(...(r.resultat >= 0 ? PDF_GREEN : PDF_RED));
+    doc.setFont('helvetica', 'bold');
+    doc.text(mktFmtEUR(r.resultat), marginX + contentW - 4, y + 5, { align: 'right' });
+    y += rowH;
   });
 
+  if (y + rowH > pageH - 24) { doc.addPage(); y = mktPdfHeaderBand(doc, logo, bienNom); }
+  doc.setDrawColor(...PDF_NAVY); doc.setLineWidth(0.6); doc.line(marginX, y, marginX + contentW, y);
+  doc.setFillColor(...PDF_BGSOFT); doc.rect(marginX, y, contentW, rowH + 1, 'F');
+  y += rowH * 0.72;
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(...PDF_NAVY);
+  doc.text('TOTAL', marginX + 4, y);
+  doc.setTextColor(...PDF_GREEN); doc.text(mktFmtEUR(totalCa), marginX + contentW * 0.52, y, { align: 'right' });
+  doc.setTextColor(...PDF_RED); doc.text(mktFmtEUR(totalDepAbs), marginX + contentW * 0.74, y, { align: 'right' });
+  doc.setTextColor(...(totalRes >= 0 ? PDF_GREEN : PDF_RED)); doc.text(mktFmtEUR(totalRes), marginX + contentW - 4, y, { align: 'right' });
+  y += rowH + 12;
+
+  // Répartition des charges par catégorie (barres horizontales colorées)
+  const catEntries = Object.entries(catTotals).sort((a, b) => b[1] - a[1]);
+  if (catEntries.length) {
+    if (y + 25 > pageH - 24 && y > 60) {
+      doc.addPage(); y = mktPdfHeaderBand(doc, logo, bienNom);
+    }
+    mktPdfSectionTitle(doc, marginX, y, 'Répartition des charges par catégorie');
+    y += 10;
+    const maxCat = catEntries[0][1];
+    catEntries.forEach(([cat, amt], i) => {
+      if (y + 11 > pageH - 24) { doc.addPage(); y = mktPdfHeaderBand(doc, logo, bienNom); }
+      const pct = (amt / totalDepAbs * 100);
+      const color = PDF_CAT_COLORS[i % PDF_CAT_COLORS.length];
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor(...PDF_TEXT);
+      doc.text(cat, marginX, y);
+      doc.setTextColor(...PDF_MUTED);
+      doc.text(mktFmtEUR(amt) + '  ·  ' + pct.toFixed(1) + '%', marginX + contentW, y, { align: 'right' });
+      y += 2.5;
+      doc.setFillColor(...PDF_LINE); doc.roundedRect(marginX, y, contentW, 3, 1.5, 1.5, 'F');
+      const fillW = Math.max(3, contentW * (amt / maxCat));
+      doc.setFillColor(...color); doc.roundedRect(marginX, y, fillW, 3, 1.5, 1.5, 'F');
+      y += 8.5;
+    });
+    y += 4;
+  }
+
+  if (y + 14 > pageH - 24) { doc.addPage(); y = mktPdfHeaderBand(doc, logo, bienNom); }
+  doc.setFont('helvetica', 'italic'); doc.setFontSize(7); doc.setTextColor(...PDF_MUTED);
+  const disclaimer = "Les montants présentés sont issus des données comptables importées et catégorisées dans Artemis (relevés bancaires, plateformes de location). Ce document est fourni à titre indicatif et ne constitue pas une pièce comptable certifiée.";
+  doc.text(doc.splitTextToSize(disclaimer, contentW), marginX, y);
+
+  mktPdfFooters(doc);
   doc.save('rapport-' + bienNom.replace(/[^a-z0-9]+/gi, '-').toLowerCase() + '.pdf');
+  showToast('✅ Rapport téléchargé');
 }
 
+let _mktCurrentListing = null;
 async function mktOpenDetail(id) {
   const el = document.getElementById('mkt-detail-view');
   el.innerHTML = '<div style="color:var(--text2)">Chargement...</div>';
@@ -717,6 +958,7 @@ async function mktOpenDetail(id) {
     const doc = await _fs.collection('listings').doc(id).get();
     if (!doc.exists) { el.innerHTML = '<div style="color:var(--red)">Annonce introuvable.</div>'; return; }
     const l = { id: doc.id, ...doc.data() };
+    _mktCurrentListing = l;
     _mktDetailPhotos = l.photos || [];
     const galleryHtml = (l.photos && l.photos.length)
       ? '<div class="mkt-gallery">' + l.photos.map((u, i) => '<img src="' + mktCldUrl(u, 'w_600,h_400,c_fill,q_auto,f_auto') + '" onclick="mktOpenLightbox(' + i + ')">').join('') + '</div>'
