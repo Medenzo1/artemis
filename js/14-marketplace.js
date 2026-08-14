@@ -564,7 +564,9 @@ async function mktRefreshGrid() {
 // ── Analyse automatique (texte généré à partir des données calculées, pas
 // d'IA rédactrice : quelques phrases construites selon le score, le rendement,
 // l'écart au marché DVF et les points forts/faibles du questionnaire) ──
-function mktGenerateComment(l) {
+// Phrases en texte brut avec marqueurs **gras** — partagées entre l'affichage
+// HTML (converti en <b>) et le PDF (marqueurs simplement retirés).
+function mktBuildAnalysisParts(l) {
   const parts = [];
 
   if (l.score != null) {
@@ -573,7 +575,7 @@ function mktGenerateComment(l) {
     else if (l.score >= 6) verdict = "une opportunité correcte, avec quelques points de vigilance";
     else if (l.score >= 4.5) verdict = "un investissement à examiner avec prudence";
     else verdict = "un investissement présentant plusieurs points faibles";
-    parts.push('Avec une note de <b>' + l.score.toFixed(1) + '/10</b>, ce bien représente ' + verdict + '.');
+    parts.push('Avec une note de **' + l.score.toFixed(1) + '/10**, ce bien représente ' + verdict + '.');
   }
 
   const rendementItem = (l.scoreBreakdown || []).find(b => b.id === 'rendement');
@@ -590,21 +592,27 @@ function mktGenerateComment(l) {
     const ecart = Math.round(((prixM2Bien - l.dvfComparatif.prixM2Marche) / l.dvfComparatif.prixM2Marche) * 100);
     const comparaison = ecart > 3 ? (ecart + '% au-dessus') : ecart < -3 ? ((-ecart) + '% en-dessous') : 'proche';
     parts.push(
-      'Le prix affiché (' + prixM2Bien.toLocaleString('fr-FR') + ' €/m²) est ' + comparaison +
-      ' du prix moyen constaté sur le secteur via DVF (' + l.dvfComparatif.prixM2Marche.toLocaleString('fr-FR') + ' €/m², ' + l.dvfComparatif.nbVentes + ' vente(s) sur 2 ans). ' +
-      'Cette donnée reste <b>à prendre avec précaution</b> : échantillon parfois limité, biens pas toujours comparables (état, étage, exposition...).'
+      'Le prix affiché (' + mktFmtNum(prixM2Bien) + ' €/m²) est ' + comparaison +
+      ' du prix moyen constaté sur le secteur via DVF (' + mktFmtNum(l.dvfComparatif.prixM2Marche) + ' €/m², ' + l.dvfComparatif.nbVentes + ' vente(s) sur 2 ans). ' +
+      'Cette donnée reste **à prendre avec précaution** : échantillon parfois limité, biens pas toujours comparables (état, étage, exposition...).'
     );
   }
 
   const bd = (l.scoreBreakdown || []).slice().sort((a, b) => b.points - a.points);
   if (bd.length >= 2) {
     const best = bd[0], worst = bd[bd.length - 1];
-    if (best.points >= 7 && best.id !== 'rendement') parts.push('Point fort : <b>' + best.label.toLowerCase() + '</b> (' + best.detail + ').');
-    if (worst.points <= 4) parts.push('Point de vigilance : <b>' + worst.label.toLowerCase() + '</b> (' + worst.detail + ').');
+    if (best.points >= 7 && best.id !== 'rendement') parts.push('Point fort : **' + best.label.toLowerCase() + '** (' + best.detail + ').');
+    if (worst.points <= 4) parts.push('Point de vigilance : **' + worst.label.toLowerCase() + '** (' + worst.detail + ').');
   }
 
+  return parts;
+}
+
+function mktGenerateComment(l) {
+  const parts = mktBuildAnalysisParts(l);
   if (!parts.length) return '';
-  return '<div class="mkt-comment"><div class="mkt-comment-label">💬 Analyse Artemis</div><p>' + parts.join(' ') + '</p></div>';
+  const html = parts.map(p => p.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>')).join(' ');
+  return '<div class="mkt-comment"><div class="mkt-comment-label">💬 Analyse Artemis</div><p>' + html + '</p></div>';
 }
 
 // ── Rapport financier PDF (bien suivi dans Artemis, données réelles importées) ──
@@ -693,7 +701,7 @@ function mktPdfHeaderBand(doc, logo, bienNom) {
   doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(255, 255, 255);
   doc.text('ARTEMIS', 28, 12);
   doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(...PDF_CYAN);
-  doc.text('Rapport financier · ' + bienNom, pageW - 14, 9, { align: 'right' });
+  doc.text('Dossier · ' + bienNom, pageW - 14, 9, { align: 'right' });
   doc.setTextColor(200, 208, 225);
   doc.text('Généré le ' + new Date().toLocaleDateString('fr-FR'), pageW - 14, 14.5, { align: 'right' });
   return 30;
@@ -767,27 +775,119 @@ function mktPdfLegendDot(doc, x, y, color, label) {
   doc.text(label, x + 5, y);
 }
 
-async function mktGenerateReport(bienId, bienNom) {
+// Grille label/valeur façon fiche technique (3 colonnes par défaut). Retourne le y de fin.
+function mktPdfFactsGrid(doc, x, y, w, items, cols) {
+  const colW = w / cols;
+  const rowH = 14;
+  items.forEach((it, i) => {
+    const col = i % cols, row = Math.floor(i / cols);
+    const ix = x + col * colW, iy = y + row * rowH;
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(7); doc.setTextColor(...PDF_MUTED);
+    doc.text(it[0].toUpperCase(), ix, iy);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(9.5); doc.setTextColor(...PDF_TEXT);
+    doc.text(String(it[1]), ix, iy + 5.5);
+  });
+  return y + Math.ceil(items.length / cols) * rowH + 4;
+}
+
+// Paragraphe avec retour à la ligne + saut de page automatique (en-tête répété).
+function mktPdfParagraph(doc, x, y, w, text, logo, docTitle, pageH) {
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(9.5); doc.setTextColor(...PDF_TEXT);
+  const lines = doc.splitTextToSize(text, w);
+  lines.forEach(line => {
+    if (y > pageH - 24) {
+      doc.addPage(); y = mktPdfHeaderBand(doc, logo, docTitle);
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(9.5); doc.setTextColor(...PDF_TEXT);
+    }
+    doc.text(line, x, y); y += 5;
+  });
+  return y;
+}
+
+// Carte de localisation vectorielle. Pas d'imagerie satellite : les tuiles
+// gratuites (Esri, OSM, IGN — toutes vérifiées) ne renvoient aucun en-tête
+// CORS, donc leurs pixels sont illisibles côté navigateur pour être
+// incrustés dans un PDF ; la carte interactive reste dans l'app.
+function mktPdfLocationCard(doc, x, y, w, listing) {
+  const h = 62;
+  doc.setFillColor(...PDF_BGSOFT); doc.roundedRect(x, y, w, h, 3, 3, 'F');
+  const cx = x + 28, cy = y + h / 2 - 4;
+  doc.setFillColor(...PDF_GOLD); doc.circle(cx, cy, 9, 'F');
+  doc.setDrawColor(...PDF_NAVY); doc.setLineWidth(1); doc.circle(cx, cy, 9, 'S');
+  doc.triangle(cx - 6, cy + 6, cx + 6, cy + 6, cx, cy + 17, 'F');
+  doc.setFillColor(...PDF_NAVY); doc.circle(cx, cy, 3, 'F');
+
+  const tx = x + 54;
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(11.5); doc.setTextColor(...PDF_TEXT);
+  doc.text(listing.adresse || 'Adresse non renseignée', tx, y + 20);
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(9.5); doc.setTextColor(...PDF_MUTED);
+  doc.text([listing.codePostal, listing.ville].filter(Boolean).join(' ') || '', tx, y + 27);
+  if (listing.lat && listing.lon) {
+    doc.setFontSize(8);
+    doc.text('Coordonnées GPS : ' + (+listing.lat).toFixed(5) + ', ' + (+listing.lon).toFixed(5), tx, y + 35);
+  }
+  doc.setFont('helvetica', 'italic'); doc.setFontSize(7.5); doc.setTextColor(...PDF_MUTED);
+  doc.text(doc.splitTextToSize("La carte satellite interactive du bien reste consultable dans l'application Artemis, sur la fiche de l'annonce.", w - 54 - 14), tx, y + h - 12);
+  return y + h + 8;
+}
+
+function mktPdfScoreCircle(doc, cx, cy, r, score) {
+  const color = score >= 7 ? PDF_GREEN : score >= 4.5 ? PDF_GOLD : PDF_RED;
+  doc.setFillColor(255, 255, 255); doc.circle(cx, cy, r, 'F');
+  doc.setDrawColor(...color); doc.setLineWidth(2.4); doc.circle(cx, cy, r, 'S');
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(r > 15 ? 22 : 15); doc.setTextColor(...PDF_TEXT);
+  doc.text(score != null ? score.toFixed(1) : '—', cx, cy + r * 0.18, { align: 'center' });
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(7); doc.setTextColor(...PDF_MUTED);
+  doc.text('/ 10', cx, cy + r * 0.18 + 6, { align: 'center' });
+}
+
+// Un critère du questionnaire : hauteur calculée à l'avance pour que
+// l'appelant puisse décider d'un saut de page avant de dessiner.
+function mktPdfScoreCriterion(doc, x, w, item) {
+  const detailLines = item.detail ? doc.splitTextToSize(item.detail, w - 20) : [];
+  const height = 5 + detailLines.length * 4 + 9;
+  return {
+    height,
+    draw(yy) {
+      const color = item.points >= 7 ? PDF_GREEN : item.points >= 4 ? PDF_GOLD : PDF_RED;
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(...PDF_TEXT);
+      doc.text(item.label, x, yy);
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); doc.setTextColor(...PDF_MUTED);
+      doc.text('Poids ' + item.weight + '%', x + w, yy, { align: 'right' });
+      yy += 4.5;
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(...PDF_MUTED);
+      detailLines.forEach(line => { doc.text(line, x, yy); yy += 4; });
+      yy += 1.5;
+      doc.setFillColor(...PDF_LINE); doc.roundedRect(x, yy, w - 16, 3, 1.5, 1.5, 'F');
+      doc.setFillColor(...color); doc.roundedRect(x, yy, Math.max(3, (w - 16) * (item.points / 10)), 3, 1.5, 1.5, 'F');
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(...color);
+      doc.text(item.points + '/10', x + w, yy + 2.6, { align: 'right' });
+    }
+  };
+}
+
+const MKT_GALLERY_TRANSFORM = 'w_700,h_460,c_fill,q_auto,f_auto';
+const MKT_GALLERY_RATIO = 460 / 700; // même ratio que le recadrage Cloudinary ci-dessus, pour dimensionner la grille photo dans le PDF sans déformation
+
+async function mktGenerateReport() {
   if (!window.jspdf) { showToast('⚠️ Génération PDF indisponible', '#f0566a'); return; }
+  const listing = _mktCurrentListing;
+  if (!listing) { showToast('⚠️ Aucune annonce sélectionnée', '#f0566a'); return; }
   const { jsPDF } = window.jspdf;
-  const { rows, catTotals } = mktBuildBienStats(bienId);
-  if (!rows.length) { showToast('⚠️ Aucune donnée trouvée pour ce bien dans la base Artemis', '#f0566a'); return; }
 
-  showToast('📄 Génération du rapport en cours…', '#22d3c8');
+  showToast('📄 Génération du dossier en cours…', '#22d3c8');
 
-  const bien = (getParams().biens || []).find(b => b.id === bienId) || {};
-  const listing = (_mktCurrentListing && _mktCurrentListing.linkedBienId === bienId) ? _mktCurrentListing : null;
+  const bienId = listing.linkedBienId || null;
+  const bien = bienId ? ((getParams().biens || []).find(b => b.id === bienId) || {}) : {};
+  const { rows, catTotals } = bienId ? mktBuildBienStats(bienId) : { rows: [], catTotals: {} };
+  const docTitle = listing.linkedBienNom || [listing.type, listing.ville].filter(Boolean).join(' · ') || 'Bien';
+  const galleryUrls = (listing.photos || []).slice(0, MKT_MAX_PHOTOS);
 
-  const [logo, photo] = await Promise.all([
+  const [logo, coverPhoto, ...galleryPhotos] = await Promise.all([
     mktLoadImage('icon-192.png'),
-    (listing && listing.photos && listing.photos[0]) ? mktLoadImage(mktCldUrl(listing.photos[0], 'w_1000,h_650,c_fill,q_auto,f_auto')) : Promise.resolve(null)
+    galleryUrls[0] ? mktLoadImage(mktCldUrl(galleryUrls[0], 'w_1000,h_650,c_fill,q_auto,f_auto')) : Promise.resolve(null),
+    ...galleryUrls.map(u => mktLoadImage(mktCldUrl(u, MKT_GALLERY_TRANSFORM)))
   ]);
-
-  const totalCa = rows.reduce((s, r) => s + r.ca, 0);
-  const totalDep = rows.reduce((s, r) => s + r.dep, 0);
-  const totalRes = totalCa + totalDep;
-  const totalDepAbs = Math.abs(totalDep) || 1;
-  const moyMensuelle = totalRes / rows.length;
 
   const doc = new jsPDF();
   const pageW = doc.internal.pageSize.getWidth();
@@ -811,25 +911,29 @@ async function mktGenerateReport(bienId, bienNom) {
   doc.setDrawColor(...PDF_GOLD); doc.setLineWidth(0.6);
   doc.line(pageW / 2 - 14, 100, pageW / 2 + 14, 100);
 
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(28); doc.setTextColor(255, 255, 255);
-  doc.text('Rapport financier', pageW / 2, 118, { align: 'center' });
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(26); doc.setTextColor(255, 255, 255);
+  doc.text('Dossier du bien', pageW / 2, 118, { align: 'center' });
   doc.setFont('helvetica', 'normal'); doc.setFontSize(15); doc.setTextColor(...PDF_CYAN);
-  doc.text(bienNom, pageW / 2, 128, { align: 'center' });
+  doc.text(docTitle, pageW / 2, 128, { align: 'center' });
 
-  if (photo) {
+  if (coverPhoto) {
     const pw = 120, ph = 78, px = pageW / 2 - pw / 2, py = 140;
     doc.setFillColor(255, 255, 255); doc.roundedRect(px - 1.5, py - 1.5, pw + 3, ph + 3, 3, 3, 'F');
-    doc.addImage(photo.dataUrl, 'PNG', px, py, pw, ph);
+    doc.addImage(coverPhoto.dataUrl, 'PNG', px, py, pw, ph);
   }
 
-  const factsY = photo ? 232 : 150;
-  const facts = [
-    ['SCI', bien.sci || '—'],
-    ['Type', PDF_TYPE_LABELS[bien.type] || bien.type || '—'],
-    ['Adresse', listing ? ([listing.adresse, listing.ville].filter(Boolean).join(', ') || '—') : '—'],
-    ['Période couverte', mktFmtPeriod(rows[0].period) + ' → ' + mktFmtPeriod(rows[rows.length - 1].period)]
-  ];
-  doc.setFillColor(255, 255, 255); doc.roundedRect(marginX + 10, factsY, contentW - 20, 34, 3, 3, 'F');
+  const factsAll = [];
+  if (bien.sci) factsAll.push(['SCI', bien.sci]);
+  factsAll.push(['Type de bien', listing.type || '—']);
+  factsAll.push(['Localisation', [listing.codePostal, listing.ville].filter(Boolean).join(' ') || '—']);
+  if (listing.prix) factsAll.push(['Prix', mktFmtEUR(listing.prix)]);
+  if (listing.surface) factsAll.push(['Surface', listing.surface + ' m²']);
+  if (rows.length) factsAll.push(['Période comptable', mktFmtPeriod(rows[0].period) + ' → ' + mktFmtPeriod(rows[rows.length - 1].period)]);
+  const facts = factsAll.slice(0, coverPhoto ? 4 : 6);
+  const factsRows = Math.max(1, Math.ceil(facts.length / 2));
+  const cardH = factsRows * 14 + 6;
+  const factsY = coverPhoto ? 232 : 150;
+  doc.setFillColor(255, 255, 255); doc.roundedRect(marginX + 10, factsY, contentW - 20, cardH, 3, 3, 'F');
   const colW = (contentW - 20) / 2;
   facts.forEach((f, i) => {
     const fx = marginX + 10 + 8 + (i % 2) * colW;
@@ -843,110 +947,223 @@ async function mktGenerateReport(bienId, bienNom) {
   doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(150, 160, 182);
   doc.text('Document confidentiel généré automatiquement par Artemis le ' + new Date().toLocaleDateString('fr-FR'), pageW / 2, pageH - 14, { align: 'center' });
 
-  // ═══ PAGE 2 — SYNTHÈSE ═══
+  // ═══ PAGE — PRÉSENTATION DU BIEN ═══
   doc.addPage();
-  let y = mktPdfHeaderBand(doc, logo, bienNom);
+  let y = mktPdfHeaderBand(doc, logo, docTitle);
   y += 6;
-
-  mktPdfSectionTitle(doc, marginX, y, 'Synthèse financière');
-  y += 8;
-
-  const cardGap = 5;
-  const cardW = (contentW - cardGap * 3) / 4;
-  const cardH = 26;
-  mktPdfKpiCard(doc, marginX, y, cardW, cardH, "Chiffre d'affaires", mktFmtEUR(totalCa), PDF_GREEN);
-  mktPdfKpiCard(doc, marginX + (cardW + cardGap), y, cardW, cardH, 'Charges', mktFmtEUR(totalDepAbs), PDF_RED);
-  mktPdfKpiCard(doc, marginX + (cardW + cardGap) * 2, y, cardW, cardH, 'Résultat net', mktFmtEUR(totalRes), totalRes >= 0 ? PDF_GOLD : PDF_RED);
-  mktPdfKpiCard(doc, marginX + (cardW + cardGap) * 3, y, cardW, cardH, 'Moyenne mensuelle', mktFmtEUR(moyMensuelle), PDF_CYAN);
-  y += cardH + 14;
-
-  mktPdfSectionTitle(doc, marginX, y, 'Évolution mensuelle');
-  mktPdfLegendDot(doc, pageW - 14 - 95, y, PDF_GREEN, "Chiffre d'affaires");
-  mktPdfLegendDot(doc, pageW - 14 - 28, y, PDF_RED, 'Charges');
+  mktPdfSectionTitle(doc, marginX, y, 'Présentation du bien');
   y += 10;
-  const chartH = 66;
-  mktPdfBarChart(doc, marginX, y, contentW, chartH, rows);
-  y += chartH + 12;
 
-  // Tableau détail mensuel (avec saut de page automatique + en-tête répété)
-  const tableTop = () => {
-    mktPdfSectionTitle(doc, marginX, y, 'Détail mensuel');
-    y += 7;
-    doc.setFillColor(...PDF_NAVY); doc.rect(marginX, y, contentW, 8, 'F');
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(8.5); doc.setTextColor(255, 255, 255);
-    doc.text('PÉRIODE', marginX + 4, y + 5.5);
-    doc.text("CHIFFRE D'AFFAIRES", marginX + contentW * 0.52, y + 5.5, { align: 'right' });
-    doc.text('CHARGES', marginX + contentW * 0.74, y + 5.5, { align: 'right' });
-    doc.text('RÉSULTAT', marginX + contentW - 4, y + 5.5, { align: 'right' });
-    y += 8;
-  };
-  if (y + 8 > pageH - 24) { doc.addPage(); y = mktPdfHeaderBand(doc, logo, bienNom); }
-  tableTop();
-
-  const rowH = 7.2;
-  rows.forEach((r, i) => {
-    if (y + rowH > pageH - 24) {
-      doc.addPage();
-      y = mktPdfHeaderBand(doc, logo, bienNom);
-      tableTop();
-    }
-    if (i % 2 === 1) { doc.setFillColor(...PDF_BGSOFT); doc.rect(marginX, y, contentW, rowH, 'F'); }
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor(...PDF_TEXT);
-    doc.text(mktFmtPeriod(r.period), marginX + 4, y + 5);
-    doc.text(mktFmtEUR(r.ca), marginX + contentW * 0.52, y + 5, { align: 'right' });
-    doc.setTextColor(...PDF_RED);
-    doc.text(mktFmtEUR(Math.abs(r.dep)), marginX + contentW * 0.74, y + 5, { align: 'right' });
-    doc.setTextColor(...(r.resultat >= 0 ? PDF_GREEN : PDF_RED));
-    doc.setFont('helvetica', 'bold');
-    doc.text(mktFmtEUR(r.resultat), marginX + contentW - 4, y + 5, { align: 'right' });
-    y += rowH;
-  });
-
-  if (y + rowH > pageH - 24) { doc.addPage(); y = mktPdfHeaderBand(doc, logo, bienNom); }
-  doc.setDrawColor(...PDF_NAVY); doc.setLineWidth(0.6); doc.line(marginX, y, marginX + contentW, y);
-  doc.setFillColor(...PDF_BGSOFT); doc.rect(marginX, y, contentW, rowH + 1, 'F');
-  y += rowH * 0.72;
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(...PDF_NAVY);
-  doc.text('TOTAL', marginX + 4, y);
-  doc.setTextColor(...PDF_GREEN); doc.text(mktFmtEUR(totalCa), marginX + contentW * 0.52, y, { align: 'right' });
-  doc.setTextColor(...PDF_RED); doc.text(mktFmtEUR(totalDepAbs), marginX + contentW * 0.74, y, { align: 'right' });
-  doc.setTextColor(...(totalRes >= 0 ? PDF_GREEN : PDF_RED)); doc.text(mktFmtEUR(totalRes), marginX + contentW - 4, y, { align: 'right' });
-  y += rowH + 12;
-
-  // Répartition des charges par catégorie (barres horizontales colorées)
-  const catEntries = Object.entries(catTotals).sort((a, b) => b[1] - a[1]);
-  if (catEntries.length) {
-    if (y + 25 > pageH - 24 && y > 60) {
-      doc.addPage(); y = mktPdfHeaderBand(doc, logo, bienNom);
-    }
-    mktPdfSectionTitle(doc, marginX, y, 'Répartition des charges par catégorie');
-    y += 10;
-    const maxCat = catEntries[0][1];
-    catEntries.forEach(([cat, amt], i) => {
-      if (y + 11 > pageH - 24) { doc.addPage(); y = mktPdfHeaderBand(doc, logo, bienNom); }
-      const pct = (amt / totalDepAbs * 100);
-      const color = PDF_CAT_COLORS[i % PDF_CAT_COLORS.length];
-      doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor(...PDF_TEXT);
-      doc.text(cat, marginX, y);
-      doc.setTextColor(...PDF_MUTED);
-      doc.text(mktFmtEUR(amt) + '  ·  ' + pct.toFixed(1) + '%', marginX + contentW, y, { align: 'right' });
-      y += 2.5;
-      doc.setFillColor(...PDF_LINE); doc.roundedRect(marginX, y, contentW, 3, 1.5, 1.5, 'F');
-      const fillW = Math.max(3, contentW * (amt / maxCat));
-      doc.setFillColor(...color); doc.roundedRect(marginX, y, fillW, 3, 1.5, 1.5, 'F');
-      y += 8.5;
+  const validGallery = galleryPhotos.filter(Boolean);
+  if (validGallery.length) {
+    const gap = 4;
+    const cols = validGallery.length === 1 ? 1 : 2;
+    const photoW = cols === 1 ? contentW : (contentW - gap) / 2;
+    const photoH = photoW * MKT_GALLERY_RATIO;
+    validGallery.forEach((ph, i) => {
+      const col = i % cols, row = Math.floor(i / cols);
+      doc.addImage(ph.dataUrl, 'PNG', marginX + col * (photoW + gap), y + row * (photoH + gap), photoW, photoH);
     });
-    y += 4;
+    y += Math.ceil(validGallery.length / cols) * (photoH + gap) + 6;
   }
 
-  if (y + 14 > pageH - 24) { doc.addPage(); y = mktPdfHeaderBand(doc, logo, bienNom); }
-  doc.setFont('helvetica', 'italic'); doc.setFontSize(7); doc.setTextColor(...PDF_MUTED);
-  const disclaimer = "Les montants présentés sont issus des données comptables importées et catégorisées dans Artemis (relevés bancaires, plateformes de location). Ce document est fourni à titre indicatif et ne constitue pas une pièce comptable certifiée.";
-  doc.text(doc.splitTextToSize(disclaimer, contentW), marginX, y);
+  const factItems = [
+    ['Type', listing.type || '—'],
+    ['Ville', listing.ville || '—'],
+    ['DPE', listing.dpe || '—'],
+    ['Prix', listing.prix ? mktFmtEUR(listing.prix) : '—'],
+    ['Surface', listing.surface ? listing.surface + ' m²' : '—'],
+    ['Pièces', listing.pieces || '—'],
+    ['Prix / m²', (listing.prix && listing.surface) ? mktFmtEUR(Math.round(listing.prix / listing.surface)) : '—'],
+    ['Loyer estimé', listing.loyerEstime ? mktFmtEUR(listing.loyerEstime) + ' / mois' : '—'],
+    ['Adresse', listing.adresse || '—']
+  ];
+  y = mktPdfFactsGrid(doc, marginX, y, contentW, factItems, 3);
+  y += 4;
+
+  if (listing.contactNom || listing.contactTel || listing.contactEmail) {
+    doc.setFillColor(...PDF_BGSOFT); doc.roundedRect(marginX, y, contentW, 12, 2, 2, 'F');
+    const contactBits = [
+      listing.contactNom ? 'Contact : ' + listing.contactNom : '',
+      listing.contactTel ? 'Tél. ' + listing.contactTel : '',
+      listing.contactEmail ? listing.contactEmail : ''
+    ].filter(Boolean).join('     ');
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor(...PDF_TEXT);
+    doc.text(contactBits, marginX + 6, y + 7.5);
+    y += 18;
+  }
+
+  if (listing.description) {
+    mktPdfSectionTitle(doc, marginX, y, 'Description de l’annonce');
+    y += 8;
+    y = mktPdfParagraph(doc, marginX, y, contentW, listing.description, logo, docTitle, pageH);
+  }
+
+  // ═══ PAGE — LOCALISATION ═══
+  if (listing.adresse || (listing.lat && listing.lon)) {
+    doc.addPage();
+    y = mktPdfHeaderBand(doc, logo, docTitle);
+    y += 6;
+    mktPdfSectionTitle(doc, marginX, y, 'Localisation');
+    y += 10;
+    mktPdfLocationCard(doc, marginX, y, contentW, listing);
+  }
+
+  // ═══ PAGE — SCORE D'OPPORTUNITÉ ═══
+  if (listing.score != null || (listing.scoreBreakdown || []).length) {
+    doc.addPage();
+    y = mktPdfHeaderBand(doc, logo, docTitle);
+    y += 6;
+    mktPdfSectionTitle(doc, marginX, y, "Score d'opportunité Artemis");
+    y += 12;
+
+    mktPdfScoreCircle(doc, marginX + 16, y + 4, 16, listing.score);
+    if (listing.dvfComparatif && listing.prix && listing.surface) {
+      const prixM2 = Math.round(listing.prix / listing.surface);
+      doc.setFillColor(...PDF_BGSOFT); doc.roundedRect(marginX + 40, y - 12, contentW - 40, 32, 2, 2, 'F');
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(8.5); doc.setTextColor(...PDF_TEXT);
+      doc.text('Comparatif marché (DVF)', marginX + 46, y - 3);
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(...PDF_MUTED);
+      doc.text(
+        doc.splitTextToSize(
+          'Bien : ' + mktFmtEUR(prixM2) + '/m²  ·  Secteur : ' + mktFmtEUR(listing.dvfComparatif.prixM2Marche) + '/m² (' + listing.dvfComparatif.nbVentes + ' vente(s) sur 2 ans)',
+          contentW - 52
+        ), marginX + 46, y + 4
+      );
+      doc.setFontSize(7); doc.text('Donnée officielle Etalab (DVF) — à prendre avec précaution, échantillon parfois limité.', marginX + 46, y + 15);
+    }
+    y += 30;
+
+    const breakdown = listing.scoreBreakdown || [];
+    breakdown.forEach(item => {
+      const c = mktPdfScoreCriterion(doc, marginX, contentW, item);
+      if (y + c.height > pageH - 24) { doc.addPage(); y = mktPdfHeaderBand(doc, logo, docTitle); }
+      c.draw(y);
+      y += c.height;
+    });
+
+    const analysisParts = mktBuildAnalysisParts(listing).map(p => p.replace(/\*\*/g, ''));
+    if (analysisParts.length) {
+      y += 4;
+      if (y + 20 > pageH - 24) { doc.addPage(); y = mktPdfHeaderBand(doc, logo, docTitle); }
+      mktPdfSectionTitle(doc, marginX, y, 'Analyse Artemis');
+      y += 9;
+      y = mktPdfParagraph(doc, marginX, y, contentW, analysisParts.join(' '), logo, docTitle, pageH);
+    }
+  }
+
+  // ═══ PAGES — SYNTHÈSE FINANCIÈRE (uniquement si le bien est suivi avec des données importées) ═══
+  if (rows.length) {
+    const totalCa = rows.reduce((s, r) => s + r.ca, 0);
+    const totalDep = rows.reduce((s, r) => s + r.dep, 0);
+    const totalRes = totalCa + totalDep;
+    const totalDepAbs = Math.abs(totalDep) || 1;
+    const moyMensuelle = totalRes / rows.length;
+
+    doc.addPage();
+    y = mktPdfHeaderBand(doc, logo, docTitle);
+    y += 6;
+
+    mktPdfSectionTitle(doc, marginX, y, 'Synthèse financière');
+    y += 8;
+
+    const cardGap = 5;
+    const cardW = (contentW - cardGap * 3) / 4;
+    const cardH2 = 26;
+    mktPdfKpiCard(doc, marginX, y, cardW, cardH2, "Chiffre d'affaires", mktFmtEUR(totalCa), PDF_GREEN);
+    mktPdfKpiCard(doc, marginX + (cardW + cardGap), y, cardW, cardH2, 'Charges', mktFmtEUR(totalDepAbs), PDF_RED);
+    mktPdfKpiCard(doc, marginX + (cardW + cardGap) * 2, y, cardW, cardH2, 'Résultat net', mktFmtEUR(totalRes), totalRes >= 0 ? PDF_GOLD : PDF_RED);
+    mktPdfKpiCard(doc, marginX + (cardW + cardGap) * 3, y, cardW, cardH2, 'Moyenne mensuelle', mktFmtEUR(moyMensuelle), PDF_CYAN);
+    y += cardH2 + 14;
+
+    mktPdfSectionTitle(doc, marginX, y, 'Évolution mensuelle');
+    mktPdfLegendDot(doc, pageW - 14 - 95, y, PDF_GREEN, "Chiffre d'affaires");
+    mktPdfLegendDot(doc, pageW - 14 - 28, y, PDF_RED, 'Charges');
+    y += 10;
+    const chartH = 66;
+    mktPdfBarChart(doc, marginX, y, contentW, chartH, rows);
+    y += chartH + 12;
+
+    // Tableau détail mensuel (avec saut de page automatique + en-tête répété)
+    const tableTop = () => {
+      mktPdfSectionTitle(doc, marginX, y, 'Détail mensuel');
+      y += 7;
+      doc.setFillColor(...PDF_NAVY); doc.rect(marginX, y, contentW, 8, 'F');
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(8.5); doc.setTextColor(255, 255, 255);
+      doc.text('PÉRIODE', marginX + 4, y + 5.5);
+      doc.text("CHIFFRE D'AFFAIRES", marginX + contentW * 0.52, y + 5.5, { align: 'right' });
+      doc.text('CHARGES', marginX + contentW * 0.74, y + 5.5, { align: 'right' });
+      doc.text('RÉSULTAT', marginX + contentW - 4, y + 5.5, { align: 'right' });
+      y += 8;
+    };
+    if (y + 8 > pageH - 24) { doc.addPage(); y = mktPdfHeaderBand(doc, logo, docTitle); }
+    tableTop();
+
+    const rowH = 7.2;
+    rows.forEach((r, i) => {
+      if (y + rowH > pageH - 24) {
+        doc.addPage();
+        y = mktPdfHeaderBand(doc, logo, docTitle);
+        tableTop();
+      }
+      if (i % 2 === 1) { doc.setFillColor(...PDF_BGSOFT); doc.rect(marginX, y, contentW, rowH, 'F'); }
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor(...PDF_TEXT);
+      doc.text(mktFmtPeriod(r.period), marginX + 4, y + 5);
+      doc.text(mktFmtEUR(r.ca), marginX + contentW * 0.52, y + 5, { align: 'right' });
+      doc.setTextColor(...PDF_RED);
+      doc.text(mktFmtEUR(Math.abs(r.dep)), marginX + contentW * 0.74, y + 5, { align: 'right' });
+      doc.setTextColor(...(r.resultat >= 0 ? PDF_GREEN : PDF_RED));
+      doc.setFont('helvetica', 'bold');
+      doc.text(mktFmtEUR(r.resultat), marginX + contentW - 4, y + 5, { align: 'right' });
+      y += rowH;
+    });
+
+    if (y + rowH > pageH - 24) { doc.addPage(); y = mktPdfHeaderBand(doc, logo, docTitle); }
+    doc.setDrawColor(...PDF_NAVY); doc.setLineWidth(0.6); doc.line(marginX, y, marginX + contentW, y);
+    doc.setFillColor(...PDF_BGSOFT); doc.rect(marginX, y, contentW, rowH + 1, 'F');
+    y += rowH * 0.72;
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(...PDF_NAVY);
+    doc.text('TOTAL', marginX + 4, y);
+    doc.setTextColor(...PDF_GREEN); doc.text(mktFmtEUR(totalCa), marginX + contentW * 0.52, y, { align: 'right' });
+    doc.setTextColor(...PDF_RED); doc.text(mktFmtEUR(totalDepAbs), marginX + contentW * 0.74, y, { align: 'right' });
+    doc.setTextColor(...(totalRes >= 0 ? PDF_GREEN : PDF_RED)); doc.text(mktFmtEUR(totalRes), marginX + contentW - 4, y, { align: 'right' });
+    y += rowH + 12;
+
+    // Répartition des charges par catégorie (barres horizontales colorées)
+    const catEntries = Object.entries(catTotals).sort((a, b) => b[1] - a[1]);
+    if (catEntries.length) {
+      if (y + 25 > pageH - 24 && y > 60) {
+        doc.addPage(); y = mktPdfHeaderBand(doc, logo, docTitle);
+      }
+      mktPdfSectionTitle(doc, marginX, y, 'Répartition des charges par catégorie');
+      y += 10;
+      const maxCat = catEntries[0][1];
+      catEntries.forEach(([cat, amt], i) => {
+        if (y + 11 > pageH - 24) { doc.addPage(); y = mktPdfHeaderBand(doc, logo, docTitle); }
+        const pct = (amt / totalDepAbs * 100);
+        const color = PDF_CAT_COLORS[i % PDF_CAT_COLORS.length];
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor(...PDF_TEXT);
+        doc.text(cat, marginX, y);
+        doc.setTextColor(...PDF_MUTED);
+        doc.text(mktFmtEUR(amt) + '  ·  ' + pct.toFixed(1) + '%', marginX + contentW, y, { align: 'right' });
+        y += 2.5;
+        doc.setFillColor(...PDF_LINE); doc.roundedRect(marginX, y, contentW, 3, 1.5, 1.5, 'F');
+        const fillW = Math.max(3, contentW * (amt / maxCat));
+        doc.setFillColor(...color); doc.roundedRect(marginX, y, fillW, 3, 1.5, 1.5, 'F');
+        y += 8.5;
+      });
+      y += 4;
+    }
+
+    if (y + 14 > pageH - 24) { doc.addPage(); y = mktPdfHeaderBand(doc, logo, docTitle); }
+    doc.setFont('helvetica', 'italic'); doc.setFontSize(7); doc.setTextColor(...PDF_MUTED);
+    const disclaimer = "Les montants présentés sont issus des données comptables importées et catégorisées dans Artemis (relevés bancaires, plateformes de location). Ce document est fourni à titre indicatif et ne constitue pas une pièce comptable certifiée.";
+    doc.text(doc.splitTextToSize(disclaimer, contentW), marginX, y);
+  }
 
   mktPdfFooters(doc);
-  doc.save('rapport-' + bienNom.replace(/[^a-z0-9]+/gi, '-').toLowerCase() + '.pdf');
-  showToast('✅ Rapport téléchargé');
+  doc.save('dossier-' + docTitle.replace(/[^a-z0-9]+/gi, '-').toLowerCase() + '.pdf');
+  showToast('✅ Dossier téléchargé');
 }
 
 let _mktCurrentListing = null;
@@ -979,9 +1196,7 @@ async function mktOpenDetail(id) {
       '</div>'
     ) : '';
     const mapHtml = (l.lat && l.lon) ? '<div id="mkt-detail-map" style="height:280px;border-radius:12px;margin-bottom:20px"></div>' : '';
-    const reportHtml = l.linkedBienId
-      ? '<div class="chip chip-cyan" style="margin-bottom:14px;cursor:pointer" onclick="mktGenerateReport(\'' + l.linkedBienId + '\',\'' + escHtml(l.linkedBienNom || '') + '\')">📄 Télécharger le rapport financier (' + escHtml(l.linkedBienNom || '') + ')</div>'
-      : '';
+    const reportHtml = '<div class="chip chip-cyan" style="margin-bottom:14px;cursor:pointer" onclick="mktGenerateReport()">📄 Télécharger le dossier complet (PDF)</div>';
     el.innerHTML =
       '<button class="btn btn-outline" onclick="mktCloseDetail()" style="margin-bottom:16px">← Retour</button>' +
       galleryHtml +
