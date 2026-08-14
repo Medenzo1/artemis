@@ -25,6 +25,20 @@ function mktCldUrl(url, transform) {
   return url.replace('/upload/', '/upload/' + transform + '/');
 }
 
+// ── Typologies de bien ─────────────────────────
+// Source de vérité unique pilotant : champs affichés dans le formulaire, jeu de
+// questions du baromètre, filtre DVF, et module d'analyse PDF additionnel.
+// Clé = valeur exacte stockée dans listing.type (donc zéro migration des annonces existantes).
+const MKT_TYPOLOGIES = {
+  'Appartement':          { dvfTypeLocal: 'Appartement', dvfEnabled: true,  showDpe: true,  showPieces: true,  pieceLabel: 'Pièces',          questionSetKey: 'standard', reportModuleKey: null },
+  'Maison':                { dvfTypeLocal: 'Maison',      dvfEnabled: true,  showDpe: true,  showPieces: true,  pieceLabel: 'Pièces',          questionSetKey: 'standard', reportModuleKey: null },
+  'Location courte durée': { dvfTypeLocal: 'Appartement', dvfEnabled: true,  showDpe: true,  showPieces: true,  pieceLabel: 'Pièces',          questionSetKey: 'standard', reportModuleKey: 'lcd' },
+  'Place de parking':      { dvfTypeLocal: 'Dépendance',  dvfEnabled: true,  showDpe: false, showPieces: false, pieceLabel: null,              questionSetKey: 'parking',  reportModuleKey: null },
+  'Immeuble':              { dvfTypeLocal: null,          dvfEnabled: false, showDpe: false, showPieces: true,  pieceLabel: 'Nombre de lots',  questionSetKey: 'immeuble', reportModuleKey: 'immeuble' },
+};
+const MKT_DEFAULT_TYPOLOGY = 'Appartement';
+function mktTypology(type) { return MKT_TYPOLOGIES[type] || MKT_TYPOLOGIES[MKT_DEFAULT_TYPOLOGY]; }
+
 // ── Questionnaire pondéré ─────────────────────
 // Le score final combine : rendement brut (20%, calculé), DPE (8%, dérivé du
 // champ DPE), et ces questions à choix multiple (poids total 72%).
@@ -118,6 +132,122 @@ const MARKETPLACE_QUESTIONS = [
   },
 ];
 
+// Place de parking : pas de DPE, pas d'étage/extérieur — questions dédiées.
+const MKT_QUESTIONS_PARKING = [
+  {
+    id: 'q_prix_marche', label: 'Prix vs marché', weight: 22,
+    options: [
+      { id: 'a1', label: 'Nettement au-dessus du marché (+15% ou plus)', points: 2 },
+      { id: 'a2', label: 'Au-dessus du marché (+5 à +15%)', points: 5 },
+      { id: 'a3', label: 'Dans le marché (±5%)', points: 7 },
+      { id: 'a4', label: 'En-dessous du marché (-5 à -15%)', points: 9 },
+      { id: 'a5', label: 'Largement en-dessous du marché (-15% ou plus)', points: 10 },
+    ],
+  },
+  {
+    id: 'q_securisation', label: 'Sécurisation / accès', weight: 12,
+    options: [
+      { id: 'a1', label: 'Box fermé individuel, digicode + vidéosurveillance', points: 10 },
+      { id: 'a2', label: 'Parking clos/gardienné, accès contrôlé', points: 7 },
+      { id: 'a3', label: 'Parking clos sans surveillance active', points: 5 },
+      { id: 'a4', label: 'Place extérieure non sécurisée', points: 2 },
+    ],
+  },
+  {
+    id: 'q_tension_parking', label: 'Tension du marché local du stationnement', weight: 12,
+    options: [
+      { id: 'a1', label: 'Hyper-centre / zone tendue, stationnement rare et cher', points: 10 },
+      { id: 'a2', label: 'Quartier dense, demande soutenue', points: 7 },
+      { id: 'a3', label: 'Demande modérée, offre équilibrée', points: 5 },
+      { id: 'a4', label: 'Zone peu tendue, stationnement facile en voirie', points: 2 },
+    ],
+  },
+  {
+    id: 'q_accessibilite', label: 'Accessibilité / manœuvre', weight: 10,
+    options: [
+      { id: 'a1', label: 'Place large, accès direct, manœuvre facile (tous véhicules)', points: 10 },
+      { id: 'a2', label: 'Standard, manœuvre normale', points: 7 },
+      { id: 'a3', label: 'Accès contraint (rampe, virage serré, hauteur limitée)', points: 4 },
+      { id: 'a4', label: "Place difficile d'accès, incompatible gros véhicules", points: 1 },
+    ],
+  },
+  {
+    id: 'q_fiscalite', label: "Fiscalité / structure d'achat adaptée", weight: 6,
+    options: [
+      { id: 'a1', label: 'Optimisation claire possible (LMNP, SCI...)', points: 10 },
+      { id: 'a2', label: 'Neutre', points: 5 },
+      { id: 'a3', label: 'Contraintes fiscales défavorables', points: 2 },
+    ],
+  },
+];
+
+// Immeuble entier : pas de DPE (bien collectif), questions sur le parc de lots.
+const MKT_QUESTIONS_IMMEUBLE = [
+  {
+    id: 'q_prix_marche', label: 'Prix vs marché (estimation manuelle — pas de comparatif DVF automatique pour les immeubles)', weight: 18,
+    options: [
+      { id: 'a1', label: 'Nettement au-dessus des immeubles de rapport comparables (+15% ou plus)', points: 2 },
+      { id: 'a2', label: 'Au-dessus du marché (+5 à +15%)', points: 5 },
+      { id: 'a3', label: 'Dans le marché (±5%)', points: 7 },
+      { id: 'a4', label: 'En-dessous du marché (-5 à -15%)', points: 9 },
+      { id: 'a5', label: 'Largement en-dessous du marché (-15% ou plus)', points: 10 },
+    ],
+  },
+  {
+    id: 'q_etat_immeuble', label: "État général de l'immeuble (structure, toiture, façade, parties communes)", weight: 12,
+    options: [
+      { id: 'a1', label: 'Neuf ou récemment rénové intégralement', points: 10 },
+      { id: 'a2', label: 'Bon état, travaux mineurs ponctuels', points: 7 },
+      { id: 'a3', label: 'Vieillissant, rénovation à prévoir (toiture, façade...)', points: 4 },
+      { id: 'a4', label: 'Dégradé, travaux lourds de structure/mise aux normes', points: 1 },
+    ],
+  },
+  {
+    id: 'q_occupation_taux', label: "Taux d'occupation actuel du parc de lots", weight: 12,
+    options: [
+      { id: 'a1', label: '100% loué, baux à jour et cohérents avec le marché', points: 10 },
+      { id: 'a2', label: 'Majoritairement loué (> 70%), quelques vacances', points: 7 },
+      { id: 'a3', label: 'Occupation partielle (40-70%)', points: 4 },
+      { id: 'a4', label: 'Largement vacant (< 40%)', points: 1 },
+    ],
+  },
+  {
+    id: 'q_mixite_baux', label: 'Mixité des baux / usages', weight: 8,
+    options: [
+      { id: 'a1', label: 'Mixte habitation + commercial, baux diversifiés (mutualise le risque)', points: 10 },
+      { id: 'a2', label: 'Homogène habitation, baux nus et meublés variés', points: 7 },
+      { id: 'a3', label: 'Un seul type de bail, un seul type de locataire dominant', points: 4 },
+    ],
+  },
+  {
+    id: 'q_charges_gestion', label: 'Charges de copropriété / complexité de gestion', weight: 8,
+    options: [
+      { id: 'a1', label: 'Mono-propriété, gestion simple, charges maîtrisées', points: 10 },
+      { id: 'a2', label: 'Copropriété saine, charges raisonnables', points: 6 },
+      { id: 'a3', label: 'Charges élevées ou copropriété en difficulté', points: 2 },
+    ],
+  },
+  {
+    id: 'q_potentiel_valorisation', label: "Potentiel de valorisation (découpe en lots, travaux, changement d'usage)", weight: 10,
+    options: [
+      { id: 'a1', label: 'Fort potentiel identifié (découpe, surélévation, changement d\'usage)', points: 10 },
+      { id: 'a2', label: 'Potentiel modéré (rénovation valorisante possible)', points: 6 },
+      { id: 'a3', label: 'Aucun potentiel de valorisation identifié', points: 2 },
+    ],
+  },
+  {
+    id: 'q_fiscalite', label: "Fiscalité / structure d'achat adaptée", weight: 6,
+    options: [
+      { id: 'a1', label: 'Optimisation claire possible (SCI IS, déficit foncier, LMNP...)', points: 10 },
+      { id: 'a2', label: 'Neutre', points: 5 },
+      { id: 'a3', label: 'Contraintes fiscales défavorables', points: 2 },
+    ],
+  },
+];
+
+const MKT_QUESTION_SETS = { standard: MARKETPLACE_QUESTIONS, parking: MKT_QUESTIONS_PARKING, immeuble: MKT_QUESTIONS_IMMEUBLE };
+function mktQuestionsFor(type) { return MKT_QUESTION_SETS[mktTypology(type).questionSetKey] || MKT_QUESTION_SETS.standard; }
+
 const MKT_RENDEMENT_WEIGHT = 20;
 const MKT_DPE_WEIGHT = 8;
 const MKT_DPE_POINTS = { A: 10, B: 10, C: 7, D: 7, E: 4, F: 2, G: 0 };
@@ -160,7 +290,7 @@ function computeScore(listing) {
   }
 
   const answers = listing.answers || {};
-  MARKETPLACE_QUESTIONS.forEach(q => {
+  mktQuestionsFor(listing.type).forEach(q => {
     const opt = q.options.find(o => o.id === answers[q.id]);
     if (!opt) return;
     breakdown.push({ id: q.id, label: q.label, detail: opt.label, points: opt.points, weight: q.weight });
@@ -236,13 +366,21 @@ async function fetchDvfComparatif(lat, lon, inseeCode, typeLocal) {
     const mutData = await mutRes.json();
     const cutoff = new Date(); cutoff.setFullYear(cutoff.getFullYear() - 2);
     const cutoffStr = cutoff.toISOString().slice(0, 10);
+    // Les dépendances (garages, caves, places de parking) ont souvent une surface_reelle_bati
+    // vide dans le DVF, et le €/m² n'a pas de sens pour ce type de bien — on compare alors
+    // en prix de vente absolu plutôt qu'en prix au m².
+    const unitBased = typeLocal === 'Dépendance';
     const valid = (mutData.mutations || [])
       .filter(m => m.nature_mutation === 'Vente' && m.type_local === (typeLocal || 'Appartement') && m.date_mutation >= cutoffStr)
       .map(m => ({ valeur: parseFloat(m.valeur_fonciere), surface: parseFloat(m.surface_reelle_bati) }))
-      .filter(m => m.valeur > 1000 && m.surface > 5);
+      .filter(m => m.valeur > 1000 && (unitBased || m.surface > 5));
     if (!valid.length) return null;
+    if (unitBased) {
+      const prixMoyen = valid.reduce((s, m) => s + m.valeur, 0) / valid.length;
+      return { prixMoyen: Math.round(prixMoyen), nbVentes: valid.length, unitBased: true };
+    }
     const prixM2Moyen = valid.reduce((s, m) => s + m.valeur / m.surface, 0) / valid.length;
-    return { prixM2Marche: Math.round(prixM2Moyen), nbVentes: valid.length };
+    return { prixM2Marche: Math.round(prixM2Moyen), nbVentes: valid.length, unitBased: false };
   } catch (e) {
     console.warn('[marketplace] comparatif DVF indisponible', e);
     return null;
@@ -332,7 +470,8 @@ function mktRemovePhoto(i) { _mktPhotoFiles[i] = null; mktRenderPhotoSlots(); }
 function mktRenderQuestionnaire() {
   const el = document.getElementById('mkt-questionnaire');
   if (!el) return;
-  el.innerHTML = MARKETPLACE_QUESTIONS.map(q => {
+  const type = document.getElementById('mkt-f-type').value;
+  el.innerHTML = mktQuestionsFor(type).map(q => {
     const choices = q.options.map(o => {
       const selected = _mktAnswers[q.id] === o.id;
       return '<div class="mkt-choice' + (selected ? ' selected' : '') + '" onclick="mktSelectAnswer(\'' + q.id + '\',\'' + o.id + '\')">' +
@@ -439,17 +578,33 @@ async function mktRunDvfLookup() {
   const statusEl = document.getElementById('mkt-dvf-status');
   const geo = _mktCurrentGeocode;
   if (!geo) return;
-  statusEl.textContent = '📍 ' + geo.label + ' — recherche de ventes comparables...';
   const type = document.getElementById('mkt-f-type').value;
-  const dvf = await fetchDvfComparatif(geo.lat, geo.lon, geo.inseeCode, type);
+  const tg = mktTypology(type);
+  if (!tg.dvfEnabled) {
+    _mktCurrentDvf = null;
+    statusEl.textContent = 'ℹ️ Comparatif DVF non disponible pour les immeubles (ventes en bloc, non comparables aux ventes au lot) — estime le prix vs marché manuellement dans le questionnaire ci-dessous.';
+    mktRenderQuestionnaire();
+    mktUpdateScorePreview();
+    return;
+  }
+  statusEl.textContent = '📍 ' + geo.label + ' — recherche de ventes comparables...';
+  const dvf = await fetchDvfComparatif(geo.lat, geo.lon, geo.inseeCode, tg.dvfTypeLocal);
   _mktCurrentDvf = dvf;
   if (dvf) {
-    statusEl.textContent = '📊 Prix moyen du secteur : ' + dvf.prixM2Marche + ' €/m² (' + dvf.nbVentes + ' vente(s) trouvée(s))';
     const prix = parseFloat(document.getElementById('mkt-f-prix').value) || 0;
-    const surface = parseFloat(document.getElementById('mkt-f-surface').value) || 0;
-    if (prix > 0 && surface > 0) {
-      const ecartPct = ((prix / surface - dvf.prixM2Marche) / dvf.prixM2Marche) * 100;
-      _mktAnswers.q_prix_marche = _pickPrixMarcheOptionId(ecartPct);
+    if (dvf.unitBased) {
+      statusEl.textContent = '📊 Prix moyen constaté du secteur : ' + mktFmtEUR(dvf.prixMoyen) + ' (' + dvf.nbVentes + ' vente(s) trouvée(s) — catégorie DVF "Dépendance" : garages, caves et places de parking confondus)';
+      if (prix > 0) {
+        const ecartPct = ((prix - dvf.prixMoyen) / dvf.prixMoyen) * 100;
+        _mktAnswers.q_prix_marche = _pickPrixMarcheOptionId(ecartPct);
+      }
+    } else {
+      statusEl.textContent = '📊 Prix moyen du secteur : ' + dvf.prixM2Marche + ' €/m² (' + dvf.nbVentes + ' vente(s) trouvée(s))';
+      const surface = parseFloat(document.getElementById('mkt-f-surface').value) || 0;
+      if (prix > 0 && surface > 0) {
+        const ecartPct = ((prix / surface - dvf.prixM2Marche) / dvf.prixM2Marche) * 100;
+        _mktAnswers.q_prix_marche = _pickPrixMarcheOptionId(ecartPct);
+      }
     }
   } else {
     statusEl.textContent = '⚠️ Comparatif automatique indisponible — choisis une estimation ci-dessous.';
@@ -472,11 +627,29 @@ function mktOpenForm() {
   const box = document.getElementById('mkt-addr-suggestions');
   if (box) { box.innerHTML = ''; box.style.display = 'none'; }
   mktRenderPhotoSlots();
-  mktRenderQuestionnaire();
-  mktUpdateScorePreview();
+  mktOnTypeChange();
   mktShowView('mkt-form-view');
 }
 function mktCloseForm() { mktShowView('mkt-grid-view'); }
+
+// Appelé au changement de typologie : adapte les champs affichés (DPE, Pièces),
+// recharge le bon jeu de questions, recalcule le score, et relance le comparatif
+// DVF si une adresse est déjà géocodée (le filtre type_local peut changer).
+function mktOnTypeChange() {
+  const type = document.getElementById('mkt-f-type').value;
+  const tg = mktTypology(type);
+  const dpeWrap = document.getElementById('mkt-f-dpe-wrap');
+  if (dpeWrap) dpeWrap.style.display = tg.showDpe ? '' : 'none';
+  if (!tg.showDpe) document.getElementById('mkt-f-dpe').value = '';
+  const piecesWrap = document.getElementById('mkt-f-pieces-wrap');
+  if (piecesWrap) piecesWrap.style.display = tg.showPieces ? '' : 'none';
+  const piecesLabel = document.getElementById('mkt-f-pieces-label');
+  if (piecesLabel) piecesLabel.textContent = tg.pieceLabel || 'Pièces';
+  _mktAnswers = {};
+  mktRenderQuestionnaire();
+  mktUpdateScorePreview();
+  if (_mktCurrentGeocode) mktRunDvfLookup();
+}
 
 async function mktSubmitListing() {
   const btn = document.getElementById('mkt-submit-btn');
@@ -587,7 +760,15 @@ function mktBuildAnalysisParts(l) {
     parts.push('Le rendement brut estimé (' + rendementItem.detail + ') est ' + niveau + " des standards d'un investissement locatif classique (repère usuel : 4 à 6 % brut).");
   }
 
-  if (l.dvfComparatif && l.prix && l.surface) {
+  if (l.dvfComparatif && l.dvfComparatif.unitBased && l.prix) {
+    const ecart = Math.round(((l.prix - l.dvfComparatif.prixMoyen) / l.dvfComparatif.prixMoyen) * 100);
+    const comparaison = ecart > 3 ? (ecart + '% au-dessus') : ecart < -3 ? ((-ecart) + '% en-dessous') : 'proche';
+    parts.push(
+      'Le prix affiché (' + mktFmtEUR(l.prix) + ') est ' + comparaison +
+      ' du prix moyen constaté sur le secteur via DVF (' + mktFmtEUR(l.dvfComparatif.prixMoyen) + ', ' + l.dvfComparatif.nbVentes + ' vente(s) sur 2 ans, catégorie "Dépendance" : garages, caves et places de parking confondus). ' +
+      'Cette donnée reste **à prendre avec précaution** : échantillon parfois limité, biens pas toujours comparables (sécurisation, accessibilité, emplacement...).'
+    );
+  } else if (l.dvfComparatif && !l.dvfComparatif.unitBased && l.prix && l.surface) {
     const prixM2Bien = Math.round(l.prix / l.surface);
     const ecart = Math.round(((prixM2Bien - l.dvfComparatif.prixM2Marche) / l.dvfComparatif.prixM2Marche) * 100);
     const comparaison = ecart > 3 ? (ecart + '% au-dessus') : ecart < -3 ? ((-ecart) + '% en-dessous') : 'proche';
@@ -772,6 +953,35 @@ function mktPdfBarChart(doc, x, y, w, h, rows) {
   });
 }
 
+// Graphique en barres à une seule série (ex. saisonnalité LCD). Copie volontairement la
+// logique d'axes/grille de mktPdfBarChart plutôt que de la factoriser, pour ne pas risquer
+// de régression sur le graphique CA/Charges déjà utilisé par la Synthèse financière.
+function mktPdfSeasonalityChart(doc, x, y, w, h, rows, color) {
+  const leftPad = 20, bottomPad = 14;
+  const plotX = x + leftPad, plotW = w - leftPad, plotH = h - bottomPad;
+  const maxVal = mktNiceMax(Math.max(1, ...rows.map(r => r.ca)));
+  doc.setLineWidth(0.2);
+  for (let i = 0; i <= 4; i++) {
+    const gy = y + plotH - (plotH * i / 4);
+    doc.setDrawColor(...(i === 0 ? PDF_MUTED : PDF_LINE));
+    doc.line(plotX, gy, x + w, gy);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(7); doc.setTextColor(...PDF_MUTED);
+    doc.text(mktFmtK(maxVal * i / 4), plotX - 3, gy + 1, { align: 'right' });
+  }
+  const n = rows.length;
+  const groupW = plotW / n;
+  const barW = Math.min(12, groupW * 0.5);
+  const shortLabels = n > 6;
+  rows.forEach((r, i) => {
+    const gx = plotX + groupW * i + groupW / 2;
+    const caH = (r.ca / maxVal) * plotH;
+    doc.setFillColor(...color);
+    doc.roundedRect(gx - barW / 2, y + plotH - caH, barW, Math.max(caH, 0.3), 0.6, 0.6, 'F');
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(n > 10 ? 6 : 7); doc.setTextColor(...PDF_MUTED);
+    doc.text(mktFmtPeriod(r.period, shortLabels), gx, y + plotH + 7, { align: 'center' });
+  });
+}
+
 function mktPdfLegendDot(doc, x, y, color, label) {
   doc.setFillColor(...color); doc.roundedRect(x, y - 2.6, 3.2, 3.2, 0.8, 0.8, 'F');
   doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(...PDF_TEXT);
@@ -871,6 +1081,107 @@ function mktPdfScoreCriterion(doc, x, w, item) {
 
 const MKT_GALLERY_TRANSFORM = 'w_700,h_460,c_fill,q_auto,f_auto';
 const MKT_GALLERY_RATIO = 460 / 700; // même ratio que le recadrage Cloudinary ci-dessus, pour dimensionner la grille photo dans le PDF sans déformation
+
+// ── Module PDF « Location courte durée » ──────────────────────────────────
+// Il n'existe pas d'équivalent gratuit au DVF pour la location courte durée en France
+// (les données de marché LCD sérieuses — AirDNA etc. — sont payantes). On s'appuie donc
+// sur une donnée réelle et gratuite : l'historique des autres biens LCD déjà suivis dans
+// le portefeuille Artemis de l'utilisateur (getParams().biens, type==='LCD').
+function mktLcdPortfolioBenchmark(excludeBienId) {
+  const biens = (getParams().biens || []).filter(b => b.type === 'LCD' && b.id !== excludeBienId);
+  const perBien = biens.map(b => mktBuildBienStats(b.id)).filter(s => s.rows.length);
+  const byPeriod = {};
+  perBien.forEach(({ rows }) => rows.forEach(r => { (byPeriod[r.period] = byPeriod[r.period] || []).push(r.ca); }));
+  const periods = Object.keys(byPeriod).sort();
+  const avgRows = periods.map(period => ({ period, ca: byPeriod[period].reduce((s, v) => s + v, 0) / byPeriod[period].length }));
+  const globalAvgMonthly = avgRows.length ? avgRows.reduce((s, r) => s + r.ca, 0) / avgRows.length : null;
+  return { nbBiens: perBien.length, avgRows, globalAvgMonthly, firstPeriod: periods[0], lastPeriod: periods[periods.length - 1] };
+}
+
+function mktPdfModuleLCD(doc, listing, logo, docTitle, marginX, contentW, pageH) {
+  doc.addPage();
+  let y = mktPdfHeaderBand(doc, logo, docTitle);
+  y += 6;
+  mktPdfSectionTitle(doc, marginX, y, 'Analyse marché — Location courte durée');
+  y += 10;
+
+  const bench = mktLcdPortfolioBenchmark(listing.linkedBienId || null);
+
+  if (bench.nbBiens < 2) {
+    mktPdfParagraph(doc, marginX, y, contentW,
+      "Cette analyse s'appuie sur l'historique de revenus des biens de type Location courte durée déjà suivis dans votre portefeuille Artemis. " +
+      "À ce jour, " + bench.nbBiens + (bench.nbBiens > 1 ? ' biens sont suivis' : (bench.nbBiens === 1 ? ' bien est suivi' : ' bien n\'est suivi')) +
+      " avec des données importées — un minimum de 2 biens comparables est nécessaire pour établir une moyenne de portefeuille fiable. " +
+      "Ajoute et importe les données d'autres biens LCD dans Artemis pour enrichir cette analyse.",
+      logo, docTitle, pageH);
+    return;
+  }
+
+  const cardGap = 5, cardW = (contentW - cardGap * 3) / 4, cardH = 26;
+  const ecart = (listing.loyerEstime && bench.globalAvgMonthly) ? Math.round(((listing.loyerEstime - bench.globalAvgMonthly) / bench.globalAvgMonthly) * 100) : null;
+  mktPdfKpiCard(doc, marginX, y, cardW, cardH, 'Revenu moyen portefeuille', mktFmtEUR(bench.globalAvgMonthly) + ' /mois', PDF_CYAN);
+  mktPdfKpiCard(doc, marginX + (cardW + cardGap), y, cardW, cardH, 'Loyer estimé de ce bien', listing.loyerEstime ? mktFmtEUR(listing.loyerEstime) + ' /mois' : '—', PDF_GOLD);
+  mktPdfKpiCard(doc, marginX + (cardW + cardGap) * 2, y, cardW, cardH, 'Écart', ecart != null ? (ecart >= 0 ? '+' : '') + ecart + ' %' : '—', (ecart != null && ecart >= 0) ? PDF_GREEN : PDF_RED);
+  mktPdfKpiCard(doc, marginX + (cardW + cardGap) * 3, y, cardW, cardH, 'Biens comparés', String(bench.nbBiens), PDF_NAVY2);
+  y += cardH + 14;
+
+  mktPdfSectionTitle(doc, marginX, y, 'Revenu mensuel moyen — portefeuille LCD');
+  y += 10;
+  mktPdfSeasonalityChart(doc, marginX, y, contentW, 60, bench.avgRows, PDF_CYAN);
+  y += 60 + 12;
+
+  const parts = [];
+  parts.push('Cette page compare le loyer estimé de ce bien à l\'historique réel des ' + bench.nbBiens +
+    ' biens de type Location courte durée déjà suivis dans votre portefeuille Artemis (' +
+    mktFmtPeriod(bench.firstPeriod) + ' → ' + mktFmtPeriod(bench.lastPeriod) + ').');
+  if (ecart != null) {
+    parts.push('Le loyer estimé de ce bien (' + mktFmtEUR(listing.loyerEstime) + '/mois) se situe ' +
+      Math.abs(ecart) + '% ' + (ecart >= 0 ? 'au-dessus' : 'en-dessous') +
+      ' de la moyenne mensuelle constatée sur votre portefeuille LCD (' + mktFmtEUR(bench.globalAvgMonthly) + '/mois).');
+  }
+  parts.push("Cette comparaison reste indicative : elle s'appuie sur vos propres biens, dont l'emplacement, la taille et le niveau de gamme peuvent différer de ce bien. Elle ne remplace pas une étude de marché spécialisée (non intégrée à Artemis pour rester sans coût).");
+  mktPdfParagraph(doc, marginX, y, contentW, parts.join(' '), logo, docTitle, pageH);
+}
+
+// ── Module PDF « Immeuble » ────────────────────────────────────────────────
+// Pas de comparatif DVF pour un immeuble (voir fetchDvfComparatif / mktRunDvfLookup) : le seul
+// signal fiable et gratuit vient des champs déjà saisis dans le formulaire (prix, loyers
+// cumulés, nombre de lots), agrégés en un rendement global et une lecture par lot.
+function mktPdfModuleImmeuble(doc, listing, logo, docTitle, marginX, contentW, pageH) {
+  doc.addPage();
+  let y = mktPdfHeaderBand(doc, logo, docTitle);
+  y += 6;
+  mktPdfSectionTitle(doc, marginX, y, "Rentabilité globale de l'immeuble");
+  y += 10;
+
+  const prix = listing.prix || 0, loyer = listing.loyerEstime || 0, lots = listing.pieces || 0;
+  const rendementGlobal = (prix > 0 && loyer > 0) ? (loyer * 12 / prix) * 100 : null;
+
+  const cardGap = 5, cardW = (contentW - cardGap * 3) / 4, cardH = 26;
+  mktPdfKpiCard(doc, marginX, y, cardW, cardH, 'Prix total', mktFmtEUR(prix), PDF_NAVY2);
+  mktPdfKpiCard(doc, marginX + (cardW + cardGap), y, cardW, cardH, 'Loyers mensuels cumulés', mktFmtEUR(loyer), PDF_GOLD);
+  mktPdfKpiCard(doc, marginX + (cardW + cardGap) * 2, y, cardW, cardH, 'Rendement brut global', rendementGlobal != null ? rendementGlobal.toFixed(1) + ' %' : '—', PDF_GREEN);
+  mktPdfKpiCard(doc, marginX + (cardW + cardGap) * 3, y, cardW, cardH, 'Nombre de lots', lots ? String(lots) : '—', PDF_CYAN);
+  y += cardH + 14;
+
+  if (lots > 0) {
+    y = mktPdfFactsGrid(doc, marginX, y, contentW, [
+      ['Prix moyen / lot', mktFmtEUR(prix / lots)],
+      ['Loyer moyen / lot', mktFmtEUR(loyer / lots) + ' /mois'],
+    ], 2);
+    y += 4;
+  }
+
+  if (rendementGlobal != null) {
+    const niveau = rendementGlobal >= 6 ? 'nettement au-dessus' : rendementGlobal >= 5 ? 'dans la moyenne haute'
+      : rendementGlobal >= 4 ? 'dans la moyenne' : 'en-dessous';
+    mktPdfParagraph(doc, marginX, y, contentW,
+      'Le rendement brut global de cet immeuble (' + rendementGlobal.toFixed(1) + ' %) est ' + niveau +
+      " des standards d'un investissement locatif classique (repère usuel : 4 à 6 % brut). " +
+      "Ce chiffre agrège l'ensemble des lots : la performance réelle peut varier fortement d'un lot à l'autre selon leur état, leur occupation et leur typologie.",
+      logo, docTitle, pageH);
+  }
+}
 
 async function mktGenerateReport() {
   if (!window.jspdf) { showToast('⚠️ Génération PDF indisponible', '#f0566a'); return; }
@@ -1021,7 +1332,20 @@ async function mktGenerateReport() {
     y += 12;
 
     mktPdfScoreCircle(doc, marginX + 16, y + 4, 16, listing.score);
-    if (listing.dvfComparatif && listing.prix && listing.surface) {
+    if (listing.dvfComparatif && listing.dvfComparatif.unitBased && listing.prix) {
+      doc.setFillColor(...PDF_BGSOFT); doc.roundedRect(marginX + 40, y - 12, contentW - 40, 32, 2, 2, 'F');
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(8.5); doc.setTextColor(...PDF_TEXT);
+      doc.text('Comparatif marché (DVF)', marginX + 46, y - 3);
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(...PDF_MUTED);
+      doc.text(
+        doc.splitTextToSize(
+          'Bien : ' + mktFmtEUR(listing.prix) + '  ·  Secteur : ' + mktFmtEUR(listing.dvfComparatif.prixMoyen) + ' (' + listing.dvfComparatif.nbVentes + ' vente(s) sur 2 ans)',
+          contentW - 52
+        ), marginX + 46, y + 4
+      );
+      doc.setFontSize(7);
+      doc.text(doc.splitTextToSize('Donnée officielle Etalab (DVF), catégorie "Dépendance" (garages, caves et places de parking confondus) — à prendre avec précaution.', contentW - 52), marginX + 46, y + 15);
+    } else if (listing.dvfComparatif && !listing.dvfComparatif.unitBased && listing.prix && listing.surface) {
       const prixM2 = Math.round(listing.prix / listing.surface);
       doc.setFillColor(...PDF_BGSOFT); doc.roundedRect(marginX + 40, y - 12, contentW - 40, 32, 2, 2, 'F');
       doc.setFont('helvetica', 'bold'); doc.setFontSize(8.5); doc.setTextColor(...PDF_TEXT);
@@ -1053,6 +1377,14 @@ async function mktGenerateReport() {
       y += 9;
       y = mktPdfParagraph(doc, marginX, y, contentW, analysisParts.join(' '), logo, docTitle, pageH);
     }
+  }
+
+  // ═══ MODULE D'ANALYSE SPÉCIFIQUE À LA TYPOLOGIE ═══
+  const typologyModule = mktTypology(listing.type).reportModuleKey;
+  if (typologyModule === 'lcd') {
+    mktPdfModuleLCD(doc, listing, logo, docTitle, marginX, contentW, pageH);
+  } else if (typologyModule === 'immeuble') {
+    mktPdfModuleImmeuble(doc, listing, logo, docTitle, marginX, contentW, pageH);
   }
 
   // ═══ PAGES — SYNTHÈSE FINANCIÈRE (uniquement si le bien est suivi avec des données importées) ═══
@@ -1216,7 +1548,9 @@ async function mktOpenDetail(id) {
       '<div><div class="lbl">DPE</div><div style="font-weight:700">' + (l.dpe || '—') + '</div></div>' +
       '</div>' +
       (l.description ? '<p style="font-size:13px;color:var(--text2);margin-bottom:14px">' + escHtml(l.description) + '</p>' : '') +
-      (l.dvfComparatif ? '<div class="chip chip-gold" style="margin-bottom:14px">📊 Marché secteur : ' + l.dvfComparatif.prixM2Marche + ' €/m² (' + l.dvfComparatif.nbVentes + ' ventes)</div>' : '') +
+      (l.dvfComparatif && l.dvfComparatif.unitBased
+        ? '<div class="chip chip-gold" style="margin-bottom:14px">📊 Marché secteur (dépendances) : ' + Math.round(l.dvfComparatif.prixMoyen).toLocaleString('fr-FR') + ' € (' + l.dvfComparatif.nbVentes + ' ventes)</div>'
+        : l.dvfComparatif ? '<div class="chip chip-gold" style="margin-bottom:14px">📊 Marché secteur : ' + l.dvfComparatif.prixM2Marche + ' €/m² (' + l.dvfComparatif.nbVentes + ' ventes)</div>' : '') +
       reportHtml +
       contactHtml +
       '<div class="sep-title">Détail du score</div>' +

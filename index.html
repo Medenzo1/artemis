@@ -383,9 +383,16 @@
         <div style="display:flex;flex-direction:column;gap:14px">
           <div class="grid2">
             <div><label class="lbl">Type</label>
-              <select id="mkt-f-type"><option value="Appartement">Appartement</option><option value="Maison">Maison</option></select>
+              <!-- Options synchronisées avec MKT_TYPOLOGIES dans js/14-marketplace.js -->
+              <select id="mkt-f-type" onchange="mktOnTypeChange()">
+                <option value="Appartement">Appartement</option>
+                <option value="Maison">Maison</option>
+                <option value="Location courte durée">Location courte durée</option>
+                <option value="Place de parking">Place de parking</option>
+                <option value="Immeuble">Immeuble</option>
+              </select>
             </div>
-            <div><label class="lbl">DPE</label>
+            <div id="mkt-f-dpe-wrap"><label class="lbl">DPE</label>
               <select id="mkt-f-dpe" onchange="mktUpdateScorePreview()">
                 <option value="">—</option>
                 <option value="A">A</option><option value="B">B</option><option value="C">C</option>
@@ -400,7 +407,7 @@
           <div class="grid3">
             <div><label class="lbl">Prix (€)</label><input type="number" id="mkt-f-prix" oninput="mktUpdateScorePreview()"></div>
             <div><label class="lbl">Surface (m²)</label><input type="number" id="mkt-f-surface" oninput="mktUpdateScorePreview()"></div>
-            <div><label class="lbl">Pièces</label><input type="number" id="mkt-f-pieces"></div>
+            <div id="mkt-f-pieces-wrap"><label class="lbl" id="mkt-f-pieces-label">Pièces</label><input type="number" id="mkt-f-pieces"></div>
           </div>
           <div><label class="lbl">Loyer mensuel estimé (€, optionnel — sert au calcul de rendement)</label>
             <input type="number" id="mkt-f-loyer" oninput="mktUpdateScorePreview()">
