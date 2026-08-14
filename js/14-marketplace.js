@@ -662,7 +662,10 @@ function mktBuildBienStats(bienId) {
   const rows = [];
   const catTotals = {};
   periodKeys.forEach(k => {
-    const lines = (db.periods[k].lines || []).filter(l => l.bienId === bienId);
+    // _expandFG ventile les lignes "Frais généraux" (ex : expert-comptable réparti
+    // sur plusieurs biens via une quote-part) en une sous-ligne par bien avant filtrage —
+    // sans ça, seules les charges mappées directement sur ce bien étaient comptées.
+    const lines = _expandFG(db.periods[k].lines || []).filter(l => l.bienId === bienId);
     if (!lines.length) return;
     const ca = lines.filter(l => _isCA(l)).reduce((s, l) => s + (+l.montant || 0), 0);
     const dep = lines.filter(l => _isDep(l)).reduce((s, l) => s + (+l.montant || 0), 0); // négatif
