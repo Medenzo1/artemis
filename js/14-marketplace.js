@@ -1098,18 +1098,90 @@ function mktLcdPortfolioBenchmark(excludeBienId) {
   return { nbBiens: perBien.length, avgRows, globalAvgMonthly, firstPeriod: periods[0], lastPeriod: periods[periods.length - 1] };
 }
 
-function mktPdfModuleLCD(doc, listing, logo, docTitle, marginX, contentW, pageH) {
+// Contexte touristique du secteur — source externe et gratuite (OpenStreetMap / Overpass
+// API, sans clé). Contrairement aux tuiles de carte (images), les données Overpass sont du
+// JSON structuré : lisibles directement en fetch(), pas de blocage CORS pour ce type d'usage.
+async function mktFetchLcdSectorContext(lat, lon) {
+  if (lat == null || lon == null) return null;
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 10000);
+  try {
+    const query = '[out:json][timeout:15];(' +
+      'node(around:500,' + lat + ',' + lon + ')["amenity"~"restaurant|bar|cafe|pub"];' +
+      'node(around:1000,' + lat + ',' + lon + ')["tourism"~"attraction|museum|viewpoint|artwork|gallery"];' +
+      'node(around:1000,' + lat + ',' + lon + ')["tourism"~"hotel|guest_house|hostel|apartment|chalet"];' +
+      'node(around:600,' + lat + ',' + lon + ')["railway"="station"];' +
+      'node(around:600,' + lat + ',' + lon + ')["public_transport"="stop_position"];' +
+      ');out tags;';
+    const res = await fetch('https://overpass-api.de/api/interpreter', { method: 'POST', body: 'data=' + encodeURIComponent(query), signal: ctrl.signal });
+    if (!res.ok) return null;
+    const data = await res.json();
+    const els = data.elements || [];
+    const has = (e, key, re) => e.tags && re.test(e.tags[key] || '');
+    return {
+      restaurants: els.filter(e => has(e, 'amenity', /restaurant|bar|cafe|pub/)).length,
+      attractions: els.filter(e => has(e, 'tourism', /attraction|museum|viewpoint|artwork|gallery/)).length,
+      hebergements: els.filter(e => has(e, 'tourism', /hotel|guest_house|hostel|apartment|chalet/)).length,
+      transports: els.filter(e => (e.tags && (e.tags.railway === 'station' || e.tags.public_transport === 'stop_position'))).length,
+    };
+  } catch (e) {
+    console.warn('[marketplace] contexte touristique OSM indisponible', e);
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+function mktLcdAttractivite(ctx) {
+  const pts = (ctx.restaurants >= 15 ? 2 : ctx.restaurants >= 5 ? 1 : 0)
+    + (ctx.attractions >= 5 ? 2 : ctx.attractions >= 1 ? 1 : 0)
+    + (ctx.transports >= 1 ? 1 : 0);
+  if (pts >= 4) return 'forte';
+  if (pts >= 2) return 'modérée';
+  return 'limitée';
+}
+
+function mktPdfModuleLCD(doc, listing, logo, docTitle, marginX, contentW, pageH, sectorContext) {
   doc.addPage();
   let y = mktPdfHeaderBand(doc, logo, docTitle);
   y += 6;
   mktPdfSectionTitle(doc, marginX, y, 'Analyse marché — Location courte durée');
-  y += 10;
+  y += 12;
 
+  // ── Section 1 : contexte touristique du secteur (source externe — OpenStreetMap) ──
+  mktPdfSectionTitle(doc, marginX, y, 'Contexte touristique du secteur (OpenStreetMap)');
+  y += 10;
+  if (!sectorContext) {
+    y = mktPdfParagraph(doc, marginX, y, contentW,
+      "Le contexte touristique du secteur (établissements, hébergements, attractions à proximité, via OpenStreetMap) n'a pas pu être récupéré pour cette annonce — service externe temporairement indisponible ou adresse non géolocalisée. Réessaie de générer le dossier ultérieurement.",
+      logo, docTitle, pageH);
+  } else {
+    y = mktPdfFactsGrid(doc, marginX, y, contentW, [
+      ['Restaurants / bars / cafés (500 m)', String(sectorContext.restaurants)],
+      ['Hébergements touristiques (1 km)', String(sectorContext.hebergements)],
+      ['Sites & attractions (1 km)', String(sectorContext.attractions)],
+      ['Arrêts transports en commun (600 m)', String(sectorContext.transports)],
+    ], 2);
+    y += 4;
+    const niveau = mktLcdAttractivite(sectorContext);
+    y = mktPdfParagraph(doc, marginX, y, contentW,
+      "Attractivité touristique du secteur estimée " + niveau.toUpperCase() + ", sur la base de " + sectorContext.restaurants +
+      " établissement(s) de restauration, " + sectorContext.hebergements + " hébergement(s) touristique(s) existant(s) et " +
+      sectorContext.attractions + " site(s)/attraction(s) recensés à proximité (données OpenStreetMap, contribution ouverte — " +
+      "la complétude varie selon les zones, à recouper avec une visite du secteur).",
+      logo, docTitle, pageH);
+  }
+  y += 8;
+
+  // ── Section 2 : comparatif avec le portefeuille LCD déjà suivi dans Artemis ──
   const bench = mktLcdPortfolioBenchmark(listing.linkedBienId || null);
+  if (y + 30 > pageH - 24) { doc.addPage(); y = mktPdfHeaderBand(doc, logo, docTitle); y += 6; }
+  mktPdfSectionTitle(doc, marginX, y, 'Comparatif portefeuille Artemis');
+  y += 10;
 
   if (bench.nbBiens < 2) {
     mktPdfParagraph(doc, marginX, y, contentW,
-      "Cette analyse s'appuie sur l'historique de revenus des biens de type Location courte durée déjà suivis dans votre portefeuille Artemis. " +
+      "Cette section compare le bien à l'historique de revenus des biens de type Location courte durée déjà suivis dans votre portefeuille Artemis. " +
       "À ce jour, " + bench.nbBiens + (bench.nbBiens > 1 ? ' biens sont suivis' : (bench.nbBiens === 1 ? ' bien est suivi' : ' bien n\'est suivi')) +
       " avec des données importées — un minimum de 2 biens comparables est nécessaire pour établir une moyenne de portefeuille fiable. " +
       "Ajoute et importe les données d'autres biens LCD dans Artemis pour enrichir cette analyse.",
@@ -1125,13 +1197,14 @@ function mktPdfModuleLCD(doc, listing, logo, docTitle, marginX, contentW, pageH)
   mktPdfKpiCard(doc, marginX + (cardW + cardGap) * 3, y, cardW, cardH, 'Biens comparés', String(bench.nbBiens), PDF_NAVY2);
   y += cardH + 14;
 
+  if (y + 80 > pageH - 24) { doc.addPage(); y = mktPdfHeaderBand(doc, logo, docTitle); y += 6; }
   mktPdfSectionTitle(doc, marginX, y, 'Revenu mensuel moyen — portefeuille LCD');
   y += 10;
   mktPdfSeasonalityChart(doc, marginX, y, contentW, 60, bench.avgRows, PDF_CYAN);
   y += 60 + 12;
 
   const parts = [];
-  parts.push('Cette page compare le loyer estimé de ce bien à l\'historique réel des ' + bench.nbBiens +
+  parts.push('Cette section compare le loyer estimé de ce bien à l\'historique réel des ' + bench.nbBiens +
     ' biens de type Location courte durée déjà suivis dans votre portefeuille Artemis (' +
     mktFmtPeriod(bench.firstPeriod) + ' → ' + mktFmtPeriod(bench.lastPeriod) + ').');
   if (ecart != null) {
@@ -1139,8 +1212,9 @@ function mktPdfModuleLCD(doc, listing, logo, docTitle, marginX, contentW, pageH)
       Math.abs(ecart) + '% ' + (ecart >= 0 ? 'au-dessus' : 'en-dessous') +
       ' de la moyenne mensuelle constatée sur votre portefeuille LCD (' + mktFmtEUR(bench.globalAvgMonthly) + '/mois).');
   }
-  parts.push("Cette comparaison reste indicative : elle s'appuie sur vos propres biens, dont l'emplacement, la taille et le niveau de gamme peuvent différer de ce bien. Elle ne remplace pas une étude de marché spécialisée (non intégrée à Artemis pour rester sans coût).");
-  mktPdfParagraph(doc, marginX, y, contentW, parts.join(' '), logo, docTitle, pageH);
+  parts.push("Cette comparaison reste indicative : elle s'appuie sur vos propres biens, dont l'emplacement, la taille et le niveau de gamme peuvent différer de ce bien. Elle ne remplace pas une étude de marché spécialisée payante (non intégrée à Artemis pour rester sans coût).");
+  if (y + 20 > pageH - 24) { doc.addPage(); y = mktPdfHeaderBand(doc, logo, docTitle); y += 6; }
+  mktPdfParagraph(doc, marginX, y, contentW, parts.join(' ').replace(/\*\*/g, ''), logo, docTitle, pageH);
 }
 
 // ── Module PDF « Immeuble » ────────────────────────────────────────────────
@@ -1197,9 +1271,11 @@ async function mktGenerateReport() {
   const docTitle = listing.linkedBienNom || [listing.type, listing.ville].filter(Boolean).join(' · ') || 'Bien';
   const galleryUrls = (listing.photos || []).slice(0, MKT_MAX_PHOTOS);
 
-  const [logo, coverPhoto, ...galleryPhotos] = await Promise.all([
+  const needsLcdContext = mktTypology(listing.type).reportModuleKey === 'lcd' && listing.lat != null && listing.lon != null;
+  const [logo, coverPhoto, lcdSectorContext, ...galleryPhotos] = await Promise.all([
     mktLoadImage('icon-192.png'),
     galleryUrls[0] ? mktLoadImage(mktCldUrl(galleryUrls[0], 'w_1000,h_650,c_fill,q_auto,f_auto')) : Promise.resolve(null),
+    needsLcdContext ? mktFetchLcdSectorContext(listing.lat, listing.lon) : Promise.resolve(null),
     ...galleryUrls.map(u => mktLoadImage(mktCldUrl(u, MKT_GALLERY_TRANSFORM)))
   ]);
 
@@ -1382,7 +1458,7 @@ async function mktGenerateReport() {
   // ═══ MODULE D'ANALYSE SPÉCIFIQUE À LA TYPOLOGIE ═══
   const typologyModule = mktTypology(listing.type).reportModuleKey;
   if (typologyModule === 'lcd') {
-    mktPdfModuleLCD(doc, listing, logo, docTitle, marginX, contentW, pageH);
+    mktPdfModuleLCD(doc, listing, logo, docTitle, marginX, contentW, pageH, lcdSectorContext);
   } else if (typologyModule === 'immeuble') {
     mktPdfModuleImmeuble(doc, listing, logo, docTitle, marginX, contentW, pageH);
   }
