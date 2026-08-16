@@ -445,7 +445,26 @@ buildMappingTable();
 function _parseMontantCell(raw) {
   const s = String(raw || '');
   const isParenNegative = /\(\s*[\d.,\s   ]+\s*\)/.test(s);
-  const n = parseFloat(s.replace(/[\s   ]/g,'').replace(',','.').replace(/[^0-9.\-]/g,'')) || 0;
+  const cleaned = s.replace(/[\s   ]/g,'').replace(/[^0-9.,\-]/g,'');
+  // Les exports bancaires mélangent les conventions : "," décimale (1097,19), "."
+  // décimale (982.37), ou "." de milliers + "," décimale (1.097,19). On repère le
+  // DERNIER séparateur ('.' ou ',') comme décimale et on retire les précédents —
+  // sauf s'il n'y en a qu'un seul suivi d'exactement 3 chiffres, auquel cas c'est
+  // un séparateur de milliers isolé (aucun montant en euros n'a 3 décimales).
+  const sepIdx = [];
+  for (let i = 0; i < cleaned.length; i++) { if (cleaned[i] === '.' || cleaned[i] === ',') sepIdx.push(i); }
+  let numStr;
+  if (!sepIdx.length) {
+    numStr = cleaned;
+  } else {
+    const lastSep = sepIdx[sepIdx.length - 1];
+    const digitsAfter = cleaned.length - lastSep - 1;
+    const lastIsThousands = sepIdx.length === 1 && digitsAfter === 3;
+    numStr = lastIsThousands
+      ? cleaned.replace(/[.,]/g, '')
+      : cleaned.slice(0, lastSep).replace(/[.,]/g, '') + '.' + cleaned.slice(lastSep + 1).replace(/[.,]/g, '');
+  }
+  const n = parseFloat(numStr) || 0;
   return (isParenNegative && n > 0) ? -n : n;
 }
 
