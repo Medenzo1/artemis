@@ -1610,7 +1610,13 @@ function openEditModal(periodKey) {
     const amt = +l.montant || 0;
     const amtCls = amt >= 0 ? 'color:var(--green)' : 'color:var(--red)';
     const catOpts = cats.map(c => `<option value="${c}" ${c===l.cat?'selected':''}>${c}</option>`).join('');
-    const bienOpts = ['Frais généraux',...biens.map(b=>b.name)].map(b=>`<option value="${b}" ${b===(l.bienName||l.bien||'')?'selected':''}>${b}</option>`).join('');
+    // Les lignes importées stockent tantôt "Frais généraux" tantôt "Frais generaux" (les deux
+    // variantes coexistent ailleurs dans l'app, ex. BIENS_NOMS) — l'option du select doit
+    // matcher les deux pour ne pas retomber silencieusement sur "-" quand la valeur enregistrée
+    // n'a pas d'accent.
+    const currentBien = l.bienName || l.bien || '';
+    const isCurrentFG = currentBien === 'Frais généraux' || currentBien === 'Frais generaux';
+    const bienOpts = ['Frais generaux',...biens.map(b=>b.name)].map(b=>`<option value="${b}" ${(b==='Frais generaux' ? isCurrentFG : b===currentBien)?'selected':''}>${b}</option>`).join('');
     return `<tr id="erow-${i}" style="border-bottom:1px solid var(--border)">
       <td style="padding:6px 8px;color:var(--text2);font-size:10px;white-space:nowrap">${l.date||''}</td>
       <td style="padding:6px 8px;font-size:11px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${(l.full||l.libelle||'').replace(/"/g,'')}">${l.full||l.libelle||'-'}</td>
