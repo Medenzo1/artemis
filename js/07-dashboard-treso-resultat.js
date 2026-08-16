@@ -1141,30 +1141,57 @@ function _renderSIG() {
     rows += `<tr><td colspan="3" style="height:10px"></td></tr>`;
   });
 
-  // ── Séparateur avant soldes ──
-  rows += `<tr><td colspan="3" style="border-top:1px solid var(--border);padding:0"></td></tr>`;
+  // ── Cascade des Soldes Intermédiaires de Gestion ──
+  // Isolée dans son propre bloc (hors tableau de détail) pour qu'elle se lise comme une
+  // vraie cascade comptable : EBE (avant amortissements, "cash") → Résultat d'exploitation
+  // (après amortissements) → RCAI (après financier) → Résultat net (après IS).
+  const amortTotal = (subs["Charge d'exploitation"] && subs["Charge d'exploitation"]["Amortissements"]) || 0;
+  const chargeExpHorsAmort = (totals["Charge d'exploitation"]||0) - amortTotal;
+  const ebe = (totals["Produit d'exploitation"]||0) - chargeExpHorsAmort;
+  const impot = totals["Impôt sur les bénéfices"]||0;
 
-  // ── Soldes en cascade ──
-  const solde = (label, val, large) => {
+  // Ligne "opération" (fine, grise, +/- explicite) qui alimente le solde suivant.
+  const opRow = (label, val, note) => {
+    const sign = val >= 0 ? '+' : '−';
     const col = val >= 0 ? 'var(--green)' : 'var(--red)';
-    const sz = large ? '15px' : '12px';
-    const py = large ? '11px' : '7px';
-    rows += `<tr style="border-top:${large?'1px':'0.5px'} solid var(--border)">
-      <td colspan="2" style="padding:${py} 0;font-size:${large?'13':'12'}px;font-weight:${large?'700':'400'};color:${large?'var(--text)':'var(--text2)'}">${escHtml(label)}</td>
-      <td style="text-align:right;padding:${py} 0;font-family:monospace;font-size:${sz};font-weight:${large?'800':'600'};color:${col}">${val>=0?'+':''}${_fmtK(val)}</td>
-    </tr>`;
+    const noteTag = note ? ` <span style="font-size:9px;background:rgba(155,110,243,.12);border:1px solid rgba(155,110,243,.25);color:var(--purple);border-radius:3px;padding:1px 5px;margin-left:5px">${escHtml(note)}</span>` : '';
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 16px 6px 30px;font-size:12px;color:var(--text2)">
+      <span>${escHtml(label)}${noteTag}</span>
+      <span style="font-family:monospace">${sign} ${_fmtK(Math.abs(val))}</span>
+    </div>`;
+  };
+  // Ligne "solde" (checkpoint en gras, encadré, coloré selon le signe) — un niveau du SIG.
+  const soldeRow = (label, val, big) => {
+    const col = val >= 0 ? 'var(--green)' : 'var(--red)';
+    const bg = val >= 0 ? 'rgba(34,201,122,.07)' : 'rgba(240,86,106,.07)';
+    const border = val >= 0 ? 'rgba(34,201,122,.25)' : 'rgba(240,86,106,.25)';
+    return `<div style="display:flex;justify-content:space-between;align-items:center;background:${bg};border:1px solid ${border};border-radius:8px;padding:${big?'14px 18px':'8px 16px'};margin:${big?'12px 0 0':'6px 0'}">
+      <span style="font-size:${big?'13px':'12px'};font-weight:${big?800:700};color:${big?'var(--text)':col}">${escHtml(label)}</span>
+      <span style="font-family:monospace;font-size:${big?'19px':'13px'};font-weight:800;color:${col}">${val>=0?'+':''}${_fmtK(val)}</span>
+    </div>`;
   };
 
-  solde("Résultat d'exploitation", rex, false);
-  solde("Résultat financier", rfin, false);
-  solde("Résultat exceptionnel", rexc, false);
-  solde("Résultat courant avant IS (RCAI)", rcai, false);
-  rows += `<tr><td colspan="3" style="border-top:2px solid var(--border2);padding:0"></td></tr>`;
-  solde("Résultat net", rnet, true);
+  const cascadeHTML = `
+    <div style="padding:16px;border-top:1px solid var(--border)">
+      <div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text2);margin-bottom:10px;display:flex;align-items:center;gap:8px">
+        <span style="display:block;width:3px;height:12px;background:var(--cyan);border-radius:2px"></span>
+        Cascade des soldes intermédiaires de gestion
+      </div>
+      ${opRow("Produits d'exploitation", totals["Produit d'exploitation"]||0)}
+      ${opRow("Charges d'exploitation (hors amortissements)", -chargeExpHorsAmort)}
+      ${soldeRow("Excédent brut d'exploitation (EBE)", ebe)}
+      ${opRow('Dotations aux amortissements', -amortTotal, 'non décaissée')}
+      ${soldeRow("Résultat d'exploitation", rex)}
+      ${opRow('Résultat financier', rfin)}
+      ${opRow('Résultat exceptionnel', rexc)}
+      ${soldeRow('Résultat courant avant IS (RCAI)', rcai)}
+      ${opRow('Impôt sur les bénéfices', -impot)}
+      ${soldeRow('Résultat net', rnet, true)}
+    </div>`;
 
   let sigBody = el.querySelector('#sig-table-body');
   if (!sigBody) { sigBody = document.createElement('div'); sigBody.id = 'sig-table-body'; el.appendChild(sigBody); }
-  sigBody.innerHTML = `<div style="padding:16px">
+  sigBody.innerHTML = `<div style="padding:16px 16px 0">
     <table style="width:100%;border-collapse:collapse">
       <colgroup><col style="width:56%"><col style="width:14%"><col style="width:30%"></colgroup>
       <thead>
@@ -1176,7 +1203,7 @@ function _renderSIG() {
       </thead>
       <tbody>${rows}</tbody>
     </table>
-  </div>`;
+  </div>${cascadeHTML}`;
 }
 
 
