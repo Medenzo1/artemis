@@ -439,6 +439,16 @@ buildMappingTable();
 });
 }
 
+// Certains exports bancaires (format comptable) notent les montants négatifs entre
+// parenthèses — ex. "(982,37 €)" — au lieu d'un signe moins. Sans ça, le signe est perdu
+// silencieusement, ce qui casse entre autres la détection des échéances d'emprunt (montant < 0).
+function _parseMontantCell(raw) {
+  const s = String(raw || '');
+  const isParenNegative = /\(\s*[\d.,\s   ]+\s*\)/.test(s);
+  const n = parseFloat(s.replace(/[\s   ]/g,'').replace(',','.').replace(/[^0-9.\-]/g,'')) || 0;
+  return (isParenNegative && n > 0) ? -n : n;
+}
+
 function parseBankFile(name, rows) {
 period = name.replace(/\.xlsx?|\.csv/gi,'');
 const headers = rows[0] || [];
@@ -456,7 +466,7 @@ bankRows = rows.slice(1).map(r => {
 if(!r) return null;
 let d = r[idx.date];
 if(d instanceof Date) { const _dd=String(d.getUTCDate()).padStart(2,'0'),_mm=String(d.getUTCMonth()+1).padStart(2,'0'),_yy=d.getUTCFullYear(); d=_dd+'/'+_mm+'/'+_yy; }
-const montant = parseFloat(String(r[idx.montant]||'').replace(/[\s\u00a0\u202f\u2009]/g,'').replace(',','.').replace(/[^0-9.\-]/g,'')) || 0;
+const montant = _parseMontantCell(r[idx.montant]);
 if(!montant) return null;
 return {
 date:    String(d||''),
