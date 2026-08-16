@@ -1307,18 +1307,18 @@ function renderRecentActivity() {
       </div>
 
       <!-- Figures -->
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
-        <div style="background:var(--bg3);border-radius:7px;padding:8px 10px">
-          <div style="font-size:9px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px">Revenus</div>
-          <div style="font-size:12px;font-weight:700;color:var(--green);font-family:monospace">+${Math.round(rev).toLocaleString('fr-FR')} €</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px">
+        <div style="background:var(--bg3);border-radius:7px;padding:8px 6px;min-width:0">
+          <div style="font-size:9px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Revenus</div>
+          <div style="font-size:10.5px;font-weight:700;color:var(--green);font-family:monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">+${Math.round(rev).toLocaleString('fr-FR')} €</div>
         </div>
-        <div style="background:var(--bg3);border-radius:7px;padding:8px 10px">
-          <div style="font-size:9px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px">Charges</div>
-          <div style="font-size:12px;font-weight:700;color:var(--red);font-family:monospace">${Math.round(chg).toLocaleString('fr-FR')} €</div>
+        <div style="background:var(--bg3);border-radius:7px;padding:8px 6px;min-width:0">
+          <div style="font-size:9px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Charges</div>
+          <div style="font-size:10.5px;font-weight:700;color:var(--red);font-family:monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${Math.round(chg).toLocaleString('fr-FR')} €</div>
         </div>
-        <div style="background:var(--bg3);border-radius:7px;padding:8px 10px">
-          <div style="font-size:9px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px">Net</div>
-          <div style="font-size:12px;font-weight:700;color:${netPos?'var(--green)':'var(--red)'};font-family:monospace">${netPos?'+':''}${Math.round(net).toLocaleString('fr-FR')} €</div>
+        <div style="background:var(--bg3);border-radius:7px;padding:8px 6px;min-width:0">
+          <div style="font-size:9px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Net</div>
+          <div style="font-size:10.5px;font-weight:700;color:${netPos?'var(--green)':'var(--red)'};font-family:monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${netPos?'+':''}${Math.round(net).toLocaleString('fr-FR')} €</div>
         </div>
       </div>
 
@@ -1351,7 +1351,7 @@ function renderRecentActivity() {
       </div>
       <span style="font-size:10px;color:var(--text3)">${periods.length} période${periods.length>1?'s':''} · cliquer pour reprendre</span>
     </div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px">
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px">
       ${cards.join('')}
     </div>`;
 }
