@@ -750,7 +750,7 @@ function _renderCaWaterfall(el) {
       icon: totalDelta >= 0 ? '📈' : '📉',
       color: trendColor,
       text: '<strong>'+trend+' globale</strong> — Le CA de P1 ('+p1Label+') '+
-            (totalDelta>=0?'progresse de <strong style="color:var(--green)">+'+fmtAmt(Math.abs(totalDelta))+'</strong>':'recule de <strong style="color:var(--red)">-'+fmtAmt(Math.abs(totalDelta))+'</strong>')+
+            (totalDelta>=0?'progresse de <strong style="color:var(--green)">'+fmtAmt(totalDelta)+'</strong>':'recule de <strong style="color:var(--red)">'+fmtAmt(totalDelta)+'</strong>')+
             ' par rapport à P2 ('+p2Label+') sur une fenêtre de <strong>'+mthLabel(driver)+'</strong>.'
     });
 
@@ -759,7 +759,7 @@ function _renderCaWaterfall(el) {
       const items = top3pos.map(d => {
         const parts = d.key.split(' · ');
         const p = fmtPct(d.delta, d.p2);
-        return '<em>'+parts[0]+(parts[1]?' · '+parts[1]:'')+'</em> (<span style="color:var(--green)">+'+fmtAmt(d.delta)+', '+p+'</span>)';
+        return '<em>'+parts[0]+(parts[1]?' · '+parts[1]:'')+'</em> (<span style="color:var(--green)">'+fmtAmt(d.delta)+', '+p+'</span>)';
       });
       bullets.push({
         icon: '✅',
@@ -1362,13 +1362,13 @@ function _renderDepWaterfall(el) {
   bullets.push({
     icon:totalDelta<=0?'📉':'📈',
     text:'<strong>'+trend+'</strong> — Les dépenses de P1 ('+fmtFR(p1Min)+' → '+fmtFR(p1Max)+') '+
-         (totalDelta<=0?'reculent de <strong style="color:var(--green)">-'+fmtAmt(Math.abs(totalDelta))+'</strong>':'progressent de <strong style="color:var(--red)">+'+fmtAmt(Math.abs(totalDelta))+'</strong>')+
+         (totalDelta<=0?'reculent de <strong style="color:var(--green)">'+fmtAmt(totalDelta)+'</strong>':'progressent de <strong style="color:var(--red)">'+fmtAmt(totalDelta)+'</strong>')+
          ' vs P2 ('+fmtFR(p2Min)+' → '+fmtFR(p2Max)+') sur <strong>'+mthLabel(driver)+'</strong>.'
   });
   if(top3pos.length){
     const items=top3pos.map(d=>{
       const parts=d.key.split(' · ');
-      return '<em>'+parts[0]+(parts[1]?' · '+parts[1]:'')+'</em> (<span style="color:var(--red)">+'+fmtAmt(d.delta)+', '+fmtPct(d.delta,d.p2)+'</span>)';
+      return '<em>'+parts[0]+(parts[1]?' · '+parts[1]:'')+'</em> (<span style="color:var(--red)">'+fmtAmt(d.delta)+', '+fmtPct(d.delta,d.p2)+'</span>)';
     });
     bullets.push({icon:'⚠️',text:'<strong>Postes en hausse</strong> — '+items.join(' ; ')+'.'});
   }

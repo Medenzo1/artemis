@@ -565,13 +565,13 @@ function _renderTresWaterfall(el) {
   bullets.push({
     icon:trendUp?'📈':'📉',
     text:'<strong>'+(trendUp?'↑ Amélioration':'↓ Détérioration')+' de la trésorerie</strong> — Le solde net de P1 ('+fmtFR(p1Min)+' → '+fmtFR(p1Max)+') '+
-         (trendUp?'progresse de <strong style="color:var(--green)">+'+fmtAmt(Math.abs(totalDelta))+'</strong>':'recule de <strong style="color:var(--red)">'+fmtAmt(-Math.abs(totalDelta))+'</strong>')+
+         (trendUp?'progresse de <strong style="color:var(--green)">'+fmtAmt(totalDelta)+'</strong>':'recule de <strong style="color:var(--red)">'+fmtAmt(totalDelta)+'</strong>')+
          ' vs P2 ('+fmtFR(p2Min)+' → '+fmtFR(p2Max)+') sur <strong>'+mthLabel(driver)+'</strong>.'
   });
   if(top3pos.length){
     const items=top3pos.map(d=>{
       const parts=d.key.split(' · ');
-      return '<em>'+parts[0]+(parts[1]?' · '+parts[1]:'')+'</em> (<span style="color:var(--green)">+'+fmtAmt(d.delta)+', '+fmtPct(d.delta,d.p2)+'</span>)';
+      return '<em>'+parts[0]+(parts[1]?' · '+parts[1]:'')+'</em> (<span style="color:var(--green)">'+fmtAmt(d.delta)+', '+fmtPct(d.delta,d.p2)+'</span>)';
     });
     bullets.push({icon:'✅',text:'<strong>Moteurs de hausse</strong> — '+items.join(' ; ')+'.'});
   }
