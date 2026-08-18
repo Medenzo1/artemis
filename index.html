@@ -124,6 +124,12 @@
           <div class="h-card-desc">Biens · Opportunités · Baromètre investissement</div>
           <div class="h-card-arrow" style="color:#ffb400">→</div>
         </div>
+        <div class="h-entry-card h-card-sim" onclick="showSimulateur()">
+          <div class="h-card-icon">🧮</div>
+          <div class="h-card-label">Simulateur</div>
+          <div class="h-card-desc">Rentabilité · Fiscalité · Comparatif des régimes</div>
+          <div class="h-card-arrow" style="color:#34d399">→</div>
+        </div>
       </div>
 
       <!-- KPI cards — même parent que les cartes du haut → largeur identique -->
@@ -459,6 +465,24 @@
     <div id="mkt-detail-view" style="display:none;max-width:720px;margin:0 auto"></div>
 
   </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SIMULATEUR SCREEN
+══════════════════════════════════════ -->
+<div id="simulateurScreen" style="display:none;position:fixed;inset:0;z-index:600;background:#04080f;overflow-y:auto;font-family:'DM Sans',system-ui,sans-serif">
+
+  <div id="sim-topbar" style="position:sticky;top:0;z-index:10;background:rgba(4,8,15,.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(52,211,153,.1);padding:12px 32px;min-height:56px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+    <div style="display:flex;align-items:center;gap:12px">
+      <button onclick="exitSimulateur()" style="background:none;border:none;color:rgba(52,211,153,.7);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;padding:0" onmouseover="this.style.color='#34d399'" onmouseout="this.style.color='rgba(52,211,153,.7)'">🏠 Accueil</button>
+      <span style="color:rgba(255,255,255,.15)">·</span>
+      <span style="font-size:13px;font-weight:700;color:#eaf0ff;letter-spacing:.04em">ARTEM<span style="color:#34d399">IS</span> <span style="color:rgba(52,211,153,.6)">Simulateur</span></span>
+    </div>
+    <div id="sim-header-actions" style="display:flex;gap:10px;flex-wrap:wrap"></div>
+  </div>
+
+  <div style="max-width:1200px;margin:0 auto;padding:32px" id="sim-content"></div>
+
 </div>
 
 
@@ -2197,5 +2221,9 @@
 <script src="js/13-init-patch.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="js/14-marketplace.js"></script>
+<script src="js/15-simulateur.js"></script>
+<script src="js/16-simulateur-moteur.js"></script>
+<script src="js/17-simulateur-regimes.js"></script>
+<script src="js/18-simulateur-resultats.js"></script>
 </body>
 </html>
