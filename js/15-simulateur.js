@@ -360,12 +360,24 @@ function simFmtEURCompact(n) {
   return (n < 0 ? '-' : '') + s + ' €';
 }
 
+function simToast(msg) {
+  if (typeof showToast === 'function') showToast(msg);
+  else alert(msg);
+}
+
 function simCalculer() {
   const inputs = simGetFormInputs();
   if (!inputs.prixBien || inputs.prixBien <= 0) {
-    if (typeof showToast === 'function') showToast('Renseignez au moins le prix du bien avant de calculer.');
-    else alert('Renseignez au moins le prix du bien avant de calculer.');
+    simToast('Renseignez au moins le prix du bien avant de calculer.');
     return;
+  }
+  // Garde-fou : une durée de détention à 0 désactiverait silencieusement toutes les années
+  // de la simulation (tableau de résultats à 0 € partout, sans message d'erreur visible).
+  if (!inputs.dureeDetention || inputs.dureeDetention <= 0) {
+    inputs.dureeDetention = inputs.dureeEmprunt > 0 ? inputs.dureeEmprunt : 15;
+    saveSimDraft(inputs);
+    simToast('Durée de détention non renseignée — ' + inputs.dureeDetention + ' ans utilisés par défaut. Tu peux la modifier dans "Revente du bien".');
+    if (SIM_CURRENT_VIEW === 'form') simRenderForm();
   }
   SIM_LAST_RESULTS = simRunAllRegimes(inputs);
   simShowView('results');
