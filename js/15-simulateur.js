@@ -52,6 +52,7 @@ const SIM_DEFAULT_INPUTS = {
   impositionDividendes: 'FLAT TAX', // ou 'BARÈME PROGRESSIF'
 
   // Revente
+  revendreLeBien: 'OUI', // 'NON' = le bien est gardé indéfiniment (simulation sur 25 ans, sans PV)
   valeurRevente: 0,
   dureeDetention: 15,
 
@@ -118,7 +119,8 @@ function simField(id, label, value, opts) {
   const step = opts.step || (type === 'number' ? 'any' : undefined);
   let inputHtml;
   if (type === 'select') {
-    inputHtml = '<select id="' + id + '" onchange="simOnFieldChange(\'' + id + '\',this)">' +
+    const extraOnChange = opts.onChangeExtra ? ';' + opts.onChangeExtra : '';
+    inputHtml = '<select id="' + id + '" onchange="simOnFieldChange(\'' + id + '\',this)' + extraOnChange + '">' +
       opts.options.map(function(o) {
         return '<option value="' + o.v + '"' + (String(value) === String(o.v) ? ' selected' : '') + '>' + o.l + '</option>';
       }).join('') + '</select>';
@@ -243,8 +245,17 @@ function simRenderForm() {
 
     // Revente
     '<div class="sim-card">' + simSectionHeader('🔑', 'Revente du bien') + '<div class="grid3" style="gap:14px">' +
-      simField('valeurRevente', 'Valeur du bien à la revente', i.valeurRevente, {suffix:'€'}) +
-      simField('dureeDetention', 'Durée de détention du bien (années)', i.dureeDetention) +
+      simField('revendreLeBien', 'Je prévois de revendre ce bien', i.revendreLeBien, {type:'select', options:[
+        {v:'OUI',l:'Oui, à terme'},{v:'NON',l:'Non, je le garde indéfiniment'}
+      ], onChangeExtra: 'simRenderForm()'}) +
+      (i.revendreLeBien === 'OUI' ? (
+        simField('valeurRevente', 'Valeur du bien à la revente', i.valeurRevente, {suffix:'€'}) +
+        simField('dureeDetention', 'Durée de détention du bien (années)', i.dureeDetention)
+      ) : (
+        '<div style="grid-column:1/-1;background:rgba(52,211,153,.06);border:1px solid rgba(52,211,153,.2);border-radius:10px;padding:12px 14px;font-size:11px;color:var(--text2)">' +
+          '📅 Simulation sur ' + SIM_HORIZON + ' ans sans revente : ni produit de cession, ni impôt sur la plus-value ne sont pris en compte — seuls les cash-flows locatifs comptent.' +
+        '</div>'
+      )) +
     '</div></div>' +
 
     // Options
@@ -373,7 +384,8 @@ function simCalculer() {
   }
   // Garde-fou : une durée de détention à 0 désactiverait silencieusement toutes les années
   // de la simulation (tableau de résultats à 0 € partout, sans message d'erreur visible).
-  if (!inputs.dureeDetention || inputs.dureeDetention <= 0) {
+  // Non pertinent si l'utilisateur a choisi de ne jamais revendre (simulation sur 25 ans fixe).
+  if (inputs.revendreLeBien !== 'NON' && (!inputs.dureeDetention || inputs.dureeDetention <= 0)) {
     inputs.dureeDetention = inputs.dureeEmprunt > 0 ? inputs.dureeEmprunt : 15;
     saveSimDraft(inputs);
     simToast('Durée de détention non renseignée — ' + inputs.dureeDetention + ' ans utilisés par défaut. Tu peux la modifier dans "Revente du bien".');

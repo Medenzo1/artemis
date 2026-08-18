@@ -48,6 +48,13 @@ function simTotalChargesRecurrentes(ch) {
          ch.fraisMiseEnLocation + ch.fraisBancaires + ch.fraisComptabilite + ch.cga + ch.cfe + ch.crl;
 }
 
+// Durée effective de simulation : l'horizon complet (25 ans) si l'utilisateur ne prévoit pas de
+// revendre le bien, sinon la durée de détention saisie (repliée sur l'horizon si non renseignée).
+function simEffectiveDuree(inputs) {
+  if (inputs.revendreLeBien === 'NON') return SIM_HORIZON;
+  return inputs.dureeDetention > 0 ? inputs.dureeDetention : SIM_HORIZON;
+}
+
 // ── Base annuelle commune (produits, charges récurrentes, emprunt) pour un mode donné ──
 function simBuildAnnualBase(inputs, mode) {
   const cout = simBuildBaseCoutAcquisition(inputs, mode);
@@ -56,7 +63,7 @@ function simBuildAnnualBase(inputs, mode) {
   const montantEmprunte = inputs.dureeEmprunt > 0 ? Math.max(0, cout.total - inputs.apportPersonnel) : 0;
   const loan = simBuildLoanSchedule(montantEmprunte, inputs.tauxEmprunt, inputs.tauxAssuranceEmprunt, inputs.dureeEmprunt, inputs.dureeDiffereMois, inputs.typeEmprunt);
 
-  const dureeDetention = inputs.dureeDetention;
+  const dureeDetention = simEffectiveDuree(inputs);
   const years = [];
   for (let a = 0; a < SIM_HORIZON; a++) {
     const active = (a + 1) <= dureeDetention;
@@ -86,7 +93,10 @@ function simFinalizeRegime(key, label, years, apport, coutAcquisitionTotal, inpu
   const cashFlowCumuleFinal = validYears.length ? validYears[validYears.length - 1].cashFlowCumule : 0;
   const totalImpot = simSum(validYears.map(y => y.impotLocatif));
 
-  const opYears = validYears.length > 1 ? validYears.slice(0, -1) : validYears;
+  // Année exclue du calcul de rendement uniquement si elle porte une revente (produit de cession
+  // et impôt de plus-value ponctuels qui fausseraient le ratio) — jamais en mode "pas de revente".
+  const hasResale = inputs.revendreLeBien === 'OUI';
+  const opYears = (hasResale && validYears.length > 1) ? validYears.slice(0, -1) : validYears;
   const rendementNetNet = coutAcquisitionTotal > 0 && opYears.length
     ? simSum(opYears.map(y => (y.produits - y.chargesDecaissees - y.impotLocatif) / coutAcquisitionTotal)) / opYears.length
     : 0;
@@ -122,7 +132,7 @@ function simRegimeLmnpReel(inputs) {
 
   const deficitOut = simDeficitLMNPEngine(produits, chargesHorsAmort, amortissement, SIM_HORIZON);
 
-  const dureeDetention = inputs.dureeDetention;
+  const dureeDetention = simEffectiveDuree(inputs);
   const cumulAmortBien = simSum(dep.amortBien.slice(0, dureeDetention));
   const cumulAmortTravaux = simSum(dep.amortTravaux.slice(0, dureeDetention));
   const pv = simPvParticuliers({
@@ -138,7 +148,7 @@ function simRegimeLmnpReel(inputs) {
     const resultatImposable = deficitOut[a].resultatApres;
     const impotMarginal = simImpotMarginal(inputs.revenusNets, resultatImposable, nbParts, inputs.situationPersonnelle);
     const csgCrds = resultatImposable * SIM_TAUX_CSG_CRDS;
-    const isRevente = (a + 1) === dureeDetention;
+    const isRevente = inputs.revendreLeBien === 'OUI' && (a + 1) === dureeDetention;
     const impotPVAnnee = isRevente ? pv.total : 0;
     const impotLocatif = impotMarginal + csgCrds + impotPVAnnee;
 
@@ -159,7 +169,7 @@ function simRegimeLmnpReel(inputs) {
 function simRegimeLmnpMicro(inputs) {
   const mode = 'meuble';
   const base = simBuildAnnualBase(inputs, mode);
-  const dureeDetention = inputs.dureeDetention;
+  const dureeDetention = simEffectiveDuree(inputs);
   const produits = base.years.map(y => y.produits);
   const nbParts = simNbParts(inputs.situationPersonnelle, inputs.nbEnfants);
   const L31 = inputs.amortFraisAcquisition === 'OUI';
@@ -185,7 +195,7 @@ function simRegimeLmnpMicro(inputs) {
     const resultatImposable = Math.max(0, produits[a] * (1 - SIM_ABATT_MICRO_BIC));
     const impotMarginal = simImpotMarginal(inputs.revenusNets, resultatImposable, nbParts, inputs.situationPersonnelle);
     const csgCrds = resultatImposable * SIM_TAUX_CSG_CRDS;
-    const isRevente = (a + 1) === dureeDetention;
+    const isRevente = inputs.revendreLeBien === 'OUI' && (a + 1) === dureeDetention;
     const impotPVAnnee = isRevente ? pv.total : 0;
     const impotLocatif = impotMarginal + csgCrds + impotPVAnnee;
     // Pas d'obligation comptable en micro-BIC : frais de comptabilité et CGA jamais décaissés
@@ -220,7 +230,7 @@ function simRegimeLmpReel(inputs) {
   const revenuFoyerAnnuel = new Array(SIM_HORIZON).fill(inputs.revenusNets);
   const deficitOut = simDeficitLMPEngine(produits, chargesHorsAmort, amortissement, revenuFoyerAnnuel, SIM_HORIZON);
 
-  const dureeDetention = inputs.dureeDetention;
+  const dureeDetention = simEffectiveDuree(inputs);
   const nbParts = simNbParts(inputs.situationPersonnelle, inputs.nbEnfants);
   const idxRevente = dureeDetention - 1;
   const resultatAvantArr = base.years.map((y, a) => produits[a] - chargesHorsAmort[a] - (amortissement[a] || 0));
@@ -241,7 +251,7 @@ function simRegimeLmpReel(inputs) {
     const impotMarginal = simImpotMarginal(inputs.revenusNets, resultatOperation, nbParts, inputs.situationPersonnelle);
     const resultatAvant = resultatAvantArr[a];
     const cotisations = resultatAvant <= 0 ? SIM_COTIS_MIN_LMP : resultatAvant * SIM_TAUX_COTIS_LMP;
-    const isRevente = (a + 1) === dureeDetention;
+    const isRevente = inputs.revendreLeBien === 'OUI' && (a + 1) === dureeDetention;
     const impotPVAnnee = isRevente ? pv.total : 0;
     const impotLocatif = impotMarginal + cotisations + impotPVAnnee;
     const chargesDecaissees = base.years[a].chargeExploit + base.years[a].interets + base.years[a].assuranceEmprunt;
@@ -259,7 +269,7 @@ function simRegimeLmpReel(inputs) {
 // ════════════════════════════════════════════
 function simBuildFoncierBase(inputs, travauxDeductible) {
   const base = simBuildAnnualBase(inputs, 'nu');
-  const dureeDetention = inputs.dureeDetention;
+  const dureeDetention = simEffectiveDuree(inputs);
   const produits = base.years.map(y => y.produits);
   const chargesFinancieres = base.years.map((y, a) => y.interets + y.assuranceEmprunt + (a === 0 ? (base.cout.fraisDossier + base.cout.caution) : 0));
   const chargesExploitation = base.years.map((y, a) => y.chargeExploit + (a === 0 && travauxDeductible ? base.cout.travaux : 0));
@@ -275,7 +285,7 @@ function simBuildFoncierYearsAndFinalize(key, label, base, dureeDetention, produ
     let impotMarginal = simImpotMarginal(inputs.revenusNets, resultatOperation, nbParts, inputs.situationPersonnelle);
     if (pinelReductionFn) impotMarginal = Math.max(0, impotMarginal - pinelReductionFn(a + 1));
     const csgCrds = Math.max(0, d.resultatApres) * SIM_TAUX_CSG_CRDS;
-    const isRevente = (a + 1) === dureeDetention;
+    const isRevente = inputs.revendreLeBien === 'OUI' && (a + 1) === dureeDetention;
     const impotPVAnnee = isRevente ? pv.total : 0;
     const impotLocatif = impotMarginal + csgCrds + impotPVAnnee;
     const chargesDecaissees = base.years[a].chargeExploit + base.years[a].interets + base.years[a].assuranceEmprunt;
@@ -341,7 +351,7 @@ function simBuildMicroFoncierRegime(key, label, inputs, sourceBase, abattement, 
     let impotMarginal = simImpotMarginal(inputs.revenusNets, resultatMicro, nbParts, inputs.situationPersonnelle);
     if (pinelReductionFn) impotMarginal = Math.max(0, impotMarginal - pinelReductionFn(a + 1));
     const csgCrds = resultatMicro * SIM_TAUX_CSG_CRDS;
-    const isRevente = (a + 1) === dureeDetention;
+    const isRevente = inputs.revendreLeBien === 'OUI' && (a + 1) === dureeDetention;
     const impotPVAnnee = isRevente ? pv.total : 0;
     const impotLocatif = impotMarginal + csgCrds + impotPVAnnee;
     const chargesDecaissees = base.years[a].chargeExploit + base.years[a].interets + base.years[a].assuranceEmprunt;
@@ -379,7 +389,7 @@ function simBuildIsBase(inputs) {
     amortirFraisAcquisition: L31, dureeEmpruntAnnees: inputs.dureeEmprunt,
   });
   const amortissement = simAddArrays(dep.amortBien, dep.amortFraisAcq, dep.amortFraisBancaires, dep.amortTravaux, dep.amortMobilier, dep.amortFraisConstitution);
-  const dureeDetention = inputs.dureeDetention;
+  const dureeDetention = simEffectiveDuree(inputs);
   const produits = base.years.map(y => y.produits);
   // Si L31="NON" : frais d'acquisition + frais de constitution déduits intégralement en charge l'année 1 (jamais amortis).
   // Travaux et mobilier restent, eux, toujours immobilisés (jamais en charge courante) — cf. simBuildDepreciationSchedule.
@@ -401,7 +411,7 @@ function simRegimeSocieteIsSansDistrib(inputs) {
   const years = []; let cumule = 0; const apport = inputs.apportPersonnel;
   for (let a = 0; a < SIM_HORIZON; a++) {
     if ((a + 1) > dureeDetention) { years.push(null); continue; }
-    const isRevente = (a + 1) === dureeDetention;
+    const isRevente = inputs.revendreLeBien === 'OUI' && (a + 1) === dureeDetention;
     let pvImposable = 0;
     if (isRevente) {
       const cumulAmortTotal = simSum(amortissement.slice(0, a + 1));
@@ -429,7 +439,7 @@ function simRegimeSocieteIsAvecDistrib(inputs) {
   const years = []; let cumule = 0; const apport = inputs.apportPersonnel;
   for (let a = 0; a < SIM_HORIZON; a++) {
     if ((a + 1) > dureeDetention) { years.push(null); continue; }
-    const isRevente = (a + 1) === dureeDetention;
+    const isRevente = inputs.revendreLeBien === 'OUI' && (a + 1) === dureeDetention;
     let pvImposable = 0;
     if (isRevente) {
       const cumulAmortTotal = simSum(amortissement.slice(0, a + 1));

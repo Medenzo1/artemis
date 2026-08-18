@@ -194,7 +194,7 @@ function simRenderResults() {
     '<div style="margin-bottom:24px;display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:12px">' +
       '<div>' +
         '<div style="font-size:22px;font-weight:700;color:#eaf0ff;margin-bottom:4px">Comparatif des régimes fiscaux</div>' +
-        '<div style="font-size:12px;color:var(--text2)">Sur ' + SIM_LAST_RESULTS.inputs.dureeDetention + ' ans · Coût du projet ' + simFmtEUR(okRegimes[0] ? okRegimes[0].coutAcquisitionTotal : 0) + ' · Apport ' + simFmtEUR(SIM_LAST_RESULTS.inputs.apportPersonnel) + '</div>' +
+        '<div style="font-size:12px;color:var(--text2)">' + (SIM_LAST_RESULTS.inputs.revendreLeBien === 'NON' ? 'Sans revente, sur ' + SIM_HORIZON + ' ans' : 'Sur ' + SIM_LAST_RESULTS.inputs.dureeDetention + ' ans') + ' · Coût du projet ' + simFmtEUR(okRegimes[0] ? okRegimes[0].coutAcquisitionTotal : 0) + ' · Apport ' + simFmtEUR(SIM_LAST_RESULTS.inputs.apportPersonnel) + '</div>' +
       '</div>' +
     '</div>' +
 
