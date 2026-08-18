@@ -146,12 +146,20 @@ function simOnFieldChange(id, el) {
   }
   inputs[id] = v;
   saveSimDraft(inputs);
+  simRefreshApercu(inputs);
 }
 
 // Champs stockés en fraction (0.08) mais affichés/saisis en % (8) dans le formulaire
 const SIM_PCT_FIELDS = ['tauxNotaire','tauxEmprunt','tauxAssuranceEmprunt','tauxGestionLocative','tauxVacance','tauxActualisation','reglesFinancementPct'];
 
 function simPctVal(v) { return Math.round(v * 10000) / 100; }
+
+function simSectionHeader(icon, title, color) {
+  color = color || '#34d399';
+  return '<div class="sim-card-title" style="display:flex;align-items:center;gap:10px;text-transform:none;font-size:14px;letter-spacing:0;color:#eaf0ff">' +
+    '<span style="width:30px;height:30px;border-radius:9px;background:' + color + '1a;border:1px solid ' + color + '40;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">' + icon + '</span>' +
+    title + '</div>';
+}
 
 function simRenderForm() {
   const el = document.getElementById('sim-content');
@@ -167,10 +175,11 @@ function simRenderForm() {
       '<div style="font-size:22px;font-weight:700;color:#eaf0ff;margin-bottom:4px">Simulateur de rentabilité immobilière</div>' +
       '<div style="font-size:12px;color:var(--text2)">Renseignez votre projet, puis comparez automatiquement 9 régimes fiscaux (LMNP, LMP, revenus fonciers, Pinel, société à l\'IS...)</div>' +
     '</div>' +
-    '<div class="sim-form" style="display:flex;flex-direction:column;gap:18px">' +
+    '<div class="sim-layout">' +
+    '<div class="sim-form" style="display:flex;flex-direction:column;gap:18px;min-width:0">' +
 
     // Coût d'acquisition
-    '<div class="sim-card"><div class="sim-card-title">🏠 Coût d\'acquisition du bien</div><div class="grid3" style="gap:14px">' +
+    '<div class="sim-card">' + simSectionHeader('🏠', "Coût d'acquisition du bien") + '<div class="grid3" style="gap:14px">' +
       simField('prixBien', "Prix du bien (hors frais d'agence)", i.prixBien, {suffix:'€'}) +
       simField('fraisAgence', "Frais d'agence", i.fraisAgence, {suffix:'€'}) +
       simField('tauxNotaire', 'Frais de notaire', simPctVal(i.tauxNotaire), {suffix:'%'}) +
@@ -183,7 +192,7 @@ function simRenderForm() {
     '</div></div>' +
 
     // Financement
-    '<div class="sim-card"><div class="sim-card-title">🏦 Financement & apport</div><div class="grid3" style="gap:14px">' +
+    '<div class="sim-card">' + simSectionHeader('🏦', 'Financement & apport') + '<div class="grid3" style="gap:14px">' +
       simField('typeEmprunt', 'Type emprunt', i.typeEmprunt, {type:'select', options:[
         {v:'CLASSIQUE',l:'Classique'},{v:'DIFFÉRÉ PARTIEL',l:'Différé partiel'},{v:'DIFFÉRÉ TOTAL',l:'Différé total'},{v:'IN FINE',l:'In fine'}
       ]}) +
@@ -195,7 +204,7 @@ function simRenderForm() {
     '</div></div>' +
 
     // Produits mensuels
-    '<div class="sim-card"><div class="sim-card-title">💶 Produits mensuels</div><div class="grid3" style="gap:14px">' +
+    '<div class="sim-card">' + simSectionHeader('💶', 'Produits mensuels') + '<div class="grid3" style="gap:14px">' +
       simField('loyerMeuble', 'Loyer mensuel — location meublée', i.loyerMeuble, {suffix:'€'}) +
       simField('chargesRecupMeuble', 'Charges récupérables — meublée', i.chargesRecupMeuble, {suffix:'€'}) +
       simField('loyerNu', 'Loyer mensuel — location nue', i.loyerNu, {suffix:'€'}) +
@@ -206,7 +215,7 @@ function simRenderForm() {
     '</div></div>' +
 
     // Charges annuelles
-    '<div class="sim-card"><div class="sim-card-title">📋 Charges annuelles</div><div class="grid3" style="gap:14px">' +
+    '<div class="sim-card">' + simSectionHeader('📋', 'Charges annuelles') + '<div class="grid3" style="gap:14px">' +
       simField('chargesLocatives', 'Charges locatives', i.chargesLocatives, {suffix:'€'}) +
       simField('assurances', 'Assurances (PNO/immeuble/GLI...)', i.assurances, {suffix:'€'}) +
       simField('taxeFonciere', 'Taxe foncière', i.taxeFonciere, {suffix:'€'}) +
@@ -221,7 +230,7 @@ function simRenderForm() {
     '</div></div>' +
 
     // Foyer fiscal
-    '<div class="sim-card"><div class="sim-card-title">👪 Foyer fiscal</div><div class="grid3" style="gap:14px">' +
+    '<div class="sim-card">' + simSectionHeader('👪', 'Foyer fiscal') + '<div class="grid3" style="gap:14px">' +
       simField('revenusNets', 'Revenus nets imposables du foyer', i.revenusNets, {suffix:'€'}) +
       simField('situationPersonnelle', 'Situation personnelle', i.situationPersonnelle, {type:'select', options:[
         {v:'Célibataire ou Divorcé',l:'Célibataire ou divorcé'},{v:'Marié ou Pacsé',l:'Marié ou pacsé'}
@@ -233,13 +242,13 @@ function simRenderForm() {
     '</div></div>' +
 
     // Revente
-    '<div class="sim-card"><div class="sim-card-title">🔑 Revente du bien</div><div class="grid3" style="gap:14px">' +
+    '<div class="sim-card">' + simSectionHeader('🔑', 'Revente du bien') + '<div class="grid3" style="gap:14px">' +
       simField('valeurRevente', 'Valeur du bien à la revente', i.valeurRevente, {suffix:'€'}) +
       simField('dureeDetention', 'Durée de détention du bien (années)', i.dureeDetention) +
     '</div></div>' +
 
     // Options
-    '<div class="sim-card"><div class="sim-card-title">⚙️ Options & réglages</div><div class="grid3" style="gap:14px">' +
+    '<div class="sim-card">' + simSectionHeader('⚙️', 'Options & réglages') + '<div class="grid3" style="gap:14px">' +
       simField('nbLots', 'Nombre de lots sur ce projet', i.nbLots) +
       simField('tauxVacance', 'Taux de vacance locative', simPctVal(i.tauxVacance), {suffix:'%'}) +
       simField('tauxActualisation', 'Taux actualisation (VAN & TRI)', simPctVal(i.tauxActualisation), {suffix:'%'}) +
@@ -257,7 +266,98 @@ function simRenderForm() {
       '<button class="btn btn-green" onclick="simCalculer()">Calculer →</button>' +
     '</div>' +
 
+    '</div>' + // .sim-form
+
+    '<aside class="sim-apercu-wrap"><div id="sim-apercu"></div></aside>' +
+
+    '</div>'; // .sim-layout
+
+  simRefreshApercu(i);
+}
+
+// ── Panneau "Aperçu du projet" — synthèse visuelle mise à jour en direct ──
+function simApercuBar(label, pct, color) {
+  return '<div style="margin-bottom:10px">' +
+    '<div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text2);margin-bottom:4px"><span>' + label + '</span><span style="font-weight:700;color:' + color + '">' + Math.round(pct) + ' %</span></div>' +
+    '<div style="height:6px;border-radius:4px;background:rgba(255,255,255,.06);overflow:hidden"><div style="height:100%;width:' + Math.max(0, Math.min(100, pct)) + '%;background:' + color + ';border-radius:4px"></div></div>' +
     '</div>';
+}
+
+function simRefreshApercu(inputs) {
+  const el = document.getElementById('sim-apercu');
+  if (!el) return;
+  const i = inputs || simGetFormInputs();
+
+  const fraisNotaire = (i.prixBien || 0) * (i.tauxNotaire || 0);
+  const coutTotal = (i.prixBien||0) + (i.fraisAgence||0) + fraisNotaire + (i.fraisDossierBancaire||0) +
+    (i.fraisCourtier||0) + (i.cautionHypotheque||0) + (i.travaux||0) + (i.mobilier||0) + (i.fraisConstitutionSociete||0);
+  const apport = i.apportPersonnel || 0;
+  const montantEmprunte = i.dureeEmprunt > 0 ? Math.max(0, coutTotal - apport) : 0;
+  const pctApport = coutTotal > 0 ? (apport / coutTotal) * 100 : 0;
+  const pctEmprunt = 100 - pctApport;
+
+  let mensualite = 0;
+  if (montantEmprunte > 0 && typeof simBuildLoanSchedule === 'function') {
+    try {
+      const sched = simBuildLoanSchedule(montantEmprunte, i.tauxEmprunt, i.tauxAssuranceEmprunt, i.dureeEmprunt, i.dureeDiffereMois, i.typeEmprunt);
+      mensualite = sched[0] ? sched[0].mensualite : 0;
+    } catch(e) {}
+  }
+
+  const loyerMensuel = i.loyerMeuble || i.loyerNu || 0;
+  const cashFlowBrutMensuel = loyerMensuel - mensualite;
+  const cfColor = cashFlowBrutMensuel >= 0 ? '#34d399' : '#f0566a';
+
+  const sectionsRemplies = [
+    i.prixBien > 0, (i.loyerMeuble > 0 || i.loyerNu > 0), i.apportPersonnel >= 0 && i.dureeEmprunt > 0,
+    i.revenusNets > 0, i.valeurRevente > 0 || i.dureeDetention > 0,
+  ].filter(Boolean).length;
+
+  el.innerHTML =
+    '<div class="sim-card" style="position:sticky;top:16px">' +
+      '<div style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--text2);font-weight:700;margin-bottom:14px">📊 Aperçu du projet</div>' +
+
+      '<div style="margin-bottom:18px">' +
+        '<div style="font-size:10px;color:var(--text2);margin-bottom:2px">Coût total du projet</div>' +
+        '<div style="font-size:26px;font-weight:800;color:#eaf0ff;font-family:monospace;letter-spacing:-.02em">' + simFmtEURCompact(coutTotal) + '</div>' +
+      '</div>' +
+
+      (coutTotal > 0 ?
+        '<div style="margin-bottom:18px">' +
+          simApercuBar('Apport (' + simFmtEURCompact(apport) + ')', pctApport, '#34d399') +
+          simApercuBar('Emprunt (' + simFmtEURCompact(montantEmprunte) + ')', pctEmprunt, '#9b6ef3') +
+        '</div>'
+      : '') +
+
+      '<div class="grid2" style="gap:10px;margin-bottom:4px">' +
+        '<div style="background:rgba(255,255,255,.03);border-radius:10px;padding:10px 12px">' +
+          '<div style="font-size:9px;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Loyer / mois</div>' +
+          '<div style="font-size:15px;font-weight:700;color:#eaf0ff;font-family:monospace">' + simFmtEURCompact(loyerMensuel) + '</div>' +
+        '</div>' +
+        '<div style="background:rgba(255,255,255,.03);border-radius:10px;padding:10px 12px">' +
+          '<div style="font-size:9px;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Mensualité ~</div>' +
+          '<div style="font-size:15px;font-weight:700;color:#eaf0ff;font-family:monospace">' + simFmtEURCompact(mensualite) + '</div>' +
+        '</div>' +
+      '</div>' +
+
+      '<div style="background:' + cfColor + '14;border:1px solid ' + cfColor + '35;border-radius:10px;padding:12px;margin-top:10px">' +
+        '<div style="font-size:9px;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Cash-flow brut estimé / mois</div>' +
+        '<div style="font-size:19px;font-weight:800;color:' + cfColor + ';font-family:monospace">' + (cashFlowBrutMensuel >= 0 ? '+' : '') + simFmtEURCompact(cashFlowBrutMensuel) + '</div>' +
+        '<div style="font-size:9px;color:var(--text2);margin-top:3px">Avant charges, impôts et régime fiscal</div>' +
+      '</div>' +
+
+      '<div style="margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,.06)">' +
+        '<div style="font-size:9px;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Progression de la saisie</div>' +
+        '<div style="display:flex;gap:4px">' + [0,1,2,3,4].map(function(k){ return '<div style="flex:1;height:4px;border-radius:2px;background:' + (k < sectionsRemplies ? '#34d399' : 'rgba(255,255,255,.08)') + '"></div>'; }).join('') + '</div>' +
+      '</div>' +
+    '</div>';
+}
+
+function simFmtEURCompact(n) {
+  n = n || 0;
+  const abs = Math.abs(n);
+  const s = Math.round(abs).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+  return (n < 0 ? '-' : '') + s + ' €';
 }
 
 function simCalculer() {

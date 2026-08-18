@@ -862,6 +862,14 @@ body.dash-mode #sc6 { padding: 0; }
   #sim-topbar { padding: 10px 16px !important; }
   #simulateurScreen #sim-content { padding: 16px !important; }
 }
+.sim-layout { display: grid; grid-template-columns: 1fr 300px; gap: 24px; align-items: start; }
+.sim-apercu-wrap { min-width: 0; }
+@media (max-width: 1000px) {
+  .sim-layout { grid-template-columns: 1fr; }
+  .sim-apercu-wrap .sim-card { position: static !important; }
+}
+.sim-card { transition: border-color .2s; }
+.sim-card:hover { border-color: rgba(52,211,153,.18); }
 .mkt-listing-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:14px;overflow:hidden;cursor:pointer;transition:border-color .2s,transform .15s}
 .mkt-listing-card:hover{border-color:rgba(255,180,0,.35);transform:translateY(-2px)}
 .mkt-listing-photo{width:100%;height:110px;background:rgba(255,255,255,.04);display:flex;align-items:center;justify-content:center;font-size:32px;color:rgba(255,255,255,.15)}
