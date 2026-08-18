@@ -32,7 +32,7 @@ function simLoyerCharges(inputs, mode) {
 function simChargesAnnuellesRecurrentes(inputs, mode) {
   const { loyerMensuel, chargesMensuelles } = simLoyerCharges(inputs, mode);
   const gestionLocative = Math.round(((loyerMensuel + chargesMensuelles) * 12 * (1 - inputs.tauxVacance)) * inputs.tauxGestionLocative);
-  const fraisComptabilite = (mode === 'nu') ? 0 : inputs.fraisComptabilite;
+  const fraisComptabilite = (mode === 'nu') ? 0 : (mode === 'societe' ? inputs.fraisComptabiliteSociete : inputs.fraisComptabilite);
   const cga = (mode === 'meuble') ? inputs.cga : 0;
   const cfe = (mode === 'nu') ? 0 : inputs.cfe;
   const fraisBancaires = (mode === 'societe') ? inputs.fraisBancairesSociete : inputs.fraisBancaires;

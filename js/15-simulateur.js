@@ -42,6 +42,7 @@ const SIM_DEFAULT_INPUTS = {
   fraisBancaires: 15,
   fraisBancairesSociete: 25,
   fraisComptabilite: 900,
+  fraisComptabiliteSociete: 1500,
   cga: 150,
   cfe: 150,
 
@@ -226,7 +227,8 @@ function simRenderForm() {
       simField('fraisMiseEnLocation', 'Frais de mise en location', i.fraisMiseEnLocation, {suffix:'€'}) +
       simField('fraisBancaires', 'Frais bancaires (perso)', i.fraisBancaires, {suffix:'€'}) +
       simField('fraisBancairesSociete', 'Frais bancaires (société)', i.fraisBancairesSociete, {suffix:'€'}) +
-      simField('fraisComptabilite', 'Frais de comptabilité', i.fraisComptabilite, {suffix:'€'}) +
+      simField('fraisComptabilite', 'Frais de comptabilité (meublé)', i.fraisComptabilite, {suffix:'€'}) +
+      simField('fraisComptabiliteSociete', 'Frais de comptabilité (société)', i.fraisComptabiliteSociete, {suffix:'€'}) +
       simField('cga', 'CGA', i.cga, {suffix:'€'}) +
       simField('cfe', 'CFE (cotisation foncière entreprises)', i.cfe, {suffix:'€'}) +
     '</div></div>' +
