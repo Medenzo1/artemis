@@ -735,9 +735,17 @@ meta.airbnbResolved = meta.airbnbVentil.length > 0;
 if(!meta.isAirbnb && !meta.isBooking && r.montant < 0) {
 const loanRef = Object.keys(LOAN_REF_MAP).find(ref => combined.includes(ref));
 if(loanRef) {
+const split = resolveLoanSplit(loanRef, r.date, r.montant);
+// Le numéro de prêt n'est parfois présent que par coïncidence dans le libellé bancaire
+// (référence de prélèvement, mandat SEPA...). Si aucune échéance ne correspond, ni par
+// date ni par montant (split.unknown), ce n'est très probablement pas un vrai remboursement
+// d'emprunt : on laisse la ligne être catégorisée normalement plutôt que de la bloquer
+// indéfiniment en "Échéance introuvable".
+if(!(split && split.unknown)) {
 meta.isLoan    = true;
 meta.loanRef   = loanRef;
-meta.loanSplit = resolveLoanSplit(loanRef, r.date, r.montant);
+meta.loanSplit = split;
+}
 }
 }
 
