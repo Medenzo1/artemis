@@ -176,7 +176,6 @@ body.dash-mode #sc6 { padding: 0; }
 /* ══════════════════════════════════════════════
    HOME SCREEN - Apple-style immersive landing
 ══════════════════════════════════════════════ */
-@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');
 
 #homeScreen {
   position: relative; min-height: 100vh; z-index: 500;
@@ -252,7 +251,7 @@ body.dash-mode #sc6 { padding: 0; }
   animation: fadeUp .9s ease .4s both;
   max-width: 900px;
 }
-.h-hero-title em { font-style: italic; color: #22d3c8; }
+.h-hero-title em { font-style: normal; color: #22d3c8; }
 .h-hero-sub {
   font-size: 18px; font-weight: 300; color: rgba(200,216,240,.6);
   max-width: 560px; line-height: 1.7; margin-bottom: 48px;
@@ -386,7 +385,7 @@ body.dash-mode #sc6 { padding: 0; }
   font-size: clamp(32px, 4vw, 52px); color: #eaf0ff; line-height: 1.15;
   margin-bottom: 20px;
 }
-.h-section-title em { font-style: italic; color: rgba(200,216,240,.5); }
+.h-section-title em { font-style: normal; color: rgba(200,216,240,.5); }
 .h-section-body {
   font-size: 16px; font-weight: 300; color: rgba(200,216,240,.6);
   line-height: 1.8; max-width: 600px;
@@ -867,7 +866,7 @@ body.dash-mode #sc6 { padding: 0; }
 .ms-item{display:flex;align-items:center;gap:8px;padding:6px 12px;cursor:pointer;font-size:11px;color:var(--text);transition:background .12s}
 .ms-item:hover{background:rgba(34,211,200,.07)}
 .ms-item input[type=checkbox]{accent-color:var(--cyan);width:13px;height:13px;cursor:pointer;flex-shrink:0}
-.ms-item.ms-all{border-bottom:1px solid var(--border);margin-bottom:4px;color:var(--text2);font-style:italic}
+.ms-item.ms-all{border-bottom:1px solid var(--border);margin-bottom:4px;color:var(--text2)}
 
 /* keyframes (moved from inline <style> block) */
 @keyframes mktPulse {
@@ -951,3 +950,6 @@ a{text-underline-offset:3px}
 }
 /* Grilles de champs : quand un libellé passe sur deux lignes, les champs restent alignés en bas */
 .sim-form .grid3>div,.sim-form .grid2>div{display:flex;flex-direction:column;justify-content:flex-end}
+
+/* Pas d'italique : l'accent passe par la couleur ou la graisse */
+em{font-style:normal}

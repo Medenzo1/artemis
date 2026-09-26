@@ -15,7 +15,7 @@ function _initHomeQuote() {
   const el = document.getElementById('home-quote');
   if (!el) return;
   const q = HOME_QUOTES[Math.floor(Math.random() * HOME_QUOTES.length)];
-  el.innerHTML = '<div style="font-family:\'DM Serif Display\',serif;font-size:clamp(24px,3.5vw,42px);font-style:italic;color:rgba(234,240,255,.9);line-height:1.45;margin-bottom:20px">&ldquo;' + q.text + '&rdquo;</div><div style="font-size:12px;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:#4a6080">&mdash;&nbsp;' + q.author + '</div>';
+  el.innerHTML = '<div style="font-family:\'DM Serif Display\',serif;font-size:clamp(24px,3.5vw,42px);color:rgba(234,240,255,.9);line-height:1.45;margin-bottom:20px">&ldquo;' + q.text + '&rdquo;</div><div style="font-size:12px;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:#4a6080">&mdash;&nbsp;' + q.author + '</div>';
 }
 
 function _initHomeDate() {
