@@ -64,14 +64,14 @@ function renderLcdTable(rows) {
     const bienOpts = p.biens.map(b => `<option value="${escHtml(b.name)}" ${b.name===a.bienName?'selected':''}>${escHtml(b.name)}</option>`).join('');
     const selStyle = 'background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:11px;padding:3px 6px;font-family:inherit;width:100%';
     return `<tr style="border-bottom:1px solid var(--border);${rowBg}">
-      <td style="padding:7px 10px;color:var(--text2);font-size:11px;font-family:monospace">${i+1}</td>
+      <td style="padding:7px 10px;color:var(--text2);font-size:11px;font-family:inherit">${i+1}</td>
       <td style="padding:7px 10px;max-width:160px"><input value="${escHtml(a.libelle||'')}" oninput="updateLcdField(${i},'libelle',this.value)" style="${inputStyle}">${badge2}</td>
       <td style="padding:7px 10px"><select onchange="updateLcdField(${i},'bienName',this.value)" style="${selStyle}"><option value="">—</option>${bienOpts}</select></td>
-      <td style="padding:7px 10px;text-align:right"><input type="number" min="0" step="0.01" value="${a.montant||0}" oninput="updateLcdField(${i},'montant',parseFloat(this.value)||0)" style="${inputStyle};width:80px;text-align:right;font-family:monospace;color:var(--green)"></td>
+      <td style="padding:7px 10px;text-align:right"><input type="number" min="0" step="0.01" value="${a.montant||0}" oninput="updateLcdField(${i},'montant',parseFloat(this.value)||0)" style="${inputStyle};width:80px;text-align:right;font-family:inherit;color:var(--green)"></td>
       <td style="padding:7px 10px"><input data-datemask value="${escHtml(a.datePaiement||'')}" placeholder="JJ/MM/AAAA" oninput="updateLcdField(${i},'datePaiement',this.value)" style="${inputStyle};width:90px"></td>
       <td style="padding:7px 10px"><input data-datemask value="${escHtml(a.dateDebut||'')}" placeholder="JJ/MM/AAAA" oninput="updateLcdField(${i},'dateDebut',this.value)" style="${inputStyle};width:90px"></td>
       <td style="padding:7px 10px"><input data-datemask value="${escHtml(a.dateFin||'')}" placeholder="JJ/MM/AAAA" oninput="updateLcdField(${i},'dateFin',this.value)" style="${inputStyle};width:90px"></td>
-      <td style="padding:7px 10px;text-align:right;font-family:monospace;font-size:12px;font-weight:700;color:var(--cyan)" id="lcd-nuits-${i}">${a.nuits||'—'}</td>
+      <td style="padding:7px 10px;text-align:right;font-family:inherit;font-size:12px;font-weight:700;color:var(--cyan)" id="lcd-nuits-${i}">${a.nuits||'—'}</td>
       <td style="padding:7px 10px"><input value="${escHtml(a.locataire||'')}" placeholder="Nom" oninput="updateLcdField(${i},'locataire',this.value)" style="${inputStyle};width:110px"></td>
       <td style="padding:7px 10px"><input value="${escHtml(a.contact||'')}" placeholder="Tel / email" oninput="updateLcdField(${i},'contact',this.value)" style="${inputStyle};width:120px"></td>
       <td style="padding:7px 6px;text-align:center"><button onclick="deleteLcdRow(${i})" style="background:rgba(220,50,50,.12);border:1px solid rgba(220,50,50,.3);cursor:pointer;color:var(--red);font-size:11px;font-weight:600;padding:3px 8px;border-radius:5px;font-family:inherit;white-space:nowrap" onmouseover="this.style.background='rgba(220,50,50,.25)'" onmouseout="this.style.background='rgba(220,50,50,.12)'">Supprimer</button></td>

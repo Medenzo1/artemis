@@ -410,7 +410,7 @@ function _kpiCard(icon, label, value, color, sub, varBadges, sparkData) {
     return (
       '<div style="display:flex;align-items:center;gap:6px;padding:3px 0;margin-top:2px">'
       + '<span style="font-size:11px;color:rgba(126,143,168,0.7);font-weight:600;min-width:36px">'+b.label+'</span>'
-      + '<span style="font-size:11px;font-weight:700;color:'+col+';font-family:monospace;background:'+bg+';border-radius:10px;padding:1px 7px">'+fmtD+' · '+fmtP+'</span>'
+      + '<span style="font-size:11px;font-weight:700;color:'+col+';font-family:inherit;background:'+bg+';border-radius:10px;padding:1px 7px">'+fmtD+' · '+fmtP+'</span>'
       + '</div>'
     );
   }).join('') : '';
@@ -418,7 +418,7 @@ function _kpiCard(icon, label, value, color, sub, varBadges, sparkData) {
   return '<div class="card kpi-card" style="padding:0">'
     + '<div style="flex:1;min-width:0;padding:14px 0 14px 16px;overflow:hidden">'
     + '<div style="font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--text2);margin-bottom:6px">' + icon + '&nbsp;' + label + '</div>'
-    + '<div style="font-size:26px;font-weight:800;color:' + color + ';font-family:monospace;letter-spacing:-.02em;line-height:1;margin-bottom:' + (sub||badgeHtml?'6':'0') + 'px">' + value + '</div>'
+    + '<div style="font-size:26px;font-weight:800;color:' + color + ';font-family:inherit;letter-spacing:-.02em;line-height:1;margin-bottom:' + (sub||badgeHtml?'6':'0') + 'px">' + value + '</div>'
     + (sub ? '<div style="font-size:11px;color:var(--text2);margin-bottom:5px">' + sub + '</div>' : '')
     + (badgeHtml ? '<div style="border-top:1px solid rgba(255,255,255,.06);padding-top:6px">' + badgeHtml + '</div>' : '')
     + '</div>'
@@ -465,7 +465,7 @@ function _kpiCardBig(icon, label, value, color, bienEntries, decoIcon) {
   return `<div class="card kpi-card" style="padding:14px 16px;flex-direction:row;align-items:center;gap:0;position:relative;overflow:hidden">
     <div style="flex:1;min-width:0">
       <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text2);margin-bottom:8px">${label}</div>
-      <div style="font-size:38px;font-weight:900;color:${color};font-family:monospace;line-height:1">${n}</div>
+      <div style="font-size:38px;font-weight:900;color:${color};font-family:inherit;line-height:1">${n}</div>
     </div>
     <div style="font-size:52px;opacity:.35;flex-shrink:0;line-height:1;user-select:none">${deco}</div>
   </div>`;
@@ -477,7 +477,7 @@ function _kpiCardTop(icon, label, name, color, amount, pctNum, bienEntries) {
     <div style="flex:1;min-width:0;overflow:hidden">
       <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text2);margin-bottom:6px">${label}</div>
       <div style="font-size:13px;font-weight:700;color:${color};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px">${name}</div>
-      <div style="font-size:22px;font-weight:800;font-family:monospace;color:${color};line-height:1">${amount}</div>
+      <div style="font-size:22px;font-weight:800;font-family:inherit;color:${color};line-height:1">${amount}</div>
       <div style="font-size:11px;color:var(--text2);margin-top:4px">${pct.toFixed(1)}% du CA</div>
     </div>
     <div style="font-size:48px;opacity:.5;flex-shrink:0;line-height:1;user-select:none;color:#f5b731">${icon}</div>
@@ -493,7 +493,7 @@ function _barRow(label, val, maxVal, color, rightLabel) {
   return `<div style="margin-bottom:10px">
     <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px">
       <span style="color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:65%">${label}</span>
-      <span style="color:${color};font-family:monospace;font-size:11px;white-space:nowrap">${rightLabel}</span>
+      <span style="color:${color};font-family:inherit;font-size:11px;white-space:nowrap">${rightLabel}</span>
     </div>
     <div style="background:var(--bg3);border-radius:3px;height:5px;overflow:hidden">
       <div style="background:${color};height:100%;width:${w}%;border-radius:3px;opacity:.85;transition:width .35s ease"></div>
@@ -966,11 +966,11 @@ function _renderSynRecap() {
     const dm1c = dColor(dm1abs), dn1c = dColor(dn1abs);
     return `<div class="card" onclick="_jumpToSynTab('${tab}')" style="cursor:pointer;padding:16px 18px;transition:transform .15s,box-shadow .15s" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 24px rgba(0,0,0,.35)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
       <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text2);margin-bottom:8px">${label}</div>
-      <div style="font-size:22px;font-weight:800;font-family:monospace;color:${mainColor};margin-bottom:10px;line-height:1">${mainVal}</div>
+      <div style="font-size:22px;font-weight:800;font-family:inherit;color:${mainColor};margin-bottom:10px;line-height:1">${mainVal}</div>
       <div style="display:flex;justify-content:space-between;align-items:flex-end">
         <div style="font-size:11px;line-height:1.8">
-          ${dm1abs!==null?`<div><span style="color:var(--text2);margin-right:4px">Δ M−1</span><span style="color:${dm1c};font-family:monospace">${dFmt(dm1abs,true)}</span><span style="color:${dm1c};font-family:monospace;margin-left:6px;opacity:.75">${dFmt(dm1pct,false)}</span></div>`:''}
-          ${dn1abs!==null?`<div><span style="color:var(--text2);margin-right:4px">Δ N−1</span><span style="color:${dn1c};font-family:monospace">${dFmt(dn1abs,true)}</span><span style="color:${dn1c};font-family:monospace;margin-left:6px;opacity:.75">${dFmt(dn1pct,false)}</span></div>`:''}
+          ${dm1abs!==null?`<div><span style="color:var(--text2);margin-right:4px">Δ M−1</span><span style="color:${dm1c};font-family:inherit">${dFmt(dm1abs,true)}</span><span style="color:${dm1c};font-family:inherit;margin-left:6px;opacity:.75">${dFmt(dm1pct,false)}</span></div>`:''}
+          ${dn1abs!==null?`<div><span style="color:var(--text2);margin-right:4px">Δ N−1</span><span style="color:${dn1c};font-family:inherit">${dFmt(dn1abs,true)}</span><span style="color:${dn1c};font-family:inherit;margin-left:6px;opacity:.75">${dFmt(dn1pct,false)}</span></div>`:''}
         </div>
         <div style="opacity:.7">${spark}</div>
       </div>
@@ -991,7 +991,7 @@ function _renderSynRecap() {
   const moverRow = (m, isPos) =>
     `<div style="display:flex;justify-content:space-between;font-size:11px;padding:3px 0;border-bottom:1px solid var(--border)">
       <span style="color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:70%">${m.cat}</span>
-      <span style="font-family:monospace;color:${isPos?'var(--green)':'var(--red)'};white-space:nowrap">${isPos?'▲ +':'▼ '}${_fmtK(Math.abs(m.delta))}</span>
+      <span style="font-family:inherit;color:${isPos?'var(--green)':'var(--red)'};white-space:nowrap">${isPos?'▲ +':'▼ '}${_fmtK(Math.abs(m.delta))}</span>
     </div>`;
 
   // ── EBIT by year chart ───────────────────────
@@ -1026,7 +1026,7 @@ function _renderSynRecap() {
     const labelCol = !hasData ? 'var(--border)' : val>=0 ? 'var(--cyan)' : 'var(--red)';
     const label = !hasData ? '' : `${val>=0?'+':''}${Math.abs(val)>=1000?Math.round(val/1000)+'k':Math.round(val)+'€'}`;
     return `<div style="width:64px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:3px">
-      <div style="font-size:11px;font-family:monospace;color:${labelCol};height:14px;line-height:14px">${label}</div>
+      <div style="font-size:11px;font-family:inherit;color:${labelCol};height:14px;line-height:14px">${label}</div>
       <div style="height:${BAR_H}px;display:flex;align-items:flex-end;justify-content:center;width:100%;position:relative">
         ${hasData && val >= 0 ? `<div style="width:58%;background:${col};opacity:.85;border-radius:4px 4px 0 0;height:${Math.max(h,3)}px;transition:height .4s ease"></div>` : ''}
         ${hasData && val < 0  ? `<div style="width:58%;background:${col};opacity:.85;border-radius:0 0 4px 4px;height:${Math.max(h,3)}px;position:absolute;top:0;transition:height .4s ease"></div>` : ''}

@@ -199,7 +199,7 @@ function _renderSynCA() {
     cx.setLineDash([]);
 
     // Y axis labels
-    cx.font = '10px Outfit, sans-serif';
+    cx.font = '10px Archivo, sans-serif';
     cx.fillStyle = 'rgba(126,143,168,0.8)';
     cx.textAlign = 'right';
     axisTicks.forEach(v => {
@@ -234,7 +234,7 @@ function _renderSynCA() {
     cx.stroke();
 
     // Data point dots + labels
-    cx.font = 'bold 9px Outfit, monospace';
+    cx.font = 'bold 9px Archivo,sans-serif';
     for (let i = 0; i < vals.length; i++) {
       const x = xOf(i); const y = yOf(vals[i]);
       // Dot
@@ -252,7 +252,7 @@ function _renderSynCA() {
         const lx = isFirst ? x + 6 : isLast ? x - 6 : x;
         const ly = y - 13;
         // Background pill for readability
-        cx.font = 'bold 9px Outfit, monospace';
+        cx.font = 'bold 9px Archivo,sans-serif';
         const tw = cx.measureText(lbl).width;
         const pad = 4;
         const bx = cx.textAlign === 'left' ? lx - pad : cx.textAlign === 'right' ? lx - tw - pad : lx - tw/2 - pad;
@@ -267,7 +267,7 @@ function _renderSynCA() {
     }
 
     // X axis labels
-    cx.font = '9px Outfit, sans-serif';
+    cx.font = '9px Archivo, sans-serif';
     cx.fillStyle = 'rgba(126,143,168,0.7)';
     cx.textAlign = 'center';
     const step = vals.length <= 12 ? 1 : Math.ceil(vals.length / 12);
@@ -348,21 +348,21 @@ function _renderSynCA() {
       if (hovered !== null && hovered >= 0 && slices[hovered]) {
         const s = slices[hovered];
         const pct = ((s.val/total)*100).toFixed(1);
-        ctx.font = 'bold 13px Outfit,sans-serif';
+        ctx.font = 'bold 13px Archivo,sans-serif';
         ctx.fillStyle = s.color;
         ctx.textAlign = 'center';
         const fmtV = Math.round(s.val).toLocaleString('fr-FR')+' €';
         ctx.fillText('+'+fmtV, cx0, cy0 + 2);
-        ctx.font = '9px Outfit,sans-serif';
+        ctx.font = '9px Archivo,sans-serif';
         ctx.fillStyle = 'rgba(126,143,168,0.8)';
         ctx.fillText(pct+'%', cx0, cy0 + 15);
       } else {
-        ctx.font = 'bold 13px Outfit,sans-serif';
+        ctx.font = 'bold 13px Archivo,sans-serif';
         ctx.fillStyle = '#e2e8f3';
         ctx.textAlign = 'center';
         const fmtT = Math.round(total).toLocaleString('fr-FR')+' €';
         ctx.fillText('+'+fmtT, cx0, cy0 + 2);
-        ctx.font = '9px Outfit,sans-serif';
+        ctx.font = '9px Archivo,sans-serif';
         ctx.fillStyle = 'rgba(126,143,168,0.8)';
         ctx.fillText('CA total', cx0, cy0 + 15);
       }
@@ -411,7 +411,7 @@ function _renderSynCA() {
             '<div style="width:9px;height:9px;border-radius:50%;background:'+s.color+';flex-shrink:0"></div>'+
             '<span style="font-weight:700;color:#e2e8f3;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+s.cat+'</span>'+
           '</div>'+
-          '<div style="font-family:monospace;font-size:14px;font-weight:800;color:var(--green);letter-spacing:.02em">+'+fmtV+' €</div>'+
+          '<div style="font-family:inherit;font-size:14px;font-weight:800;color:var(--green);letter-spacing:.02em">+'+fmtV+' €</div>'+
           '<div style="font-size:11px;color:var(--text2);margin-top:4px">'+pct+'% du CA total</div>';
         // Position: follow cursor, keep inside canvas bounds
         const tipW = 182, tipH = 82;
@@ -445,7 +445,7 @@ function _renderSynCA() {
             '<span style="font-size:11px;color:rgba(226,232,243,0.8);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+cat+'</span>'+
           '</div>'+
           '<div style="display:flex;gap:8px;flex-shrink:0">'+
-            '<span style="font-size:11px;font-family:monospace;color:var(--green);font-weight:600">+'+fmtV+'</span>'+
+            '<span style="font-size:11px;font-family:inherit;color:var(--green);font-weight:600">+'+fmtV+'</span>'+
             '<span style="font-size:11px;color:var(--text2);width:36px;text-align:right">'+pct+'%</span>'+
           '</div>'+
         '</div>';
@@ -460,7 +460,7 @@ function _renderSynCA() {
             '<span style="font-size:11px;color:var(--text2)">Autres ('+(entries.length-6)+')</span>'+
           '</div>'+
           '<div style="display:flex;gap:8px;flex-shrink:0">'+
-            '<span style="font-size:11px;font-family:monospace;color:var(--green)">+'+fmtV+'</span>'+
+            '<span style="font-size:11px;font-family:inherit;color:var(--green)">+'+fmtV+'</span>'+
             '<span style="font-size:11px;color:var(--text2);width:36px;text-align:right">'+pct+'%</span>'+
           '</div>'+
         '</div>';
@@ -607,8 +607,8 @@ function _renderCaWaterfall(el) {
     '<div class="card-title">📊 Drivers CA — P1 vs P2</div>'+
     '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">'+
       '<div style="display:flex;gap:16px">'+
-        '<div style="font-size:11px;color:var(--text2)">P1 <span style="color:var(--cyan);font-weight:700;font-family:monospace">'+ fmtFR(p1Min)+' → '+fmtFR(p1Max)+'</span></div>'+
-        '<div style="font-size:11px;color:var(--text2)">P2 <span style="color:var(--text);font-weight:600;font-family:monospace">'+ fmtFR(p2Min)+' → '+fmtFR(p2Max)+'</span></div>'+
+        '<div style="font-size:11px;color:var(--text2)">P1 <span style="color:var(--cyan);font-weight:700;font-family:inherit">'+ fmtFR(p1Min)+' → '+fmtFR(p1Max)+'</span></div>'+
+        '<div style="font-size:11px;color:var(--text2)">P2 <span style="color:var(--text);font-weight:600;font-family:inherit">'+ fmtFR(p2Min)+' → '+fmtFR(p2Max)+'</span></div>'+
       '</div>'+
       '<div style="font-size:12px;font-weight:700;color:'+(totalDelta>=0?'var(--green)':'var(--red)')+'">'+(totalDelta>=0?'+':'')+totalDelta.toLocaleString('fr-FR',{minimumFractionDigits:0,maximumFractionDigits:0})+' €</div>'+
     '</div>'+
@@ -662,13 +662,13 @@ function _renderCaWaterfall(el) {
       const parts = d.key.split(' · ');
       const catLbl = parts[0] || d.key, bienLbl = parts[1] || '';
       const maxLblW = LBL_W - PAD_L - 6;
-      cx.font = 'bold 10px Outfit,sans-serif'; cx.fillStyle = 'rgba(226,232,243,0.9)'; cx.textAlign = 'left';
+      cx.font = 'bold 10px Archivo,sans-serif'; cx.fillStyle = 'rgba(226,232,243,0.9)'; cx.textAlign = 'left';
       let catTxt = catLbl;
       while (cx.measureText(catTxt).width > maxLblW && catTxt.length > 4) catTxt = catTxt.slice(0,-1);
       if (catTxt !== catLbl) catTxt += '…';
       cx.fillText(catTxt, PAD_L, y + 13);
       if (bienLbl) {
-        cx.font = '9px Outfit,sans-serif'; cx.fillStyle = 'rgba(126,143,168,0.8)';
+        cx.font = '9px Archivo,sans-serif'; cx.fillStyle = 'rgba(126,143,168,0.8)';
         let bTxt = bienLbl;
         while (cx.measureText(bTxt).width > maxLblW && bTxt.length > 4) bTxt = bTxt.slice(0,-1);
         if (bTxt !== bienLbl) bTxt += '…';
@@ -688,7 +688,7 @@ function _renderCaWaterfall(el) {
       cx.beginPath(); cx.roundRect(barX, y+2, barW, rowH-16, 4); cx.fill(); cx.stroke();
 
       // Value label: outside bar tip
-      cx.font = 'bold 11px Outfit,monospace'; cx.fillStyle = color;
+      cx.font = 'bold 11px Archivo,sans-serif'; cx.fillStyle = color;
       const deltaStr = (d.delta>=0?'+':'')+Math.round(d.delta).toLocaleString('fr-FR')+' €';
       const pctStr = (pct>=0?'+':'')+pct.toFixed(0)+'%';
       if (isPos) {
@@ -696,14 +696,14 @@ function _renderCaWaterfall(el) {
         const vx = Math.min(AXIS_X + barW + 6, W - VAL_W + 2);
         cx.textAlign = 'left';
         cx.fillText(deltaStr, vx, y + 14);
-        cx.font = '9px Outfit,sans-serif'; cx.fillStyle = 'rgba(126,143,168,0.7)';
+        cx.font = '9px Archivo,sans-serif'; cx.fillStyle = 'rgba(126,143,168,0.7)';
         cx.fillText(pctStr, vx, y + 26);
       } else {
         // Value to the left of bar, clamped to left edge (LBL_W)
         const vx = Math.max(AXIS_X - barW - 6, LBL_W + 2);
         cx.textAlign = 'right';
         cx.fillText(deltaStr, vx, y + 14);
-        cx.font = '9px Outfit,sans-serif'; cx.fillStyle = 'rgba(126,143,168,0.7)';
+        cx.font = '9px Archivo,sans-serif'; cx.fillStyle = 'rgba(126,143,168,0.7)';
         cx.fillText(pctStr, vx, y + 26);
       }
       cx.textAlign = 'left';
@@ -992,7 +992,7 @@ function _renderSynDepenses() {
     cx.setLineDash([]);
 
     // Y labels
-    cx.font='10px Outfit,sans-serif'; cx.fillStyle='rgba(126,143,168,0.8)'; cx.textAlign='right';
+    cx.font='10px Archivo,sans-serif'; cx.fillStyle='rgba(126,143,168,0.8)'; cx.textAlign='right';
     scaleD.ticks.forEach(v => {
       const y=yOf(v);
       if(y>=PAD.top-2&&y<=PAD.top+cH+2)
@@ -1015,7 +1015,7 @@ function _renderSynDepenses() {
     cx.strokeStyle='#f0566a'; cx.lineWidth=2.5; cx.lineJoin='round'; cx.stroke();
 
     // Points + labels
-    cx.font='bold 9px Outfit,monospace';
+    cx.font='bold 9px Archivo,sans-serif';
     for(let i=0;i<vals.length;i++){
       const x=xOf(i),y=yOf(vals[i]);
       cx.beginPath();cx.arc(x,y,3.5,0,Math.PI*2);
@@ -1037,7 +1037,7 @@ function _renderSynDepenses() {
     }
 
     // X labels
-    cx.font='9px Outfit,sans-serif'; cx.fillStyle='rgba(126,143,168,0.7)'; cx.textAlign='center';
+    cx.font='9px Archivo,sans-serif'; cx.fillStyle='rgba(126,143,168,0.7)'; cx.textAlign='center';
     const step=vals.length<=12?1:Math.ceil(vals.length/12);
     for(let i=0;i<labels.length;i+=step) cx.fillText(labels[i],xOf(i),PAD.top+cH+16);
   }; // end _drawDepArea
@@ -1087,14 +1087,14 @@ function _renderSynDepenses() {
       if (hovered!==null && hovered>=0 && slices[hovered]) {
         const s=slices[hovered];
         const pct=((s.val/total)*100).toFixed(1);
-        ctx.font='bold 13px Outfit,sans-serif'; ctx.fillStyle=s.color; ctx.textAlign='center';
+        ctx.font='bold 13px Archivo,sans-serif'; ctx.fillStyle=s.color; ctx.textAlign='center';
         ctx.fillText('-'+Math.round(s.val).toLocaleString('fr-FR')+' €',cx0,cy0+2);
-        ctx.font='9px Outfit,sans-serif'; ctx.fillStyle='rgba(126,143,168,0.8)';
+        ctx.font='9px Archivo,sans-serif'; ctx.fillStyle='rgba(126,143,168,0.8)';
         ctx.fillText(pct+'%',cx0,cy0+15);
       } else {
-        ctx.font='bold 13px Outfit,sans-serif'; ctx.fillStyle='#e2e8f3'; ctx.textAlign='center';
+        ctx.font='bold 13px Archivo,sans-serif'; ctx.fillStyle='#e2e8f3'; ctx.textAlign='center';
         ctx.fillText('-'+(Math.round(total).toLocaleString('fr-FR')+' €'),cx0,cy0+2);
-        ctx.font='9px Outfit,sans-serif'; ctx.fillStyle='rgba(126,143,168,0.8)';
+        ctx.font='9px Archivo,sans-serif'; ctx.fillStyle='rgba(126,143,168,0.8)';
         ctx.fillText('Dép. totales',cx0,cy0+15);
       }
       window._depDonutDraw   = depDonutDraw;
@@ -1140,7 +1140,7 @@ function _renderSynDepenses() {
             '<div style="width:9px;height:9px;border-radius:50%;background:'+sl.color+';flex-shrink:0"></div>'+
             '<span style="font-weight:700;color:#e2e8f3;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+sl.cat+'</span>'+
           '</div>'+
-          '<div style="font-family:monospace;font-size:14px;font-weight:800;color:var(--red)">-'+fmtV+' €</div>'+
+          '<div style="font-family:inherit;font-size:14px;font-weight:800;color:var(--red)">-'+fmtV+' €</div>'+
           '<div style="font-size:11px;color:var(--text2);margin-top:4px">'+pct+'% des dépenses</div>';
         const tipW=182,tipH=82;
         let tx=(e.clientX-rect.left)+14, ty=(e.clientY-rect.top)-30;
@@ -1165,7 +1165,7 @@ function _renderSynDepenses() {
             '<span style="font-size:11px;color:rgba(226,232,243,0.8);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+cat+'</span>'+
           '</div>'+
           '<div style="display:flex;gap:8px;flex-shrink:0">'+
-            '<span style="font-size:11px;font-family:monospace;color:var(--red);font-weight:600">-'+fmtV+'</span>'+
+            '<span style="font-size:11px;font-family:inherit;color:var(--red);font-weight:600">-'+fmtV+'</span>'+
             '<span style="font-size:11px;color:var(--text2);width:36px;text-align:right">'+pct+'%</span>'+
           '</div>'+
         '</div>';
@@ -1180,7 +1180,7 @@ function _renderSynDepenses() {
             '<span style="font-size:11px;color:var(--text2)">Autres ('+(catEntries.length-6)+')</span>'+
           '</div>'+
           '<div style="display:flex;gap:8px;flex-shrink:0">'+
-            '<span style="font-size:11px;font-family:monospace;color:var(--red)">-'+fmtV+'</span>'+
+            '<span style="font-size:11px;font-family:inherit;color:var(--red)">-'+fmtV+'</span>'+
             '<span style="font-size:11px;color:var(--text2);width:36px;text-align:right">'+pct+'%</span>'+
           '</div>'+
         '</div>';
@@ -1260,8 +1260,8 @@ function _renderDepWaterfall(el) {
     '<div class="card-title">📊 Drivers Dépenses — P1 vs P2</div>'+
     '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">'+
       '<div style="display:flex;gap:16px">'+
-        '<div style="font-size:11px;color:var(--text2)">P1 <span style="color:var(--red);font-weight:700;font-family:monospace">'+fmtFR(p1Min)+' → '+fmtFR(p1Max)+'</span></div>'+
-        '<div style="font-size:11px;color:var(--text2)">P2 <span style="color:var(--text);font-weight:600;font-family:monospace">'+fmtFR(p2Min)+' → '+fmtFR(p2Max)+'</span></div>'+
+        '<div style="font-size:11px;color:var(--text2)">P1 <span style="color:var(--red);font-weight:700;font-family:inherit">'+fmtFR(p1Min)+' → '+fmtFR(p1Max)+'</span></div>'+
+        '<div style="font-size:11px;color:var(--text2)">P2 <span style="color:var(--text);font-weight:600;font-family:inherit">'+fmtFR(p2Min)+' → '+fmtFR(p2Max)+'</span></div>'+
       '</div>'+
       '<div style="font-size:12px;font-weight:700;color:'+(totalDelta<=0?'var(--green)':'var(--red)')+'">'+(totalDelta<=0?'':'+')+(totalDelta).toLocaleString('fr-FR',{minimumFractionDigits:0,maximumFractionDigits:0})+' €</div>'+
     '</div>'+
@@ -1300,13 +1300,13 @@ function _renderDepWaterfall(el) {
       const parts=d.key.split(' · ');
       const catLbl=parts[0]||d.key, bienLbl=parts[1]||'';
       const maxLblW=LBL_W-PAD_L-6;
-      cx.font='bold 10px Outfit,sans-serif'; cx.fillStyle='rgba(226,232,243,0.9)'; cx.textAlign='left';
+      cx.font='bold 10px Archivo,sans-serif'; cx.fillStyle='rgba(226,232,243,0.9)'; cx.textAlign='left';
       let cTxt=catLbl;
       while(cx.measureText(cTxt).width>maxLblW&&cTxt.length>4) cTxt=cTxt.slice(0,-1);
       if(cTxt!==catLbl) cTxt+='…';
       cx.fillText(cTxt,PAD_L,y+13);
       if(bienLbl){
-        cx.font='9px Outfit,sans-serif'; cx.fillStyle='rgba(126,143,168,0.8)';
+        cx.font='9px Archivo,sans-serif'; cx.fillStyle='rgba(126,143,168,0.8)';
         let bTxt=bienLbl;
         while(cx.measureText(bTxt).width>maxLblW&&bTxt.length>4) bTxt=bTxt.slice(0,-1);
         if(bTxt!==bienLbl) bTxt+='…';
@@ -1319,20 +1319,20 @@ function _renderDepWaterfall(el) {
       cx.fill();
       cx.fillStyle=colorFill; cx.strokeStyle=color; cx.lineWidth=1;
       cx.beginPath(); cx.roundRect(barX,y+2,barW,rowH-16,4); cx.fill(); cx.stroke();
-      cx.font='bold 11px Outfit,monospace'; cx.fillStyle=color;
+      cx.font='bold 11px Archivo,sans-serif'; cx.fillStyle=color;
       const deltaStr=(d.delta>0?'+':'')+d.delta.toLocaleString('fr-FR',{minimumFractionDigits:0,maximumFractionDigits:0})+' €';
       const pctStr=(pct>=0?'+':'')+pct.toFixed(0)+'%';
       if(isGood){
         const vx=Math.min(AXIS_X+barW+6, W-VAL_W+2);
         cx.textAlign='left';
         cx.fillText(deltaStr,vx,y+14);
-        cx.font='9px Outfit,sans-serif'; cx.fillStyle='rgba(126,143,168,0.7)';
+        cx.font='9px Archivo,sans-serif'; cx.fillStyle='rgba(126,143,168,0.7)';
         cx.fillText(pctStr,vx,y+26);
       } else {
         const vx=Math.max(AXIS_X-barW-6, LBL_W+2);
         cx.textAlign='right';
         cx.fillText(deltaStr,vx,y+14);
-        cx.font='9px Outfit,sans-serif'; cx.fillStyle='rgba(126,143,168,0.7)';
+        cx.font='9px Archivo,sans-serif'; cx.fillStyle='rgba(126,143,168,0.7)';
         cx.fillText(pctStr,vx,y+26);
       }
       cx.textAlign='left';
@@ -1398,11 +1398,11 @@ function _renderDepWaterfall(el) {
 function _buildDepOpsRows(rows) {
   return rows.map(l =>
     '<tr style="border-bottom:1px solid var(--border);transition:background .12s" onmouseover="this.style.background=&quot;rgba(255,255,255,.03)&quot;" onmouseout="this.style.background=&quot;&quot;">'+
-      '<td style="padding:7px 10px;color:var(--text2);font-size:11px;white-space:nowrap;font-family:monospace">'+l.dDisplay+'</td>'+
+      '<td style="padding:7px 10px;color:var(--text2);font-size:11px;white-space:nowrap;font-family:inherit">'+l.dDisplay+'</td>'+
       '<td style="padding:7px 10px;font-size:11px;word-break:break-word;line-height:1.4">'+l.bien+'</td>'+
       '<td style="padding:7px 10px;color:var(--text2);font-size:11px;word-break:break-word;line-height:1.4">'+l.cat+'</td>'+
       '<td style="padding:7px 10px;font-size:11px;color:var(--text2);word-break:break-word;line-height:1.4">'+l.lib+'</td>'+
-      '<td style="padding:7px 10px;text-align:right;font-family:monospace;font-weight:600;color:var(--red);white-space:nowrap">'+(()=>{const _v=l.amt;const _a=Math.abs(_v);const _i=Math.floor(_a);const _d=Math.round((_a-_i)*100).toString().padStart(2,'0');return String(_i).replace(/\B(?=(\d{3})+(?!\d))/g,' ')+','+_d+' €'})()+'</td>'+
+      '<td style="padding:7px 10px;text-align:right;font-family:inherit;font-weight:600;color:var(--red);white-space:nowrap">'+(()=>{const _v=l.amt;const _a=Math.abs(_v);const _i=Math.floor(_a);const _d=Math.round((_a-_i)*100).toString().padStart(2,'0');return String(_i).replace(/\B(?=(\d{3})+(?!\d))/g,' ')+','+_d+' €'})()+'</td>'+
     '</tr>'
   ).join('');
 }

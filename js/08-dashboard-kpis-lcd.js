@@ -236,12 +236,12 @@ function _renderKpiLCD() {
         </div>
         <div style="display:flex;gap:10px;margin-top:10px;justify-content:center">
           <div style="display:flex;flex-direction:column;align-items:center;gap:2px">
-            <span style="font-size:18px;font-weight:900;color:var(--cyan);font-family:monospace">${txOcc.toFixed(1)}%</span>
+            <span style="font-size:18px;font-weight:900;color:var(--cyan);font-family:inherit">${txOcc.toFixed(1)}%</span>
             <span style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em">Occupation</span>
           </div>
           <div style="width:1px;background:var(--border2);margin:2px 0"></div>
           <div style="display:flex;flex-direction:column;align-items:center;gap:2px">
-            <span style="font-size:18px;font-weight:900;color:var(--red);font-family:monospace">${pointMortPct.toFixed(1)}%</span>
+            <span style="font-size:18px;font-weight:900;color:var(--red);font-family:inherit">${pointMortPct.toFixed(1)}%</span>
             <span style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em">Point mort</span>
           </div>
         </div>
@@ -257,12 +257,12 @@ function _renderKpiLCD() {
         </div>
         <div style="display:flex;gap:10px;margin-top:10px;justify-content:center">
           <div style="display:flex;flex-direction:column;align-items:center;gap:2px">
-            <span style="font-size:18px;font-weight:900;color:var(--purple);font-family:monospace">${nuitsLouees}</span>
+            <span style="font-size:18px;font-weight:900;color:var(--purple);font-family:inherit">${nuitsLouees}</span>
             <span style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em">Nuits louées</span>
           </div>
           <div style="width:1px;background:var(--border2);margin:2px 0"></div>
           <div style="display:flex;flex-direction:column;align-items:center;gap:2px">
-            <span style="font-size:18px;font-weight:900;color:var(--red);font-family:monospace">${pointMortNuits}</span>
+            <span style="font-size:18px;font-weight:900;color:var(--red);font-family:inherit">${pointMortNuits}</span>
             <span style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em">Point mort</span>
           </div>
         </div>
@@ -271,14 +271,14 @@ function _renderKpiLCD() {
       <!-- Durée moyenne de séjour -->
       <div class="card" style="display:flex;flex-direction:column;justify-content:center;align-items:center;padding:18px 14px;margin-top:0!important;">
         <div style="font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--text2);margin-bottom:16px;text-align:center">Durée moyenne de séjour (en jour)</div>
-        <div style="font-size:42px;font-weight:900;color:var(--text);font-family:monospace;line-height:1">${fmt2(dms)}</div>
+        <div style="font-size:42px;font-weight:900;color:var(--text);font-family:inherit;line-height:1">${fmt2(dms)}</div>
         <div style="font-size:11px;color:var(--text2);margin-top:10px">${nbSejours} séjour${nbSejours>1?'s':''} · ${nuitsLouees} nuits</div>
       </div>
 
       <!-- RevPAR -->
       <div class="card" style="display:flex;flex-direction:column;justify-content:center;align-items:center;padding:18px 14px;margin-top:0!important;">
         <div style="font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--text2);margin-bottom:16px;text-align:center">Revenu par nuit disponible</div>
-        <div style="font-size:42px;font-weight:900;color:var(--text);font-family:monospace;line-height:1">${fmt2(revpar)}&thinsp;€</div>
+        <div style="font-size:42px;font-weight:900;color:var(--text);font-family:inherit;line-height:1">${fmt2(revpar)}&thinsp;€</div>
         <div style="font-size:11px;color:var(--text2);margin-top:10px">CA&thinsp;${_fmtK(rev)} ÷ ${nuitsDisponibles} nuits dispo</div>
       </div>
     </div>
@@ -343,7 +343,7 @@ function _renderKpiLCD() {
       const bx = PAD_L + (barAreaW - bw) / 2; // centré
 
       // Label
-      ctx.font = '11px Outfit, sans-serif';
+      ctx.font = '11px Archivo, sans-serif';
       ctx.fillStyle = '#7e8fa8';
       ctx.textAlign = 'right';
       ctx.textBaseline = 'middle';
@@ -363,7 +363,7 @@ function _renderKpiLCD() {
 
       // Valeur dans la barre
       const lbl = _fmtK(Math.abs(r.val));
-      ctx.font = 'bold 11px Outfit, monospace';
+      ctx.font = 'bold 11px Archivo,sans-serif';
       ctx.textBaseline = 'middle';
       ctx.textAlign = 'center';
       ctx.fillStyle = '#0b0d12';
@@ -489,7 +489,7 @@ function _drawTrendChart(canvasId, bienSel, sciSel, type, color, cfExclu) {
     ctx.beginPath(); ctx.moveTo(PAD.l, y); ctx.lineTo(W - PAD.r, y); ctx.stroke();
     const val = maxV - (maxV - minV) * (i / 4);
     ctx.fillStyle = 'rgba(255,255,255,0.3)';
-    ctx.font = '9px Outfit, sans-serif';
+    ctx.font = '9px Archivo, sans-serif';
     ctx.textAlign = 'right';
     ctx.fillText(_fmtK(val), PAD.l - 4, y + 3);
   }
@@ -550,7 +550,7 @@ function _drawTrendChart(canvasId, bienSel, sciSel, type, color, cfExclu) {
   const tooltip = document.getElementById('kpi-trend-tooltip') || (() => {
     const t = document.createElement('div');
     t.id = 'kpi-trend-tooltip';
-    t.style.cssText = 'position:fixed;pointer-events:none;display:none;background:#1a1f2e;border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:10px 14px;font-size:12px;font-family:Outfit,sans-serif;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.4);min-width:140px';
+    t.style.cssText = 'position:fixed;pointer-events:none;display:none;background:#1a1f2e;border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:10px 14px;font-size:12px;font-family:Archivo,sans-serif;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.4);min-width:140px';
     document.body.appendChild(t);
     return t;
   })();
@@ -611,7 +611,7 @@ function _drawTrendChart(canvasId, bienSel, sciSel, type, color, cfExclu) {
 
   // Labels axe X (quelques mois)
   ctx.fillStyle = 'rgba(255,255,255,0.3)';
-  ctx.font = '9px Outfit, sans-serif';
+  ctx.font = '9px Archivo, sans-serif';
   ctx.textAlign = 'center';
   const step = Math.ceil(allYMs.length / 8);
   allYMs.forEach((ym, i) => {
@@ -658,14 +658,14 @@ function _renderKpiDetailTable(sortCol, sortDir) {
       const prefix = val >= 0 ? '+' : '−';
       return `<tr style="border-bottom:1px solid rgba(255,255,255,0.04)" onmouseover="this.style.background='rgba(255,255,255,0.03)'" onmouseout="this.style.background=''">
         <td style="padding:9px 14px;color:var(--text);font-size:13px">${cat}</td>
-        <td style="padding:9px 14px;text-align:right;font-family:monospace;font-size:13px;font-weight:700;color:${col};white-space:nowrap">${prefix} ${_fmtV(val)}</td>
-        <td style="padding:9px 14px;text-align:right;font-family:monospace;font-size:13px;color:${col};opacity:.8;white-space:nowrap">${_fmtN(perNuit)}</td>
+        <td style="padding:9px 14px;text-align:right;font-family:inherit;font-size:13px;font-weight:700;color:${col};white-space:nowrap">${prefix} ${_fmtV(val)}</td>
+        <td style="padding:9px 14px;text-align:right;font-family:inherit;font-size:13px;color:${col};opacity:.8;white-space:nowrap">${_fmtN(perNuit)}</td>
       </tr>`;
     }).join('')}</tbody>
     <tfoot><tr style="border-top:2px solid var(--border2);background:var(--bg3);position:sticky;bottom:0;z-index:2">
       <td style="padding:10px 14px;font-size:13px;font-weight:700;color:var(--text)">Total</td>
-      <td style="padding:10px 14px;text-align:right;font-family:monospace;font-size:13px;font-weight:700;color:${totalCol};white-space:nowrap">${totalPrefix} ${_fmtV(totalVal)}</td>
-      <td style="padding:10px 14px;text-align:right;font-family:monospace;font-size:13px;font-weight:700;color:${totalCol};white-space:nowrap">${_fmtN(totalNuit)}</td>
+      <td style="padding:10px 14px;text-align:right;font-family:inherit;font-size:13px;font-weight:700;color:${totalCol};white-space:nowrap">${totalPrefix} ${_fmtV(totalVal)}</td>
+      <td style="padding:10px 14px;text-align:right;font-family:inherit;font-size:13px;font-weight:700;color:${totalCol};white-space:nowrap">${_fmtN(totalNuit)}</td>
     </tr></tfoot>
   </table>`;
   window._kpiDetailSort = {col: sortCol, dir: sortDir};
@@ -730,7 +730,7 @@ function _drawGauge(canvasId, value, threshold, maxVal, color, centerLabel) {
   ctx.stroke();
 
   // Valeur centrale
-  ctx.font = 'bold 16px Outfit, monospace';
+  ctx.font = 'bold 16px Archivo,sans-serif';
   ctx.fillStyle = '#e2e8f3';
   ctx.textAlign = 'center';
   ctx.fillText(centerLabel !== undefined ? String(centerLabel) : (valuePct * 100).toFixed(1) + '%', cx, cy - R * 0.25);
@@ -795,7 +795,7 @@ function _renderKpiLLD() {
   const mBars = periods.map((p,i)=>{
     const h=Math.round((revByM[i]/maxM)*90);
     return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:56px">
-      <div style="font-size:10px;font-family:monospace;color:var(--gold)">+${Math.round(revByM[i]/1000*10)/10}k</div>
+      <div style="font-size:10px;font-family:inherit;color:var(--gold)">+${Math.round(revByM[i]/1000*10)/10}k</div>
       <div style="height:90px;display:flex;align-items:flex-end;width:100%;justify-content:center">
         <div style="width:65%;background:var(--gold);opacity:.8;border-radius:3px 3px 0 0;height:${Math.max(h,2)}px"></div>
       </div>
@@ -869,7 +869,7 @@ function renderPlateformes() {
     const bienRows = Object.entries(d.biens).sort((a,b)=>b[1]-a[1]).map(([b,v]) =>
       `<div style="display:flex;justify-content:space-between;font-size:11px;padding:4px 0;border-bottom:1px solid var(--border)">
         <span>${b}</span>
-        <span style="font-family:monospace;color:${color}">+${_fmtK(v)}</span>
+        <span style="font-family:inherit;color:${color}">+${_fmtK(v)}</span>
       </div>`
     ).join('');
     return `<div class="card">
@@ -877,7 +877,7 @@ function renderPlateformes() {
         <span style="font-size:13px;font-weight:700;color:${color}">${plt}</span>
         <span style="font-size:11px;color:var(--text2)">${_pct(pct)} du total</span>
       </div>
-      <div style="font-size:20px;font-weight:800;color:${color};font-family:monospace;margin-bottom:12px">+${_fmtK(d.rev)}</div>
+      <div style="font-size:20px;font-weight:800;color:${color};font-family:inherit;margin-bottom:12px">+${_fmtK(d.rev)}</div>
       <div style="background:var(--bg3);border-radius:3px;height:4px;margin-bottom:16px;overflow:hidden">
         <div style="background:${color};height:100%;width:${Math.round(pct)}%;border-radius:3px;opacity:.85"></div>
       </div>

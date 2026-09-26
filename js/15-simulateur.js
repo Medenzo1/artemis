@@ -332,7 +332,7 @@ function simRefreshApercu(inputs) {
 
       '<div style="margin-bottom:18px">' +
         '<div style="font-size:11px;color:var(--text2);margin-bottom:2px">Coût total du projet</div>' +
-        '<div style="font-size:26px;font-weight:800;color:#eaf0ff;font-family:monospace;letter-spacing:-.02em">' + simFmtEURCompact(coutTotal) + '</div>' +
+        '<div style="font-size:26px;font-weight:800;color:#eaf0ff;font-family:inherit;letter-spacing:-.02em">' + simFmtEURCompact(coutTotal) + '</div>' +
       '</div>' +
 
       (coutTotal > 0 ?
@@ -345,17 +345,17 @@ function simRefreshApercu(inputs) {
       '<div class="grid2" style="gap:10px;margin-bottom:4px">' +
         '<div style="background:rgba(255,255,255,.03);border-radius:10px;padding:10px 12px">' +
           '<div style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Loyer / mois</div>' +
-          '<div style="font-size:15px;font-weight:700;color:#eaf0ff;font-family:monospace">' + simFmtEURCompact(loyerMensuel) + '</div>' +
+          '<div style="font-size:15px;font-weight:700;color:#eaf0ff;font-family:inherit">' + simFmtEURCompact(loyerMensuel) + '</div>' +
         '</div>' +
         '<div style="background:rgba(255,255,255,.03);border-radius:10px;padding:10px 12px">' +
           '<div style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Mensualité ~</div>' +
-          '<div style="font-size:15px;font-weight:700;color:#eaf0ff;font-family:monospace">' + simFmtEURCompact(mensualite) + '</div>' +
+          '<div style="font-size:15px;font-weight:700;color:#eaf0ff;font-family:inherit">' + simFmtEURCompact(mensualite) + '</div>' +
         '</div>' +
       '</div>' +
 
       '<div style="background:' + cfColor + '14;border:1px solid ' + cfColor + '35;border-radius:10px;padding:12px;margin-top:10px">' +
         '<div style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Cash-flow brut estimé / mois</div>' +
-        '<div style="font-size:19px;font-weight:800;color:' + cfColor + ';font-family:monospace">' + (cashFlowBrutMensuel >= 0 ? '+' : '') + simFmtEURCompact(cashFlowBrutMensuel) + '</div>' +
+        '<div style="font-size:19px;font-weight:800;color:' + cfColor + ';font-family:inherit">' + (cashFlowBrutMensuel >= 0 ? '+' : '') + simFmtEURCompact(cashFlowBrutMensuel) + '</div>' +
         '<div style="font-size:11px;color:var(--text2);margin-top:3px">Avant charges, impôts et régime fiscal</div>' +
       '</div>' +
 

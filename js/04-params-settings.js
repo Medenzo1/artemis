@@ -149,7 +149,7 @@ function renderAmortTable(amorts) {
     const rowBg = isIncomplete ? 'background:rgba(245,183,49,.06)' : (i % 2 === 0 ? '' : 'background:rgba(255,255,255,.015)');
     const selStyle = 'background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:11px;padding:4px 6px;font-family:inherit;width:100%';
     const inputStyle = 'width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);color:var(--text);font-size:11px;font-family:inherit;padding:2px 0;outline:none';
-    const numStyle = 'width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);color:var(--text);font-size:11px;font-family:monospace;padding:2px 0;outline:none;text-align:right';
+    const numStyle = 'width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);color:var(--text);font-size:11px;font-family:inherit;padding:2px 0;outline:none;text-align:right';
     const methSel = AMORT_METHODS.map(m => '<option value="' + m + '" ' + (m===a.methode?'selected':'') + '>' + m + '</option>').join('');
     const catSel  = '<option value="">\u2014 Choisir \u2014</option>' + AMORT_CATS.map(c => '<option value="' + escHtml(c) + '" ' + (c===a.categorie?'selected':'') + '>' + escHtml(c) + '</option>').join('');
     const lotSelRow  = '<option value="">\u2014</option>' + p.lots.map(l => '<option value="' + escHtml(l) + '" ' + (l===a.lot?'selected':'') + '>' + escHtml(l) + '</option>').join('');
@@ -157,7 +157,7 @@ function renderAmortTable(amorts) {
     const newBadge = isIncomplete ? '<span style="font-size:11px;background:rgba(245,183,49,.15);border:1px solid rgba(245,183,49,.4);color:var(--gold);border-radius:3px;padding:1px 5px;margin-left:5px;vertical-align:middle">\u00e0 compléter</span>' : '';
     const srcHint = a._fromImport && a._srcMontant ? '<div style="font-size:11px;color:var(--text2);margin-top:2px">Montant bancaire\u00a0: ' + a._srcMontant.toLocaleString('fr-FR',{minimumFractionDigits:2}) + '\u00a0\u20ac</div>' : '';
     return '<tr style="border-bottom:1px solid var(--border);' + rowBg + '" onmouseover="this.style.background=\'rgba(255,255,255,.025)\'" onmouseout="this.style.background=\'' + (isIncomplete?'rgba(245,183,49,.06)':i%2===0?'':'rgba(255,255,255,.015)') + '\'">' +
-      '<td style="padding:7px 10px;color:var(--text2);font-size:11px;font-family:monospace">' + (i+1) + '</td>' +
+      '<td style="padding:7px 10px;color:var(--text2);font-size:11px;font-family:inherit">' + (i+1) + '</td>' +
       '<td style="padding:7px 10px;max-width:180px"><input value="' + escHtml(a.libelle) + '" oninput="updateAmortField(' + i + ',\'libelle\',this.value)" style="' + inputStyle + '">' + newBadge + srcHint + '</td>' +
       '<td style="padding:7px 10px"><input value="' + escHtml(a.dateAchat||'') + '" placeholder="JJ/MM/AAAA" data-datemask oninput="updateAmortField(' + i + ',\'dateAchat\',this.value)" style="' + inputStyle + ';width:90px"></td>' +
       '<td style="padding:7px 10px"><input type="number" min="0" step="0.01" value="' + (a.valeurHT||0) + '" oninput="updateAmortField(' + i + ',\'valeurHT\',parseFloat(this.value)||0)" style="' + numStyle + ';width:80px"></td>' +
@@ -598,14 +598,14 @@ function renderAmortSchedule() {
       const months = byYear[yr];
       const yearTotal = months.reduce((s, v) => s + (v||0), 0);
       const cells = months.map(v => v !== null
-        ? '<td style="padding:5px 7px;text-align:right;font-family:monospace;font-size:11px;color:var(--text)">'
+        ? '<td style="padding:5px 7px;text-align:right;font-family:inherit;font-size:11px;color:var(--text)">'
           + v.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2}) + '</td>'
         : '<td style="padding:5px 7px;text-align:right;color:var(--border2);font-size:11px">\u2014</td>'
       ).join('');
       return '<tr style="border-bottom:1px solid var(--border)">'
         + '<td style="padding:5px 10px;font-size:11px;font-weight:700;color:var(--text2);white-space:nowrap">'+yr+'</td>'
         + cells
-        + '<td style="padding:5px 10px;text-align:right;font-family:monospace;font-size:11px;font-weight:700;color:var(--cyan)">'
+        + '<td style="padding:5px 10px;text-align:right;font-family:inherit;font-size:11px;font-weight:700;color:var(--cyan)">'
           + yearTotal.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2}) + '</td>'
         + '</tr>';
     }).join('');
@@ -619,11 +619,11 @@ function renderAmortSchedule() {
       + '<div style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px 8px 0 0;padding:10px 14px;display:flex;gap:16px;flex-wrap:wrap;align-items:center">'
       + '<span style="font-size:12px;font-weight:700;color:var(--text);flex:1">' + escHtml(a._label_display || a.libelle) + '</span>'
       + '<span style="font-size:11px;color:var(--text2)">' + (a.dateAchat||'\u2014') + '</span>'
-      + '<span style="font-size:11px;font-weight:700;color:var(--gold);font-family:monospace">' + a.valeurHT.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' \u20ac</span>'
+      + '<span style="font-size:11px;font-weight:700;color:var(--gold);font-family:inherit">' + a.valeurHT.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' \u20ac</span>'
       + '<span style="font-size:11px;background:var(--bg4);border:1px solid var(--border2);border-radius:4px;padding:2px 8px;color:var(--text2)">' + (a.methode||'\u2014') + ' \u00b7 ' + dureeAns + ' ans</span>'
       + '<span style="font-size:11px;color:var(--text2)">' + escHtml(a.categorie||'\u2014') + '</span>'
       + '<span style="font-size:11px;color:var(--cyan)">' + bienName(a.bienId) + '</span>'
-      + '<span style="font-size:11px;font-family:monospace;color:var(--text2)">VNC\u00a0fin\u00a0: <strong style="color:'+(vncFin>0?'var(--gold)':'var(--green)')+'">'+vncFin.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+' \u20ac</strong></span>'
+      + '<span style="font-size:11px;font-family:inherit;color:var(--text2)">VNC\u00a0fin\u00a0: <strong style="color:'+(vncFin>0?'var(--gold)':'var(--green)')+'">'+vncFin.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+' \u20ac</strong></span>'
       + '</div>'
       // Tableau mensuel
       + '<div style="overflow-x:auto;border:1px solid var(--border2);border-top:none;border-radius:0 0 8px 8px">'
@@ -641,7 +641,7 @@ function renderAmortSchedule() {
   // Grand total banner
   const totalBanner = '<div style="background:rgba(34,211,200,.06);border:1px solid rgba(34,211,200,.2);border-radius:8px;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">'
     + '<span style="font-size:11px;font-weight:700;color:var(--text2)">'+(fYear||'Toutes ann\u00e9es')+' \u2014 '+filtered.length+' actif'+(filtered.length>1?'s':'')+' s\u00e9lectionn\u00e9'+(filtered.length>1?'s':'')+' </span>'
-    + '<span style="font-family:monospace;font-size:14px;font-weight:800;color:var(--cyan)">'+grandTotal.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+' \u20ac</span>'
+    + '<span style="font-family:inherit;font-size:14px;font-weight:800;color:var(--cyan)">'+grandTotal.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+' \u20ac</span>'
     + '</div>';
 
   body.innerHTML = totalBanner + rows;
@@ -755,7 +755,7 @@ function _renderQpDetail(p){
           data-action="qp-bien" data-gi="${gi}" data-bi="${bi}">${bienOptions(bId,p)}</select>
         <input type="number" min="0" max="100" step="0.01" value="${(pct*100).toFixed(2)}"
           data-action="qp-pct" data-gi="${gi}" data-bi="${bi}"
-          style="width:80px;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-family:monospace;font-size:12px;padding:5px 8px;text-align:right;outline:none">
+          style="width:80px;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-family:inherit;font-size:12px;padding:5px 8px;text-align:right;outline:none">
         <span style="font-size:11px;color:var(--text2);width:10px">%</span>
         <button class="param-del" data-action="qp-del-bien" data-gi="${gi}" data-bi="${bi}">✕</button>
       </div>`).join('');
@@ -906,7 +906,7 @@ function renderLoansList(p){
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px">
         <div>
           <div style="font-size:11px;color:var(--text2);font-weight:700;letter-spacing:.07em;text-transform:uppercase;margin-bottom:4px">Référence</div>
-          <input value="${escHtml(l.ref)}" oninput="updateLoan(${i},'ref',this.value)" style="width:100%;background:var(--bg2);border:1px solid var(--border2);border-radius:5px;color:var(--cyan);font-family:monospace;font-size:12px;padding:5px 8px">
+          <input value="${escHtml(l.ref)}" oninput="updateLoan(${i},'ref',this.value)" style="width:100%;background:var(--bg2);border:1px solid var(--border2);border-radius:5px;color:var(--cyan);font-family:inherit;font-size:12px;padding:5px 8px">
         </div>
         <div>
           <div style="font-size:11px;color:var(--text2);font-weight:700;letter-spacing:.07em;text-transform:uppercase;margin-bottom:4px">Libellé</div>
@@ -933,10 +933,10 @@ function renderLoansList(p){
           const tot=cap+int;
           const ok=Math.abs(tot)>0;
           return `<tr>
-            <td style="color:var(--text2);font-size:11px;font-family:monospace;padding:2px 6px">${ym}</td>
-            <td style="text-align:right;font-family:monospace;font-size:11px;padding:2px 6px;color:var(--red)">${cap.toFixed(2)} €</td>
-            <td style="text-align:right;font-family:monospace;font-size:11px;padding:2px 6px;color:var(--gold)">${int.toFixed(2)} €</td>
-            <td style="text-align:right;font-family:monospace;font-size:11px;padding:2px 6px;color:${ok?'var(--cyan)':'var(--text2)'}">${tot.toFixed(2)} €</td>
+            <td style="color:var(--text2);font-size:11px;font-family:inherit;padding:2px 6px">${ym}</td>
+            <td style="text-align:right;font-family:inherit;font-size:11px;padding:2px 6px;color:var(--red)">${cap.toFixed(2)} €</td>
+            <td style="text-align:right;font-family:inherit;font-size:11px;padding:2px 6px;color:var(--gold)">${int.toFixed(2)} €</td>
+            <td style="text-align:right;font-family:inherit;font-size:11px;padding:2px 6px;color:${ok?'var(--cyan)':'var(--text2)'}">${tot.toFixed(2)} €</td>
           </tr>`;
         }).join('');
         return `<div style="margin-top:10px;border-top:1px solid var(--border);padding-top:8px">
@@ -1016,8 +1016,8 @@ function updateLimPreview(){
     "<div style='font-size:11px;color:var(--text2);margin-bottom:8px'>Aperçu - 3 premières lignes</div>"+
     (data.length?data.map(function(r){
       return "<div style='margin-bottom:5px'><span style='color:var(--text)'>"+_parseYM(r[iD])+"</span>"
-        +" · Cap. <span style='color:var(--cyan);font-family:monospace'>"+f(r[iC])+"</span>"
-        +" · Int. <span style='color:var(--gold);font-family:monospace'>"+f(r[iI])+"</span></div>";
+        +" · Cap. <span style='color:var(--cyan);font-family:inherit'>"+f(r[iC])+"</span>"
+        +" · Int. <span style='color:var(--gold);font-family:inherit'>"+f(r[iI])+"</span></div>";
     }).join(""):"<span>Aucune donnée</span>");
 }
 function closeLoanImportModal(){document.getElementById("loanImportModal").style.display="none";_limRows=null;}

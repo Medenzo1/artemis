@@ -1594,7 +1594,7 @@ async function mktOpenDetail(id) {
     const breakdownHtml = (l.scoreBreakdown || []).map(b =>
       '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px">' +
       '<div><div style="color:var(--text)">' + escHtml(b.label) + '</div><div style="color:var(--text2);font-size:11px">' + escHtml(b.detail || '') + ' · poids ' + b.weight + '%</div></div>' +
-      '<div style="font-family:monospace;font-weight:700">' + b.points + '/10</div></div>'
+      '<div style="font-family:inherit;font-weight:700">' + b.points + '/10</div></div>'
     ).join('');
     const commentHtml = mktGenerateComment(l);
     const hasContact = l.contactNom || l.contactTel || l.contactEmail;

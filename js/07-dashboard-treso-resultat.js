@@ -44,9 +44,9 @@ function _renderSynTresorerie() {
     const net = v.inn - v.out;
     return '<tr>'+
       '<td>'+b+'</td>'+
-      '<td style="text-align:right;color:var(--green);font-family:monospace">+'+_fmtK(v.inn)+'</td>'+
-      '<td style="text-align:right;color:var(--red);font-family:monospace">-'+_fmtK(v.out)+'</td>'+
-      '<td style="text-align:right;font-family:monospace;font-weight:700;color:'+(net>=0?'var(--cyan)':'var(--red)')+'">'+(net>=0?'+':'')+_fmtK(net)+'</td>'+
+      '<td style="text-align:right;color:var(--green);font-family:inherit">+'+_fmtK(v.inn)+'</td>'+
+      '<td style="text-align:right;color:var(--red);font-family:inherit">-'+_fmtK(v.out)+'</td>'+
+      '<td style="text-align:right;font-family:inherit;font-weight:700;color:'+(net>=0?'var(--cyan)':'var(--red)')+'">'+(net>=0?'+':'')+_fmtK(net)+'</td>'+
     '</tr>';
   }).join('');
 
@@ -187,7 +187,7 @@ function _renderSynTresorerie() {
     }
 
     // Y labels
-    cx.font='10px Outfit,sans-serif'; cx.fillStyle='rgba(126,143,168,0.8)'; cx.textAlign='right';
+    cx.font='10px Archivo,sans-serif'; cx.fillStyle='rgba(126,143,168,0.8)'; cx.textAlign='right';
     scaleT.ticks.forEach(v => {
       const y=yOf(v);
       if(y>=PAD.top-2&&y<=PAD.top+cH+2)
@@ -210,7 +210,7 @@ function _renderSynTresorerie() {
     cx.strokeStyle='#f5b731'; cx.lineWidth=2.5; cx.lineJoin='round'; cx.stroke();
 
     // Points + labels
-    cx.font='bold 9px Outfit,monospace';
+    cx.font='bold 9px Archivo,sans-serif';
     for(let i=0;i<vals.length;i++){
       const x=xOf(i),y=yOf(vals[i]);
       const col = vals[i] >= 0 ? '#f5b731' : '#f0566a';
@@ -233,7 +233,7 @@ function _renderSynTresorerie() {
     }
 
     // X labels
-    cx.font='9px Outfit,sans-serif'; cx.fillStyle='rgba(126,143,168,0.7)'; cx.textAlign='center';
+    cx.font='9px Archivo,sans-serif'; cx.fillStyle='rgba(126,143,168,0.7)'; cx.textAlign='center';
     const step=vals.length<=12?1:Math.ceil(vals.length/12);
     for(let i=0;i<labels.length;i+=step) cx.fillText(labels[i],xOf(i),PAD.top+cH+16);
   };
@@ -285,14 +285,14 @@ function _renderSynTresorerie() {
       if(hovered!==null && hovered>=0 && slices[hovered]){
         const s=slices[hovered];
         const pct=((s.val/totalT)*100).toFixed(1);
-        ctx.font='bold 13px Outfit,sans-serif'; ctx.fillStyle=s.color; ctx.textAlign='center';
+        ctx.font='bold 13px Archivo,sans-serif'; ctx.fillStyle=s.color; ctx.textAlign='center';
         ctx.fillText('+'+Math.round(s.val).toLocaleString('fr-FR')+' €',cx0,cy0+2);
-        ctx.font='9px Outfit,sans-serif'; ctx.fillStyle='rgba(126,143,168,0.8)';
+        ctx.font='9px Archivo,sans-serif'; ctx.fillStyle='rgba(126,143,168,0.8)';
         ctx.fillText(pct+'%',cx0,cy0+15);
       } else {
-        ctx.font='bold 13px Outfit,sans-serif'; ctx.fillStyle='#e2e8f3'; ctx.textAlign='center';
+        ctx.font='bold 13px Archivo,sans-serif'; ctx.fillStyle='#e2e8f3'; ctx.textAlign='center';
         ctx.fillText('+'+Math.round(totalT).toLocaleString('fr-FR')+' €',cx0,cy0+2);
-        ctx.font='9px Outfit,sans-serif'; ctx.fillStyle='rgba(126,143,168,0.8)';
+        ctx.font='9px Archivo,sans-serif'; ctx.fillStyle='rgba(126,143,168,0.8)';
         ctx.fillText('Entrées',cx0,cy0+15);
       }
       window._tresDonutDraw=tresDonutDraw;
@@ -331,7 +331,7 @@ function _renderSynTresorerie() {
           '<div style="width:9px;height:9px;border-radius:50%;background:'+sl.color+';flex-shrink:0"></div>'+
           '<span style="font-weight:700;color:#e2e8f3;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+sl.cat+'</span>'+
           '</div>'+
-          '<div style="font-family:monospace;font-size:14px;font-weight:800;color:var(--green)">+'+fmtV+' €</div>'+
+          '<div style="font-family:inherit;font-size:14px;font-weight:800;color:var(--green)">+'+fmtV+' €</div>'+
           '<div style="font-size:11px;color:var(--text2);margin-top:4px">'+pct+'% des entrées</div>';
         const tipW=182,tipH=82;
         let tx=(e.clientX-rect.left)+14, ty=(e.clientY-rect.top)-30;
@@ -354,7 +354,7 @@ function _renderSynTresorerie() {
             '<span style="font-size:11px;color:rgba(226,232,243,0.8);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+cat+'</span>'+
           '</div>'+
           '<div style="display:flex;gap:8px;flex-shrink:0">'+
-            '<span style="font-size:11px;font-family:monospace;color:var(--green);font-weight:600">+'+fmtV+'</span>'+
+            '<span style="font-size:11px;font-family:inherit;color:var(--green);font-weight:600">+'+fmtV+'</span>'+
             '<span style="font-size:11px;color:var(--text2);width:36px;text-align:right">'+pct+'%</span>'+
           '</div>'+
         '</div>';
@@ -369,7 +369,7 @@ function _renderSynTresorerie() {
             '<span style="font-size:11px;color:var(--text2)">Autres ('+(catEntriesT.length-6)+')</span>'+
           '</div>'+
           '<div style="display:flex;gap:8px;flex-shrink:0">'+
-            '<span style="font-size:11px;font-family:monospace;color:var(--green)">+'+fmtV+'</span>'+
+            '<span style="font-size:11px;font-family:inherit;color:var(--green)">+'+fmtV+'</span>'+
             '<span style="font-size:11px;color:var(--text2);width:36px;text-align:right">'+pct+'%</span>'+
           '</div>'+
         '</div>';
@@ -392,11 +392,11 @@ function _buildTresOpsRows(rows) {
     const col = isIn ? 'var(--green)' : 'var(--red)';
     const amtStr = (isIn?'+':'')+(()=>{const _v=l.amt;const _a=Math.abs(_v);const _i=Math.floor(_a);const _d=Math.round((_a-_i)*100).toString().padStart(2,'0');return String(_i).replace(/\B(?=(\d{3})+(?!\d))/g,' ')+','+_d+' €'})();
     return '<tr style="border-bottom:1px solid var(--border);transition:background .12s" onmouseover="this.style.background=\'rgba(255,255,255,.03)\'" onmouseout="this.style.background=\'\'">'+
-      '<td style="padding:7px 10px;color:var(--text2);font-size:11px;white-space:nowrap;font-family:monospace">'+l.dDisplay+'</td>'+
+      '<td style="padding:7px 10px;color:var(--text2);font-size:11px;white-space:nowrap;font-family:inherit">'+l.dDisplay+'</td>'+
       '<td style="padding:7px 10px;font-size:11px;word-break:break-word;line-height:1.4">'+l.bien+'</td>'+
       '<td style="padding:7px 10px;color:var(--text2);font-size:11px;word-break:break-word;line-height:1.4">'+l.cat+'</td>'+
       '<td style="padding:7px 10px;font-size:11px;color:var(--text2);word-break:break-word;line-height:1.4">'+l.lib+'</td>'+
-      '<td style="padding:7px 10px;text-align:right;font-family:monospace;font-weight:600;color:'+col+';white-space:nowrap">'+amtStr+'</td>'+
+      '<td style="padding:7px 10px;text-align:right;font-family:inherit;font-weight:600;color:'+col+';white-space:nowrap">'+amtStr+'</td>'+
     '</tr>';
   }).join('');
 }
@@ -473,8 +473,8 @@ function _renderTresWaterfall(el) {
     '<div class="card-title">📊 Drivers Trésorerie — P1 vs P2</div>'+
     '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">'+
       '<div style="display:flex;gap:16px">'+
-        '<div style="font-size:11px;color:var(--text2)">P1 <span style="color:var(--cyan);font-weight:700;font-family:monospace">'+fmtFR(p1Min)+' → '+fmtFR(p1Max)+'</span></div>'+
-        '<div style="font-size:11px;color:var(--text2)">P2 <span style="color:var(--text);font-weight:600;font-family:monospace">'+fmtFR(p2Min)+' → '+fmtFR(p2Max)+'</span></div>'+
+        '<div style="font-size:11px;color:var(--text2)">P1 <span style="color:var(--cyan);font-weight:700;font-family:inherit">'+fmtFR(p1Min)+' → '+fmtFR(p1Max)+'</span></div>'+
+        '<div style="font-size:11px;color:var(--text2)">P2 <span style="color:var(--text);font-weight:600;font-family:inherit">'+fmtFR(p2Min)+' → '+fmtFR(p2Max)+'</span></div>'+
       '</div>'+
       '<div style="font-size:12px;font-weight:700;color:'+(totalDelta>=0?'var(--green)':'var(--red)')+'\">'+(totalDelta>=0?'+':'')+totalDelta.toLocaleString('fr-FR',{minimumFractionDigits:0,maximumFractionDigits:0})+' €</div>'+
     '</div>'+
@@ -512,11 +512,11 @@ function _renderTresWaterfall(el) {
       const parts=d.key.split(' · ');
       const catLbl=parts[0]||d.key, bienLbl=parts[1]||'';
       const maxLblW=LBL_W-PAD_L-6;
-      cx.font='bold 10px Outfit,sans-serif'; cx.fillStyle='rgba(226,232,243,0.9)'; cx.textAlign='left';
+      cx.font='bold 10px Archivo,sans-serif'; cx.fillStyle='rgba(226,232,243,0.9)'; cx.textAlign='left';
       let cTxt=catLbl; while(cx.measureText(cTxt).width>maxLblW&&cTxt.length>4) cTxt=cTxt.slice(0,-1);
       if(cTxt!==catLbl) cTxt+='…'; cx.fillText(cTxt,PAD_L,y+13);
       if(bienLbl){
-        cx.font='9px Outfit,sans-serif'; cx.fillStyle='rgba(126,143,168,0.8)';
+        cx.font='9px Archivo,sans-serif'; cx.fillStyle='rgba(126,143,168,0.8)';
         let bTxt=bienLbl; while(cx.measureText(bTxt).width>maxLblW&&bTxt.length>4) bTxt=bTxt.slice(0,-1);
         if(bTxt!==bienLbl) bTxt+='…'; cx.fillText(bTxt,PAD_L,y+26);
       }
@@ -527,18 +527,18 @@ function _renderTresWaterfall(el) {
       cx.fill();
       cx.fillStyle=colorFill; cx.strokeStyle=color; cx.lineWidth=1;
       cx.beginPath(); cx.roundRect(barX,y+2,barW,rowH-16,4); cx.fill(); cx.stroke();
-      cx.font='bold 11px Outfit,monospace'; cx.fillStyle=color;
+      cx.font='bold 11px Archivo,sans-serif'; cx.fillStyle=color;
       const deltaStr=(d.delta>=0?'+':'')+Math.round(d.delta).toLocaleString('fr-FR')+' €';
       const pctStr=(pct>=0?'+':'')+pct.toFixed(0)+'%';
       if(isPos){
         const vx=Math.min(AXIS_X+barW+6,W-VAL_W+2); cx.textAlign='left';
         cx.fillText(deltaStr,vx,y+14);
-        cx.font='9px Outfit,sans-serif'; cx.fillStyle='rgba(126,143,168,0.7)';
+        cx.font='9px Archivo,sans-serif'; cx.fillStyle='rgba(126,143,168,0.7)';
         cx.fillText(pctStr,vx,y+26);
       } else {
         const vx=Math.max(AXIS_X-barW-6,LBL_W+2); cx.textAlign='right';
         cx.fillText(deltaStr,vx,y+14);
-        cx.font='9px Outfit,sans-serif'; cx.fillStyle='rgba(126,143,168,0.7)';
+        cx.font='9px Archivo,sans-serif'; cx.fillStyle='rgba(126,143,168,0.7)';
         cx.fillText(pctStr,vx,y+26);
       }
       cx.textAlign='left';
@@ -639,7 +639,7 @@ function _renderBilanLoans() {
     return `<div style="padding:12px 0;border-bottom:1px solid var(--border)">
       <div style="display:flex;justify-content:space-between;margin-bottom:6px">
         <span style="font-size:12px;font-weight:600">${loan.label}</span>
-        <span style="font-size:11px;font-family:monospace;color:var(--text2)">${loan.ref}</span>
+        <span style="font-size:11px;font-family:inherit;color:var(--text2)">${loan.ref}</span>
       </div>
       <div style="display:flex;gap:20px;font-size:11px">
         <span>Cap. remboursé : <strong style="color:var(--cyan)">${_fmtK(capTotal)}</strong></span>
@@ -663,8 +663,8 @@ function _renderBilanTreso() {
     cumul += byPeriod[ym];
     return `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:11px">
       <span style="color:var(--text2)">${ym}</span>
-      <span style="font-family:monospace;color:${byPeriod[ym]>=0?'var(--green)':'var(--red)'}">${byPeriod[ym]>=0?'+':''}${_fmtK(byPeriod[ym])}</span>
-      <span style="font-family:monospace;font-weight:700;color:${cumul>=0?'var(--cyan)':'var(--red)'}">Σ ${_fmtK(cumul)}</span>
+      <span style="font-family:inherit;color:${byPeriod[ym]>=0?'var(--green)':'var(--red)'}">${byPeriod[ym]>=0?'+':''}${_fmtK(byPeriod[ym])}</span>
+      <span style="font-family:inherit;font-weight:700;color:${cumul>=0?'var(--cyan)':'var(--red)'}">Σ ${_fmtK(cumul)}</span>
     </div>`;
   }).join('');
   return `<div style="max-height:360px;overflow-y:auto">${rows}</div>`;
@@ -866,7 +866,7 @@ function _buildResultatHTML(year, sci, bienParam) {
       return `<div style="margin-bottom:7px">
         <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px">
           <span style="color:var(--text)">${escHtml(cat)}${dotTag}</span>
-          <span style="font-family:monospace;font-weight:600;color:${bloc.color}">${sign}${_fmtK(val)}</span>
+          <span style="font-family:inherit;font-weight:600;color:${bloc.color}">${sign}${_fmtK(val)}</span>
         </div>
         <div style="height:4px;background:var(--border);border-radius:2px">
           <div style="height:4px;width:${pct}%;background:${barColor};border-radius:2px;transition:width .4s"></div>
@@ -877,7 +877,7 @@ function _buildResultatHTML(year, sci, bienParam) {
     return `<div class="card" style="margin-bottom:14px">
       <div class="card-title" style="justify-content:space-between">
         <span>${bloc.icon} ${escHtml(bloc.key)}</span>
-        <span style="font-family:monospace;font-size:13px;font-weight:800;color:${bloc.color}">${sign}${_fmtK(total)}</span>
+        <span style="font-family:inherit;font-size:13px;font-weight:800;color:${bloc.color}">${sign}${_fmtK(total)}</span>
       </div>
       ${rows || '<div style="font-size:11px;color:var(--text2);padding:8px 0">Aucune donn\u00e9e</div>'}
     </div>`;
@@ -892,7 +892,7 @@ function _buildResultatHTML(year, sci, bienParam) {
   const netBorder= resultatNet >= 0 ? 'rgba(34,201,122,.25)' : 'rgba(240,86,106,.25)';
   const netLine  = `<div style="background:${netBg};border:1px solid ${netBorder};border-radius:10px;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
     <span style="font-size:13px;font-weight:700">R\u00e9sultat net</span>
-    <span style="font-family:monospace;font-size:20px;font-weight:800;color:${netColor}">${resultatNet >= 0 ? '+' : ''}${_fmtK(resultatNet)}</span>
+    <span style="font-family:inherit;font-size:20px;font-weight:800;color:${netColor}">${resultatNet >= 0 ? '+' : ''}${_fmtK(resultatNet)}</span>
   </div>`;
 
   if (!lines.length && totalDotations === 0) return _emptyState();
@@ -1081,13 +1081,13 @@ function _renderSIG() {
 
   // ── Helpers ──
   const fmtM = v => {
-    if (v == null || v === 0) return '<span style="color:var(--text2);font-family:monospace">—</span>';
+    if (v == null || v === 0) return '<span style="color:var(--text2);font-family:inherit">—</span>';
     const col = v >= 0 ? 'var(--green)' : 'var(--red)';
-    return `<span style="font-family:monospace;color:${col}">${v>=0?'+':''}${_fmtK(v)}</span>`;
+    return `<span style="font-family:inherit;color:${col}">${v>=0?'+':''}${_fmtK(v)}</span>`;
   };
   const fmtN = v => {
-    if (!v) return '<span style="color:var(--text2);font-family:monospace">—</span>';
-    return `<span style="font-family:monospace;color:var(--text)">${_fmtK(Math.abs(v))}</span>`;
+    if (!v) return '<span style="color:var(--text2);font-family:inherit">—</span>';
+    return `<span style="font-family:inherit;color:var(--text)">${_fmtK(Math.abs(v))}</span>`;
   };
 
   // ── Construction des lignes ──
@@ -1109,7 +1109,7 @@ function _renderSIG() {
       <td colspan="3" style="padding: 4px 0 0">
         <div style="background:${c.bg};border-left:3px solid ${c.border};border-radius:0 6px 6px 0;padding:8px 14px;display:flex;justify-content:space-between;align-items:center">
           <span style="font-size:11px;font-weight:700;color:var(--text2);letter-spacing:.06em;text-transform:uppercase">${escHtml(grp.id)}</span>
-          <span style="font-family:monospace;font-size:14px;font-weight:700;color:${c.txt}">${sign}${_fmtK(total)}</span>
+          <span style="font-family:inherit;font-size:14px;font-weight:700;color:${c.txt}">${sign}${_fmtK(total)}</span>
         </div>
       </td>
     </tr>`;
@@ -1123,7 +1123,7 @@ function _renderSIG() {
           <span class="sarr" style="font-size:11px;margin-right:6px;opacity:.6">▸</span>${escHtml(subLabel)}
         </td>
         <td style="text-align:right;padding:7px 12px;font-size:11px;color:var(--text2)">${catEntries.length} poste${catEntries.length>1?'s':''}</td>
-        <td style="text-align:right;padding:7px 0;font-family:monospace;font-size:12px;font-weight:600;color:var(--text)">${_fmtK(Math.abs(subVal))}</td>
+        <td style="text-align:right;padding:7px 0;font-family:inherit;font-size:12px;font-weight:600;color:var(--text)">${_fmtK(Math.abs(subVal))}</td>
       </tr>
       <tbody id="${uid}" style="display:none">
         ${catEntries.map(([cat, val]) => {
@@ -1132,7 +1132,7 @@ function _renderSIG() {
           return `<tr style="border-top:1px solid rgba(128,128,128,.08)">
             <td style="padding:5px 0 5px 32px;font-size:11px;color:var(--text2)">${escHtml(cat)}${dotTag}</td>
             <td></td>
-            <td style="text-align:right;padding:5px 0;font-family:monospace;font-size:11px;color:var(--text2)">${_fmtK(Math.abs(val))}</td>
+            <td style="text-align:right;padding:5px 0;font-family:inherit;font-size:11px;color:var(--text2)">${_fmtK(Math.abs(val))}</td>
           </tr>`;
         }).join('')}
       </tbody>`;
@@ -1157,7 +1157,7 @@ function _renderSIG() {
     const noteTag = note ? ` <span style="font-size:11px;background:rgba(155,110,243,.12);border:1px solid rgba(155,110,243,.25);color:var(--purple);border-radius:3px;padding:1px 5px;margin-left:5px">${escHtml(note)}</span>` : '';
     return `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 16px 6px 30px;font-size:12px;color:var(--text2)">
       <span>${escHtml(label)}${noteTag}</span>
-      <span style="font-family:monospace">${sign} ${_fmtK(Math.abs(val))}</span>
+      <span style="font-family:inherit">${sign} ${_fmtK(Math.abs(val))}</span>
     </div>`;
   };
   // Ligne "solde" (checkpoint en gras, encadré, coloré selon le signe) — un niveau du SIG.
@@ -1167,7 +1167,7 @@ function _renderSIG() {
     const border = val >= 0 ? 'rgba(34,201,122,.25)' : 'rgba(240,86,106,.25)';
     return `<div style="display:flex;justify-content:space-between;align-items:center;background:${bg};border:1px solid ${border};border-radius:8px;padding:${big?'14px 18px':'8px 16px'};margin:${big?'12px 0 0':'6px 0'}">
       <span style="font-size:${big?'13px':'12px'};font-weight:${big?800:700};color:${big?'var(--text)':col}">${escHtml(label)}</span>
-      <span style="font-family:monospace;font-size:${big?'19px':'13px'};font-weight:800;color:${col}">${val>=0?'+':''}${_fmtK(val)}</span>
+      <span style="font-family:inherit;font-size:${big?'19px':'13px'};font-weight:800;color:${col}">${val>=0?'+':''}${_fmtK(val)}</span>
     </div>`;
   };
 

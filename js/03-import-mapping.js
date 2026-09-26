@@ -302,7 +302,7 @@ tr.innerHTML = `
   <div class="td-trunc" title="${r.full}" style="font-weight:500;font-size:12px">${r.libelle}</div>
   <div style="font-size:11px;color:var(--text2);margin-top:1px">${_normDateStr(r.date).display}</div>
 </td>
-<td class="td-${pos?'pos':'neg'}" style="text-align:right;font-family:monospace;white-space:nowrap;font-size:12px">${fmt(r.montant)}</td>
+<td class="td-${pos?'pos':'neg'}" style="text-align:right;font-family:inherit;white-space:nowrap;font-size:12px">${fmt(r.montant)}</td>
 <td colspan="3" style="padding:6px 10px">
   <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
     <span class="badge badge-airbnb" style="font-size:11px">✈ Airbnb</span>
@@ -316,7 +316,7 @@ tr.innerHTML = `
   <div class="td-trunc" title="${r.full}" style="font-weight:500;font-size:12px">${r.libelle}</div>
   <div style="font-size:11px;color:var(--text2);margin-top:1px">${_normDateStr(r.date).display}</div>
 </td>
-<td class="td-${pos?'pos':'neg'}" style="text-align:right;font-family:monospace;font-size:12px">${fmt(r.montant)}</td>
+<td class="td-${pos?'pos':'neg'}" style="text-align:right;font-family:inherit;font-size:12px">${fmt(r.montant)}</td>
 <td colspan="3" style="padding:6px 10px"><span class="badge badge-blocked" style="font-size:11px">🚫 Export Airbnb requis</span></td>`;
 }
 tbody.appendChild(tr);
@@ -338,7 +338,7 @@ tr.innerHTML = `
   <div class="td-trunc" title="${r.full}" style="font-weight:500;font-size:12px">${r.libelle}</div>
   <div style="font-size:11px;color:var(--text2);margin-top:1px">${_normDateStr(r.date).display}</div>
 </td>
-<td class="td-${pos?'pos':'neg'}" style="text-align:right;font-family:monospace;white-space:nowrap;font-size:12px">${fmt(r.montant)}</td>
+<td class="td-${pos?'pos':'neg'}" style="text-align:right;font-family:inherit;white-space:nowrap;font-size:12px">${fmt(r.montant)}</td>
 <td colspan="3" style="padding:6px 10px">
   <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
     <span class="badge badge-booking" style="font-size:11px">🏨 Booking</span>
@@ -355,7 +355,7 @@ tr.innerHTML = `
   <div class="td-trunc" title="${r.full}" style="font-weight:500;font-size:12px">${r.libelle}</div>
   <div style="font-size:11px;color:var(--text2);margin-top:1px">${_normDateStr(r.date).display}</div>
 </td>
-<td class="td-${pos?'pos':'neg'}" style="text-align:right;font-family:monospace;font-size:12px">${fmt(r.montant)}</td>
+<td class="td-${pos?'pos':'neg'}" style="text-align:right;font-family:inherit;font-size:12px">${fmt(r.montant)}</td>
 <td colspan="3" style="padding:6px 10px"><span class="badge badge-blocked" style="font-size:11px">${reason}</span></td>`;
 }
 tbody.appendChild(tr);
@@ -379,7 +379,7 @@ tr.innerHTML = `
   <div class="td-trunc" title="${r.full}" style="font-weight:500;font-size:12px">${r.libelle}</div>
   <div style="font-size:11px;color:var(--text2);margin-top:1px">${_normDateStr(r.date).display}</div>
 </td>
-<td class="td-neg" style="text-align:right;font-family:monospace;white-space:nowrap;font-size:12px">${fmt(r.montant)}</td>
+<td class="td-neg" style="text-align:right;font-family:inherit;white-space:nowrap;font-size:12px">${fmt(r.montant)}</td>
 <td colspan="3" style="padding:6px 10px">
   <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
     <span class="badge badge-loan" style="font-size:11px">🏦 Emprunt</span>
@@ -394,7 +394,7 @@ tr.innerHTML = `
   <div class="td-trunc" title="${r.full}" style="font-weight:500;font-size:12px">${r.libelle}</div>
   <div style="font-size:11px;color:var(--text2);margin-top:1px">${_normDateStr(r.date).display}</div>
 </td>
-<td class="td-neg" style="text-align:right;font-family:monospace;font-size:12px">${fmt(r.montant)}</td>
+<td class="td-neg" style="text-align:right;font-family:inherit;font-size:12px">${fmt(r.montant)}</td>
 <td colspan="3" style="padding:6px 10px"><span class="badge badge-blocked" style="font-size:11px">${reason}</span></td>`;}
 tbody.appendChild(tr);
 
@@ -436,7 +436,7 @@ tr.innerHTML = `
   <div class="td-trunc" title="${r.full}" style="font-weight:500">${r.libelle}</div>
   <div style="font-size:11px;color:var(--text2);margin-top:2px">${_normDateStr(r.date).display} ${confBadge}</div>
 </td>
-<td class="td-${pos?'pos':'neg'}" style="text-align:right;font-family:monospace;white-space:nowrap">${fmt(r.montant)}</td>
+<td class="td-${pos?'pos':'neg'}" style="text-align:right;font-family:inherit;white-space:nowrap">${fmt(r.montant)}</td>
 <td><select class="sel" id="cat-${i}" onchange="onCat(${i})" style="min-width:150px"><option value="">- Catégorie -</option>
 ${CATS.map(c=>`<option value="${c}" ${c===prefCat?'selected':''}>${c}</option>`).join('')}
 </select></td>
@@ -1310,15 +1310,15 @@ function renderRecentActivity() {
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px">
         <div style="background:var(--bg3);border-radius:7px;padding:8px 6px;min-width:0">
           <div style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Revenus</div>
-          <div style="font-size:10.5px;font-weight:700;color:var(--green);font-family:monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">+${Math.round(rev).toLocaleString('fr-FR')} €</div>
+          <div style="font-size:10.5px;font-weight:700;color:var(--green);font-family:inherit;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">+${Math.round(rev).toLocaleString('fr-FR')} €</div>
         </div>
         <div style="background:var(--bg3);border-radius:7px;padding:8px 6px;min-width:0">
           <div style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Charges</div>
-          <div style="font-size:10.5px;font-weight:700;color:var(--red);font-family:monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${Math.round(chg).toLocaleString('fr-FR')} €</div>
+          <div style="font-size:10.5px;font-weight:700;color:var(--red);font-family:inherit;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${Math.round(chg).toLocaleString('fr-FR')} €</div>
         </div>
         <div style="background:var(--bg3);border-radius:7px;padding:8px 6px;min-width:0">
           <div style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Net</div>
-          <div style="font-size:10.5px;font-weight:700;color:${netPos?'var(--green)':'var(--red)'};font-family:monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${netPos?'+':''}${Math.round(net).toLocaleString('fr-FR')} €</div>
+          <div style="font-size:10.5px;font-weight:700;color:${netPos?'var(--green)':'var(--red)'};font-family:inherit;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${netPos?'+':''}${Math.round(net).toLocaleString('fr-FR')} €</div>
         </div>
       </div>
 
@@ -1392,7 +1392,7 @@ function consultPeriod(periodKey) {
       <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px" title="${(l.full||l.libelle||'').replace(/"/g,'')}">${l.full||l.libelle||'-'}</td>
       <td><span style="background:rgba(34,211,200,.08);border:1px solid rgba(34,211,200,.15);color:var(--cyan);font-size:11px;font-weight:700;padding:2px 6px;border-radius:4px">${l.cat||'-'}</span></td>
       <td style="font-size:11px;color:var(--text2)">${schema.n2||''}</td>
-      <td style="text-align:right;font-family:monospace;font-weight:700;${cls}">${amt>=0?'+':''}${(()=>{const _v=amt;const _a=Math.abs(_v);const _i=Math.floor(_a);const _d=Math.round((_a-_i)*100).toString().padStart(2,'0');return ((_v<0?'-':'')+String(_i).replace(/\B(?=(\d{3})+(?!\d))/g,'\u202f')+','+_d+'\u202f€')})()} €</td>
+      <td style="text-align:right;font-family:inherit;font-weight:700;${cls}">${amt>=0?'+':''}${(()=>{const _v=amt;const _a=Math.abs(_v);const _i=Math.floor(_a);const _d=Math.round((_a-_i)*100).toString().padStart(2,'0');return ((_v<0?'-':'')+String(_i).replace(/\B(?=(\d{3})+(?!\d))/g,'\u202f')+','+_d+'\u202f€')})()} €</td>
       <td style="font-size:11px;color:var(--text2)">${l.bienName||l.bien||'-'}</td>
     </tr>`;
   }).join('');
@@ -1459,11 +1459,11 @@ function openDiagTreso() {
   const rowsHtml = rows.map(r => {
     const cls = r.montant >= 0 ? 'color:var(--green)' : 'color:var(--red)';
     return `<tr style="border-bottom:1px solid var(--border);font-size:11px">
-      <td style="padding:4px 6px;color:var(--text2);font-family:monospace;white-space:nowrap">${_normDateStr(r.date).display}</td>
+      <td style="padding:4px 6px;color:var(--text2);font-family:inherit;white-space:nowrap">${_normDateStr(r.date).display}</td>
       <td style="padding:4px 6px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.bien}</td>
       <td style="padding:4px 6px;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text2)">${r.cat}</td>
       <td style="padding:4px 6px;color:var(--text2);white-space:nowrap;font-size:11px">${r.n2}</td>
-      <td style="padding:4px 6px;text-align:right;font-family:monospace;font-weight:600;${cls};white-space:nowrap">${r.montant>=0?'+':''}${r.montant.toFixed(2)} €</td>
+      <td style="padding:4px 6px;text-align:right;font-family:inherit;font-weight:600;${cls};white-space:nowrap">${r.montant>=0?'+':''}${r.montant.toFixed(2)} €</td>
     </tr>`;
   }).join('');
 
@@ -1495,7 +1495,7 @@ function openDiagTreso() {
             <tfoot>
               <tr style="background:var(--bg3);font-weight:700;font-size:11px">
                 <td colspan="4" style="padding:8px 6px">TOTAL (${rows.length} lignes)</td>
-                <td style="padding:8px 6px;text-align:right;font-family:monospace;color:${total>=0?'var(--cyan)':'var(--red)'}">${total>=0?'+':''}${total.toFixed(2)} €</td>
+                <td style="padding:8px 6px;text-align:right;font-family:inherit;color:${total>=0?'var(--cyan)':'var(--red)'}">${total>=0?'+':''}${total.toFixed(2)} €</td>
               </tr>
             </tfoot>
           </table>
@@ -1638,7 +1638,7 @@ function openEditModal(periodKey) {
           <option value="">-</option>${lotOptions(l.lot, getParams())}
         </select>
       </td>
-      <td style="padding:6px 8px;text-align:right;font-family:monospace;font-weight:700;font-size:11px;${amtCls}">${amt>=0?'+':''}${(()=>{const _v=amt;const _a=Math.abs(_v);const _i=Math.floor(_a);const _d=Math.round((_a-_i)*100).toString().padStart(2,'0');return ((_v<0?'-':'')+String(_i).replace(/\B(?=(\d{3})+(?!\d))/g,'\u202f')+','+_d+'\u202f€')})()} €</td>
+      <td style="padding:6px 8px;text-align:right;font-family:inherit;font-weight:700;font-size:11px;${amtCls}">${amt>=0?'+':''}${(()=>{const _v=amt;const _a=Math.abs(_v);const _i=Math.floor(_a);const _d=Math.round((_a-_i)*100).toString().padStart(2,'0');return ((_v<0?'-':'')+String(_i).replace(/\B(?=(\d{3})+(?!\d))/g,'\u202f')+','+_d+'\u202f€')})()} €</td>
     </tr>`;
   }).join('');
 

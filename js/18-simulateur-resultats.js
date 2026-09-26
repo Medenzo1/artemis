@@ -49,7 +49,7 @@ function simBarRankingChart(items, opts) {
       '<rect x="' + x.toFixed(1) + '" y="' + y + '" width="' + barW.toFixed(1) + '" height="' + barH + '" rx="5" fill="' + color + '">' +
         '<title>' + simSvgEsc(it.label) + ' — ' + fmt(v) + '</title>' +
       '</rect>' +
-      '<text x="' + (v >= 0 ? (x + barW + 8) : (x - 8)) + '" y="' + (y + barH / 2 + 4) + '" text-anchor="' + (v >= 0 ? 'start' : 'end') + '" font-size="11" font-family="monospace" font-weight="700" fill="' + (isBest ? '#34d399' : 'var(--text2)') + '">' + fmt(v) + '</text>';
+      '<text x="' + (v >= 0 ? (x + barW + 8) : (x - 8)) + '" y="' + (y + barH / 2 + 4) + '" text-anchor="' + (v >= 0 ? 'start' : 'end') + '" font-size="11" font-family="Archivo, sans-serif" font-weight="700" fill="' + (isBest ? '#34d399' : 'var(--text2)') + '">' + fmt(v) + '</text>';
   });
 
   return '<div style="overflow-x:auto"><svg viewBox="0 0 ' + W + ' ' + H + '" width="' + W + '" height="' + H + '" style="display:block;min-width:' + W + 'px">' + bars + '</svg></div>';
@@ -118,7 +118,7 @@ function simChartHover(ev, dot) {
   cdot.setAttribute('cx', x); cdot.setAttribute('cy', y);
 
   tooltip.style.display = 'block';
-  tooltip.innerHTML = '<div style="font-weight:700;margin-bottom:2px;color:#eaf0ff">' + dot.getAttribute('data-label') + '</div><div style="color:#34d399;font-family:monospace;font-weight:700">' + dot.getAttribute('data-val') + '</div>';
+  tooltip.innerHTML = '<div style="font-weight:700;margin-bottom:2px;color:#eaf0ff">' + dot.getAttribute('data-label') + '</div><div style="color:#34d399;font-family:inherit;font-weight:700">' + dot.getAttribute('data-val') + '</div>';
 
   const rect = svg.getBoundingClientRect();
   const vb = svg.viewBox.baseVal;
