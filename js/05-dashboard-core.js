@@ -403,14 +403,14 @@ function _kpiCard(icon, label, value, color, sub, varBadges, sparkData) {
       + '</div>'
     );
     const col  = b.isGood ? '#22c97a' : '#f0566a';
+    const bg   = b.isGood ? 'rgba(34,201,122,.12)' : 'rgba(240,86,106,.12)';
     const sign = b.delta >= 0 ? '+' : '';
     const fmtD = (()=>{const _v=Math.round(b.delta);const _s=String(Math.abs(_v)).replace(/\B(?=(\d{3})+(?!\d))/g,'\u202f');return sign+_s+'\u202f€';})();
     const fmtP = (b.pct >= 0 ? '+' : '')+b.pct.toFixed(0)+'%';
     return (
       '<div style="display:flex;align-items:center;gap:6px;padding:3px 0;margin-top:2px">'
       + '<span style="font-size:10px;color:rgba(126,143,168,0.7);font-weight:600;min-width:36px">'+b.label+'</span>'
-      + '<span style="font-size:10px;font-weight:700;color:'+col+';font-family:monospace;">'+fmtD+'</span>'
-      + '<span style="font-size:10px;font-weight:600;color:'+col+';font-family:monospace;opacity:.8">'+fmtP+'</span>'
+      + '<span style="font-size:10px;font-weight:700;color:'+col+';font-family:monospace;background:'+bg+';border-radius:10px;padding:1px 7px">'+fmtD+' · '+fmtP+'</span>'
       + '</div>'
     );
   }).join('') : '';
