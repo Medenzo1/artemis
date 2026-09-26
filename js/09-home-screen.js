@@ -153,9 +153,10 @@ function _startHomeCanvas() {
     H = cv.height = innerHeight;
     pts  = Array.from({length: 160}, mkPt);
     orbs = [
-      { x: W * .75, y: H * .12, r: Math.min(W,H) * .22, c: '34,211,200' },
-      { x: W * .18, y: H * .78, r: Math.min(W,H) * .18, c: '155,110,243' },
-      { x: W * .88, y: H * .70, r: Math.min(W,H) * .13, c: '34,211,200' },
+      { x: W * .75, y: H * .12, r: Math.min(W,H) * .30, c: '34,211,200' },
+      { x: W * .15, y: H * .75, r: Math.min(W,H) * .26, c: '155,110,243' },
+      { x: W * .90, y: H * .75, r: Math.min(W,H) * .22, c: '244,114,182' },
+      { x: W * .05, y: H * .15, r: Math.min(W,H) * .18, c: '245,183,49' },
     ];
   }
 
@@ -175,7 +176,7 @@ function _startHomeCanvas() {
 
     // Deep background gradient
     const bg = cx.createRadialGradient(W*.5, H*.5, 0, W*.5, H*.5, Math.max(W,H)*.7);
-    bg.addColorStop(0,   'rgba(8,14,26,1)');
+    bg.addColorStop(0,   'rgba(10,12,22,1)');
     bg.addColorStop(1,   'rgba(4,6,12,1)');
     cx.fillStyle = bg;
     cx.fillRect(0, 0, W, H);
@@ -191,8 +192,8 @@ function _startHomeCanvas() {
       const radius = o.r * pulse;
       if (!radius || radius <= 0) return;
       const g = cx.createRadialGradient(o.x, o.y, 0, o.x, o.y, radius);
-      g.addColorStop(0,   `rgba(${o.c},.18)`);
-      g.addColorStop(.4,  `rgba(${o.c},.06)`);
+      g.addColorStop(0,   `rgba(${o.c},.38)`);
+      g.addColorStop(.4,  `rgba(${o.c},.14)`);
       g.addColorStop(1,   `rgba(${o.c},0)`);
       cx.fillStyle = g;
       cx.beginPath(); cx.arc(o.x, o.y, o.r * pulse, 0, 6.28); cx.fill();

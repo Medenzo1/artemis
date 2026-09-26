@@ -157,10 +157,10 @@ const SIM_PCT_FIELDS = ['tauxNotaire','tauxEmprunt','tauxAssuranceEmprunt','taux
 
 function simPctVal(v) { return Math.round(v * 10000) / 100; }
 
-function simSectionHeader(icon, title, color) {
+function simSectionHeader(iconName, title, color) {
   color = color || '#34d399';
   return '<div class="sim-card-title" style="display:flex;align-items:center;gap:10px;text-transform:none;font-size:14px;letter-spacing:0;color:#eaf0ff">' +
-    '<span style="width:30px;height:30px;border-radius:9px;background:' + color + '1a;border:1px solid ' + color + '40;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">' + icon + '</span>' +
+    '<span style="width:32px;height:32px;border-radius:10px;background:' + color + '1a;border:1px solid ' + color + '40;display:flex;align-items:center;justify-content:center;color:' + color + ';flex-shrink:0">' + icon(iconName, {size:16}) + '</span>' +
     title + '</div>';
 }
 
@@ -170,7 +170,7 @@ function simRenderForm() {
   if (!el) return;
   const i = simGetFormInputs();
 
-  actions.innerHTML = '<button class="btn btn-outline" onclick="simOpenScenarios()">📂 Mes simulations</button>' +
+  actions.innerHTML = '<button class="btn btn-outline" onclick="simOpenScenarios()">' + icon('folder-open',{size:13}) + ' Mes simulations</button>' +
     '<button class="btn btn-green" onclick="simCalculer()">Calculer →</button>';
 
   el.innerHTML =
@@ -182,7 +182,7 @@ function simRenderForm() {
     '<div class="sim-form" style="display:flex;flex-direction:column;gap:18px;min-width:0">' +
 
     // Coût d'acquisition
-    '<div class="sim-card">' + simSectionHeader('🏠', "Coût d'acquisition du bien") + '<div class="grid3" style="gap:14px">' +
+    '<div class="sim-card">' + simSectionHeader('home', "Coût d'acquisition du bien", '#4f9eff') + '<div class="grid3" style="gap:14px">' +
       simField('prixBien', "Prix du bien (hors frais d'agence)", i.prixBien, {suffix:'€'}) +
       simField('fraisAgence', "Frais d'agence", i.fraisAgence, {suffix:'€'}) +
       simField('tauxNotaire', 'Frais de notaire', simPctVal(i.tauxNotaire), {suffix:'%'}) +
@@ -195,7 +195,7 @@ function simRenderForm() {
     '</div></div>' +
 
     // Financement
-    '<div class="sim-card">' + simSectionHeader('🏦', 'Financement & apport') + '<div class="grid3" style="gap:14px">' +
+    '<div class="sim-card">' + simSectionHeader('landmark', 'Financement & apport', '#9b6ef3') + '<div class="grid3" style="gap:14px">' +
       simField('typeEmprunt', 'Type emprunt', i.typeEmprunt, {type:'select', options:[
         {v:'CLASSIQUE',l:'Classique'},{v:'DIFFÉRÉ PARTIEL',l:'Différé partiel'},{v:'DIFFÉRÉ TOTAL',l:'Différé total'},{v:'IN FINE',l:'In fine'}
       ]}) +
@@ -207,7 +207,7 @@ function simRenderForm() {
     '</div></div>' +
 
     // Produits mensuels
-    '<div class="sim-card">' + simSectionHeader('💶', 'Produits mensuels') + '<div class="grid3" style="gap:14px">' +
+    '<div class="sim-card">' + simSectionHeader('banknote', 'Produits mensuels', '#34d399') + '<div class="grid3" style="gap:14px">' +
       simField('loyerMeuble', 'Loyer mensuel — location meublée', i.loyerMeuble, {suffix:'€'}) +
       simField('chargesRecupMeuble', 'Charges récupérables — meublée', i.chargesRecupMeuble, {suffix:'€'}) +
       simField('loyerNu', 'Loyer mensuel — location nue', i.loyerNu, {suffix:'€'}) +
@@ -218,7 +218,7 @@ function simRenderForm() {
     '</div></div>' +
 
     // Charges annuelles
-    '<div class="sim-card">' + simSectionHeader('📋', 'Charges annuelles') + '<div class="grid3" style="gap:14px">' +
+    '<div class="sim-card">' + simSectionHeader('clipboard-list', 'Charges annuelles', '#ff9142') + '<div class="grid3" style="gap:14px">' +
       simField('chargesLocatives', 'Charges locatives', i.chargesLocatives, {suffix:'€'}) +
       simField('assurances', 'Assurances (PNO/immeuble/GLI...)', i.assurances, {suffix:'€'}) +
       simField('taxeFonciere', 'Taxe foncière', i.taxeFonciere, {suffix:'€'}) +
@@ -234,7 +234,7 @@ function simRenderForm() {
     '</div></div>' +
 
     // Foyer fiscal
-    '<div class="sim-card">' + simSectionHeader('👪', 'Foyer fiscal') + '<div class="grid3" style="gap:14px">' +
+    '<div class="sim-card">' + simSectionHeader('users', 'Foyer fiscal', '#f472b6') + '<div class="grid3" style="gap:14px">' +
       simField('revenusNets', 'Revenus nets imposables du foyer', i.revenusNets, {suffix:'€'}) +
       simField('situationPersonnelle', 'Situation personnelle', i.situationPersonnelle, {type:'select', options:[
         {v:'Célibataire ou Divorcé',l:'Célibataire ou divorcé'},{v:'Marié ou Pacsé',l:'Marié ou pacsé'}
@@ -246,7 +246,7 @@ function simRenderForm() {
     '</div></div>' +
 
     // Revente
-    '<div class="sim-card">' + simSectionHeader('🔑', 'Revente du bien') + '<div class="grid3" style="gap:14px">' +
+    '<div class="sim-card">' + simSectionHeader('key', 'Revente du bien', '#f5b731') + '<div class="grid3" style="gap:14px">' +
       simField('revendreLeBien', 'Je prévois de revendre ce bien', i.revendreLeBien, {type:'select', options:[
         {v:'OUI',l:'Oui, à terme'},{v:'NON',l:'Non, je le garde indéfiniment'}
       ], onChangeExtra: 'simRenderForm()'}) +
@@ -255,13 +255,13 @@ function simRenderForm() {
         simField('dureeDetention', 'Durée de détention du bien (années)', i.dureeDetention)
       ) : (
         '<div style="grid-column:1/-1;background:rgba(52,211,153,.06);border:1px solid rgba(52,211,153,.2);border-radius:10px;padding:12px 14px;font-size:11px;color:var(--text2)">' +
-          '📅 Simulation sur ' + SIM_HORIZON + ' ans sans revente : ni produit de cession, ni impôt sur la plus-value ne sont pris en compte — seuls les cash-flows locatifs comptent.' +
+          icon('calendar',{size:12}) + ' Simulation sur ' + SIM_HORIZON + ' ans sans revente : ni produit de cession, ni impôt sur la plus-value ne sont pris en compte — seuls les cash-flows locatifs comptent.' +
         '</div>'
       )) +
     '</div></div>' +
 
     // Options
-    '<div class="sim-card">' + simSectionHeader('⚙️', 'Options & réglages') + '<div class="grid3" style="gap:14px">' +
+    '<div class="sim-card">' + simSectionHeader('settings', 'Options & réglages', '#22d3c8') + '<div class="grid3" style="gap:14px">' +
       simField('nbLots', 'Nombre de lots sur ce projet', i.nbLots) +
       simField('tauxVacance', 'Taux de vacance locative', simPctVal(i.tauxVacance), {suffix:'%'}) +
       simField('tauxActualisation', 'Taux actualisation (VAN & TRI)', simPctVal(i.tauxActualisation), {suffix:'%'}) +
@@ -275,7 +275,7 @@ function simRenderForm() {
     '</div></div>' +
 
     '<div style="display:flex;justify-content:flex-end;gap:10px;padding-bottom:40px">' +
-      '<button class="btn btn-outline" onclick="simSaveScenarioPrompt()">💾 Enregistrer cette simulation</button>' +
+      '<button class="btn btn-outline" onclick="simSaveScenarioPrompt()">' + icon('save',{size:13}) + ' Enregistrer cette simulation</button>' +
       '<button class="btn btn-green" onclick="simCalculer()">Calculer →</button>' +
     '</div>' +
 
@@ -328,7 +328,7 @@ function simRefreshApercu(inputs) {
 
   el.innerHTML =
     '<div class="sim-card" style="position:sticky;top:16px">' +
-      '<div style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--text2);font-weight:700;margin-bottom:14px">📊 Aperçu du projet</div>' +
+      '<div style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--text2);font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:6px">' + icon('gauge',{size:13}) + ' Aperçu du projet</div>' +
 
       '<div style="margin-bottom:18px">' +
         '<div style="font-size:10px;color:var(--text2);margin-bottom:2px">Coût total du projet</div>' +
@@ -424,7 +424,7 @@ function simOpenScenarios() {
         '<div style="font-size:11px;color:var(--text2);margin-bottom:12px">' + new Date(s.createdAt).toLocaleDateString('fr-FR') + ' · ' + (s.inputs.prixBien||0).toLocaleString('fr-FR') + ' €</div>' +
         '<div style="display:flex;gap:8px">' +
           '<button class="btn btn-outline" style="flex:1;font-size:10px;padding:7px 10px" onclick="simLoadScenario(\'' + s.id + '\')">Charger</button>' +
-          '<button class="btn btn-red" style="font-size:10px;padding:7px 10px" onclick="simDeleteScenario(\'' + s.id + '\')">✕</button>' +
+          '<button class="btn btn-red" style="font-size:10px;padding:7px 10px" onclick="simDeleteScenario(\'' + s.id + '\')">' + icon('trash-2',{size:12}) + '</button>' +
         '</div></div>';
     }).join('') +
     '</div>';

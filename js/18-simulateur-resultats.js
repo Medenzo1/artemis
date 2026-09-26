@@ -201,7 +201,7 @@ function simRenderResults() {
     (winner ?
       '<div class="sim-card" style="margin-bottom:18px;background:linear-gradient(135deg,rgba(52,211,153,.10),rgba(16,185,129,.02));border-color:rgba(52,211,153,.25)">' +
         '<div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">' +
-          '<span style="font-size:18px">🏆</span>' +
+          '<span style="color:#34d399">' + icon('trophy',{size:18}) + '</span>' +
           '<span style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#34d399;font-weight:700">Régime le plus avantageux sur ce critère</span>' +
         '</div>' +
         '<div style="font-size:19px;font-weight:800;color:#eaf0ff;margin-bottom:10px">' + winner.label + '</div>' +
