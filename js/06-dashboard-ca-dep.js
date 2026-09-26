@@ -92,11 +92,11 @@ function _renderSynCA() {
             '</colgroup>'+
             '<thead style="position:sticky;top:0;z-index:2">'+
               '<tr style="background:var(--bg3);border-bottom:1px solid var(--border2)">'+
-                '<th onclick="_sortCAOps(this,0)" style="padding:8px 10px;text-align:left;font-size:9px;font-weight:700;letter-spacing:.08em;color:var(--text2);white-space:nowrap;cursor:pointer;user-select:none" data-sort-col="0" data-sort-dir="desc">DATE <span class="sort-arrow">↓</span></th>'+
-                '<th onclick="_sortCAOps(this,1)" style="padding:8px 10px;text-align:left;font-size:9px;font-weight:700;letter-spacing:.08em;color:var(--text2);white-space:nowrap;cursor:pointer;user-select:none" data-sort-col="1" data-sort-dir="">BIEN <span class="sort-arrow" style="opacity:.3">↕</span></th>'+
-                '<th onclick="_sortCAOps(this,2)" style="padding:8px 10px;text-align:left;font-size:9px;font-weight:700;letter-spacing:.08em;color:var(--text2);white-space:nowrap;cursor:pointer;user-select:none" data-sort-col="2" data-sort-dir="">CATÉGORIE <span class="sort-arrow" style="opacity:.3">↕</span></th>'+
-                '<th onclick="_sortCAOps(this,3)" style="padding:8px 10px;text-align:left;font-size:9px;font-weight:700;letter-spacing:.08em;color:var(--text2);white-space:nowrap;cursor:pointer;user-select:none" data-sort-col="3" data-sort-dir="">LIBELLÉ <span class="sort-arrow" style="opacity:.3">↕</span></th>'+
-                '<th onclick="_sortCAOps(this,4)" style="padding:8px 10px;text-align:right;font-size:9px;font-weight:700;letter-spacing:.08em;color:var(--text2);white-space:nowrap;cursor:pointer;user-select:none" data-sort-col="4" data-sort-dir="">MONTANT <span class="sort-arrow" style="opacity:.3">↕</span></th>'+
+                '<th onclick="_sortCAOps(this,0)" style="padding:8px 10px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--text2);white-space:nowrap;cursor:pointer;user-select:none" data-sort-col="0" data-sort-dir="desc">DATE <span class="sort-arrow">↓</span></th>'+
+                '<th onclick="_sortCAOps(this,1)" style="padding:8px 10px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--text2);white-space:nowrap;cursor:pointer;user-select:none" data-sort-col="1" data-sort-dir="">BIEN <span class="sort-arrow" style="opacity:.3">↕</span></th>'+
+                '<th onclick="_sortCAOps(this,2)" style="padding:8px 10px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--text2);white-space:nowrap;cursor:pointer;user-select:none" data-sort-col="2" data-sort-dir="">CATÉGORIE <span class="sort-arrow" style="opacity:.3">↕</span></th>'+
+                '<th onclick="_sortCAOps(this,3)" style="padding:8px 10px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--text2);white-space:nowrap;cursor:pointer;user-select:none" data-sort-col="3" data-sort-dir="">LIBELLÉ <span class="sort-arrow" style="opacity:.3">↕</span></th>'+
+                '<th onclick="_sortCAOps(this,4)" style="padding:8px 10px;text-align:right;font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--text2);white-space:nowrap;cursor:pointer;user-select:none" data-sort-col="4" data-sort-dir="">MONTANT <span class="sort-arrow" style="opacity:.3">↕</span></th>'+
               '</tr>'+
             '</thead>'+
             '<tbody id="ca-ops-body">'+
@@ -113,7 +113,7 @@ function _renderSynCA() {
             '</tbody>'+
           '</table>'+
         '</div>'+
-        '<div style="padding:10px 0 2px;font-size:10px;color:var(--text2);text-align:right">'+lines.length+' opération'+(lines.length>1?'s':'')+' · total <span style="color:var(--green);font-weight:700">+'+_fmtK(totalCA)+'</span></div>'+
+        '<div style="padding:10px 0 2px;font-size:11px;color:var(--text2);text-align:right">'+lines.length+' opération'+(lines.length>1?'s':'')+' · total <span style="color:var(--green);font-weight:700">+'+_fmtK(totalCA)+'</span></div>'+
       '</div>'+
       '<div style="display:flex;flex-direction:column;gap:16px;height:100%">'+
         '<div class="card">'+
@@ -412,7 +412,7 @@ function _renderSynCA() {
             '<span style="font-weight:700;color:#e2e8f3;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+s.cat+'</span>'+
           '</div>'+
           '<div style="font-family:monospace;font-size:14px;font-weight:800;color:var(--green);letter-spacing:.02em">+'+fmtV+' €</div>'+
-          '<div style="font-size:10px;color:var(--text2);margin-top:4px">'+pct+'% du CA total</div>';
+          '<div style="font-size:11px;color:var(--text2);margin-top:4px">'+pct+'% du CA total</div>';
         // Position: follow cursor, keep inside canvas bounds
         const tipW = 182, tipH = 82;
         let tx = (e.clientX - rect.left) + 14;
@@ -442,11 +442,11 @@ function _renderSynCA() {
         return '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:pointer" onmouseenter="_donutHover('+i+')" onmouseleave="_donutHover(null)">'+
           '<div style="display:flex;align-items:center;gap:6px;min-width:0">'+
             '<div style="width:8px;height:8px;border-radius:50%;background:'+color+';flex-shrink:0"></div>'+
-            '<span style="font-size:10px;color:rgba(226,232,243,0.8);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+cat+'</span>'+
+            '<span style="font-size:11px;color:rgba(226,232,243,0.8);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+cat+'</span>'+
           '</div>'+
           '<div style="display:flex;gap:8px;flex-shrink:0">'+
-            '<span style="font-size:10px;font-family:monospace;color:var(--green);font-weight:600">+'+fmtV+'</span>'+
-            '<span style="font-size:10px;color:var(--text2);width:36px;text-align:right">'+pct+'%</span>'+
+            '<span style="font-size:11px;font-family:monospace;color:var(--green);font-weight:600">+'+fmtV+'</span>'+
+            '<span style="font-size:11px;color:var(--text2);width:36px;text-align:right">'+pct+'%</span>'+
           '</div>'+
         '</div>';
       }).join('');
@@ -457,11 +457,11 @@ function _renderSynCA() {
         legend.innerHTML += '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px">'+
           '<div style="display:flex;align-items:center;gap:6px">'+
             '<div style="width:8px;height:8px;border-radius:50%;background:rgba(126,143,168,0.4);flex-shrink:0"></div>'+
-            '<span style="font-size:10px;color:var(--text2)">Autres ('+(entries.length-6)+')</span>'+
+            '<span style="font-size:11px;color:var(--text2)">Autres ('+(entries.length-6)+')</span>'+
           '</div>'+
           '<div style="display:flex;gap:8px;flex-shrink:0">'+
-            '<span style="font-size:10px;font-family:monospace;color:var(--green)">+'+fmtV+'</span>'+
-            '<span style="font-size:10px;color:var(--text2);width:36px;text-align:right">'+pct+'%</span>'+
+            '<span style="font-size:11px;font-family:monospace;color:var(--green)">+'+fmtV+'</span>'+
+            '<span style="font-size:11px;color:var(--text2);width:36px;text-align:right">'+pct+'%</span>'+
           '</div>'+
         '</div>';
       }
@@ -607,8 +607,8 @@ function _renderCaWaterfall(el) {
     '<div class="card-title">📊 Drivers CA — P1 vs P2</div>'+
     '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">'+
       '<div style="display:flex;gap:16px">'+
-        '<div style="font-size:10px;color:var(--text2)">P1 <span style="color:var(--cyan);font-weight:700;font-family:monospace">'+ fmtFR(p1Min)+' → '+fmtFR(p1Max)+'</span></div>'+
-        '<div style="font-size:10px;color:var(--text2)">P2 <span style="color:var(--text);font-weight:600;font-family:monospace">'+ fmtFR(p2Min)+' → '+fmtFR(p2Max)+'</span></div>'+
+        '<div style="font-size:11px;color:var(--text2)">P1 <span style="color:var(--cyan);font-weight:700;font-family:monospace">'+ fmtFR(p1Min)+' → '+fmtFR(p1Max)+'</span></div>'+
+        '<div style="font-size:11px;color:var(--text2)">P2 <span style="color:var(--text);font-weight:600;font-family:monospace">'+ fmtFR(p2Min)+' → '+fmtFR(p2Max)+'</span></div>'+
       '</div>'+
       '<div style="font-size:12px;font-weight:700;color:'+(totalDelta>=0?'var(--green)':'var(--red)')+'">'+(totalDelta>=0?'+':'')+totalDelta.toLocaleString('fr-FR',{minimumFractionDigits:0,maximumFractionDigits:0})+' €</div>'+
     '</div>'+
@@ -899,11 +899,11 @@ function _renderSynDepenses() {
             '</colgroup>'+
             '<thead style="position:sticky;top:0;z-index:2">'+
               '<tr style="background:var(--bg3);border-bottom:1px solid var(--border2)">'+
-                '<th onclick="_sortDepOps(this,0)" style="padding:8px 10px;text-align:left;font-size:9px;font-weight:700;letter-spacing:.08em;color:var(--text2);white-space:nowrap;cursor:pointer;user-select:none" data-sort-col="0" data-sort-dir="desc">DATE <span class="sort-arrow">↓</span></th>'+
-                '<th onclick="_sortDepOps(this,1)" style="padding:8px 10px;text-align:left;font-size:9px;font-weight:700;letter-spacing:.08em;color:var(--text2);white-space:nowrap;cursor:pointer;user-select:none" data-sort-col="1" data-sort-dir="">BIEN <span class="sort-arrow" style="opacity:.3">↕</span></th>'+
-                '<th onclick="_sortDepOps(this,2)" style="padding:8px 10px;text-align:left;font-size:9px;font-weight:700;letter-spacing:.08em;color:var(--text2);white-space:nowrap;cursor:pointer;user-select:none" data-sort-col="2" data-sort-dir="">CATÉGORIE <span class="sort-arrow" style="opacity:.3">↕</span></th>'+
-                '<th onclick="_sortDepOps(this,3)" style="padding:8px 10px;text-align:left;font-size:9px;font-weight:700;letter-spacing:.08em;color:var(--text2);white-space:nowrap;cursor:pointer;user-select:none" data-sort-col="3" data-sort-dir="">LIBELLÉ <span class="sort-arrow" style="opacity:.3">↕</span></th>'+
-                '<th onclick="_sortDepOps(this,4)" style="padding:8px 10px;text-align:right;font-size:9px;font-weight:700;letter-spacing:.08em;color:var(--text2);white-space:nowrap;cursor:pointer;user-select:none" data-sort-col="4" data-sort-dir="">MONTANT <span class="sort-arrow" style="opacity:.3">↕</span></th>'+
+                '<th onclick="_sortDepOps(this,0)" style="padding:8px 10px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--text2);white-space:nowrap;cursor:pointer;user-select:none" data-sort-col="0" data-sort-dir="desc">DATE <span class="sort-arrow">↓</span></th>'+
+                '<th onclick="_sortDepOps(this,1)" style="padding:8px 10px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--text2);white-space:nowrap;cursor:pointer;user-select:none" data-sort-col="1" data-sort-dir="">BIEN <span class="sort-arrow" style="opacity:.3">↕</span></th>'+
+                '<th onclick="_sortDepOps(this,2)" style="padding:8px 10px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--text2);white-space:nowrap;cursor:pointer;user-select:none" data-sort-col="2" data-sort-dir="">CATÉGORIE <span class="sort-arrow" style="opacity:.3">↕</span></th>'+
+                '<th onclick="_sortDepOps(this,3)" style="padding:8px 10px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--text2);white-space:nowrap;cursor:pointer;user-select:none" data-sort-col="3" data-sort-dir="">LIBELLÉ <span class="sort-arrow" style="opacity:.3">↕</span></th>'+
+                '<th onclick="_sortDepOps(this,4)" style="padding:8px 10px;text-align:right;font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--text2);white-space:nowrap;cursor:pointer;user-select:none" data-sort-col="4" data-sort-dir="">MONTANT <span class="sort-arrow" style="opacity:.3">↕</span></th>'+
               '</tr>'+
             '</thead>'+
             '<tbody id="dep-ops-body">'+
@@ -919,7 +919,7 @@ function _renderSynDepenses() {
             '</tbody>'+
           '</table>'+
         '</div>'+
-        '<div style="padding:10px 0 2px;font-size:10px;color:var(--text2);text-align:right">'+lines.length+' opération'+(lines.length>1?'s':'')+' · total <span style="color:var(--red);font-weight:700">-'+_fmtK(totalDep)+'</span></div>'+
+        '<div style="padding:10px 0 2px;font-size:11px;color:var(--text2);text-align:right">'+lines.length+' opération'+(lines.length>1?'s':'')+' · total <span style="color:var(--red);font-weight:700">-'+_fmtK(totalDep)+'</span></div>'+
       '</div>'+
       '<div style="display:flex;flex-direction:column;gap:16px;height:100%">'+
         '<div class="card">'+
@@ -1141,7 +1141,7 @@ function _renderSynDepenses() {
             '<span style="font-weight:700;color:#e2e8f3;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+sl.cat+'</span>'+
           '</div>'+
           '<div style="font-family:monospace;font-size:14px;font-weight:800;color:var(--red)">-'+fmtV+' €</div>'+
-          '<div style="font-size:10px;color:var(--text2);margin-top:4px">'+pct+'% des dépenses</div>';
+          '<div style="font-size:11px;color:var(--text2);margin-top:4px">'+pct+'% des dépenses</div>';
         const tipW=182,tipH=82;
         let tx=(e.clientX-rect.left)+14, ty=(e.clientY-rect.top)-30;
         if(tx+tipW>rect.width) tx=(e.clientX-rect.left)-tipW-10;
@@ -1162,11 +1162,11 @@ function _renderSynDepenses() {
         return '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:pointer" onmouseenter="_depDonutHover('+i+')" onmouseleave="_depDonutHover(null)">'+
           '<div style="display:flex;align-items:center;gap:6px;min-width:0">'+
             '<div style="width:8px;height:8px;border-radius:50%;background:'+color+';flex-shrink:0"></div>'+
-            '<span style="font-size:10px;color:rgba(226,232,243,0.8);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+cat+'</span>'+
+            '<span style="font-size:11px;color:rgba(226,232,243,0.8);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+cat+'</span>'+
           '</div>'+
           '<div style="display:flex;gap:8px;flex-shrink:0">'+
-            '<span style="font-size:10px;font-family:monospace;color:var(--red);font-weight:600">-'+fmtV+'</span>'+
-            '<span style="font-size:10px;color:var(--text2);width:36px;text-align:right">'+pct+'%</span>'+
+            '<span style="font-size:11px;font-family:monospace;color:var(--red);font-weight:600">-'+fmtV+'</span>'+
+            '<span style="font-size:11px;color:var(--text2);width:36px;text-align:right">'+pct+'%</span>'+
           '</div>'+
         '</div>';
       }).join('');
@@ -1177,11 +1177,11 @@ function _renderSynDepenses() {
         legend.innerHTML+='<div style="display:flex;align-items:center;justify-content:space-between;gap:8px">'+
           '<div style="display:flex;align-items:center;gap:6px">'+
             '<div style="width:8px;height:8px;border-radius:50%;background:rgba(126,143,168,0.4);flex-shrink:0"></div>'+
-            '<span style="font-size:10px;color:var(--text2)">Autres ('+(catEntries.length-6)+')</span>'+
+            '<span style="font-size:11px;color:var(--text2)">Autres ('+(catEntries.length-6)+')</span>'+
           '</div>'+
           '<div style="display:flex;gap:8px;flex-shrink:0">'+
-            '<span style="font-size:10px;font-family:monospace;color:var(--red)">-'+fmtV+'</span>'+
-            '<span style="font-size:10px;color:var(--text2);width:36px;text-align:right">'+pct+'%</span>'+
+            '<span style="font-size:11px;font-family:monospace;color:var(--red)">-'+fmtV+'</span>'+
+            '<span style="font-size:11px;color:var(--text2);width:36px;text-align:right">'+pct+'%</span>'+
           '</div>'+
         '</div>';
       }
@@ -1260,8 +1260,8 @@ function _renderDepWaterfall(el) {
     '<div class="card-title">📊 Drivers Dépenses — P1 vs P2</div>'+
     '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">'+
       '<div style="display:flex;gap:16px">'+
-        '<div style="font-size:10px;color:var(--text2)">P1 <span style="color:var(--red);font-weight:700;font-family:monospace">'+fmtFR(p1Min)+' → '+fmtFR(p1Max)+'</span></div>'+
-        '<div style="font-size:10px;color:var(--text2)">P2 <span style="color:var(--text);font-weight:600;font-family:monospace">'+fmtFR(p2Min)+' → '+fmtFR(p2Max)+'</span></div>'+
+        '<div style="font-size:11px;color:var(--text2)">P1 <span style="color:var(--red);font-weight:700;font-family:monospace">'+fmtFR(p1Min)+' → '+fmtFR(p1Max)+'</span></div>'+
+        '<div style="font-size:11px;color:var(--text2)">P2 <span style="color:var(--text);font-weight:600;font-family:monospace">'+fmtFR(p2Min)+' → '+fmtFR(p2Max)+'</span></div>'+
       '</div>'+
       '<div style="font-size:12px;font-weight:700;color:'+(totalDelta<=0?'var(--green)':'var(--red)')+'">'+(totalDelta<=0?'':'+')+(totalDelta).toLocaleString('fr-FR',{minimumFractionDigits:0,maximumFractionDigits:0})+' €</div>'+
     '</div>'+
@@ -1398,10 +1398,10 @@ function _renderDepWaterfall(el) {
 function _buildDepOpsRows(rows) {
   return rows.map(l =>
     '<tr style="border-bottom:1px solid var(--border);transition:background .12s" onmouseover="this.style.background=&quot;rgba(255,255,255,.03)&quot;" onmouseout="this.style.background=&quot;&quot;">'+
-      '<td style="padding:7px 10px;color:var(--text2);font-size:10px;white-space:nowrap;font-family:monospace">'+l.dDisplay+'</td>'+
+      '<td style="padding:7px 10px;color:var(--text2);font-size:11px;white-space:nowrap;font-family:monospace">'+l.dDisplay+'</td>'+
       '<td style="padding:7px 10px;font-size:11px;word-break:break-word;line-height:1.4">'+l.bien+'</td>'+
-      '<td style="padding:7px 10px;color:var(--text2);font-size:10px;word-break:break-word;line-height:1.4">'+l.cat+'</td>'+
-      '<td style="padding:7px 10px;font-size:10px;color:var(--text2);word-break:break-word;line-height:1.4">'+l.lib+'</td>'+
+      '<td style="padding:7px 10px;color:var(--text2);font-size:11px;word-break:break-word;line-height:1.4">'+l.cat+'</td>'+
+      '<td style="padding:7px 10px;font-size:11px;color:var(--text2);word-break:break-word;line-height:1.4">'+l.lib+'</td>'+
       '<td style="padding:7px 10px;text-align:right;font-family:monospace;font-weight:600;color:var(--red);white-space:nowrap">'+(()=>{const _v=l.amt;const _a=Math.abs(_v);const _i=Math.floor(_a);const _d=Math.round((_a-_i)*100).toString().padStart(2,'0');return String(_i).replace(/\B(?=(\d{3})+(?!\d))/g,' ')+','+_d+' €'})()+'</td>'+
     '</tr>'
   ).join('');

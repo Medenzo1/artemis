@@ -104,17 +104,17 @@ function _renderSynTresorerie() {
             '</colgroup>'+
             '<thead style="position:sticky;top:0;z-index:2">'+
               '<tr style="background:var(--bg3);border-bottom:1px solid var(--border2)">'+
-                '<th onclick="_sortTresOps(this,0)" style="padding:8px 10px;text-align:left;font-size:9px;font-weight:700;letter-spacing:.08em;color:var(--text2);cursor:pointer;user-select:none" data-sort-col="0" data-sort-dir="desc">DATE <span class="sort-arrow">↓</span></th>'+
-                '<th onclick="_sortTresOps(this,1)" style="padding:8px 10px;text-align:left;font-size:9px;font-weight:700;letter-spacing:.08em;color:var(--text2);cursor:pointer;user-select:none" data-sort-col="1" data-sort-dir="">BIEN <span class="sort-arrow" style="opacity:.3">↕</span></th>'+
-                '<th onclick="_sortTresOps(this,2)" style="padding:8px 10px;text-align:left;font-size:9px;font-weight:700;letter-spacing:.08em;color:var(--text2);cursor:pointer;user-select:none" data-sort-col="2" data-sort-dir="">CATÉGORIE <span class="sort-arrow" style="opacity:.3">↕</span></th>'+
-                '<th onclick="_sortTresOps(this,3)" style="padding:8px 10px;text-align:left;font-size:9px;font-weight:700;letter-spacing:.08em;color:var(--text2);cursor:pointer;user-select:none" data-sort-col="3" data-sort-dir="">LIBELLÉ <span class="sort-arrow" style="opacity:.3">↕</span></th>'+
-                '<th onclick="_sortTresOps(this,4)" style="padding:8px 10px;text-align:right;font-size:9px;font-weight:700;letter-spacing:.08em;color:var(--text2);cursor:pointer;user-select:none" data-sort-col="4" data-sort-dir="">MONTANT <span class="sort-arrow" style="opacity:.3">↕</span></th>'+
+                '<th onclick="_sortTresOps(this,0)" style="padding:8px 10px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--text2);cursor:pointer;user-select:none" data-sort-col="0" data-sort-dir="desc">DATE <span class="sort-arrow">↓</span></th>'+
+                '<th onclick="_sortTresOps(this,1)" style="padding:8px 10px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--text2);cursor:pointer;user-select:none" data-sort-col="1" data-sort-dir="">BIEN <span class="sort-arrow" style="opacity:.3">↕</span></th>'+
+                '<th onclick="_sortTresOps(this,2)" style="padding:8px 10px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--text2);cursor:pointer;user-select:none" data-sort-col="2" data-sort-dir="">CATÉGORIE <span class="sort-arrow" style="opacity:.3">↕</span></th>'+
+                '<th onclick="_sortTresOps(this,3)" style="padding:8px 10px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--text2);cursor:pointer;user-select:none" data-sort-col="3" data-sort-dir="">LIBELLÉ <span class="sort-arrow" style="opacity:.3">↕</span></th>'+
+                '<th onclick="_sortTresOps(this,4)" style="padding:8px 10px;text-align:right;font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--text2);cursor:pointer;user-select:none" data-sort-col="4" data-sort-dir="">MONTANT <span class="sort-arrow" style="opacity:.3">↕</span></th>'+
               '</tr>'+
             '</thead>'+
             '<tbody id="tres-ops-body">'+_buildTresOpsRows(opsLines)+'</tbody>'+
           '</table>'+
         '</div>'+
-        '<div style="padding:10px 0 2px;font-size:10px;color:var(--text2);text-align:right">'+lines.length+' opération'+(lines.length>1?'s':'')+' · solde <span style="color:'+(solde>=0?'var(--cyan)':'var(--red)')+';font-weight:700">'+(solde>=0?'+':'')+_fmtK(solde)+'</span></div>'+
+        '<div style="padding:10px 0 2px;font-size:11px;color:var(--text2);text-align:right">'+lines.length+' opération'+(lines.length>1?'s':'')+' · solde <span style="color:'+(solde>=0?'var(--cyan)':'var(--red)')+';font-weight:700">'+(solde>=0?'+':'')+_fmtK(solde)+'</span></div>'+
       '</div>'+
       '<div style="display:flex;flex-direction:column;gap:16px;height:100%">'+
         '<div class="card">'+
@@ -332,7 +332,7 @@ function _renderSynTresorerie() {
           '<span style="font-weight:700;color:#e2e8f3;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+sl.cat+'</span>'+
           '</div>'+
           '<div style="font-family:monospace;font-size:14px;font-weight:800;color:var(--green)">+'+fmtV+' €</div>'+
-          '<div style="font-size:10px;color:var(--text2);margin-top:4px">'+pct+'% des entrées</div>';
+          '<div style="font-size:11px;color:var(--text2);margin-top:4px">'+pct+'% des entrées</div>';
         const tipW=182,tipH=82;
         let tx=(e.clientX-rect.left)+14, ty=(e.clientY-rect.top)-30;
         if(tx+tipW>rect.width) tx=(e.clientX-rect.left)-tipW-10;
@@ -351,11 +351,11 @@ function _renderSynTresorerie() {
         return '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:pointer" onmouseenter="_tresDonutHover('+i+')" onmouseleave="_tresDonutHover(null)">'+
           '<div style="display:flex;align-items:center;gap:6px;min-width:0">'+
             '<div style="width:8px;height:8px;border-radius:50%;background:'+color+';flex-shrink:0"></div>'+
-            '<span style="font-size:10px;color:rgba(226,232,243,0.8);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+cat+'</span>'+
+            '<span style="font-size:11px;color:rgba(226,232,243,0.8);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+cat+'</span>'+
           '</div>'+
           '<div style="display:flex;gap:8px;flex-shrink:0">'+
-            '<span style="font-size:10px;font-family:monospace;color:var(--green);font-weight:600">+'+fmtV+'</span>'+
-            '<span style="font-size:10px;color:var(--text2);width:36px;text-align:right">'+pct+'%</span>'+
+            '<span style="font-size:11px;font-family:monospace;color:var(--green);font-weight:600">+'+fmtV+'</span>'+
+            '<span style="font-size:11px;color:var(--text2);width:36px;text-align:right">'+pct+'%</span>'+
           '</div>'+
         '</div>';
       }).join('');
@@ -366,11 +366,11 @@ function _renderSynTresorerie() {
         legend.innerHTML+='<div style="display:flex;align-items:center;justify-content:space-between;gap:8px">'+
           '<div style="display:flex;align-items:center;gap:6px">'+
             '<div style="width:8px;height:8px;border-radius:50%;background:rgba(126,143,168,0.4);flex-shrink:0"></div>'+
-            '<span style="font-size:10px;color:var(--text2)">Autres ('+(catEntriesT.length-6)+')</span>'+
+            '<span style="font-size:11px;color:var(--text2)">Autres ('+(catEntriesT.length-6)+')</span>'+
           '</div>'+
           '<div style="display:flex;gap:8px;flex-shrink:0">'+
-            '<span style="font-size:10px;font-family:monospace;color:var(--green)">+'+fmtV+'</span>'+
-            '<span style="font-size:10px;color:var(--text2);width:36px;text-align:right">'+pct+'%</span>'+
+            '<span style="font-size:11px;font-family:monospace;color:var(--green)">+'+fmtV+'</span>'+
+            '<span style="font-size:11px;color:var(--text2);width:36px;text-align:right">'+pct+'%</span>'+
           '</div>'+
         '</div>';
       }
@@ -392,10 +392,10 @@ function _buildTresOpsRows(rows) {
     const col = isIn ? 'var(--green)' : 'var(--red)';
     const amtStr = (isIn?'+':'')+(()=>{const _v=l.amt;const _a=Math.abs(_v);const _i=Math.floor(_a);const _d=Math.round((_a-_i)*100).toString().padStart(2,'0');return String(_i).replace(/\B(?=(\d{3})+(?!\d))/g,' ')+','+_d+' €'})();
     return '<tr style="border-bottom:1px solid var(--border);transition:background .12s" onmouseover="this.style.background=\'rgba(255,255,255,.03)\'" onmouseout="this.style.background=\'\'">'+
-      '<td style="padding:7px 10px;color:var(--text2);font-size:10px;white-space:nowrap;font-family:monospace">'+l.dDisplay+'</td>'+
+      '<td style="padding:7px 10px;color:var(--text2);font-size:11px;white-space:nowrap;font-family:monospace">'+l.dDisplay+'</td>'+
       '<td style="padding:7px 10px;font-size:11px;word-break:break-word;line-height:1.4">'+l.bien+'</td>'+
-      '<td style="padding:7px 10px;color:var(--text2);font-size:10px;word-break:break-word;line-height:1.4">'+l.cat+'</td>'+
-      '<td style="padding:7px 10px;font-size:10px;color:var(--text2);word-break:break-word;line-height:1.4">'+l.lib+'</td>'+
+      '<td style="padding:7px 10px;color:var(--text2);font-size:11px;word-break:break-word;line-height:1.4">'+l.cat+'</td>'+
+      '<td style="padding:7px 10px;font-size:11px;color:var(--text2);word-break:break-word;line-height:1.4">'+l.lib+'</td>'+
       '<td style="padding:7px 10px;text-align:right;font-family:monospace;font-weight:600;color:'+col+';white-space:nowrap">'+amtStr+'</td>'+
     '</tr>';
   }).join('');
@@ -473,8 +473,8 @@ function _renderTresWaterfall(el) {
     '<div class="card-title">📊 Drivers Trésorerie — P1 vs P2</div>'+
     '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">'+
       '<div style="display:flex;gap:16px">'+
-        '<div style="font-size:10px;color:var(--text2)">P1 <span style="color:var(--cyan);font-weight:700;font-family:monospace">'+fmtFR(p1Min)+' → '+fmtFR(p1Max)+'</span></div>'+
-        '<div style="font-size:10px;color:var(--text2)">P2 <span style="color:var(--text);font-weight:600;font-family:monospace">'+fmtFR(p2Min)+' → '+fmtFR(p2Max)+'</span></div>'+
+        '<div style="font-size:11px;color:var(--text2)">P1 <span style="color:var(--cyan);font-weight:700;font-family:monospace">'+fmtFR(p1Min)+' → '+fmtFR(p1Max)+'</span></div>'+
+        '<div style="font-size:11px;color:var(--text2)">P2 <span style="color:var(--text);font-weight:600;font-family:monospace">'+fmtFR(p2Min)+' → '+fmtFR(p2Max)+'</span></div>'+
       '</div>'+
       '<div style="font-size:12px;font-weight:700;color:'+(totalDelta>=0?'var(--green)':'var(--red)')+'\">'+(totalDelta>=0?'+':'')+totalDelta.toLocaleString('fr-FR',{minimumFractionDigits:0,maximumFractionDigits:0})+' €</div>'+
     '</div>'+
@@ -639,7 +639,7 @@ function _renderBilanLoans() {
     return `<div style="padding:12px 0;border-bottom:1px solid var(--border)">
       <div style="display:flex;justify-content:space-between;margin-bottom:6px">
         <span style="font-size:12px;font-weight:600">${loan.label}</span>
-        <span style="font-size:10px;font-family:monospace;color:var(--text2)">${loan.ref}</span>
+        <span style="font-size:11px;font-family:monospace;color:var(--text2)">${loan.ref}</span>
       </div>
       <div style="display:flex;gap:20px;font-size:11px">
         <span>Cap. remboursé : <strong style="color:var(--cyan)">${_fmtK(capTotal)}</strong></span>
@@ -862,7 +862,7 @@ function _buildResultatHTML(year, sci, bienParam) {
       const pct = (val / maxV * 100).toFixed(1);
       const isDot = isDotAmort(cat);
       const barColor = isDot ? 'rgba(155,110,243,.5)' : bloc.color;
-      const dotTag = isDot ? '<span style="font-size:9px;background:rgba(155,110,243,.15);border:1px solid rgba(155,110,243,.3);color:var(--purple);border-radius:4px;padding:1px 6px;margin-left:6px">non d\u00e9caiss\u00e9e</span>' : '';
+      const dotTag = isDot ? '<span style="font-size:11px;background:rgba(155,110,243,.15);border:1px solid rgba(155,110,243,.3);color:var(--purple);border-radius:4px;padding:1px 6px;margin-left:6px">non d\u00e9caiss\u00e9e</span>' : '';
       return `<div style="margin-bottom:7px">
         <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px">
           <span style="color:var(--text)">${escHtml(cat)}${dotTag}</span>
@@ -1120,7 +1120,7 @@ function _renderSIG() {
       const uid = 'sig' + (grp.id+subLabel).replace(/[^a-z0-9]/gi,'');
       rows += `<tr onclick="var tb=document.getElementById('${uid}');var open=tb.style.display!=='none';tb.style.display=open?'none':'';this.querySelector('.sarr').textContent=open?'▸':'▾'" style="cursor:pointer;border-top:1px solid var(--border);background:${c.bgL||c.bg}">
         <td style="padding:7px 0 7px 16px;font-size:12px;color:var(--text)">
-          <span class="sarr" style="font-size:9px;margin-right:6px;opacity:.6">▸</span>${escHtml(subLabel)}
+          <span class="sarr" style="font-size:11px;margin-right:6px;opacity:.6">▸</span>${escHtml(subLabel)}
         </td>
         <td style="text-align:right;padding:7px 12px;font-size:11px;color:var(--text2)">${catEntries.length} poste${catEntries.length>1?'s':''}</td>
         <td style="text-align:right;padding:7px 0;font-family:monospace;font-size:12px;font-weight:600;color:var(--text)">${_fmtK(Math.abs(subVal))}</td>
@@ -1128,7 +1128,7 @@ function _renderSIG() {
       <tbody id="${uid}" style="display:none">
         ${catEntries.map(([cat, val]) => {
           const isDot = cat === 'Dotations aux amortissements';
-          const dotTag = isDot ? `<span style="font-size:9px;background:rgba(155,110,243,.12);border:1px solid rgba(155,110,243,.25);color:var(--purple);border-radius:3px;padding:1px 5px;margin-left:5px">non décaissée</span>` : '';
+          const dotTag = isDot ? `<span style="font-size:11px;background:rgba(155,110,243,.12);border:1px solid rgba(155,110,243,.25);color:var(--purple);border-radius:3px;padding:1px 5px;margin-left:5px">non décaissée</span>` : '';
           return `<tr style="border-top:1px solid rgba(128,128,128,.08)">
             <td style="padding:5px 0 5px 32px;font-size:11px;color:var(--text2)">${escHtml(cat)}${dotTag}</td>
             <td></td>
@@ -1154,7 +1154,7 @@ function _renderSIG() {
   const opRow = (label, val, note) => {
     const sign = val >= 0 ? '+' : '−';
     const col = val >= 0 ? 'var(--green)' : 'var(--red)';
-    const noteTag = note ? ` <span style="font-size:9px;background:rgba(155,110,243,.12);border:1px solid rgba(155,110,243,.25);color:var(--purple);border-radius:3px;padding:1px 5px;margin-left:5px">${escHtml(note)}</span>` : '';
+    const noteTag = note ? ` <span style="font-size:11px;background:rgba(155,110,243,.12);border:1px solid rgba(155,110,243,.25);color:var(--purple);border-radius:3px;padding:1px 5px;margin-left:5px">${escHtml(note)}</span>` : '';
     return `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 16px 6px 30px;font-size:12px;color:var(--text2)">
       <span>${escHtml(label)}${noteTag}</span>
       <span style="font-family:monospace">${sign} ${_fmtK(Math.abs(val))}</span>
@@ -1173,7 +1173,7 @@ function _renderSIG() {
 
   const cascadeHTML = `
     <div style="padding:16px;border-top:1px solid var(--border)">
-      <div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text2);margin-bottom:10px;display:flex;align-items:center;gap:8px">
+      <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text2);margin-bottom:10px;display:flex;align-items:center;gap:8px">
         <span style="display:block;width:3px;height:12px;background:var(--cyan);border-radius:2px"></span>
         Cascade des soldes intermédiaires de gestion
       </div>
@@ -1196,9 +1196,9 @@ function _renderSIG() {
       <colgroup><col style="width:56%"><col style="width:14%"><col style="width:30%"></colgroup>
       <thead>
         <tr style="border-bottom:1px solid var(--border)">
-          <th style="text-align:left;padding:0 0 8px;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text2)">Rubrique</th>
-          <th style="text-align:right;padding:0 12px 8px 0;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text2)">Détail</th>
-          <th style="text-align:right;padding:0 0 8px;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text2)">Montant</th>
+          <th style="text-align:left;padding:0 0 8px;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text2)">Rubrique</th>
+          <th style="text-align:right;padding:0 12px 8px 0;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text2)">Détail</th>
+          <th style="text-align:right;padding:0 0 8px;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text2)">Montant</th>
         </tr>
       </thead>
       <tbody>${rows}</tbody>

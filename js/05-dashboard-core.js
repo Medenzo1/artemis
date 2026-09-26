@@ -36,9 +36,9 @@ function _toggleChartMode(btn, redrawFn) {
 }
 function _chartModeToggleHtml(redrawFnName) {
   const isCumul = _chartMode === 'cumul';
-  return `<div class="chart-mode-toggle" style="display:inline-flex;align-items:center;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;overflow:hidden;font-size:10px;font-weight:700">
-    <button class="cmt-mensuel" onclick="_toggleChartMode(this,${redrawFnName})" style="padding:4px 10px;border:none;cursor:pointer;font-family:inherit;font-size:10px;font-weight:700;letter-spacing:.04em;transition:all .15s;background:${isCumul?'transparent':'var(--bg4)'};color:${isCumul?'var(--text2)':'var(--cyan)'}">Mensuel</button>
-    <button class="cmt-cumul"   onclick="_toggleChartMode(this,${redrawFnName})" style="padding:4px 10px;border:none;cursor:pointer;font-family:inherit;font-size:10px;font-weight:700;letter-spacing:.04em;transition:all .15s;background:${isCumul?'var(--bg4)':'transparent'};color:${isCumul?'var(--cyan)':'var(--text2)'}">Cumulé</button>
+  return `<div class="chart-mode-toggle" style="display:inline-flex;align-items:center;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;overflow:hidden;font-size:11px;font-weight:700">
+    <button class="cmt-mensuel" onclick="_toggleChartMode(this,${redrawFnName})" style="padding:4px 10px;border:none;cursor:pointer;font-family:inherit;font-size:11px;font-weight:700;letter-spacing:.04em;transition:all .15s;background:${isCumul?'transparent':'var(--bg4)'};color:${isCumul?'var(--text2)':'var(--cyan)'}">Mensuel</button>
+    <button class="cmt-cumul"   onclick="_toggleChartMode(this,${redrawFnName})" style="padding:4px 10px;border:none;cursor:pointer;font-family:inherit;font-size:11px;font-weight:700;letter-spacing:.04em;transition:all .15s;background:${isCumul?'var(--bg4)':'transparent'};color:${isCumul?'var(--cyan)':'var(--text2)'}">Cumulé</button>
   </div>`;
 }
 
@@ -398,8 +398,8 @@ function _kpiCard(icon, label, value, color, sub, varBadges, sparkData) {
   const badgeHtml = varBadges && varBadges.length ? varBadges.map(b => {
     if (b.nodata) return (
       '<div style="display:flex;align-items:center;gap:6px;padding:3px 0;margin-top:2px">'
-      + '<span style="font-size:10px;color:rgba(126,143,168,0.55);font-weight:600;min-width:36px">'+b.label+'</span>'
-      + '<span style="font-size:10px;color:rgba(126,143,168,0.35)">n/d</span>'
+      + '<span style="font-size:11px;color:rgba(126,143,168,0.55);font-weight:600;min-width:36px">'+b.label+'</span>'
+      + '<span style="font-size:11px;color:rgba(126,143,168,0.35)">n/d</span>'
       + '</div>'
     );
     const col  = b.isGood ? '#22c97a' : '#f0566a';
@@ -409,17 +409,17 @@ function _kpiCard(icon, label, value, color, sub, varBadges, sparkData) {
     const fmtP = (b.pct >= 0 ? '+' : '')+b.pct.toFixed(0)+'%';
     return (
       '<div style="display:flex;align-items:center;gap:6px;padding:3px 0;margin-top:2px">'
-      + '<span style="font-size:10px;color:rgba(126,143,168,0.7);font-weight:600;min-width:36px">'+b.label+'</span>'
-      + '<span style="font-size:10px;font-weight:700;color:'+col+';font-family:monospace;background:'+bg+';border-radius:10px;padding:1px 7px">'+fmtD+' · '+fmtP+'</span>'
+      + '<span style="font-size:11px;color:rgba(126,143,168,0.7);font-weight:600;min-width:36px">'+b.label+'</span>'
+      + '<span style="font-size:11px;font-weight:700;color:'+col+';font-family:monospace;background:'+bg+';border-radius:10px;padding:1px 7px">'+fmtD+' · '+fmtP+'</span>'
       + '</div>'
     );
   }).join('') : '';
   const spark = sparkData && sparkData.length >= 2 ? _sparkline(sparkData, color) : '';
   return '<div class="card kpi-card" style="padding:0">'
     + '<div style="flex:1;min-width:0;padding:14px 0 14px 16px;overflow:hidden">'
-    + '<div style="font-size:9px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--text2);margin-bottom:6px">' + icon + '&nbsp;' + label + '</div>'
+    + '<div style="font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--text2);margin-bottom:6px">' + icon + '&nbsp;' + label + '</div>'
     + '<div style="font-size:26px;font-weight:800;color:' + color + ';font-family:monospace;letter-spacing:-.02em;line-height:1;margin-bottom:' + (sub||badgeHtml?'6':'0') + 'px">' + value + '</div>'
-    + (sub ? '<div style="font-size:10px;color:var(--text2);margin-bottom:5px">' + sub + '</div>' : '')
+    + (sub ? '<div style="font-size:11px;color:var(--text2);margin-bottom:5px">' + sub + '</div>' : '')
     + (badgeHtml ? '<div style="border-top:1px solid rgba(255,255,255,.06);padding-top:6px">' + badgeHtml + '</div>' : '')
     + '</div>'
     + (spark ? '<div style="flex-shrink:0;padding:0 14px;display:flex;align-items:center;opacity:.85">' + spark + '</div>' : '')
@@ -464,7 +464,7 @@ function _kpiCardBig(icon, label, value, color, bienEntries, decoIcon) {
   const deco = decoIcon || '🏘️';
   return `<div class="card kpi-card" style="padding:14px 16px;flex-direction:row;align-items:center;gap:0;position:relative;overflow:hidden">
     <div style="flex:1;min-width:0">
-      <div style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text2);margin-bottom:8px">${label}</div>
+      <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text2);margin-bottom:8px">${label}</div>
       <div style="font-size:38px;font-weight:900;color:${color};font-family:monospace;line-height:1">${n}</div>
     </div>
     <div style="font-size:52px;opacity:.35;flex-shrink:0;line-height:1;user-select:none">${deco}</div>
@@ -475,10 +475,10 @@ function _kpiCardTop(icon, label, name, color, amount, pctNum, bienEntries) {
   const pct = parseFloat(pctNum) || 0;
   return `<div class="card kpi-card" style="padding:14px 16px;flex-direction:row;align-items:center;gap:0;position:relative;overflow:hidden">
     <div style="flex:1;min-width:0;overflow:hidden">
-      <div style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text2);margin-bottom:6px">${label}</div>
+      <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text2);margin-bottom:6px">${label}</div>
       <div style="font-size:13px;font-weight:700;color:${color};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px">${name}</div>
       <div style="font-size:22px;font-weight:800;font-family:monospace;color:${color};line-height:1">${amount}</div>
-      <div style="font-size:10px;color:var(--text2);margin-top:4px">${pct.toFixed(1)}% du CA</div>
+      <div style="font-size:11px;color:var(--text2);margin-top:4px">${pct.toFixed(1)}% du CA</div>
     </div>
     <div style="font-size:48px;opacity:.5;flex-shrink:0;line-height:1;user-select:none;color:#f5b731">${icon}</div>
   </div>`;
@@ -965,10 +965,10 @@ function _renderSynRecap() {
   const kpiPBI = (label, mainVal, mainColor, spark, dm1abs, dm1pct, dn1abs, dn1pct, tab) => {
     const dm1c = dColor(dm1abs), dn1c = dColor(dn1abs);
     return `<div class="card" onclick="_jumpToSynTab('${tab}')" style="cursor:pointer;padding:16px 18px;transition:transform .15s,box-shadow .15s" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 24px rgba(0,0,0,.35)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
-      <div style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text2);margin-bottom:8px">${label}</div>
+      <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text2);margin-bottom:8px">${label}</div>
       <div style="font-size:22px;font-weight:800;font-family:monospace;color:${mainColor};margin-bottom:10px;line-height:1">${mainVal}</div>
       <div style="display:flex;justify-content:space-between;align-items:flex-end">
-        <div style="font-size:10px;line-height:1.8">
+        <div style="font-size:11px;line-height:1.8">
           ${dm1abs!==null?`<div><span style="color:var(--text2);margin-right:4px">Δ M−1</span><span style="color:${dm1c};font-family:monospace">${dFmt(dm1abs,true)}</span><span style="color:${dm1c};font-family:monospace;margin-left:6px;opacity:.75">${dFmt(dm1pct,false)}</span></div>`:''}
           ${dn1abs!==null?`<div><span style="color:var(--text2);margin-right:4px">Δ N−1</span><span style="color:${dn1c};font-family:monospace">${dFmt(dn1abs,true)}</span><span style="color:${dn1c};font-family:monospace;margin-left:6px;opacity:.75">${dFmt(dn1pct,false)}</span></div>`:''}
         </div>
@@ -1026,13 +1026,13 @@ function _renderSynRecap() {
     const labelCol = !hasData ? 'var(--border)' : val>=0 ? 'var(--cyan)' : 'var(--red)';
     const label = !hasData ? '' : `${val>=0?'+':''}${Math.abs(val)>=1000?Math.round(val/1000)+'k':Math.round(val)+'€'}`;
     return `<div style="width:64px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:3px">
-      <div style="font-size:9px;font-family:monospace;color:${labelCol};height:14px;line-height:14px">${label}</div>
+      <div style="font-size:11px;font-family:monospace;color:${labelCol};height:14px;line-height:14px">${label}</div>
       <div style="height:${BAR_H}px;display:flex;align-items:flex-end;justify-content:center;width:100%;position:relative">
         ${hasData && val >= 0 ? `<div style="width:58%;background:${col};opacity:.85;border-radius:4px 4px 0 0;height:${Math.max(h,3)}px;transition:height .4s ease"></div>` : ''}
         ${hasData && val < 0  ? `<div style="width:58%;background:${col};opacity:.85;border-radius:0 0 4px 4px;height:${Math.max(h,3)}px;position:absolute;top:0;transition:height .4s ease"></div>` : ''}
         ${!hasData ? `<div style="width:2px;height:100%;background:var(--border);opacity:.3;border-radius:1px"></div>` : ''}
       </div>
-      <div style="font-size:9px;color:${yr==String(curYear)?'var(--cyan)':'var(--text2)'};font-weight:${yr==String(curYear)?'700':'400'}">${yr}</div>
+      <div style="font-size:11px;color:${yr==String(curYear)?'var(--cyan)':'var(--text2)'};font-weight:${yr==String(curYear)?'700':'400'}">${yr}</div>
     </div>`;
   }).join('');
 
@@ -1070,18 +1070,18 @@ function _renderSynRecap() {
           </div>
         </div>
         <div style="height:1px;background:var(--border2);margin:6px 0 2px"></div>
-        <div style="font-size:9px;color:var(--text2);text-align:center;letter-spacing:.05em">Année</div>
+        <div style="font-size:11px;color:var(--text2);text-align:center;letter-spacing:.05em">Année</div>
       </div>
 
       <div class="card">
         <div class="card-title">Variation EBIT${prevYear?' vs N−1':' - top mouvements'}</div>
         ${movers.length === 0 ? `<div style="color:var(--text2);font-size:12px;padding:12px 0">${prevYear?'Sélectionnez une année pour comparer':'Aucune donnée'}</div>` : `
         <div style="margin-bottom:10px">
-          <div style="font-size:9px;font-weight:700;color:var(--green);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px">Impact positif</div>
+          <div style="font-size:11px;font-weight:700;color:var(--green);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px">Impact positif</div>
           ${topPos.length ? topPos.map(m=>moverRow(m,true)).join('') : '<div style="font-size:11px;color:var(--text2);padding:4px 0">-</div>'}
         </div>
         <div>
-          <div style="font-size:9px;font-weight:700;color:var(--red);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px">Impact négatif</div>
+          <div style="font-size:11px;font-weight:700;color:var(--red);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px">Impact négatif</div>
           ${topNeg.length ? topNeg.map(m=>moverRow(m,false)).join('') : '<div style="font-size:11px;color:var(--text2);padding:4px 0">-</div>'}
         </div>`}
       </div>
@@ -1112,11 +1112,11 @@ function _renderSynMap(biens) {
           const sci = (b.sci||'').replace('SCI - ','');
           return `<div style="background:#0d1520;padding:14px 16px;transition:background .15s" onmouseover="this.style.background='#111d2e'" onmouseout="this.style.background='#0d1520'">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-              <span style="background:${col}18;color:${col};border:1px solid ${col}30;border-radius:5px;font-size:9px;font-weight:700;padding:2px 7px;letter-spacing:.06em">${b.type||'LCD'}</span>
-              <span style="font-size:9px;color:#2a3a50">${sci}</span>
+              <span style="background:${col}18;color:${col};border:1px solid ${col}30;border-radius:5px;font-size:11px;font-weight:700;padding:2px 7px;letter-spacing:.06em">${b.type||'LCD'}</span>
+              <span style="font-size:11px;color:#2a3a50">${sci}</span>
             </div>
             <div style="font-size:13px;font-weight:700;color:#eaf0ff;margin-bottom:4px">${b.name}</div>
-            <div style="font-size:10px;color:#4a6080">${b.lot||''}</div>
+            <div style="font-size:11px;color:#4a6080">${b.lot||''}</div>
           </div>`;
         }).join('')}
       </div>

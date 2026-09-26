@@ -44,7 +44,7 @@ function addSci(){const p=getParams();p.scis.push('Nouvelle SCI');saveParamsAndS
 // Biens
 function renderBiensList(p){
   if(!p)p=getParams();
-  const hdr=['Nom court','Nom long (Airbnb)','Type','SCI','Lot',''].map(h=>`<div style="font-size:9px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.07em">${h}</div>`).join('');
+  const hdr=['Nom court','Nom long (Airbnb)','Type','SCI','Lot',''].map(h=>`<div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.07em">${h}</div>`).join('');
   const rows=p.biens.map((b,i)=>`
     <div class="param-row" style="grid-template-columns:1fr 1.8fr 70px 1fr 1fr auto">
       <input value="${escHtml(b.name)}" oninput="updateBien(${i},'name',this.value)">
@@ -147,17 +147,17 @@ function renderAmortTable(amorts) {
     // Ligne "à compléter" seulement si _fromImport ET champs essentiels manquants
     const isIncomplete = !!a._fromImport && (!a.valeurHT || !a.duree || !a.bienId);
     const rowBg = isIncomplete ? 'background:rgba(245,183,49,.06)' : (i % 2 === 0 ? '' : 'background:rgba(255,255,255,.015)');
-    const selStyle = 'background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:10px;padding:4px 6px;font-family:inherit;width:100%';
+    const selStyle = 'background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:11px;padding:4px 6px;font-family:inherit;width:100%';
     const inputStyle = 'width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);color:var(--text);font-size:11px;font-family:inherit;padding:2px 0;outline:none';
     const numStyle = 'width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);color:var(--text);font-size:11px;font-family:monospace;padding:2px 0;outline:none;text-align:right';
     const methSel = AMORT_METHODS.map(m => '<option value="' + m + '" ' + (m===a.methode?'selected':'') + '>' + m + '</option>').join('');
     const catSel  = '<option value="">\u2014 Choisir \u2014</option>' + AMORT_CATS.map(c => '<option value="' + escHtml(c) + '" ' + (c===a.categorie?'selected':'') + '>' + escHtml(c) + '</option>').join('');
     const lotSelRow  = '<option value="">\u2014</option>' + p.lots.map(l => '<option value="' + escHtml(l) + '" ' + (l===a.lot?'selected':'') + '>' + escHtml(l) + '</option>').join('');
     const bienSelRow = '<option value="">\u2014 Choisir \u2014</option>' + '<option value="frais_generaux" ' + (a.bienId==='frais_generaux'?'selected':'') + '>Frais g\u00e9n\u00e9raux</option>' + p.biens.map(b => '<option value="' + b.id + '" ' + (b.id===a.bienId?'selected':'') + '>' + escHtml(b.name) + '</option>').join('');
-    const newBadge = isIncomplete ? '<span style="font-size:9px;background:rgba(245,183,49,.15);border:1px solid rgba(245,183,49,.4);color:var(--gold);border-radius:3px;padding:1px 5px;margin-left:5px;vertical-align:middle">\u00e0 compléter</span>' : '';
-    const srcHint = a._fromImport && a._srcMontant ? '<div style="font-size:9px;color:var(--text2);margin-top:2px">Montant bancaire\u00a0: ' + a._srcMontant.toLocaleString('fr-FR',{minimumFractionDigits:2}) + '\u00a0\u20ac</div>' : '';
+    const newBadge = isIncomplete ? '<span style="font-size:11px;background:rgba(245,183,49,.15);border:1px solid rgba(245,183,49,.4);color:var(--gold);border-radius:3px;padding:1px 5px;margin-left:5px;vertical-align:middle">\u00e0 compléter</span>' : '';
+    const srcHint = a._fromImport && a._srcMontant ? '<div style="font-size:11px;color:var(--text2);margin-top:2px">Montant bancaire\u00a0: ' + a._srcMontant.toLocaleString('fr-FR',{minimumFractionDigits:2}) + '\u00a0\u20ac</div>' : '';
     return '<tr style="border-bottom:1px solid var(--border);' + rowBg + '" onmouseover="this.style.background=\'rgba(255,255,255,.025)\'" onmouseout="this.style.background=\'' + (isIncomplete?'rgba(245,183,49,.06)':i%2===0?'':'rgba(255,255,255,.015)') + '\'">' +
-      '<td style="padding:7px 10px;color:var(--text2);font-size:10px;font-family:monospace">' + (i+1) + '</td>' +
+      '<td style="padding:7px 10px;color:var(--text2);font-size:11px;font-family:monospace">' + (i+1) + '</td>' +
       '<td style="padding:7px 10px;max-width:180px"><input value="' + escHtml(a.libelle) + '" oninput="updateAmortField(' + i + ',\'libelle\',this.value)" style="' + inputStyle + '">' + newBadge + srcHint + '</td>' +
       '<td style="padding:7px 10px"><input value="' + escHtml(a.dateAchat||'') + '" placeholder="JJ/MM/AAAA" data-datemask oninput="updateAmortField(' + i + ',\'dateAchat\',this.value)" style="' + inputStyle + ';width:90px"></td>' +
       '<td style="padding:7px 10px"><input type="number" min="0" step="0.01" value="' + (a.valeurHT||0) + '" oninput="updateAmortField(' + i + ',\'valeurHT\',parseFloat(this.value)||0)" style="' + numStyle + ';width:80px"></td>' +
@@ -166,7 +166,7 @@ function renderAmortTable(amorts) {
       '<td id="amort-lot-td-' + i + '" style="padding:7px 10px' + (a.bienId==='frais_generaux'?';outline:1px solid rgba(245,183,49,.5);border-radius:5px':'') + '"><select onchange="updateAmortField(' + i + ',\'lot\',this.value)" style="' + selStyle + (a.bienId==='frais_generaux'?';border-color:rgba(245,183,49,.6)':'') + '">' + lotSelRow + '</select></td>' +
       '<td style="padding:7px 10px"><select id="amort-bien-' + i + '" onchange="updateAmortField(' + i + ',\'bienId\',this.value);_amortHighlightLot(' + i + ',this.value)" style="' + selStyle + '">' + bienSelRow + '</select></td>' +
       '<td style="padding:7px 10px"><select onchange="updateAmortField(' + i + ',\'categorie\',this.value)" style="' + selStyle + '">' + catSel + '</select></td>' +
-      '<td style="padding:7px 6px;text-align:center"><button onclick="deleteAmortRow(' + i + ')" style="background:rgba(220,50,50,.12);border:1px solid rgba(220,50,50,.3);cursor:pointer;color:var(--red);font-size:10px;font-weight:600;padding:3px 8px;border-radius:5px;font-family:inherit;white-space:nowrap" onmouseover="this.style.background=\'rgba(220,50,50,.25)\'" onmouseout="this.style.background=\'rgba(220,50,50,.12)\'">Supprimer</button></td>' +
+      '<td style="padding:7px 6px;text-align:center"><button onclick="deleteAmortRow(' + i + ')" style="background:rgba(220,50,50,.12);border:1px solid rgba(220,50,50,.3);cursor:pointer;color:var(--red);font-size:11px;font-weight:600;padding:3px 8px;border-radius:5px;font-family:inherit;white-space:nowrap" onmouseover="this.style.background=\'rgba(220,50,50,.25)\'" onmouseout="this.style.background=\'rgba(220,50,50,.12)\'">Supprimer</button></td>' +
     '</tr>';
   }).join('');
   if (badge) { badge.textContent = amorts.length + ' actif' + (amorts.length > 1 ? 's' : ''); badge.style.display = ''; }
@@ -177,7 +177,7 @@ function renderAmortTable(amorts) {
     const _incomplete = amorts.filter(a => a._fromImport && (!a.valeurHT || !a.duree || !a.bienId));
     if (_incomplete.length) {
       _statusEl.innerHTML = '<div style="background:rgba(245,183,49,.1);border:1px solid rgba(245,183,49,.35);border-radius:8px;padding:10px 14px;color:var(--gold);font-size:12px">'
-        + '<strong>⚠️ ' + _incomplete.length + ' immobilisation(s) à compléter</strong> — renseigne la valeur HT, la durée et le bien pour chaque ligne marquée <span style="font-size:10px;background:rgba(245,183,49,.15);border:1px solid rgba(245,183,49,.4);border-radius:3px;padding:1px 5px">à compléter</span>, puis clique sur <strong>Enregistrer</strong>.</div>';
+        + '<strong>⚠️ ' + _incomplete.length + ' immobilisation(s) à compléter</strong> — renseigne la valeur HT, la durée et le bien pour chaque ligne marquée <span style="font-size:11px;background:rgba(245,183,49,.15);border:1px solid rgba(245,183,49,.4);border-radius:3px;padding:1px 5px">à compléter</span>, puis clique sur <strong>Enregistrer</strong>.</div>';
     } else if (_statusEl.querySelector && _statusEl.querySelector('strong')) {
       _statusEl.innerHTML = '';
     }
@@ -364,7 +364,7 @@ function loadAmortOnOpen() {
     if (fromImport.length && status) {
       status.innerHTML = '<div style="background:rgba(245,183,49,.1);border:1px solid rgba(245,183,49,.35);border-radius:8px;padding:10px 14px;color:var(--gold);font-size:12px">'
         + '<strong>⚠️ ' + fromImport.length + ' immobilisation(s) à compléter</strong> — détectées lors d\'un import bancaire. '
-        + 'Renseigne la valeur HT, la durée et le bien pour chaque ligne marquée <span style="font-size:10px;background:rgba(245,183,49,.15);border:1px solid rgba(245,183,49,.4);border-radius:3px;padding:1px 5px">à compléter</span>, '
+        + 'Renseigne la valeur HT, la durée et le bien pour chaque ligne marquée <span style="font-size:11px;background:rgba(245,183,49,.15);border:1px solid rgba(245,183,49,.4);border-radius:3px;padding:1px 5px">à compléter</span>, '
         + 'puis clique sur <strong>Enregistrer</strong>.</div>';
     }
   } catch(e) {}
@@ -598,14 +598,14 @@ function renderAmortSchedule() {
       const months = byYear[yr];
       const yearTotal = months.reduce((s, v) => s + (v||0), 0);
       const cells = months.map(v => v !== null
-        ? '<td style="padding:5px 7px;text-align:right;font-family:monospace;font-size:10px;color:var(--text)">'
+        ? '<td style="padding:5px 7px;text-align:right;font-family:monospace;font-size:11px;color:var(--text)">'
           + v.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2}) + '</td>'
-        : '<td style="padding:5px 7px;text-align:right;color:var(--border2);font-size:10px">\u2014</td>'
+        : '<td style="padding:5px 7px;text-align:right;color:var(--border2);font-size:11px">\u2014</td>'
       ).join('');
       return '<tr style="border-bottom:1px solid var(--border)">'
-        + '<td style="padding:5px 10px;font-size:10px;font-weight:700;color:var(--text2);white-space:nowrap">'+yr+'</td>'
+        + '<td style="padding:5px 10px;font-size:11px;font-weight:700;color:var(--text2);white-space:nowrap">'+yr+'</td>'
         + cells
-        + '<td style="padding:5px 10px;text-align:right;font-family:monospace;font-size:10px;font-weight:700;color:var(--cyan)">'
+        + '<td style="padding:5px 10px;text-align:right;font-family:monospace;font-size:11px;font-weight:700;color:var(--cyan)">'
           + yearTotal.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2}) + '</td>'
         + '</tr>';
     }).join('');
@@ -618,20 +618,20 @@ function renderAmortSchedule() {
       // Header actif
       + '<div style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px 8px 0 0;padding:10px 14px;display:flex;gap:16px;flex-wrap:wrap;align-items:center">'
       + '<span style="font-size:12px;font-weight:700;color:var(--text);flex:1">' + escHtml(a._label_display || a.libelle) + '</span>'
-      + '<span style="font-size:10px;color:var(--text2)">' + (a.dateAchat||'\u2014') + '</span>'
+      + '<span style="font-size:11px;color:var(--text2)">' + (a.dateAchat||'\u2014') + '</span>'
       + '<span style="font-size:11px;font-weight:700;color:var(--gold);font-family:monospace">' + a.valeurHT.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' \u20ac</span>'
-      + '<span style="font-size:10px;background:var(--bg4);border:1px solid var(--border2);border-radius:4px;padding:2px 8px;color:var(--text2)">' + (a.methode||'\u2014') + ' \u00b7 ' + dureeAns + ' ans</span>'
-      + '<span style="font-size:10px;color:var(--text2)">' + escHtml(a.categorie||'\u2014') + '</span>'
-      + '<span style="font-size:10px;color:var(--cyan)">' + bienName(a.bienId) + '</span>'
-      + '<span style="font-size:10px;font-family:monospace;color:var(--text2)">VNC\u00a0fin\u00a0: <strong style="color:'+(vncFin>0?'var(--gold)':'var(--green)')+'">'+vncFin.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+' \u20ac</strong></span>'
+      + '<span style="font-size:11px;background:var(--bg4);border:1px solid var(--border2);border-radius:4px;padding:2px 8px;color:var(--text2)">' + (a.methode||'\u2014') + ' \u00b7 ' + dureeAns + ' ans</span>'
+      + '<span style="font-size:11px;color:var(--text2)">' + escHtml(a.categorie||'\u2014') + '</span>'
+      + '<span style="font-size:11px;color:var(--cyan)">' + bienName(a.bienId) + '</span>'
+      + '<span style="font-size:11px;font-family:monospace;color:var(--text2)">VNC\u00a0fin\u00a0: <strong style="color:'+(vncFin>0?'var(--gold)':'var(--green)')+'">'+vncFin.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+' \u20ac</strong></span>'
       + '</div>'
       // Tableau mensuel
       + '<div style="overflow-x:auto;border:1px solid var(--border2);border-top:none;border-radius:0 0 8px 8px">'
       + '<table style="width:100%;border-collapse:collapse;min-width:800px">'
       + '<thead><tr style="background:var(--bg4)">'
-      + '<th style="padding:6px 10px;text-align:left;font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text2);white-space:nowrap">Ann\u00e9e</th>'
-      + MONTH_NAMES.map(m=>'<th style="padding:6px 7px;text-align:right;font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text2)">'+m+'</th>').join('')
-      + '<th style="padding:6px 10px;text-align:right;font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text2)">Total</th>'
+      + '<th style="padding:6px 10px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text2);white-space:nowrap">Ann\u00e9e</th>'
+      + MONTH_NAMES.map(m=>'<th style="padding:6px 7px;text-align:right;font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text2)">'+m+'</th>').join('')
+      + '<th style="padding:6px 10px;text-align:right;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text2)">Total</th>'
       + '</tr></thead>'
       + '<tbody>' + yearRows + '</tbody>'
       + '</table></div>'
@@ -763,14 +763,14 @@ function _renderQpDetail(p){
     const totOk = Math.abs(tot-1) < 0.005;
     return `<div style="background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:14px;margin-bottom:10px">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
-        <span style="font-size:10px;color:var(--text2);font-weight:600;min-width:26px">Lot</span>
+        <span style="font-size:11px;color:var(--text2);font-weight:600;min-width:26px">Lot</span>
         <select style="flex:1;background:var(--bg2);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:11px;padding:5px 8px"
           data-action="qp-lot" data-gi="${gi}">${lotOptions(g.lot,p)}</select>
         <span style="font-size:11px;font-weight:700;min-width:44px;text-align:right;color:${totOk?'var(--green)':'var(--red)'}">${(tot*100).toFixed(1)}%</span>
         <button class="param-del" data-action="qp-del-group" data-gi="${gi}">✕</button>
       </div>
       ${bHtml}
-      <button data-action="qp-add-bien" data-gi="${gi}" style="background:none;border:1px dashed var(--border2);border-radius:5px;color:var(--text2);font-size:10px;padding:3px 12px;cursor:pointer;margin-top:2px">+ Bien</button>
+      <button data-action="qp-add-bien" data-gi="${gi}" style="background:none;border:1px dashed var(--border2);border-radius:5px;color:var(--text2);font-size:11px;padding:3px 12px;cursor:pointer;margin-top:2px">+ Bien</button>
     </div>`;
   }).join('');
 
@@ -778,11 +778,11 @@ function _renderQpDetail(p){
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
       <div>
         <div style="font-size:14px;font-weight:700">${escHtml(cat)}</div>
-        <div style="font-size:10px;color:var(--text2);margin-top:2px">${groups.length} groupe${groups.length>1?'s':''} de répartition</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:2px">${groups.length} groupe${groups.length>1?'s':''} de répartition</div>
       </div>
       <div style="display:flex;gap:8px">
-        <button data-action="qp-add-group" class="btn btn-outline" style="font-size:10px;padding:5px 12px">+ Groupe</button>
-        <button data-action="qp-del-cat" class="btn btn-red" style="font-size:10px;padding:5px 12px">Supprimer</button>
+        <button data-action="qp-add-group" class="btn btn-outline" style="font-size:11px;padding:5px 12px">+ Groupe</button>
+        <button data-action="qp-del-cat" class="btn btn-red" style="font-size:11px;padding:5px 12px">Supprimer</button>
       </div>
     </div>
     ${gHtml || '<div style="font-size:11px;color:var(--text2)">Aucun groupe - cliquez &quot;+ Groupe&quot;</div>'}
@@ -890,7 +890,7 @@ function renderLoansList(p){
       <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px">
         <select style="flex:1;background:var(--bg2);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:11px;padding:4px 8px" onchange="updateLoanBien(${i},${bi},this.value)">${bienOptions(bId,p)}</select>
         <input type="number" min="0" max="100" step="0.01" value="${((l.pcts[bi]||0)*100).toFixed(2)}" oninput="updateLoanPct(${i},${bi},this.value)" style="width:76px;background:var(--bg2);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:11px;padding:4px 8px;text-align:right">
-        <span style="font-size:10px;color:var(--text2)">%</span>
+        <span style="font-size:11px;color:var(--text2)">%</span>
         <button class="param-del" onclick="delLoanBien(${i},${bi})">&#x2715;</button>
       </div>`).join('');
     const totPct=(l.pcts||[]).reduce((a,v)=>a+v,0);
@@ -905,25 +905,25 @@ function renderLoansList(p){
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px">
         <div>
-          <div style="font-size:9px;color:var(--text2);font-weight:700;letter-spacing:.07em;text-transform:uppercase;margin-bottom:4px">Référence</div>
+          <div style="font-size:11px;color:var(--text2);font-weight:700;letter-spacing:.07em;text-transform:uppercase;margin-bottom:4px">Référence</div>
           <input value="${escHtml(l.ref)}" oninput="updateLoan(${i},'ref',this.value)" style="width:100%;background:var(--bg2);border:1px solid var(--border2);border-radius:5px;color:var(--cyan);font-family:monospace;font-size:12px;padding:5px 8px">
         </div>
         <div>
-          <div style="font-size:9px;color:var(--text2);font-weight:700;letter-spacing:.07em;text-transform:uppercase;margin-bottom:4px">Libellé</div>
+          <div style="font-size:11px;color:var(--text2);font-weight:700;letter-spacing:.07em;text-transform:uppercase;margin-bottom:4px">Libellé</div>
           <input value="${escHtml(l.label)}" oninput="updateLoan(${i},'label',this.value)" style="width:100%;background:var(--bg2);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:12px;padding:5px 8px">
         </div>
         <div>
-          <div style="font-size:9px;color:var(--text2);font-weight:700;letter-spacing:.07em;text-transform:uppercase;margin-bottom:4px">Lot</div>
+          <div style="font-size:11px;color:var(--text2);font-weight:700;letter-spacing:.07em;text-transform:uppercase;margin-bottom:4px">Lot</div>
           <select style="width:100%;background:var(--bg2);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:12px;padding:5px 8px" onchange="updateLoan(${i},'lot',this.value)">${lotOptions(l.lot,p)}</select>
         </div>
       </div>
-      <div style="font-size:9px;color:var(--text2);font-weight:700;letter-spacing:.07em;text-transform:uppercase;margin-bottom:8px">
+      <div style="font-size:11px;color:var(--text2);font-weight:700;letter-spacing:.07em;text-transform:uppercase;margin-bottom:8px">
         Répartition <span class="${totCls}">${(totPct*100).toFixed(1)}%</span>
       </div>
       ${bHtml}
-      <button onclick="addLoanBien(${i})" style="background:none;border:1px dashed var(--border2);border-radius:5px;color:var(--text2);font-size:10px;padding:3px 10px;cursor:pointer">+ Bien</button>
-      <button onclick="_repairLoanLinesByRef(this)" data-ref="${escHtml(l.ref)}" style="background:rgba(240,86,106,.1);border:1px solid rgba(240,86,106,.3);border-radius:5px;color:var(--red);font-size:10px;padding:3px 10px;cursor:pointer;margin-left:6px">🔧 Réparer les montants</button>
-      <button onclick="_swapCapInt(this)" data-ref="${escHtml(l.ref)}" style="background:rgba(255,165,0,.1);border:1px solid rgba(255,165,0,.3);border-radius:5px;color:orange;font-size:10px;padding:3px 10px;cursor:pointer;margin-left:6px" title="Inverser capital et intérêts si importés dans le mauvais sens">🔄 Inverser cap/int</button>
+      <button onclick="addLoanBien(${i})" style="background:none;border:1px dashed var(--border2);border-radius:5px;color:var(--text2);font-size:11px;padding:3px 10px;cursor:pointer">+ Bien</button>
+      <button onclick="_repairLoanLinesByRef(this)" data-ref="${escHtml(l.ref)}" style="background:rgba(240,86,106,.1);border:1px solid rgba(240,86,106,.3);border-radius:5px;color:var(--red);font-size:11px;padding:3px 10px;cursor:pointer;margin-left:6px">🔧 Réparer les montants</button>
+      <button onclick="_swapCapInt(this)" data-ref="${escHtml(l.ref)}" style="background:rgba(255,165,0,.1);border:1px solid rgba(255,165,0,.3);border-radius:5px;color:orange;font-size:11px;padding:3px 10px;cursor:pointer;margin-left:6px" title="Inverser capital et intérêts si importés dans le mauvais sens">🔄 Inverser cap/int</button>
       ${(()=>{
         const tbl=(p.loanTable||{})[l.ref]||{};
         const allKeys=Object.keys(tbl).sort(); const keys=[...allKeys.slice(0,2),...allKeys.slice(-2)];
@@ -933,20 +933,20 @@ function renderLoansList(p){
           const tot=cap+int;
           const ok=Math.abs(tot)>0;
           return `<tr>
-            <td style="color:var(--text2);font-size:10px;font-family:monospace;padding:2px 6px">${ym}</td>
-            <td style="text-align:right;font-family:monospace;font-size:10px;padding:2px 6px;color:var(--red)">${cap.toFixed(2)} €</td>
-            <td style="text-align:right;font-family:monospace;font-size:10px;padding:2px 6px;color:var(--gold)">${int.toFixed(2)} €</td>
-            <td style="text-align:right;font-family:monospace;font-size:10px;padding:2px 6px;color:${ok?'var(--cyan)':'var(--text2)'}">${tot.toFixed(2)} €</td>
+            <td style="color:var(--text2);font-size:11px;font-family:monospace;padding:2px 6px">${ym}</td>
+            <td style="text-align:right;font-family:monospace;font-size:11px;padding:2px 6px;color:var(--red)">${cap.toFixed(2)} €</td>
+            <td style="text-align:right;font-family:monospace;font-size:11px;padding:2px 6px;color:var(--gold)">${int.toFixed(2)} €</td>
+            <td style="text-align:right;font-family:monospace;font-size:11px;padding:2px 6px;color:${ok?'var(--cyan)':'var(--text2)'}">${tot.toFixed(2)} €</td>
           </tr>`;
         }).join('');
         return `<div style="margin-top:10px;border-top:1px solid var(--border);padding-top:8px">
-          <div style="font-size:9px;color:var(--text2);font-weight:700;letter-spacing:.07em;text-transform:uppercase;margin-bottom:6px">Premières &amp; dernières échéances</div>
+          <div style="font-size:11px;color:var(--text2);font-weight:700;letter-spacing:.07em;text-transform:uppercase;margin-bottom:6px">Premières &amp; dernières échéances</div>
           <table style="width:100%;border-collapse:collapse">
             <thead><tr>
-              <th style="font-size:9px;color:var(--text2);text-align:left;padding:2px 6px;font-weight:600">Période</th>
-              <th style="font-size:9px;color:var(--text2);text-align:right;padding:2px 6px;font-weight:600">Capital</th>
-              <th style="font-size:9px;color:var(--text2);text-align:right;padding:2px 6px;font-weight:600">Intérêts</th>
-              <th style="font-size:9px;color:var(--text2);text-align:right;padding:2px 6px;font-weight:600">Total échéance</th>
+              <th style="font-size:11px;color:var(--text2);text-align:left;padding:2px 6px;font-weight:600">Période</th>
+              <th style="font-size:11px;color:var(--text2);text-align:right;padding:2px 6px;font-weight:600">Capital</th>
+              <th style="font-size:11px;color:var(--text2);text-align:right;padding:2px 6px;font-weight:600">Intérêts</th>
+              <th style="font-size:11px;color:var(--text2);text-align:right;padding:2px 6px;font-weight:600">Total échéance</th>
             </tr></thead>
             <tbody>${rows}</tbody>
           </table>
@@ -1013,7 +1013,7 @@ function updateLimPreview(){
   var data=_limRows.slice(1).filter(Boolean).slice(0,3);
   var f=function(v){return (()=>{const _v=parseFloat(v||0);const _a=Math.abs(_v);const _i=Math.floor(_a);const _d=Math.round((_a-_i)*100).toString().padStart(2,'0');return ((_v<0?'-':'')+String(_i).replace(/\B(?=(\d{3})+(?!\d))/g,'\u202f')+','+_d+'\u202f€')})()+" €";};
   document.getElementById("lim-preview").innerHTML=
-    "<div style='font-size:9px;color:var(--text2);margin-bottom:8px'>Aperçu - 3 premières lignes</div>"+
+    "<div style='font-size:11px;color:var(--text2);margin-bottom:8px'>Aperçu - 3 premières lignes</div>"+
     (data.length?data.map(function(r){
       return "<div style='margin-bottom:5px'><span style='color:var(--text)'>"+_parseYM(r[iD])+"</span>"
         +" · Cap. <span style='color:var(--cyan);font-family:monospace'>"+f(r[iC])+"</span>"

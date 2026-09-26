@@ -228,58 +228,58 @@ function _renderKpiLCD() {
 
       <!-- Taux d'occupation vs Point mort (%) -->
       <div class="card" style="display:flex;flex-direction:column;align-items:center;padding:18px 14px 14px;margin-top:0!important;">
-        <div style="font-size:8px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text2);margin-bottom:12px;text-align:center">Taux d'occupation vs Point mort</div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text2);margin-bottom:12px;text-align:center">Taux d'occupation vs Point mort</div>
         <canvas id="${gaugeId1}" width="180" height="100" style="display:block;max-width:180px;flex:1;min-height:80px;max-height:120px"></canvas>
-        <div style="display:flex;justify-content:space-between;width:100%;margin-top:6px;font-size:10px">
+        <div style="display:flex;justify-content:space-between;width:100%;margin-top:6px;font-size:11px">
           <span style="color:var(--text2)">0%</span>
           <span style="color:var(--text2)">100%</span>
         </div>
         <div style="display:flex;gap:10px;margin-top:10px;justify-content:center">
           <div style="display:flex;flex-direction:column;align-items:center;gap:2px">
             <span style="font-size:18px;font-weight:900;color:var(--cyan);font-family:monospace">${txOcc.toFixed(1)}%</span>
-            <span style="font-size:9px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em">Occupation</span>
+            <span style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em">Occupation</span>
           </div>
           <div style="width:1px;background:var(--border2);margin:2px 0"></div>
           <div style="display:flex;flex-direction:column;align-items:center;gap:2px">
             <span style="font-size:18px;font-weight:900;color:var(--red);font-family:monospace">${pointMortPct.toFixed(1)}%</span>
-            <span style="font-size:9px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em">Point mort</span>
+            <span style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em">Point mort</span>
           </div>
         </div>
       </div>
 
       <!-- Jours d'occupation vs Point mort -->
       <div class="card" style="display:flex;flex-direction:column;align-items:center;padding:18px 14px 14px;margin-top:0!important;">
-        <div style="font-size:8px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text2);margin-bottom:12px;text-align:center">Jours d'occupation vs Point mort</div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text2);margin-bottom:12px;text-align:center">Jours d'occupation vs Point mort</div>
         <canvas id="${gaugeId2}" width="180" height="100" style="display:block;max-width:180px;flex:1;min-height:80px;max-height:120px"></canvas>
-        <div style="display:flex;justify-content:space-between;width:100%;margin-top:6px;font-size:10px">
+        <div style="display:flex;justify-content:space-between;width:100%;margin-top:6px;font-size:11px">
           <span style="color:var(--text2)">0</span>
           <span style="color:var(--text2)">${nuitsDisponibles} nuits dispo</span>
         </div>
         <div style="display:flex;gap:10px;margin-top:10px;justify-content:center">
           <div style="display:flex;flex-direction:column;align-items:center;gap:2px">
             <span style="font-size:18px;font-weight:900;color:var(--purple);font-family:monospace">${nuitsLouees}</span>
-            <span style="font-size:9px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em">Nuits louées</span>
+            <span style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em">Nuits louées</span>
           </div>
           <div style="width:1px;background:var(--border2);margin:2px 0"></div>
           <div style="display:flex;flex-direction:column;align-items:center;gap:2px">
             <span style="font-size:18px;font-weight:900;color:var(--red);font-family:monospace">${pointMortNuits}</span>
-            <span style="font-size:9px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em">Point mort</span>
+            <span style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em">Point mort</span>
           </div>
         </div>
       </div>
 
       <!-- Durée moyenne de séjour -->
       <div class="card" style="display:flex;flex-direction:column;justify-content:center;align-items:center;padding:18px 14px;margin-top:0!important;">
-        <div style="font-size:9px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--text2);margin-bottom:16px;text-align:center">Durée moyenne de séjour (en jour)</div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--text2);margin-bottom:16px;text-align:center">Durée moyenne de séjour (en jour)</div>
         <div style="font-size:42px;font-weight:900;color:var(--text);font-family:monospace;line-height:1">${fmt2(dms)}</div>
-        <div style="font-size:10px;color:var(--text2);margin-top:10px">${nbSejours} séjour${nbSejours>1?'s':''} · ${nuitsLouees} nuits</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:10px">${nbSejours} séjour${nbSejours>1?'s':''} · ${nuitsLouees} nuits</div>
       </div>
 
       <!-- RevPAR -->
       <div class="card" style="display:flex;flex-direction:column;justify-content:center;align-items:center;padding:18px 14px;margin-top:0!important;">
-        <div style="font-size:9px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--text2);margin-bottom:16px;text-align:center">Revenu par nuit disponible</div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--text2);margin-bottom:16px;text-align:center">Revenu par nuit disponible</div>
         <div style="font-size:42px;font-weight:900;color:var(--text);font-family:monospace;line-height:1">${fmt2(revpar)}&thinsp;€</div>
-        <div style="font-size:10px;color:var(--text2);margin-top:10px">CA&thinsp;${_fmtK(rev)} ÷ ${nuitsDisponibles} nuits dispo</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:10px">CA&thinsp;${_fmtK(rev)} ÷ ${nuitsDisponibles} nuits dispo</div>
       </div>
     </div>
 
@@ -640,7 +640,7 @@ function _renderKpiDetailTable(sortCol, sortDir) {
   });
   const _fmtV = v => Math.abs(v).toLocaleString('fr-FR', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' €';
   const _fmtN = v => (v >= 0 ? '+' : '') + v.toLocaleString('fr-FR', {minimumFractionDigits:2, maximumFractionDigits:2});
-  const thStyle = (col) => `padding:8px 14px;font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--text2);cursor:pointer;user-select:none;white-space:nowrap;`;
+  const thStyle = (col) => `padding:8px 14px;font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--text2);cursor:pointer;user-select:none;white-space:nowrap;`;
   const arrow = (col) => `<span class="kpi-sort-arrow" data-col="${col}" style="margin-left:4px;opacity:${sortCol===col?'1':'.3'}">${sortCol===col?(sortDir==='asc'?'↑':'↓'):'↕'}</span>`;
   const totalVal = rows.reduce((s, r) => s + r.val, 0);
   const totalNuit = window._kpiDetailNuits > 0 ? totalVal / window._kpiDetailNuits : 0;
@@ -795,11 +795,11 @@ function _renderKpiLLD() {
   const mBars = periods.map((p,i)=>{
     const h=Math.round((revByM[i]/maxM)*90);
     return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:56px">
-      <div style="font-size:8px;font-family:monospace;color:var(--gold)">+${Math.round(revByM[i]/1000*10)/10}k</div>
+      <div style="font-size:10px;font-family:monospace;color:var(--gold)">+${Math.round(revByM[i]/1000*10)/10}k</div>
       <div style="height:90px;display:flex;align-items:flex-end;width:100%;justify-content:center">
         <div style="width:65%;background:var(--gold);opacity:.8;border-radius:3px 3px 0 0;height:${Math.max(h,2)}px"></div>
       </div>
-      <div style="font-size:8px;color:var(--text2);text-align:center">${mLabels[i]}</div>
+      <div style="font-size:10px;color:var(--text2);text-align:center">${mLabels[i]}</div>
     </div>`;
   }).join('');
 
@@ -881,7 +881,7 @@ function renderPlateformes() {
       <div style="background:var(--bg3);border-radius:3px;height:4px;margin-bottom:16px;overflow:hidden">
         <div style="background:${color};height:100%;width:${Math.round(pct)}%;border-radius:3px;opacity:.85"></div>
       </div>
-      <div style="font-size:10px;font-weight:700;color:var(--text2);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px">Par bien</div>
+      <div style="font-size:11px;font-weight:700;color:var(--text2);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px">Par bien</div>
       ${bienRows || '<div style="color:var(--text2);font-size:11px">-</div>'}
     </div>`;
   }).join('');

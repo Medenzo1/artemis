@@ -300,13 +300,13 @@ tr.innerHTML = `
 <td style="width:24px"><span class="dot dot-airbnb"></span></td>
 <td style="max-width:260px">
   <div class="td-trunc" title="${r.full}" style="font-weight:500;font-size:12px">${r.libelle}</div>
-  <div style="font-size:10px;color:var(--text2);margin-top:1px">${_normDateStr(r.date).display}</div>
+  <div style="font-size:11px;color:var(--text2);margin-top:1px">${_normDateStr(r.date).display}</div>
 </td>
 <td class="td-${pos?'pos':'neg'}" style="text-align:right;font-family:monospace;white-space:nowrap;font-size:12px">${fmt(r.montant)}</td>
 <td colspan="3" style="padding:6px 10px">
   <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-    <span class="badge badge-airbnb" style="font-size:9px">✈ Airbnb</span>
-    <span style="font-size:10px;color:var(--text2)">${ventilSummary}</span>
+    <span class="badge badge-airbnb" style="font-size:11px">✈ Airbnb</span>
+    <span style="font-size:11px;color:var(--text2)">${ventilSummary}</span>
   </div>
 </td>`;
 } else {
@@ -314,10 +314,10 @@ tr.innerHTML = `
 <td style="width:24px"><span class="dot dot-err"></span></td>
 <td style="max-width:260px">
   <div class="td-trunc" title="${r.full}" style="font-weight:500;font-size:12px">${r.libelle}</div>
-  <div style="font-size:10px;color:var(--text2);margin-top:1px">${_normDateStr(r.date).display}</div>
+  <div style="font-size:11px;color:var(--text2);margin-top:1px">${_normDateStr(r.date).display}</div>
 </td>
 <td class="td-${pos?'pos':'neg'}" style="text-align:right;font-family:monospace;font-size:12px">${fmt(r.montant)}</td>
-<td colspan="3" style="padding:6px 10px"><span class="badge badge-blocked" style="font-size:9px">🚫 Export Airbnb requis</span></td>`;
+<td colspan="3" style="padding:6px 10px"><span class="badge badge-blocked" style="font-size:11px">🚫 Export Airbnb requis</span></td>`;
 }
 tbody.appendChild(tr);
 
@@ -336,13 +336,13 @@ tr.innerHTML = `
 <td style="width:24px"><span class="dot dot-booking"></span></td>
 <td style="max-width:260px">
   <div class="td-trunc" title="${r.full}" style="font-weight:500;font-size:12px">${r.libelle}</div>
-  <div style="font-size:10px;color:var(--text2);margin-top:1px">${_normDateStr(r.date).display}</div>
+  <div style="font-size:11px;color:var(--text2);margin-top:1px">${_normDateStr(r.date).display}</div>
 </td>
 <td class="td-${pos?'pos':'neg'}" style="text-align:right;font-family:monospace;white-space:nowrap;font-size:12px">${fmt(r.montant)}</td>
 <td colspan="3" style="padding:6px 10px">
   <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-    <span class="badge badge-booking" style="font-size:9px">🏨 Booking</span>
-    <span style="font-size:10px;color:var(--text2)">${v.bienName}</span>
+    <span class="badge badge-booking" style="font-size:11px">🏨 Booking</span>
+    <span style="font-size:11px;color:var(--text2)">${v.bienName}</span>
   </div>
 </td>`;
 } else {
@@ -353,10 +353,10 @@ tr.innerHTML = `
 <td style="width:24px"><span class="dot dot-err"></span></td>
 <td style="max-width:260px">
   <div class="td-trunc" title="${r.full}" style="font-weight:500;font-size:12px">${r.libelle}</div>
-  <div style="font-size:10px;color:var(--text2);margin-top:1px">${_normDateStr(r.date).display}</div>
+  <div style="font-size:11px;color:var(--text2);margin-top:1px">${_normDateStr(r.date).display}</div>
 </td>
 <td class="td-${pos?'pos':'neg'}" style="text-align:right;font-family:monospace;font-size:12px">${fmt(r.montant)}</td>
-<td colspan="3" style="padding:6px 10px"><span class="badge badge-blocked" style="font-size:9px">${reason}</span></td>`;
+<td colspan="3" style="padding:6px 10px"><span class="badge badge-blocked" style="font-size:11px">${reason}</span></td>`;
 }
 tbody.appendChild(tr);
 
@@ -377,13 +377,13 @@ tr.innerHTML = `
 <td style="width:24px"><span class="dot dot-loan"></span></td>
 <td style="max-width:260px">
   <div class="td-trunc" title="${r.full}" style="font-weight:500;font-size:12px">${r.libelle}</div>
-  <div style="font-size:10px;color:var(--text2);margin-top:1px">${_normDateStr(r.date).display}</div>
+  <div style="font-size:11px;color:var(--text2);margin-top:1px">${_normDateStr(r.date).display}</div>
 </td>
 <td class="td-neg" style="text-align:right;font-family:monospace;white-space:nowrap;font-size:12px">${fmt(r.montant)}</td>
 <td colspan="3" style="padding:6px 10px">
   <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-    <span class="badge badge-loan" style="font-size:9px">🏦 Emprunt</span>
-    <span style="font-size:10px;color:var(--text2)">Cap. ${fmt(totalCap)} · Int. ${fmt(totalInt)}</span>
+    <span class="badge badge-loan" style="font-size:11px">🏦 Emprunt</span>
+    <span style="font-size:11px;color:var(--text2)">Cap. ${fmt(totalCap)} · Int. ${fmt(totalInt)}</span>
   </div>
 </td>`;
 } else {
@@ -392,21 +392,21 @@ tr.innerHTML = `
 <td style="width:24px"><span class="dot dot-err"></span></td>
 <td style="max-width:260px">
   <div class="td-trunc" title="${r.full}" style="font-weight:500;font-size:12px">${r.libelle}</div>
-  <div style="font-size:10px;color:var(--text2);margin-top:1px">${_normDateStr(r.date).display}</div>
+  <div style="font-size:11px;color:var(--text2);margin-top:1px">${_normDateStr(r.date).display}</div>
 </td>
 <td class="td-neg" style="text-align:right;font-family:monospace;font-size:12px">${fmt(r.montant)}</td>
-<td colspan="3" style="padding:6px 10px"><span class="badge badge-blocked" style="font-size:9px">${reason}</span></td>`;}
+<td colspan="3" style="padding:6px 10px"><span class="badge badge-blocked" style="font-size:11px">${reason}</span></td>`;}
 tbody.appendChild(tr);
 
 if(resolved) {
 const trDetail = document.createElement('tr');
 trDetail.className = 'row-expanded';
 const subRows = s.lines.flatMap(l => [
-`<tr><td style="padding-left:32px" class="sub-bien">↳ ${l.bienName} · Capital</td><td class="td-muted">${l.sci}</td><td class="td-muted">${l.lot}</td><td class="td-muted" style="font-size:10px">${(l.pct*100).toFixed(0)}%</td><td class="sub-amt" style="color:var(--red)">${fmt(l.capital)}</td></tr>`,
-`<tr><td style="padding-left:32px;opacity:.7" class="sub-bien">↳ ${l.bienName} · Intérêts</td><td class="td-muted" style="opacity:.7">${l.sci}</td><td class="td-muted" style="opacity:.7">${l.lot}</td><td class="td-muted" style="font-size:10px;opacity:.7">${(l.pct*100).toFixed(0)}%</td><td class="sub-amt" style="color:var(--red);opacity:.8">${fmt(l.interets)}</td></tr>`
+`<tr><td style="padding-left:32px" class="sub-bien">↳ ${l.bienName} · Capital</td><td class="td-muted">${l.sci}</td><td class="td-muted">${l.lot}</td><td class="td-muted" style="font-size:11px">${(l.pct*100).toFixed(0)}%</td><td class="sub-amt" style="color:var(--red)">${fmt(l.capital)}</td></tr>`,
+`<tr><td style="padding-left:32px;opacity:.7" class="sub-bien">↳ ${l.bienName} · Intérêts</td><td class="td-muted" style="opacity:.7">${l.sci}</td><td class="td-muted" style="opacity:.7">${l.lot}</td><td class="td-muted" style="font-size:11px;opacity:.7">${(l.pct*100).toFixed(0)}%</td><td class="sub-amt" style="color:var(--red);opacity:.8">${fmt(l.interets)}</td></tr>`
 ]).join('');
 
-trDetail.innerHTML = `<td colspan="9"><div class="airbnb-panel" style="border-top-color:rgba(34,201,122,.15);background:rgba(34,201,122,.03)"><div style="width:100%"><table class="airbnb-sub-table" style="width:100%"><thead><tr><th style="padding-left:32px;color:var(--green)">Bien · Nature</th><th>SCI</th><th>Lot</th><th>%</th><th style="text-align:right;color:var(--red)">Montant</th></tr></thead><tbody>${subRows}</tbody><tfoot><tr style="border-top:1px solid var(--border2)"><td colspan="3" style="padding-left:32px;font-size:10px;color:var(--text2)">Total échéance</td><td></td><td style="text-align:right;font-size:12px;font-weight:700;color:var(--red)">${fmt(r.montant)}</td></tr></tfoot></table></div></div></td>`;
+trDetail.innerHTML = `<td colspan="9"><div class="airbnb-panel" style="border-top-color:rgba(34,201,122,.15);background:rgba(34,201,122,.03)"><div style="width:100%"><table class="airbnb-sub-table" style="width:100%"><thead><tr><th style="padding-left:32px;color:var(--green)">Bien · Nature</th><th>SCI</th><th>Lot</th><th>%</th><th style="text-align:right;color:var(--red)">Montant</th></tr></thead><tbody>${subRows}</tbody><tfoot><tr style="border-top:1px solid var(--border2)"><td colspan="3" style="padding-left:32px;font-size:11px;color:var(--text2)">Total échéance</td><td></td><td style="text-align:right;font-size:12px;font-weight:700;color:var(--red)">${fmt(r.montant)}</td></tr></tfoot></table></div></div></td>`;
 tbody.appendChild(trDetail);
 }
 
@@ -426,15 +426,15 @@ const prefBien = r._bien || '';
 const prefLot  = r._lot  || '';
 
 const confBadge = r._conf ? {
-  high:   '<span style="font-size:9px;font-weight:700;color:#22c97a;background:rgba(34,201,122,.1);border:1px solid rgba(34,201,122,.25);border-radius:4px;padding:1px 5px;margin-left:4px">' + (r._fromHistory ? '📚 Historique' : '🟢 Sûr') + '</span>',
-  medium: '<span style="font-size:9px;font-weight:700;color:var(--gold);background:rgba(245,183,49,.1);border:1px solid rgba(245,183,49,.25);border-radius:4px;padding:1px 5px;margin-left:4px">🟡 À vérifier</span>',
-  low:    '<span style="font-size:9px;font-weight:700;color:var(--red);background:rgba(240,86,106,.1);border:1px solid rgba(240,86,106,.25);border-radius:4px;padding:1px 5px;margin-left:4px">🔴 Incertain</span>',
+  high:   '<span style="font-size:11px;font-weight:700;color:#22c97a;background:rgba(34,201,122,.1);border:1px solid rgba(34,201,122,.25);border-radius:4px;padding:1px 5px;margin-left:4px">' + (r._fromHistory ? '📚 Historique' : '🟢 Sûr') + '</span>',
+  medium: '<span style="font-size:11px;font-weight:700;color:var(--gold);background:rgba(245,183,49,.1);border:1px solid rgba(245,183,49,.25);border-radius:4px;padding:1px 5px;margin-left:4px">🟡 À vérifier</span>',
+  low:    '<span style="font-size:11px;font-weight:700;color:var(--red);background:rgba(240,86,106,.1);border:1px solid rgba(240,86,106,.25);border-radius:4px;padding:1px 5px;margin-left:4px">🔴 Incertain</span>',
 }[r._conf] || '' : '';
 tr.innerHTML = `
 <td style="width:24px"><span class="dot dot-pending" id="dot-${i}"></span></td>
 <td style="max-width:220px">
   <div class="td-trunc" title="${r.full}" style="font-weight:500">${r.libelle}</div>
-  <div style="font-size:10px;color:var(--text2);margin-top:2px">${_normDateStr(r.date).display} ${confBadge}</div>
+  <div style="font-size:11px;color:var(--text2);margin-top:2px">${_normDateStr(r.date).display} ${confBadge}</div>
 </td>
 <td class="td-${pos?'pos':'neg'}" style="text-align:right;font-family:monospace;white-space:nowrap">${fmt(r.montant)}</td>
 <td><select class="sel" id="cat-${i}" onchange="onCat(${i})" style="min-width:150px"><option value="">- Catégorie -</option>
@@ -447,7 +447,7 @@ ${CATS.map(c=>`<option value="${c}" ${c===prefCat?'selected':''}>${c}</option>`)
   <select class="sel" id="sci-${i}" onchange="onRow(${i})" style="display:none" aria-hidden="true">
   ${SCIS.map(s=>`<option value="${s}" ${s===prefSci?'selected':''}>${s}</option>`).join('')}
   </select>
-  <div id="sci-label-${i}" style="font-size:9px;color:var(--text2);margin-top:3px;letter-spacing:.04em">${prefSci||''}</div>
+  <div id="sci-label-${i}" style="font-size:11px;color:var(--text2);margin-top:3px;letter-spacing:.04em">${prefSci||''}</div>
 </td>
 <td><select class="sel" id="lot-${i}" onchange="onRow(${i})" style="min-width:120px"><option value="">- Lot -</option>
 ${LOTS.map(l=>`<option value="${l}" ${l===prefLot?'selected':''}>${l}</option>`).join('')}
@@ -541,7 +541,7 @@ const isLLD = b?.type === 'LLD';
 return `<span class="badge ${isLLD?'badge-ventil':'badge-direct'}" style="margin-bottom:2px">${name} ${(p*100).toFixed(0)}%</span>`;
 }).join(' ');
 } else {
-ap.innerHTML = `<span style="font-size:10px;color:var(--red)">Règle manquante</span>`;
+ap.innerHTML = `<span style="font-size:11px;color:var(--red)">Règle manquante</span>`;
 }
 } else {
 const b = BIENS.find(x => x.nom === bien);
@@ -555,8 +555,8 @@ function toggleCompleted() {
   const btn = document.getElementById('btnToggleCompleted');
   if (btn) {
     btn.innerHTML = showCompleted
-      ? '✅ <span style="font-size:10px">Masquer traitées (<span id=\"completedCount\">' + document.getElementById('completedCount').textContent + '</span>)</span>'
-      : '👁 <span style="font-size:10px">Voir traitées (<span id=\"completedCount\">' + document.getElementById('completedCount').textContent + '</span>)</span>';
+      ? '✅ <span style="font-size:11px">Masquer traitées (<span id=\"completedCount\">' + document.getElementById('completedCount').textContent + '</span>)</span>'
+      : '👁 <span style="font-size:11px">Voir traitées (<span id=\"completedCount\">' + document.getElementById('completedCount').textContent + '</span>)</span>';
     btn.style.background = showCompleted ? 'rgba(34,201,122,.15)' : '';
     btn.style.borderColor = showCompleted ? 'rgba(34,201,122,.6)' : 'rgba(34,201,122,.3)';
   }
@@ -1295,10 +1295,10 @@ function renderRecentActivity() {
       <div style="display:flex;align-items:center;justify-content:space-between">
         <div>
           <div style="font-size:13px;font-weight:700;color:var(--text)">${p.monthName} ${p.year}</div>
-          <div style="font-size:10px;color:var(--text2);margin-top:1px">${p.linesCount} ligne${p.linesCount>1?'s':''}</div>
+          <div style="font-size:11px;color:var(--text2);margin-top:1px">${p.linesCount} ligne${p.linesCount>1?'s':''}</div>
         </div>
         <span style="
-          font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+          font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
           padding:3px 9px;border-radius:20px;
           background:${complete?'rgba(34,201,122,.1)':'rgba(245,183,49,.1)'};
           border:1px solid ${complete?'rgba(34,201,122,.3)':'rgba(245,183,49,.3)'};
@@ -1309,22 +1309,22 @@ function renderRecentActivity() {
       <!-- Figures -->
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px">
         <div style="background:var(--bg3);border-radius:7px;padding:8px 6px;min-width:0">
-          <div style="font-size:9px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Revenus</div>
+          <div style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Revenus</div>
           <div style="font-size:10.5px;font-weight:700;color:var(--green);font-family:monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">+${Math.round(rev).toLocaleString('fr-FR')} €</div>
         </div>
         <div style="background:var(--bg3);border-radius:7px;padding:8px 6px;min-width:0">
-          <div style="font-size:9px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Charges</div>
+          <div style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Charges</div>
           <div style="font-size:10.5px;font-weight:700;color:var(--red);font-family:monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${Math.round(chg).toLocaleString('fr-FR')} €</div>
         </div>
         <div style="background:var(--bg3);border-radius:7px;padding:8px 6px;min-width:0">
-          <div style="font-size:9px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Net</div>
+          <div style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Net</div>
           <div style="font-size:10.5px;font-weight:700;color:${netPos?'var(--green)':'var(--red)'};font-family:monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${netPos?'+':''}${Math.round(net).toLocaleString('fr-FR')} €</div>
         </div>
       </div>
 
       <!-- Progress bar -->
       <div>
-        <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--text2);margin-bottom:4px">
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text2);margin-bottom:4px">
           <span>Mapping</span>
           <span>${mapped}/${p.linesCount}</span>
         </div>
@@ -1335,7 +1335,7 @@ function renderRecentActivity() {
       <!-- Consult button -->
       <div style="margin-top:10px;display:flex;justify-content:flex-end" onclick="event.stopPropagation()">
         <button onclick="consultPeriod('${p.period}')"
-          style="background:rgba(34,211,200,.07);border:1px solid rgba(34,211,200,.2);color:var(--cyan);font-size:10px;font-weight:700;letter-spacing:.05em;padding:5px 12px;border-radius:6px;cursor:pointer;font-family:inherit;transition:all .15s"
+          style="background:rgba(34,211,200,.07);border:1px solid rgba(34,211,200,.2);color:var(--cyan);font-size:11px;font-weight:700;letter-spacing:.05em;padding:5px 12px;border-radius:6px;cursor:pointer;font-family:inherit;transition:all .15s"
           onmouseover="this.style.background='rgba(34,211,200,.15)'"
           onmouseout="this.style.background='rgba(34,211,200,.07)'"
         >👁 Consulter</button>
@@ -1345,11 +1345,11 @@ function renderRecentActivity() {
 
   el.innerHTML = `
     <div style="margin-bottom:14px;display:flex;align-items:center;justify-content:space-between">
-      <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text2);display:flex;align-items:center;gap:8px">
+      <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text2);display:flex;align-items:center;gap:8px">
         <span style="display:block;width:3px;height:13px;background:var(--cyan);border-radius:2px"></span>
         Activité récente
       </div>
-      <span style="font-size:10px;color:var(--text3)">${periods.length} période${periods.length>1?'s':''} · cliquer pour reprendre</span>
+      <span style="font-size:11px;color:var(--text3)">${periods.length} période${periods.length>1?'s':''} · cliquer pour reprendre</span>
     </div>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px">
       ${cards.join('')}
@@ -1388,12 +1388,12 @@ function consultPeriod(periodKey) {
     const cls = amt >= 0 ? 'color:var(--green)' : 'color:var(--red)';
     const schema = SCHEMA[l.cat||''] || {};
     return `<tr>
-      <td style="color:var(--text2);font-size:10px">${l.date||''}</td>
+      <td style="color:var(--text2);font-size:11px">${l.date||''}</td>
       <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px" title="${(l.full||l.libelle||'').replace(/"/g,'')}">${l.full||l.libelle||'-'}</td>
-      <td><span style="background:rgba(34,211,200,.08);border:1px solid rgba(34,211,200,.15);color:var(--cyan);font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px">${l.cat||'-'}</span></td>
-      <td style="font-size:10px;color:var(--text2)">${schema.n2||''}</td>
+      <td><span style="background:rgba(34,211,200,.08);border:1px solid rgba(34,211,200,.15);color:var(--cyan);font-size:11px;font-weight:700;padding:2px 6px;border-radius:4px">${l.cat||'-'}</span></td>
+      <td style="font-size:11px;color:var(--text2)">${schema.n2||''}</td>
       <td style="text-align:right;font-family:monospace;font-weight:700;${cls}">${amt>=0?'+':''}${(()=>{const _v=amt;const _a=Math.abs(_v);const _i=Math.floor(_a);const _d=Math.round((_a-_i)*100).toString().padStart(2,'0');return ((_v<0?'-':'')+String(_i).replace(/\B(?=(\d{3})+(?!\d))/g,'\u202f')+','+_d+'\u202f€')})()} €</td>
-      <td style="font-size:10px;color:var(--text2)">${l.bienName||l.bien||'-'}</td>
+      <td style="font-size:11px;color:var(--text2)">${l.bienName||l.bien||'-'}</td>
     </tr>`;
   }).join('');
 
@@ -1415,12 +1415,12 @@ function consultPeriod(periodKey) {
     <div style="overflow-x:auto">
       <table style="width:100%;border-collapse:collapse;font-size:11px">
         <thead><tr style="background:var(--bg3);border-bottom:1px solid var(--border)">
-          <th style="padding:8px 10px;text-align:left;font-size:9px;font-weight:700;letter-spacing:.08em;color:var(--text2);white-space:nowrap">DATE</th>
-          <th style="padding:8px 10px;text-align:left;font-size:9px;font-weight:700;letter-spacing:.08em;color:var(--text2)">LIBELLÉ</th>
-          <th style="padding:8px 10px;text-align:left;font-size:9px;font-weight:700;letter-spacing:.08em;color:var(--text2)">CATÉGORIE</th>
-          <th style="padding:8px 10px;text-align:left;font-size:9px;font-weight:700;letter-spacing:.08em;color:var(--text2)">TYPE</th>
-          <th style="padding:8px 10px;text-align:right;font-size:9px;font-weight:700;letter-spacing:.08em;color:var(--text2)">MONTANT</th>
-          <th style="padding:8px 10px;text-align:left;font-size:9px;font-weight:700;letter-spacing:.08em;color:var(--text2)">BIEN</th>
+          <th style="padding:8px 10px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--text2);white-space:nowrap">DATE</th>
+          <th style="padding:8px 10px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--text2)">LIBELLÉ</th>
+          <th style="padding:8px 10px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--text2)">CATÉGORIE</th>
+          <th style="padding:8px 10px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--text2)">TYPE</th>
+          <th style="padding:8px 10px;text-align:right;font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--text2)">MONTANT</th>
+          <th style="padding:8px 10px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--text2)">BIEN</th>
         </tr></thead>
         <tbody>${rows}</tbody>
       </table>
@@ -1458,11 +1458,11 @@ function openDiagTreso() {
   // Construire le HTML
   const rowsHtml = rows.map(r => {
     const cls = r.montant >= 0 ? 'color:var(--green)' : 'color:var(--red)';
-    return `<tr style="border-bottom:1px solid var(--border);font-size:10px">
+    return `<tr style="border-bottom:1px solid var(--border);font-size:11px">
       <td style="padding:4px 6px;color:var(--text2);font-family:monospace;white-space:nowrap">${_normDateStr(r.date).display}</td>
       <td style="padding:4px 6px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.bien}</td>
       <td style="padding:4px 6px;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text2)">${r.cat}</td>
-      <td style="padding:4px 6px;color:var(--text2);white-space:nowrap;font-size:9px">${r.n2}</td>
+      <td style="padding:4px 6px;color:var(--text2);white-space:nowrap;font-size:11px">${r.n2}</td>
       <td style="padding:4px 6px;text-align:right;font-family:monospace;font-weight:600;${cls};white-space:nowrap">${r.montant>=0?'+':''}${r.montant.toFixed(2)} €</td>
     </tr>`;
   }).join('');
@@ -1473,7 +1473,7 @@ function openDiagTreso() {
         <div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
           <div>
             <div style="font-size:13px;font-weight:700">🔍 Diagnostic Trésorerie</div>
-            <div style="font-size:10px;color:var(--text2);margin-top:2px">${rows.length} lignes · Filtre bien : ${bienSel.length ? bienSel.join(', ') : 'Tous'}</div>
+            <div style="font-size:11px;color:var(--text2);margin-top:2px">${rows.length} lignes · Filtre bien : ${bienSel.length ? bienSel.join(', ') : 'Tous'}</div>
           </div>
           <div style="display:flex;align-items:center;gap:12px">
             <span style="font-size:13px;font-weight:700;color:${total>=0?'var(--cyan)':'var(--red)'}">${total>=0?'+':''}${total.toFixed(2)} €</span>
@@ -1483,7 +1483,7 @@ function openDiagTreso() {
         <div style="overflow-y:auto;flex:1">
           <table style="width:100%;border-collapse:collapse">
             <thead style="position:sticky;top:0;background:var(--bg3);z-index:1">
-              <tr style="font-size:9px;color:var(--text2);font-weight:700;letter-spacing:.07em;text-transform:uppercase">
+              <tr style="font-size:11px;color:var(--text2);font-weight:700;letter-spacing:.07em;text-transform:uppercase">
                 <th style="padding:6px 6px;text-align:left">Date</th>
                 <th style="padding:6px 6px;text-align:left">Bien</th>
                 <th style="padding:6px 6px;text-align:left">Catégorie</th>
@@ -1531,7 +1531,7 @@ document.getElementById('dbPeriodList').innerHTML = periods.map(p => {
 const rev = p.lines.filter(l => parseFloat(l.montant||0)>0).reduce((s,l)=>s+parseFloat(l.montant||0),0);
 const chg = p.lines.filter(l => parseFloat(l.montant||0)<0).reduce((s,l)=>s+parseFloat(l.montant||0),0);
 const net = rev + chg;
-return `<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border);gap:12px"><div style="display:flex;align-items:center;gap:12px"><div style="font-size:13px;font-weight:700;color:var(--cyan)">${p.period}</div><div style="font-size:13px;color:var(--text1)">${p.monthName} ${p.year}</div><div style="font-size:11px;color:var(--text2)">${p.linesCount} lignes</div></div><div style="display:flex;gap:16px;align-items:center"><span style="font-size:12px;color:var(--green)">+${fmt(rev)}</span><span style="font-size:12px;color:var(--red)">${fmt(chg)}</span><span style="font-size:13px;font-weight:700;color:${net>=0?'var(--green)':'var(--red)'}">${net>=0?'+':''}${fmt(net)}</span><button class="btn btn-outline" style="font-size:10px;padding:4px 10px;border-color:rgba(34,211,200,.2);color:var(--cyan)" onclick="consultPeriod('${p.period}')">👁 Consulter</button><button class="btn btn-outline" style="font-size:10px;padding:4px 10px;border-color:rgba(240,86,106,.3);color:#f0566a" onclick="deletePeriod('${p.period}')">✕</button><button class="btn btn-outline" style="font-size:10px;padding:4px 10px;border-color:rgba(0,229,255,.3);color:var(--cyan)" onclick="editPeriod('${p.period}')">✎ Éditer</button></div></div>`;
+return `<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border);gap:12px"><div style="display:flex;align-items:center;gap:12px"><div style="font-size:13px;font-weight:700;color:var(--cyan)">${p.period}</div><div style="font-size:13px;color:var(--text1)">${p.monthName} ${p.year}</div><div style="font-size:11px;color:var(--text2)">${p.linesCount} lignes</div></div><div style="display:flex;gap:16px;align-items:center"><span style="font-size:12px;color:var(--green)">+${fmt(rev)}</span><span style="font-size:12px;color:var(--red)">${fmt(chg)}</span><span style="font-size:13px;font-weight:700;color:${net>=0?'var(--green)':'var(--red)'}">${net>=0?'+':''}${fmt(net)}</span><button class="btn btn-outline" style="font-size:11px;padding:4px 10px;border-color:rgba(34,211,200,.2);color:var(--cyan)" onclick="consultPeriod('${p.period}')">👁 Consulter</button><button class="btn btn-outline" style="font-size:11px;padding:4px 10px;border-color:rgba(240,86,106,.3);color:#f0566a" onclick="deletePeriod('${p.period}')">✕</button><button class="btn btn-outline" style="font-size:11px;padding:4px 10px;border-color:rgba(0,229,255,.3);color:var(--cyan)" onclick="editPeriod('${p.period}')">✎ Éditer</button></div></div>`;
 }).join('');
 }
 
@@ -1618,23 +1618,23 @@ function openEditModal(periodKey) {
     const isCurrentFG = currentBien === 'Frais généraux' || currentBien === 'Frais generaux';
     const bienOpts = ['Frais generaux',...biens.map(b=>b.name)].map(b=>`<option value="${b}" ${(b==='Frais generaux' ? isCurrentFG : b===currentBien)?'selected':''}>${b}</option>`).join('');
     return `<tr id="erow-${i}" style="border-bottom:1px solid var(--border)">
-      <td style="padding:6px 8px;color:var(--text2);font-size:10px;white-space:nowrap">${l.date||''}</td>
+      <td style="padding:6px 8px;color:var(--text2);font-size:11px;white-space:nowrap">${l.date||''}</td>
       <td style="padding:6px 8px;font-size:11px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${(l.full||l.libelle||'').replace(/"/g,'')}">${l.full||l.libelle||'-'}</td>
       <td style="padding:6px 4px">
         <select data-idx="${i}" data-field="cat" onchange="_editLineChange(this,'${periodKey}')"
-          style="background:var(--bg3);border:1px solid var(--border2);color:var(--cyan);font-size:10px;padding:3px 4px;border-radius:4px;width:100%">
+          style="background:var(--bg3);border:1px solid var(--border2);color:var(--cyan);font-size:11px;padding:3px 4px;border-radius:4px;width:100%">
           <option value="">-</option>${catOpts}
         </select>
       </td>
       <td style="padding:6px 4px">
         <select data-idx="${i}" data-field="bien" onchange="_editLineChange(this,'${periodKey}')"
-          style="background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-size:10px;padding:3px 4px;border-radius:4px;width:100%">
+          style="background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-size:11px;padding:3px 4px;border-radius:4px;width:100%">
           <option value="">-</option>${bienOpts}
         </select>
       </td>
       <td style="padding:6px 4px">
         <select data-idx="${i}" data-field="lot" onchange="_editLineChange(this,'${periodKey}')"
-          style="background:var(--bg3);border:1px solid rgba(245,183,49,.3);color:var(--gold);font-size:10px;padding:3px 4px;border-radius:4px;width:100%">
+          style="background:var(--bg3);border:1px solid rgba(245,183,49,.3);color:var(--gold);font-size:11px;padding:3px 4px;border-radius:4px;width:100%">
           <option value="">-</option>${lotOptions(l.lot, getParams())}
         </select>
       </td>
@@ -1648,12 +1648,12 @@ function openEditModal(periodKey) {
   document.getElementById('editLineBody').innerHTML = `
     <table style="width:100%;border-collapse:collapse">
       <thead><tr style="background:var(--bg3);border-bottom:1px solid var(--border)">
-        <th style="padding:7px 8px;text-align:left;font-size:9px;font-weight:700;letter-spacing:.08em;color:var(--text2)">DATE</th>
-        <th style="padding:7px 8px;text-align:left;font-size:9px;font-weight:700;letter-spacing:.08em;color:var(--text2)">LIBELLÉ</th>
-        <th style="padding:7px 8px;text-align:left;font-size:9px;font-weight:700;letter-spacing:.08em;color:var(--text2)">CATÉGORIE</th>
-        <th style="padding:7px 8px;text-align:left;font-size:9px;font-weight:700;letter-spacing:.08em;color:var(--text2)">BIEN</th>
-        <th style="padding:7px 8px;text-align:left;font-size:9px;font-weight:700;letter-spacing:.08em;color:var(--gold)">LOT</th>
-        <th style="padding:7px 8px;text-align:right;font-size:9px;font-weight:700;letter-spacing:.08em;color:var(--text2)">MONTANT</th>
+        <th style="padding:7px 8px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--text2)">DATE</th>
+        <th style="padding:7px 8px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--text2)">LIBELLÉ</th>
+        <th style="padding:7px 8px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--text2)">CATÉGORIE</th>
+        <th style="padding:7px 8px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--text2)">BIEN</th>
+        <th style="padding:7px 8px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--gold)">LOT</th>
+        <th style="padding:7px 8px;text-align:right;font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--text2)">MONTANT</th>
       </tr></thead>
       <tbody>${rows}</tbody>
     </table>`;

@@ -58,13 +58,13 @@ function renderLcdTable(rows) {
   tbody.innerHTML = _currentLcd.map((a, i) => {
     const isPending = !!a._pending;
     const rowBg = isPending ? 'background:rgba(34,211,200,.05)' : (i % 2 === 0 ? '' : 'background:rgba(255,255,255,.015)');
-    const badge2 = isPending ? '<span style="font-size:9px;background:rgba(34,211,200,.12);border:1px solid rgba(34,211,200,.3);color:var(--cyan);border-radius:3px;padding:1px 5px;margin-left:5px">à compléter</span>' : '';
+    const badge2 = isPending ? '<span style="font-size:11px;background:rgba(34,211,200,.12);border:1px solid rgba(34,211,200,.3);color:var(--cyan);border-radius:3px;padding:1px 5px;margin-left:5px">à compléter</span>' : '';
     // Bien options
     const p = getParams();
     const bienOpts = p.biens.map(b => `<option value="${escHtml(b.name)}" ${b.name===a.bienName?'selected':''}>${escHtml(b.name)}</option>`).join('');
-    const selStyle = 'background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:10px;padding:3px 6px;font-family:inherit;width:100%';
+    const selStyle = 'background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:11px;padding:3px 6px;font-family:inherit;width:100%';
     return `<tr style="border-bottom:1px solid var(--border);${rowBg}">
-      <td style="padding:7px 10px;color:var(--text2);font-size:10px;font-family:monospace">${i+1}</td>
+      <td style="padding:7px 10px;color:var(--text2);font-size:11px;font-family:monospace">${i+1}</td>
       <td style="padding:7px 10px;max-width:160px"><input value="${escHtml(a.libelle||'')}" oninput="updateLcdField(${i},'libelle',this.value)" style="${inputStyle}">${badge2}</td>
       <td style="padding:7px 10px"><select onchange="updateLcdField(${i},'bienName',this.value)" style="${selStyle}"><option value="">—</option>${bienOpts}</select></td>
       <td style="padding:7px 10px;text-align:right"><input type="number" min="0" step="0.01" value="${a.montant||0}" oninput="updateLcdField(${i},'montant',parseFloat(this.value)||0)" style="${inputStyle};width:80px;text-align:right;font-family:monospace;color:var(--green)"></td>
@@ -74,7 +74,7 @@ function renderLcdTable(rows) {
       <td style="padding:7px 10px;text-align:right;font-family:monospace;font-size:12px;font-weight:700;color:var(--cyan)" id="lcd-nuits-${i}">${a.nuits||'—'}</td>
       <td style="padding:7px 10px"><input value="${escHtml(a.locataire||'')}" placeholder="Nom" oninput="updateLcdField(${i},'locataire',this.value)" style="${inputStyle};width:110px"></td>
       <td style="padding:7px 10px"><input value="${escHtml(a.contact||'')}" placeholder="Tel / email" oninput="updateLcdField(${i},'contact',this.value)" style="${inputStyle};width:120px"></td>
-      <td style="padding:7px 6px;text-align:center"><button onclick="deleteLcdRow(${i})" style="background:rgba(220,50,50,.12);border:1px solid rgba(220,50,50,.3);cursor:pointer;color:var(--red);font-size:10px;font-weight:600;padding:3px 8px;border-radius:5px;font-family:inherit;white-space:nowrap" onmouseover="this.style.background='rgba(220,50,50,.25)'" onmouseout="this.style.background='rgba(220,50,50,.12)'">Supprimer</button></td>
+      <td style="padding:7px 6px;text-align:center"><button onclick="deleteLcdRow(${i})" style="background:rgba(220,50,50,.12);border:1px solid rgba(220,50,50,.3);cursor:pointer;color:var(--red);font-size:11px;font-weight:600;padding:3px 8px;border-radius:5px;font-family:inherit;white-space:nowrap" onmouseover="this.style.background='rgba(220,50,50,.25)'" onmouseout="this.style.background='rgba(220,50,50,.12)'">Supprimer</button></td>
     </tr>`;
   }).join('');
 
@@ -323,7 +323,7 @@ function _render(){
   if(_view==='days'){
     // Jours de semaine
     h+=`<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;margin-bottom:3px">`;
-    JOURS.forEach(j=>{h+=`<div style="text-align:center;font-size:9px;font-weight:700;color:var(--text2);padding:2px 0">${j}</div>`;});
+    JOURS.forEach(j=>{h+=`<div style="text-align:center;font-size:11px;font-weight:700;color:var(--text2);padding:2px 0">${j}</div>`;});
     h+=`</div><div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px">`;
 
     const first=new Date(_vy,_vm,1);
@@ -401,7 +401,7 @@ function patchInput(input){
   lbl.textContent=_fmtDisp(input.value);
   const ico=document.createElement('span');
   ico.textContent='▼';
-  ico.style.cssText='font-size:8px;opacity:.5';
+  ico.style.cssText='font-size:10px;opacity:.5';
   btn.appendChild(lbl);
   btn.appendChild(ico);
   wrap.insertBefore(btn,input);

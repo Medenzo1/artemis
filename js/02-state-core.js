@@ -57,12 +57,12 @@ function _renderHomeMedia() {
   grid.innerHTML = HOME_MEDIA.map(n => {
     return `<div class="news-card" onclick="window.open('${n.url}','_blank')" title="Lire l'article">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
-        <span class="news-tag" style="background:${n.color}18;color:${n.color};border:1px solid ${n.color}30;border-radius:5px;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px">${n.tag}</span>
-        <span style="font-size:10px;color:#2a3a50;transition:color .2s" onmouseover="this.style.color='#22d3c8'" onmouseout="this.style.color='#2a3a50'">↗ Lire</span>
+        <span class="news-tag" style="background:${n.color}18;color:${n.color};border:1px solid ${n.color}30;border-radius:5px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px">${n.tag}</span>
+        <span style="font-size:11px;color:#2a3a50;transition:color .2s" onmouseover="this.style.color='#22d3c8'" onmouseout="this.style.color='#2a3a50'">↗ Lire</span>
       </div>
       <div class="news-title" style="font-size:13px;font-weight:600;color:#eaf0ff;line-height:1.45;margin:6px 0 4px">${n.title}</div>
       <div class="news-summary" style="font-size:11px;color:rgba(200,216,240,.45);line-height:1.6;flex:1">${n.summary}</div>
-      ${n.date ? `<div style="font-size:10px;color:#2a3a50;margin-top:6px;padding-top:8px;border-top:1px solid rgba(255,255,255,.05)">${n.date}</div>` : ''}
+      ${n.date ? `<div style="font-size:11px;color:#2a3a50;margin-top:6px;padding-top:8px;border-top:1px solid rgba(255,255,255,.05)">${n.date}</div>` : ''}
     </div>`;
   }).join('');
 }

@@ -220,7 +220,7 @@ function simRenderResults() {
 
     '<div class="sim-card" style="padding:0;overflow-x:auto">' +
       '<table style="width:100%;border-collapse:collapse;font-size:12.5px;white-space:nowrap">' +
-        '<thead><tr style="border-bottom:1px solid rgba(255,255,255,.08);color:var(--text2);text-transform:uppercase;font-size:10px;letter-spacing:.05em">' +
+        '<thead><tr style="border-bottom:1px solid rgba(255,255,255,.08);color:var(--text2);text-transform:uppercase;font-size:11px;letter-spacing:.05em">' +
           '<th style="padding:12px;text-align:left">Régime</th>' +
           '<th style="padding:12px;text-align:right">Cash-flow net-net cumulé</th>' +
           '<th style="padding:12px;text-align:center">Trajectoire</th>' +
@@ -278,19 +278,19 @@ function simRenderRegimeDetail(r) {
 
     '<div class="sim-card" style="margin-bottom:18px">' +
       '<div style="font-size:12px;font-weight:700;color:#eaf0ff;margin-bottom:6px">Trajectoire du cash-flow cumulé</div>' +
-      '<div style="font-size:10px;color:var(--text2);margin-bottom:10px">Survole le graphique pour voir le détail année par année</div>' +
+      '<div style="font-size:11px;color:var(--text2);margin-bottom:10px">Survole le graphique pour voir le détail année par année</div>' +
       simAreaChartWithHover(cumulPoints, { color: '#34d399', fmt: simFmtEUR }) +
     '</div>' +
 
     '<div class="sim-card" style="margin-bottom:18px">' +
       '<div style="font-size:12px;font-weight:700;color:#eaf0ff;margin-bottom:6px">Cash-flow annuel</div>' +
-      '<div style="font-size:10px;color:var(--text2);margin-bottom:10px">Produits − charges − capital emprunt − impôt (+ cession l\'année de revente)</div>' +
+      '<div style="font-size:11px;color:var(--text2);margin-bottom:10px">Produits − charges − capital emprunt − impôt (+ cession l\'année de revente)</div>' +
       simAreaChartWithHover(annuelPoints, { color: '#9b6ef3', fmt: simFmtEUR }) +
     '</div>' +
 
     '<div class="sim-card" style="padding:0;overflow-x:auto">' +
       '<table style="width:100%;border-collapse:collapse;font-size:12px;white-space:nowrap">' +
-        '<thead><tr style="border-bottom:1px solid rgba(255,255,255,.08);color:var(--text2);text-transform:uppercase;font-size:10px;letter-spacing:.05em">' +
+        '<thead><tr style="border-bottom:1px solid rgba(255,255,255,.08);color:var(--text2);text-transform:uppercase;font-size:11px;letter-spacing:.05em">' +
           '<th style="padding:10px">Année</th><th style="padding:10px;text-align:right">Produits</th>' +
           '<th style="padding:10px;text-align:right">Charges décaissées</th><th style="padding:10px;text-align:right">Capital emprunt</th>' +
           '<th style="padding:10px;text-align:right">Impôt</th><th style="padding:10px;text-align:right">Cession</th>' +
@@ -301,5 +301,5 @@ function simRenderRegimeDetail(r) {
 }
 
 function simDetailKpi(label, value) {
-  return '<div class="sim-card"><div style="font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);margin-bottom:6px">' + label + '</div><div style="font-size:18px;font-weight:700;color:#eaf0ff">' + value + '</div></div>';
+  return '<div class="sim-card"><div style="font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);margin-bottom:6px">' + label + '</div><div style="font-size:18px;font-weight:700;color:#eaf0ff">' + value + '</div></div>';
 }

@@ -291,7 +291,7 @@ function simRenderForm() {
 // ── Panneau "Aperçu du projet" — synthèse visuelle mise à jour en direct ──
 function simApercuBar(label, pct, color) {
   return '<div style="margin-bottom:10px">' +
-    '<div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text2);margin-bottom:4px"><span>' + label + '</span><span style="font-weight:700;color:' + color + '">' + Math.round(pct) + ' %</span></div>' +
+    '<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text2);margin-bottom:4px"><span>' + label + '</span><span style="font-weight:700;color:' + color + '">' + Math.round(pct) + ' %</span></div>' +
     '<div style="height:6px;border-radius:4px;background:rgba(255,255,255,.06);overflow:hidden"><div style="height:100%;width:' + Math.max(0, Math.min(100, pct)) + '%;background:' + color + ';border-radius:4px"></div></div>' +
     '</div>';
 }
@@ -328,10 +328,10 @@ function simRefreshApercu(inputs) {
 
   el.innerHTML =
     '<div class="sim-card" style="position:sticky;top:16px">' +
-      '<div style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--text2);font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:6px">' + icon('gauge',{size:13}) + ' Aperçu du projet</div>' +
+      '<div style="font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--text2);font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:6px">' + icon('gauge',{size:13}) + ' Aperçu du projet</div>' +
 
       '<div style="margin-bottom:18px">' +
-        '<div style="font-size:10px;color:var(--text2);margin-bottom:2px">Coût total du projet</div>' +
+        '<div style="font-size:11px;color:var(--text2);margin-bottom:2px">Coût total du projet</div>' +
         '<div style="font-size:26px;font-weight:800;color:#eaf0ff;font-family:monospace;letter-spacing:-.02em">' + simFmtEURCompact(coutTotal) + '</div>' +
       '</div>' +
 
@@ -344,23 +344,23 @@ function simRefreshApercu(inputs) {
 
       '<div class="grid2" style="gap:10px;margin-bottom:4px">' +
         '<div style="background:rgba(255,255,255,.03);border-radius:10px;padding:10px 12px">' +
-          '<div style="font-size:9px;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Loyer / mois</div>' +
+          '<div style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Loyer / mois</div>' +
           '<div style="font-size:15px;font-weight:700;color:#eaf0ff;font-family:monospace">' + simFmtEURCompact(loyerMensuel) + '</div>' +
         '</div>' +
         '<div style="background:rgba(255,255,255,.03);border-radius:10px;padding:10px 12px">' +
-          '<div style="font-size:9px;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Mensualité ~</div>' +
+          '<div style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Mensualité ~</div>' +
           '<div style="font-size:15px;font-weight:700;color:#eaf0ff;font-family:monospace">' + simFmtEURCompact(mensualite) + '</div>' +
         '</div>' +
       '</div>' +
 
       '<div style="background:' + cfColor + '14;border:1px solid ' + cfColor + '35;border-radius:10px;padding:12px;margin-top:10px">' +
-        '<div style="font-size:9px;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Cash-flow brut estimé / mois</div>' +
+        '<div style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Cash-flow brut estimé / mois</div>' +
         '<div style="font-size:19px;font-weight:800;color:' + cfColor + ';font-family:monospace">' + (cashFlowBrutMensuel >= 0 ? '+' : '') + simFmtEURCompact(cashFlowBrutMensuel) + '</div>' +
-        '<div style="font-size:9px;color:var(--text2);margin-top:3px">Avant charges, impôts et régime fiscal</div>' +
+        '<div style="font-size:11px;color:var(--text2);margin-top:3px">Avant charges, impôts et régime fiscal</div>' +
       '</div>' +
 
       '<div style="margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,.06)">' +
-        '<div style="font-size:9px;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Progression de la saisie</div>' +
+        '<div style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Progression de la saisie</div>' +
         '<div style="display:flex;gap:4px">' + [0,1,2,3,4].map(function(k){ return '<div style="flex:1;height:4px;border-radius:2px;background:' + (k < sectionsRemplies ? '#34d399' : 'rgba(255,255,255,.08)') + '"></div>'; }).join('') + '</div>' +
       '</div>' +
     '</div>';
@@ -423,8 +423,8 @@ function simOpenScenarios() {
         '<div style="font-weight:700;color:#eaf0ff;margin-bottom:6px">' + s.name + '</div>' +
         '<div style="font-size:11px;color:var(--text2);margin-bottom:12px">' + new Date(s.createdAt).toLocaleDateString('fr-FR') + ' · ' + (s.inputs.prixBien||0).toLocaleString('fr-FR') + ' €</div>' +
         '<div style="display:flex;gap:8px">' +
-          '<button class="btn btn-outline" style="flex:1;font-size:10px;padding:7px 10px" onclick="simLoadScenario(\'' + s.id + '\')">Charger</button>' +
-          '<button class="btn btn-red" style="font-size:10px;padding:7px 10px" onclick="simDeleteScenario(\'' + s.id + '\')">' + icon('trash-2',{size:12}) + '</button>' +
+          '<button class="btn btn-outline" style="flex:1;font-size:11px;padding:7px 10px" onclick="simLoadScenario(\'' + s.id + '\')">Charger</button>' +
+          '<button class="btn btn-red" style="font-size:11px;padding:7px 10px" onclick="simDeleteScenario(\'' + s.id + '\')">' + icon('trash-2',{size:12}) + '</button>' +
         '</div></div>';
     }).join('') +
     '</div>';
