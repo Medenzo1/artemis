@@ -153,10 +153,8 @@ function _startHomeCanvas() {
     H = cv.height = innerHeight;
     pts  = Array.from({length: 160}, mkPt);
     orbs = [
-      { x: W * .75, y: H * .12, r: Math.min(W,H) * .30, c: '34,211,200' },
-      { x: W * .15, y: H * .75, r: Math.min(W,H) * .26, c: '155,110,243' },
-      { x: W * .90, y: H * .75, r: Math.min(W,H) * .22, c: '244,114,182' },
-      { x: W * .05, y: H * .15, r: Math.min(W,H) * .18, c: '245,183,49' },
+      { x: W * .78, y: H * .10, r: Math.min(W,H) * .24, c: '34,211,200' },
+      { x: W * .16, y: H * .80, r: Math.min(W,H) * .20, c: '155,110,243' },
     ];
   }
 
@@ -192,8 +190,8 @@ function _startHomeCanvas() {
       const radius = o.r * pulse;
       if (!radius || radius <= 0) return;
       const g = cx.createRadialGradient(o.x, o.y, 0, o.x, o.y, radius);
-      g.addColorStop(0,   `rgba(${o.c},.38)`);
-      g.addColorStop(.4,  `rgba(${o.c},.14)`);
+      g.addColorStop(0,   `rgba(${o.c},.22)`);
+      g.addColorStop(.4,  `rgba(${o.c},.08)`);
       g.addColorStop(1,   `rgba(${o.c},0)`);
       cx.fillStyle = g;
       cx.beginPath(); cx.arc(o.x, o.y, o.r * pulse, 0, 6.28); cx.fill();
