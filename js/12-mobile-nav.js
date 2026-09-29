@@ -91,23 +91,13 @@ document.addEventListener('click', function(e) {
   const sbItem = e.target.closest('.sb-item');
   if (!sbItem) return;
 
-  // Determine which section was clicked
-  const icon = sbItem.querySelector('.sb-icon');
-  if (!icon) return;
-  const iconText = icon.textContent.trim();
-
-  // Map icons to nav sections
-  const iconMap = {
-    '🏠': 'home',
-    '📥': 'tools',
-    '🗺️': 'tools',
-    '✅': 'tools',
-    '🗃️': 'tools',
-    '📊': 'dash',
-    '⚙️': 'params',
-    '🔧': 'params',
+  // Section déduite de l'identifiant de l'entrée (les icônes sont des SVG, plus des emojis)
+  const idMap = {
+    'nav-home': 'home',
+    'nav-import': 'tools', 'nav-mapping': 'tools', 'nav-validation': 'tools', 'nav-base': 'tools',
+    'nav-params': 'params', 'nav-loans': 'params', 'nav-lcd': 'params', 'nav-amort': 'params',
   };
-  const section = iconMap[iconText];
+  const section = idMap[sbItem.id];
   if (section) {
     document.querySelectorAll('.mn-item').forEach(el => el.classList.remove('active'));
     const activeEl = document.getElementById('mn-' + section);

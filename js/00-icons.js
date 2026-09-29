@@ -92,6 +92,14 @@ const ART_ICONS = {
   'wrench': '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z" />',
   'x': '<path d="M18 6 6 18" /><path d="m6 6 12 12" />',
   'zap': '<path d="M15.914 4a1.5 1.5 0 00-2.474-1.561l-9 9A1.5 1.5 0 005.5 14h4.002a.5.5 0 01.471.666L8.086 20a1.5 1.5 0 002.475 1.56l9-9A1.5 1.5 0 0018.5 10h-3.997a.5.5 0 01-.472-.667z" />',
+  'inbox': '<polyline points="22 12 16 12 14 15 10 15 8 12 2 12" /><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" />',
+  'menu': '<path d="M4 5h16" /><path d="M4 12h16" /><path d="M4 19h16" />',
+  'history': '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /><path d="M12 7v5l4 2" />',
+  'hourglass': '<path d="M5 22h14" /><path d="M5 2h14" /><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22" /><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2" />',
+  'siren': '<path d="M7 18v-6a5 5 0 1 1 10 0v6" /><path d="M5 21a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-1a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2z" /><path d="M21 12h1" /><path d="M18.5 4.5 18 5" /><path d="M2 12h1" /><path d="M12 2v1" /><path d="m4.929 4.929.707.707" /><path d="M12 12v6" />',
+  'map': '<path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z" /><path d="M15 5.764v15" /><path d="M9 3.236v15" />',
+  'message-square': '<path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z" />',
+  'user': '<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />',
 };
 
 function icon(name, opts) {
@@ -104,3 +112,91 @@ function icon(name, opts) {
   const extraStyle = opts.style ? ';' + opts.style : '';
   return '<svg' + cls + ' width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="' + sw + '" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0' + extraStyle + '">' + body + '</svg>';
 }
+
+// ════════════════════════════════════════════
+//  EMOJI → ICÔNES VECTORIELLES
+//  Tout emoji présent dans le DOM (HTML statique, rendus JS, toasts, badges…)
+//  est remplacé à l'affichage par l'icône Lucide correspondante, dimensionnée
+//  à 1em et colorée par currentColor : elle suit la taille et la couleur du
+//  texte qui l'entoure. Pour ajouter un emoji : une ligne dans EMOJI_ICONS.
+// ════════════════════════════════════════════
+const EMOJI_ICONS = {
+  '🏠':'home','🏡':'home','🏘':'building','🏨':'bed-double','🏦':'landmark','🏛':'landmark',
+  '⚙':'settings','🔧':'wrench','⏻':'power','☰':'menu',
+  '📊':'bar-chart-3','📈':'trending-up','📉':'trending-down','💹':'chart-no-axes-combined',
+  '💰':'wallet','💸':'banknote','💳':'credit-card','⚖':'scale','🥇':'trophy','⭐':'star',
+  '⚡':'zap','🎯':'target','✨':'sparkles','🚨':'siren',
+  '📥':'inbox','📭':'inbox','🗂':'folder-open','📂':'folder-open','📦':'package','🗃':'database',
+  '📋':'clipboard-list','📄':'file-text','📚':'history','📅':'calendar','⏳':'hourglass',
+  '💾':'save','⬇':'download','🗑':'trash-2','✎':'pencil','🔄':'refresh-cw','♻':'refresh-cw',
+  '👁':'eye','🔍':'search','🔎':'search','📍':'map-pin','🗺':'map',
+  '✈':'plane','☁':'cloud','💬':'message-square','👤':'user','📞':'phone','✉':'mail',
+  '✅':'check-circle','⚠':'alert-triangle','🚫':'ban','✓':'check','✕':'x'
+};
+// Couleur sémantique conservée pour les emojis qui en portaient une
+const EMOJI_TONE = { '✅':'ok', '⚠':'warn', '🚫':'err' };
+const EMOJI_DOTS = { '🟢':'var(--green)', '🟡':'var(--gold)', '🔴':'var(--red)' };
+
+const _EMOJI_RE = new RegExp('(' + Object.keys(EMOJI_ICONS).concat(Object.keys(EMOJI_DOTS))
+  .map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')\\uFE0F?', 'g');
+const _EMOJI_SKIP = { SCRIPT:1, STYLE:1, TEXTAREA:1, TITLE:1, NOSCRIPT:1, svg:1, SVG:1 };
+
+function _emojiSvg(ch) {
+  if (EMOJI_DOTS[ch]) {
+    const s = document.createElement('span');
+    s.className = 'art-emo-dot';
+    s.style.background = EMOJI_DOTS[ch];
+    return s;
+  }
+  const s = document.createElement('span');
+  s.className = 'art-emo' + (EMOJI_TONE[ch] ? ' art-emo--' + EMOJI_TONE[ch] : '');
+  s.setAttribute('aria-hidden', 'true');
+  s.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + ART_ICONS[EMOJI_ICONS[ch]] + '</svg>';
+  return s;
+}
+
+function _emojiTextNode(node) {
+  const text = node.nodeValue;
+  _EMOJI_RE.lastIndex = 0;
+  if (!_EMOJI_RE.test(text)) return;
+  const parent = node.parentNode;
+  if (!parent || _EMOJI_SKIP[parent.nodeName] || parent.closest && parent.closest('svg')) return;
+  // <option> ne peut contenir que du texte : on retire simplement l'emoji
+  if (parent.nodeName === 'OPTION') {
+    node.nodeValue = text.replace(_EMOJI_RE, '').replace(/^\s+/, '');
+    return;
+  }
+  const frag = document.createDocumentFragment();
+  let last = 0;
+  _EMOJI_RE.lastIndex = 0;
+  let m;
+  while ((m = _EMOJI_RE.exec(text))) {
+    if (m.index > last) frag.appendChild(document.createTextNode(text.slice(last, m.index)));
+    frag.appendChild(_emojiSvg(m[1]));
+    last = m.index + m[0].length;
+  }
+  if (last < text.length) frag.appendChild(document.createTextNode(text.slice(last)));
+  parent.replaceChild(frag, node);
+}
+
+function emojiToIcons(root) {
+  if (!root) return;
+  if (root.nodeType === 3) { _emojiTextNode(root); return; }
+  if (root.nodeType !== 1 || _EMOJI_SKIP[root.nodeName]) return;
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  while (walker.nextNode()) nodes.push(walker.currentNode);
+  nodes.forEach(_emojiTextNode);
+}
+
+(function () {
+  const obs = new MutationObserver(muts => {
+    for (const m of muts) {
+      if (m.type === 'characterData') _emojiTextNode(m.target);
+      else m.addedNodes.forEach(emojiToIcons);
+    }
+  });
+  // Démarré dès le <head> : les nœuds sont convertis au fil du parsing, avant le premier rendu
+  obs.observe(document.documentElement, { childList: true, subtree: true, characterData: true });
+  document.addEventListener('DOMContentLoaded', () => emojiToIcons(document.body));
+})();
