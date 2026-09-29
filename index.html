@@ -14,7 +14,7 @@
 <meta name="application-name" content="ARTEMIS">
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<link rel="stylesheet" href="css/styles.css?v=202609292229">
+<link rel="stylesheet" href="css/styles.css?v=202609292243">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 </head>
@@ -65,9 +65,9 @@
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
-<script src="js/00-icons.js?v=202609292229"></script>
-<script src="js/00-firebase-config.js?v=202609292229"></script>
-<script src="js/01-login.js?v=202609292229"></script>
+<script src="js/00-icons.js?v=202609292243"></script>
+<script src="js/00-firebase-config.js?v=202609292243"></script>
+<script src="js/01-login.js?v=202609292243"></script>
 </div>
 
 
@@ -1182,8 +1182,8 @@
 </div>
 
 <!-- FAB bouton -->
-<button id="dash-mobile-fab" onclick="openDashDrawer()">
-  <span>☰</span> <span id="dash-fab-label">Synthèse</span>
+<button id="dash-mobile-fab" onclick="openDashDrawer()" aria-label="Changer d'onglet du dashboard">
+  <span id="dash-fab-label">Synthèse</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
 </button>
 
 <div class="dash-inner">
@@ -1199,7 +1199,7 @@
     <!-- SCI -->
     <div style="display:flex;flex-direction:column;gap:3px">
       <span class="lbl">Société</span>
-      <div class="ms-wrap" id="ms-syn-sci" data-msid="syn-sci" data-all="Toutes" data-plural="Plusieurs"><div class="ms-btn" onclick="_msToggle(this.parentElement)"><span class="ms-label">Toutes</span><span class="ms-caret">▼</span></div><div class="ms-dropdown"></div></div><select id="syn-sci" style="display:none" multiple>
+      <div class="ms-wrap" id="ms-syn-sci" data-msid="syn-sci" data-all="Toutes" data-plural="Plusieurs"><div class="ms-btn" onclick="_msToggle(this.parentElement)"><span class="ms-label">Toutes</span><span class="ms-caret"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span></div><div class="ms-dropdown"></div></div><select id="syn-sci" style="display:none" multiple>
         <option value="all">Toutes</option>
       </select>
     </div>
@@ -1209,7 +1209,7 @@
     <!-- Bien -->
     <div style="display:flex;flex-direction:column;gap:3px">
       <span class="lbl">Bien</span>
-      <div class="ms-wrap" id="ms-syn-bien" data-msid="syn-bien" data-all="Tous" data-plural="Plusieurs"><div class="ms-btn" onclick="_msToggle(this.parentElement)"><span class="ms-label">Tous</span><span class="ms-caret">▼</span></div><div class="ms-dropdown"></div></div><select id="syn-bien" style="display:none" multiple>
+      <div class="ms-wrap" id="ms-syn-bien" data-msid="syn-bien" data-all="Tous" data-plural="Plusieurs"><div class="ms-btn" onclick="_msToggle(this.parentElement)"><span class="ms-label">Tous</span><span class="ms-caret"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span></div><div class="ms-dropdown"></div></div><select id="syn-bien" style="display:none" multiple>
         <option value="all">Tous</option>
       </select>
     </div>
@@ -1231,7 +1231,7 @@
     <!-- Catégorie -->
     <div style="display:flex;flex-direction:column;gap:3px">
       <span class="lbl">Catégorie</span>
-      <div class="ms-wrap" id="ms-syn-cat" data-msid="syn-cat" data-all="Toutes" data-plural="Plusieurs"><div class="ms-btn" onclick="_msToggle(this.parentElement)"><span class="ms-label">Toutes</span><span class="ms-caret">▼</span></div><div class="ms-dropdown"></div></div><select id="syn-cat" style="display:none" multiple>
+      <div class="ms-wrap" id="ms-syn-cat" data-msid="syn-cat" data-all="Toutes" data-plural="Plusieurs"><div class="ms-btn" onclick="_msToggle(this.parentElement)"><span class="ms-label">Toutes</span><span class="ms-caret"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span></div><div class="ms-dropdown"></div></div><select id="syn-cat" style="display:none" multiple>
         <option value="all">Toutes</option>
       </select>
     </div>
@@ -1303,13 +1303,13 @@
   <div id="kpi-filters" style="display:flex;flex-wrap:wrap;align-items:flex-end;gap:8px;margin-bottom:16px;padding:10px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:10px">
     <div style="display:flex;flex-direction:column;gap:3px">
       <span class="lbl">Société</span>
-      <div class="ms-wrap" id="ms-kpi-sci" data-msid="kpi-sci" data-all="Toutes" data-plural="Plusieurs" data-onchange="renderKpis"><div class="ms-btn" onclick="_msToggle(this.parentElement)"><span class="ms-label">Toutes</span><span class="ms-caret">▼</span></div><div class="ms-dropdown"></div></div>
+      <div class="ms-wrap" id="ms-kpi-sci" data-msid="kpi-sci" data-all="Toutes" data-plural="Plusieurs" data-onchange="renderKpis"><div class="ms-btn" onclick="_msToggle(this.parentElement)"><span class="ms-label">Toutes</span><span class="ms-caret"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span></div><div class="ms-dropdown"></div></div>
       <select id="kpi-sci" style="display:none" multiple><option value="all">Toutes</option></select>
     </div>
     <div class="syn-sep"></div>
     <div style="display:flex;flex-direction:column;gap:3px">
       <span class="lbl">Bien</span>
-      <div class="ms-wrap" id="ms-kpi-bien2" data-msid="kpi-bien2" data-all="Tous" data-plural="Plusieurs" data-onchange="renderKpis"><div class="ms-btn" onclick="_msToggle(this.parentElement)"><span class="ms-label">Tous</span><span class="ms-caret">▼</span></div><div class="ms-dropdown"></div></div>
+      <div class="ms-wrap" id="ms-kpi-bien2" data-msid="kpi-bien2" data-all="Tous" data-plural="Plusieurs" data-onchange="renderKpis"><div class="ms-btn" onclick="_msToggle(this.parentElement)"><span class="ms-label">Tous</span><span class="ms-caret"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span></div><div class="ms-dropdown"></div></div>
       <select id="kpi-bien2" style="display:none" multiple><option value="all">Tous</option></select>
     </div>
     <div class="syn-sep"></div>
@@ -1999,7 +1999,7 @@
     <!-- SCI -->
     <div style="display:flex;flex-direction:column;gap:3px">
       <span class="lbl">Société</span>
-      <div class="ms-wrap" id="ms-syn-sci" data-msid="syn-sci" data-all="Toutes" data-plural="Plusieurs"><div class="ms-btn" onclick="_msToggle(this.parentElement)"><span class="ms-label">Toutes</span><span class="ms-caret">▼</span></div><div class="ms-dropdown"></div></div><select id="syn-sci" style="display:none" multiple>
+      <div class="ms-wrap" id="ms-syn-sci" data-msid="syn-sci" data-all="Toutes" data-plural="Plusieurs"><div class="ms-btn" onclick="_msToggle(this.parentElement)"><span class="ms-label">Toutes</span><span class="ms-caret"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span></div><div class="ms-dropdown"></div></div><select id="syn-sci" style="display:none" multiple>
         <option value="all">Toutes</option>
       </select>
     </div>
@@ -2009,7 +2009,7 @@
     <!-- Bien -->
     <div style="display:flex;flex-direction:column;gap:3px">
       <span class="lbl">Bien</span>
-      <div class="ms-wrap" id="ms-syn-bien" data-msid="syn-bien" data-all="Tous" data-plural="Plusieurs"><div class="ms-btn" onclick="_msToggle(this.parentElement)"><span class="ms-label">Tous</span><span class="ms-caret">▼</span></div><div class="ms-dropdown"></div></div><select id="syn-bien" style="display:none" multiple>
+      <div class="ms-wrap" id="ms-syn-bien" data-msid="syn-bien" data-all="Tous" data-plural="Plusieurs"><div class="ms-btn" onclick="_msToggle(this.parentElement)"><span class="ms-label">Tous</span><span class="ms-caret"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span></div><div class="ms-dropdown"></div></div><select id="syn-bien" style="display:none" multiple>
         <option value="all">Tous</option>
       </select>
     </div>
@@ -2031,7 +2031,7 @@
     <!-- Catégorie -->
     <div style="display:flex;flex-direction:column;gap:3px">
       <span class="lbl">Catégorie</span>
-      <div class="ms-wrap" id="ms-syn-cat" data-msid="syn-cat" data-all="Toutes" data-plural="Plusieurs"><div class="ms-btn" onclick="_msToggle(this.parentElement)"><span class="ms-label">Toutes</span><span class="ms-caret">▼</span></div><div class="ms-dropdown"></div></div><select id="syn-cat" style="display:none" multiple>
+      <div class="ms-wrap" id="ms-syn-cat" data-msid="syn-cat" data-all="Toutes" data-plural="Plusieurs"><div class="ms-btn" onclick="_msToggle(this.parentElement)"><span class="ms-label">Toutes</span><span class="ms-caret"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span></div><div class="ms-dropdown"></div></div><select id="syn-cat" style="display:none" multiple>
         <option value="all">Toutes</option>
       </select>
     </div>
@@ -2098,13 +2098,13 @@
   <div id="kpi-filters" style="display:flex;flex-wrap:wrap;align-items:flex-end;gap:8px;margin-bottom:16px;padding:10px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:10px">
     <div style="display:flex;flex-direction:column;gap:3px">
       <span class="lbl">Société</span>
-      <div class="ms-wrap" id="ms-kpi-sci" data-msid="kpi-sci" data-all="Toutes" data-plural="Plusieurs" data-onchange="renderKpis"><div class="ms-btn" onclick="_msToggle(this.parentElement)"><span class="ms-label">Toutes</span><span class="ms-caret">▼</span></div><div class="ms-dropdown"></div></div>
+      <div class="ms-wrap" id="ms-kpi-sci" data-msid="kpi-sci" data-all="Toutes" data-plural="Plusieurs" data-onchange="renderKpis"><div class="ms-btn" onclick="_msToggle(this.parentElement)"><span class="ms-label">Toutes</span><span class="ms-caret"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span></div><div class="ms-dropdown"></div></div>
       <select id="kpi-sci" style="display:none" multiple><option value="all">Toutes</option></select>
     </div>
     <div class="syn-sep"></div>
     <div style="display:flex;flex-direction:column;gap:3px">
       <span class="lbl">Bien</span>
-      <div class="ms-wrap" id="ms-kpi-bien2" data-msid="kpi-bien2" data-all="Tous" data-plural="Plusieurs" data-onchange="renderKpis"><div class="ms-btn" onclick="_msToggle(this.parentElement)"><span class="ms-label">Tous</span><span class="ms-caret">▼</span></div><div class="ms-dropdown"></div></div>
+      <div class="ms-wrap" id="ms-kpi-bien2" data-msid="kpi-bien2" data-all="Tous" data-plural="Plusieurs" data-onchange="renderKpis"><div class="ms-btn" onclick="_msToggle(this.parentElement)"><span class="ms-label">Tous</span><span class="ms-caret"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span></div><div class="ms-dropdown"></div></div>
       <select id="kpi-bien2" style="display:none" multiple><option value="all">Tous</option></select>
     </div>
     <div class="syn-sep"></div>
@@ -2204,28 +2204,28 @@
 
 </div>
 
-<script src="js/02-state-core.js?v=202609292229"></script>
-<script src="js/03-import-mapping.js?v=202609292229"></script>
-<script src="js/04-params-settings.js?v=202609292229"></script>
-<script src="js/05-dashboard-core.js?v=202609292229"></script>
-<script src="js/06-dashboard-ca-dep.js?v=202609292229"></script>
-<script src="js/07-dashboard-treso-resultat.js?v=202609292229"></script>
-<script src="js/08-dashboard-kpis-lcd.js?v=202609292229"></script>
-<script src="js/09-home-screen.js?v=202609292229"></script>
+<script src="js/02-state-core.js?v=202609292243"></script>
+<script src="js/03-import-mapping.js?v=202609292243"></script>
+<script src="js/04-params-settings.js?v=202609292243"></script>
+<script src="js/05-dashboard-core.js?v=202609292243"></script>
+<script src="js/06-dashboard-ca-dep.js?v=202609292243"></script>
+<script src="js/07-dashboard-treso-resultat.js?v=202609292243"></script>
+<script src="js/08-dashboard-kpis-lcd.js?v=202609292243"></script>
+<script src="js/09-home-screen.js?v=202609292243"></script>
 
-<script src="js/10-mobile-drawer.js?v=202609292229"></script>
+<script src="js/10-mobile-drawer.js?v=202609292243"></script>
 
-<script src="js/11-ca-table-sort.js?v=202609292229"></script>
+<script src="js/11-ca-table-sort.js?v=202609292243"></script>
 
 <!-- ══ MOBILE NAV SCRIPT ══ -->
-<script src="js/12-mobile-nav.js?v=202609292229"></script>
-<script src="js/13-init-patch.js?v=202609292229"></script>
+<script src="js/12-mobile-nav.js?v=202609292243"></script>
+<script src="js/13-init-patch.js?v=202609292243"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="js/14-marketplace.js?v=202609292229"></script>
-<script src="js/15-simulateur.js?v=202609292229"></script>
-<script src="js/16-simulateur-moteur.js?v=202609292229"></script>
-<script src="js/17-simulateur-regimes.js?v=202609292229"></script>
-<script src="js/18-simulateur-resultats.js?v=202609292229"></script>
-<script src="js/19-charts.js?v=202609292229"></script>
+<script src="js/14-marketplace.js?v=202609292243"></script>
+<script src="js/15-simulateur.js?v=202609292243"></script>
+<script src="js/16-simulateur-moteur.js?v=202609292243"></script>
+<script src="js/17-simulateur-regimes.js?v=202609292243"></script>
+<script src="js/18-simulateur-resultats.js?v=202609292243"></script>
+<script src="js/19-charts.js?v=202609292243"></script>
 </body>
 </html>

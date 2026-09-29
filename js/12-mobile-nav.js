@@ -34,50 +34,24 @@ function mobileNav(section) {
       }
       break;
 
+    // Mêmes chemins que la barre latérale sur ordinateur : chaque écran est rendu, titre compris
     case 'tools':
-      if (typeof enterTools === 'function') {
-        enterTools();
-      }
-      // Make sure app is visible
-      const appEl = document.querySelector('.app');
-      const homeEl = document.getElementById('homeScreen');
-      if (appEl) appEl.style.display = '';
-      if (homeEl) homeEl.style.display = 'none';
-      // Navigate to first tools screen (sc1)
-      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-      const sc1 = document.getElementById('sc1');
-      if (sc1) sc1.classList.add('active');
+      if (typeof enterTools === 'function') enterTools();
       break;
 
     case 'dash':
-      if (typeof enterDash === 'function') {
-        enterDash();
-      } else {
-        // Fallback: activate dashboard screen
-        const appElD = document.querySelector('.app');
-        const homeElD = document.getElementById('homeScreen');
-        if (appElD) appElD.style.display = '';
-        if (homeElD) homeElD.style.display = 'none';
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        const sc6 = document.getElementById('sc6');
-        if (sc6) sc6.classList.add('active');
-        // Also activate dash mode if available
-        document.body.classList.add('dash-mode');
-      }
+      if (typeof enterDashboard === 'function') enterDashboard();
       break;
 
-    case 'params':
-      // Navigate to params screen (sc5)
-      const appElP = document.querySelector('.app');
-      const homeElP = document.getElementById('homeScreen');
-      if (appElP) appElP.style.display = '';
-      if (homeElP) homeElP.style.display = 'none';
-      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-      const sc5 = document.getElementById('sc5');
-      if (sc5) sc5.classList.add('active');
-      // Remove dash-mode if active
-      document.body.classList.remove('dash-mode');
+    case 'params': {
+      if (typeof enterTools === 'function') enterTools();
+      // enterTools() ouvre Import au tick suivant : on passe aux Paramètres juste après
+      setTimeout(() => {
+        const p = document.getElementById('nav-params');
+        if (p) p.click(); else if (typeof navTo === 'function') navTo(5);
+      }, 0);
       break;
+    }
   }
 
   // Scroll to top
