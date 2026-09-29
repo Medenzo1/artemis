@@ -9,10 +9,13 @@ function _initHomeScroll() {
   if (!hs) return;
 
   const topbar = document.getElementById('home-topbar');
-  hs.addEventListener('scroll', () => {
-    if (topbar) topbar.classList.toggle('scrolled', hs.scrollTop > 60);
+  // Selon la hauteur de l'écran, c'est l'accueil OU la fenêtre qui défile : on écoute les deux
+  const onScroll = () => {
+    if (topbar) topbar.classList.toggle('scrolled', Math.max(hs.scrollTop, window.scrollY) > 60);
     _checkHomeReveal(hs);
-  });
+  };
+  hs.addEventListener('scroll', onScroll);
+  window.addEventListener('scroll', onScroll, { passive: true });
 
   // Sections always visible — scroll animation is a progressive enhancement only
   setTimeout(() => {
@@ -136,9 +139,9 @@ function _renderHomeKpis() {
   // calcul\u00e9 (positif - n\u00e9gatif) est artificiellement gonfl\u00e9.
   var depAbsPM={}; keys.forEach(function(k){ depAbsPM[k]=Math.abs(depPM[k]||0); });
   el.innerHTML =
-    _kpiCard('CA', "Chiffre d'affaires", periods.length?fmt(ca):'\u2014', 'var(--green)', '', _varBadges(ca,last,caPM,true), caSpark) +
-    _kpiCard('DE', 'Charges totales', periods.length?'-'+fmt(dep):'\u2014', 'var(--red)', '', _varBadges(dep,last,depAbsPM,false), depSpark) +
-    _kpiCard('TR', 'Solde net', periods.length?(sol>=0?'+':'')+fmt(sol):'\u2014', sol>=0?'var(--cyan)':'var(--red)', '', _varBadges(sol,last,soldePM,true), solSpark);
+    _kpiCard('💰', "Chiffre d'affaires", periods.length?fmt(ca):'\u2014', 'var(--green)', '', _varBadges(ca,last,caPM,true), caSpark) +
+    _kpiCard('💸', 'Charges totales', periods.length?'-'+fmt(dep):'\u2014', 'var(--red)', '', _varBadges(dep,last,depAbsPM,false), depSpark) +
+    _kpiCard('⚖', 'Solde net', periods.length?(sol>=0?'+':'')+fmt(sol):'\u2014', sol>=0?'var(--cyan)':'var(--red)', '', _varBadges(sol,last,soldePM,true), solSpark);
 }
 
 function _startHomeCanvas() {

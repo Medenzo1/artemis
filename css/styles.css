@@ -230,7 +230,7 @@ body.dash-mode #sc6 { padding: 0; }
 .h-hero {
   position: relative; min-height: 100vh;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  text-align: center; padding: clamp(60px, 8vh, 120px) clamp(24px, 4vw, 80px) 60px;
+  text-align: center; padding: clamp(104px, 14vh, 150px) clamp(24px, 4vw, 80px) 60px; /* dégage la barre fixe du haut */
   overflow: hidden;
 }
 .h-hero-bg {
@@ -341,28 +341,16 @@ body.dash-mode #sc6 { padding: 0; }
 /* ── KPI strip (home) ── */
 .h-kpi-strip { display: none; } /* ancien strip masqué */
 #home-kpis .card.kpi-card {
-  background: linear-gradient(135deg, rgba(8,18,34,.85), rgba(4,10,20,.92));
-  border: 1px solid rgba(255,255,255,.08);
-  border-radius: 16px;
-  backdrop-filter: blur(18px);
-  box-shadow: 0 4px 24px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.04);
-  transition: border-color .25s, box-shadow .25s, transform .25s;
-  display: flex; flex-direction: row; align-items: stretch; overflow: hidden;
-  padding: 0; position: relative;
-  height: 130px;
+  /* même carte que le dashboard : colonne, hauteur libre */
+  transition: box-shadow .25s, transform .25s;
   margin-top: 0 !important; /* annule le .card+.card{margin-top:18px} global */
+  text-align: left;
 }
 #home-kpis {
-  align-items: end;
-}
-#home-kpis .card.kpi-card::before {
-  content: ''; position: absolute; inset: 0; border-radius: 16px;
-  background: radial-gradient(ellipse 80% 60% at 20% 0%, rgba(34,211,200,.05), transparent 70%);
-  pointer-events: none;
+  align-items: stretch;
 }
 #home-kpis .card.kpi-card:hover {
-  border-color: rgba(34,211,200,.25);
-  box-shadow: 0 8px 40px rgba(0,0,0,.55), 0 0 0 1px rgba(34,211,200,.08);
+  box-shadow: 0 16px 36px -8px rgba(0,0,0,.5) !important;
   transform: translateY(-2px);
 }
 
