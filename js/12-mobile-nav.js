@@ -112,3 +112,18 @@ document.addEventListener('DOMContentLoaded', function() {
   const activeItem = document.getElementById('mn-home');
   if (activeItem) activeItem.classList.add('active');
 });
+
+// ─── Onglet actif de la barre du bas = écran réellement affiché ─
+// (les entrées se font aussi depuis l'accueil, la sidebar ou le code, pas seulement via mobileNav)
+(function () {
+  const setActive = s => document.querySelectorAll('.mn-item').forEach(el => el.classList.toggle('active', el.id === 'mn-' + s));
+  const wrap = (fn, section) => {
+    const orig = window[fn];
+    if (typeof orig !== 'function') return;
+    window[fn] = function () { const r = orig.apply(this, arguments); setActive(typeof section === 'function' ? section.apply(this, arguments) : section); return r; };
+  };
+  wrap('showHome', 'home');
+  wrap('enterTools', 'tools');
+  wrap('enterDashboard', 'dash');
+  wrap('navTo', n => (n >= 5 ? 'params' : 'tools'));
+})();

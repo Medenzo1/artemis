@@ -45,20 +45,22 @@ function addSci(){const p=getParams();p.scis.push('Nouvelle SCI');saveParamsAndS
 function renderBiensList(p){
   if(!p)p=getParams();
   const hdr=['Nom court','Nom long (Airbnb)','Type','SCI','Lot',''].map(h=>`<div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.07em">${h}</div>`).join('');
+  // Chaque champ porte son libellé : masqué sur ordinateur (en-tête de colonnes), visible sur mobile (fiche empilée)
+  const f=(lbl,ctrl,cls)=>`<label class="bien-f${cls?' '+cls:''}"><span class="bien-l">${lbl}</span>${ctrl}</label>`;
   const rows=p.biens.map((b,i)=>`
-    <div class="param-row" style="grid-template-columns:1fr 1.8fr 70px 1fr 1fr auto">
-      <input value="${escHtml(b.name)}" oninput="updateBien(${i},'name',this.value)">
-      <input value="${escHtml(b.nom)}" oninput="updateBien(${i},'nom',this.value)">
-      <select onchange="updateBien(${i},'type',this.value)">
+    <div class="param-row bien-row" style="grid-template-columns:1fr 1.8fr 70px 1fr 1fr auto">
+      ${f('Nom court',`<input value="${escHtml(b.name)}" oninput="updateBien(${i},'name',this.value)">`)}
+      ${f('Nom long (Airbnb)',`<input value="${escHtml(b.nom)}" oninput="updateBien(${i},'nom',this.value)">`,'bien-f-wide')}
+      ${f('Type',`<select onchange="updateBien(${i},'type',this.value)">
         <option ${b.type==='LCD'?'selected':''}>LCD</option>
         <option ${b.type==='LLD'?'selected':''}>LLD</option>
         <option ${b.type==='SC'?'selected':''}>SC</option>
-      </select>
-      <select onchange="updateBien(${i},'sci',this.value)">${sciOptions(b.sci,p)}</select>
-      <select onchange="updateBien(${i},'lot',this.value)">${lotOptions(b.lot,p)}</select>
-      <button class="param-del" onclick="delBien(${i})">&#x2715;</button>
+      </select>`)}
+      ${f('SCI',`<select onchange="updateBien(${i},'sci',this.value)">${sciOptions(b.sci,p)}</select>`)}
+      ${f('Lot',`<select onchange="updateBien(${i},'lot',this.value)">${lotOptions(b.lot,p)}</select>`)}
+      <button class="param-del" aria-label="Supprimer ce bien" onclick="delBien(${i})">&#x2715;</button>
     </div>`).join('');
-  document.getElementById('biens-list').innerHTML=`<div style="display:grid;grid-template-columns:1fr 1.8fr 70px 1fr 1fr auto;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);margin-bottom:4px">${hdr}</div>${rows}`;
+  document.getElementById('biens-list').innerHTML=`<div class="bien-hdr" style="display:grid;grid-template-columns:1fr 1.8fr 70px 1fr 1fr auto;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);margin-bottom:4px">${hdr}</div>${rows}`;
 }
 function _slugify(s){return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'');}
 function addBien(){const p=getParams();p.biens.push({id:'nouveau',name:'Nouveau bien',nom:'Nom complet',sci:p.scis[0]||'',type:'LCD',lot:p.lots[0]||'',lat:'',lng:''});saveParamsAndSync(p);renderParams();}

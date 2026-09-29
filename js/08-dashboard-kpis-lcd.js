@@ -284,7 +284,7 @@ function _renderKpiLCD() {
     </div>
 
     <!-- Compte de résultat en paliers -->
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px;margin-top:14px">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(320px,100%),1fr));gap:14px;margin-top:14px">
       <div class="card" style="margin-top:0!important">
         <div class="card-title">Compte de résultat en paliers</div>
         <div class="ac-wrap"><canvas id="kpi-waterfall-cv"></canvas></div>
@@ -296,7 +296,7 @@ function _renderKpiLCD() {
     </div>
 
     <!-- Graphiques tendance CF + CV -->
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px;margin-top:14px">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(320px,100%),1fr));gap:14px;margin-top:14px">
       <div class="card" style="margin-top:0!important">
         <div class="card-title gold">Charges fixes — tendance et prévision à 10 mois</div>
         <div class="ac-wrap"><canvas id="kpi-trend-cf"></canvas></div>
@@ -640,7 +640,7 @@ function renderPlateformes() {
         _kpiCard(({Airbnb:'✈',Booking:'🏨'})[plt]||'🏦', plt, '+'+_fmtK(d.rev), PLT_COLORS[plt]||'var(--text2)', _pct(total?d.rev/total*100:0)+' du total')
       ).join('')}
     </div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr));gap:16px">
       ${pltCards || _emptyState()}
     </div>`;
 }

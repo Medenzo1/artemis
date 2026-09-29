@@ -338,7 +338,7 @@ function renderBilan() {
   if (!el) { return; }
   _dashFillYears(_getDB());
   el.innerHTML = `
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(400px,1fr));gap:16px">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(400px,100%),1fr));gap:16px">
       <div class="card">
         ${_sectionTitle('Emprunts en cours')}
         <div id="bil-loans-content">${_renderBilanLoans()}</div>

@@ -14,7 +14,7 @@
 <meta name="application-name" content="ARTEMIS">
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<link rel="stylesheet" href="css/styles.css?v=202609292218">
+<link rel="stylesheet" href="css/styles.css?v=202609292229">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 </head>
@@ -65,9 +65,9 @@
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
-<script src="js/00-icons.js?v=202609292218"></script>
-<script src="js/00-firebase-config.js?v=202609292218"></script>
-<script src="js/01-login.js?v=202609292218"></script>
+<script src="js/00-icons.js?v=202609292229"></script>
+<script src="js/00-firebase-config.js?v=202609292229"></script>
+<script src="js/01-login.js?v=202609292229"></script>
 </div>
 
 
@@ -154,7 +154,7 @@
     </p>
 
     <!-- WHY IT MATTERS -->
-    <div style="margin-top:56px;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px">
+    <div style="margin-top:56px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr));gap:16px">
       <div style="background:rgba(34,211,200,.04);border:1px solid rgba(34,211,200,.1);border-radius:16px;padding:28px 24px">
         <div style="font-size:24px;margin-bottom:14px">🏦</div>
         <div style="font-size:14px;font-weight:700;color:#eaf0ff;margin-bottom:10px">Comptabilité analytique réelle</div>
@@ -222,7 +222,7 @@
       <div class="h-section-eyebrow" style="margin-bottom:8px">L'équipe fondatrice</div>
       <h3 style="font-family:'Archivo',sans-serif;font-weight:800;letter-spacing:-.02em;font-size:28px;color:#eaf0ff;margin-bottom:40px;line-height:1.2">Deux frères, une vision,<br><em style="color:rgba(200,216,240,.45)">une synergie rare.</em></h3>
 
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr));gap:24px">
 
         <!-- Enzo -->
         <div style="background:linear-gradient(135deg,rgba(34,211,200,.06),rgba(34,211,200,.02));border:1px solid rgba(34,211,200,.15);border-radius:20px;padding:36px 32px;position:relative;overflow:hidden">
@@ -367,16 +367,16 @@
 ══════════════════════════════════════ -->
 <div id="marketplaceScreen" class="art-mesh-bg" style="display:none;position:fixed;inset:0;z-index:600;background-color:#04080f;overflow-y:auto;font-family:'Archivo',system-ui,sans-serif">
 
-  <div style="position:sticky;top:0;z-index:10;background:rgba(4,8,15,.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,180,0,.1);padding:0 32px;height:56px;display:flex;align-items:center;justify-content:space-between">
+  <div class="mkt-topbar" style="position:sticky;top:0;z-index:10;background:rgba(4,8,15,.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,180,0,.1);padding:0 32px;height:56px;display:flex;align-items:center;justify-content:space-between">
     <div style="display:flex;align-items:center;gap:12px">
       <button onclick="exitMarketplace()" style="background:none;border:none;color:rgba(255,180,0,.7);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;padding:0" onmouseover="this.style.color='#ffb400'" onmouseout="this.style.color='rgba(255,180,0,.7)'"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg> Accueil</button>
       <span style="color:rgba(255,255,255,.15)">·</span>
       <span style="font-size:13px;font-weight:700;color:#eaf0ff;letter-spacing:.04em">ARTEM<span style="color:#ffb400">IS</span> <span style="color:rgba(255,180,0,.6)">Marketplace</span></span>
     </div>
-    <button class="btn btn-gold" onclick="mktOpenForm()">+ Déposer une annonce</button>
+    <button class="btn btn-gold" onclick="mktOpenForm()">+ <span class="hide-sm">Déposer une </span>annonce</button>
   </div>
 
-  <div style="max-width:1100px;margin:0 auto;padding:32px">
+  <div class="mkt-body" style="max-width:1100px;margin:0 auto;padding:32px">
 
     <!-- Vue liste -->
     <div id="mkt-grid-view">
@@ -534,7 +534,7 @@
 <div class="upload-zone" id="dzBank">
 <input type="file" id="fileBank" accept=".xlsx,.xls,.csv">
 <div class="upload-icon-wrap upload-icon-wrap--bank">🏦</div>
-<div class="upload-title">Glisser le fichier ici</div>
+<div class="upload-title"><span class="only-pointer">Glisser le fichier ici</span><span class="only-touch">Touchez pour choisir le fichier</span></div>
 <div class="upload-sub">Banque · Date · Libellé</div>
 </div>
 <div id="bankStatus" class="bk-status"></div>
@@ -547,7 +547,7 @@
 <div class="upload-zone gold-zone" id="dzAirbnb">
 <input type="file" id="fileAirbnb" accept=".xlsx,.xls,.csv">
 <div class="upload-icon-wrap upload-icon-wrap--airbnb">✈</div>
-<div class="upload-title">Glisser le fichier ici</div>
+<div class="upload-title"><span class="only-pointer">Glisser le fichier ici</span><span class="only-touch">Touchez pour choisir le fichier</span></div>
 <div class="upload-sub">Airbnb · Payout</div>
 </div>
 <div id="airbnbStatus" class="bk-status"></div>
@@ -560,7 +560,7 @@
 <div class="upload-zone booking-zone" id="dzBooking">
 <input type="file" id="fileBooking" accept=".xlsx,.xls,.csv">
 <div class="upload-icon-wrap upload-icon-wrap--booking">🏨</div>
-<div class="upload-title">Glisser le fichier ici</div>
+<div class="upload-title"><span class="only-pointer">Glisser le fichier ici</span><span class="only-touch">Touchez pour choisir le fichier</span></div>
 <div class="upload-sub">Booking · Type · Montant</div>
 </div>
 <div id="bookingStatus" class="bk-status"></div>
@@ -734,11 +734,11 @@
 <div style="font-size:15px;font-weight:700">📦 Base de données</div>
 
 </div>
-<div id="dbSummaryCards" style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px"></div>
+<div id="dbSummaryCards" class="db-summary"></div>
 <div class="card">
-<div class="card-title" style="display:flex;align-items:center;justify-content:space-between">
+<div class="card-title db-head">
 <span>Périodes enregistrées</span>
-<div style="display:flex;gap:8px">
+<div class="db-head-actions">
 <button class="btn btn-outline" style="font-size:11px;padding:5px 12px" onclick="exportDatabase()">⬇ Export JSON</button>
 <button class="btn btn-outline" style="font-size:11px;padding:5px 12px;border-color:rgba(240,86,106,.3);color:#f0566a" onclick="clearDatabase()">🗑 Vider la base</button>
 </div>
@@ -1513,7 +1513,7 @@
 <div class="upload-zone" id="dzBank">
 <input type="file" id="fileBank" accept=".xlsx,.xls,.csv">
 <div class="upload-icon-wrap upload-icon-wrap--bank">🏦</div>
-<div class="upload-title">Glisser le fichier ici</div>
+<div class="upload-title"><span class="only-pointer">Glisser le fichier ici</span><span class="only-touch">Touchez pour choisir le fichier</span></div>
 <div class="upload-sub">Banque · Date · Libellé</div>
 </div>
 <div id="bankStatus" class="bk-status"></div>
@@ -1526,7 +1526,7 @@
 <div class="upload-zone gold-zone" id="dzAirbnb">
 <input type="file" id="fileAirbnb" accept=".xlsx,.xls,.csv">
 <div class="upload-icon-wrap upload-icon-wrap--airbnb">✈</div>
-<div class="upload-title">Glisser le fichier ici</div>
+<div class="upload-title"><span class="only-pointer">Glisser le fichier ici</span><span class="only-touch">Touchez pour choisir le fichier</span></div>
 <div class="upload-sub">Airbnb · Payout</div>
 </div>
 <div id="airbnbStatus" class="bk-status"></div>
@@ -1539,7 +1539,7 @@
 <div class="upload-zone booking-zone" id="dzBooking">
 <input type="file" id="fileBooking" accept=".xlsx,.xls,.csv">
 <div class="upload-icon-wrap upload-icon-wrap--booking">🏨</div>
-<div class="upload-title">Glisser le fichier ici</div>
+<div class="upload-title"><span class="only-pointer">Glisser le fichier ici</span><span class="only-touch">Touchez pour choisir le fichier</span></div>
 <div class="upload-sub">Booking · Type · Montant</div>
 </div>
 <div id="bookingStatus" class="bk-status"></div>
@@ -1713,11 +1713,11 @@
 <div style="font-size:15px;font-weight:700">📦 Base de données</div>
 
 </div>
-<div id="dbSummaryCards" style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px"></div>
+<div id="dbSummaryCards" class="db-summary"></div>
 <div class="card">
-<div class="card-title" style="display:flex;align-items:center;justify-content:space-between">
+<div class="card-title db-head">
 <span>Périodes enregistrées</span>
-<div style="display:flex;gap:8px">
+<div class="db-head-actions">
 <button class="btn btn-outline" style="font-size:11px;padding:5px 12px" onclick="exportDatabase()">⬇ Export JSON</button>
 <button class="btn btn-outline" style="font-size:11px;padding:5px 12px;border-color:rgba(240,86,106,.3);color:#f0566a" onclick="clearDatabase()">🗑 Vider la base</button>
 </div>
@@ -2204,28 +2204,28 @@
 
 </div>
 
-<script src="js/02-state-core.js?v=202609292218"></script>
-<script src="js/03-import-mapping.js?v=202609292218"></script>
-<script src="js/04-params-settings.js?v=202609292218"></script>
-<script src="js/05-dashboard-core.js?v=202609292218"></script>
-<script src="js/06-dashboard-ca-dep.js?v=202609292218"></script>
-<script src="js/07-dashboard-treso-resultat.js?v=202609292218"></script>
-<script src="js/08-dashboard-kpis-lcd.js?v=202609292218"></script>
-<script src="js/09-home-screen.js?v=202609292218"></script>
+<script src="js/02-state-core.js?v=202609292229"></script>
+<script src="js/03-import-mapping.js?v=202609292229"></script>
+<script src="js/04-params-settings.js?v=202609292229"></script>
+<script src="js/05-dashboard-core.js?v=202609292229"></script>
+<script src="js/06-dashboard-ca-dep.js?v=202609292229"></script>
+<script src="js/07-dashboard-treso-resultat.js?v=202609292229"></script>
+<script src="js/08-dashboard-kpis-lcd.js?v=202609292229"></script>
+<script src="js/09-home-screen.js?v=202609292229"></script>
 
-<script src="js/10-mobile-drawer.js?v=202609292218"></script>
+<script src="js/10-mobile-drawer.js?v=202609292229"></script>
 
-<script src="js/11-ca-table-sort.js?v=202609292218"></script>
+<script src="js/11-ca-table-sort.js?v=202609292229"></script>
 
 <!-- ══ MOBILE NAV SCRIPT ══ -->
-<script src="js/12-mobile-nav.js?v=202609292218"></script>
-<script src="js/13-init-patch.js?v=202609292218"></script>
+<script src="js/12-mobile-nav.js?v=202609292229"></script>
+<script src="js/13-init-patch.js?v=202609292229"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="js/14-marketplace.js?v=202609292218"></script>
-<script src="js/15-simulateur.js?v=202609292218"></script>
-<script src="js/16-simulateur-moteur.js?v=202609292218"></script>
-<script src="js/17-simulateur-regimes.js?v=202609292218"></script>
-<script src="js/18-simulateur-resultats.js?v=202609292218"></script>
-<script src="js/19-charts.js?v=202609292218"></script>
+<script src="js/14-marketplace.js?v=202609292229"></script>
+<script src="js/15-simulateur.js?v=202609292229"></script>
+<script src="js/16-simulateur-moteur.js?v=202609292229"></script>
+<script src="js/17-simulateur-regimes.js?v=202609292229"></script>
+<script src="js/18-simulateur-resultats.js?v=202609292229"></script>
+<script src="js/19-charts.js?v=202609292229"></script>
 </body>
 </html>

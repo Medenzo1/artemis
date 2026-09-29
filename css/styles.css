@@ -128,7 +128,7 @@ header{background:linear-gradient(180deg,rgba(0,229,255,.03) 0%,transparent 100%
 .dash-section-title{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text2);margin-bottom:12px;display:flex;align-items:center;gap:8px}
 .dash-section-title::after{content:"";flex:1;height:1px;background:var(--border)}
 .dash-grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;align-items:stretch}.dash-grid-4 .card+.card{margin-top:0}
-.dash-grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(400px,1fr));gap:16px;margin-bottom:20px;align-items:start}.dash-grid-2 .card+.card{margin-top:0}
+.dash-grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(400px,100%),1fr));gap:16px;margin-bottom:20px;align-items:start}.dash-grid-2 .card+.card{margin-top:0}
 .dash-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:20px}
 .syn-sep{width:1px;height:32px;background:var(--border);align-self:flex-end;margin:0 2px;flex-shrink:0}
 .stab{background:none;border:none;color:var(--text2);font-size:11px;font-weight:600;letter-spacing:.04em;padding:6px 13px;border-radius:6px;cursor:pointer;font-family:inherit;transition:all .15s;white-space:nowrap}.stab:hover{color:var(--text);background:rgba(255,255,255,.04)}.stab.active{background:rgba(34,211,200,.1);color:var(--cyan);border:1px solid rgba(34,211,200,.18)}
@@ -987,3 +987,50 @@ body{font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
 /* Les éléments de grille ne doivent jamais élargir la page : un tableau trop large défile dans sa carte */
 .dash-grid-2>*,.dash-grid-4>*{min-width:0}
 #ca-ops-wrap,#dep-ops-wrap,#tres-ops-wrap{overflow:auto!important}
+
+/* ═══ Mobile ═══ */
+.only-touch{display:none}
+@media (hover:none) and (pointer:coarse){.only-touch{display:inline}.only-pointer{display:none}}
+/* Base de données : lignes de périodes */
+.db-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(170px,100%),1fr));gap:14px;margin-bottom:24px}
+.db-head{flex-wrap:wrap;row-gap:10px}
+.db-head-actions{display:flex;gap:8px;margin-left:auto}
+.db-head-actions .btn{font-size:11px!important;padding:6px 12px!important;white-space:nowrap}
+.dbp-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border)}
+.dbp-id{display:flex;align-items:baseline;gap:12px;flex:1;min-width:0}
+.dbp-key{font-size:13px;font-weight:700;color:var(--cyan)}
+.dbp-name{font-size:13px;color:var(--text)}
+.dbp-count{font-size:11px;color:var(--text2)}
+.dbp-amts{display:flex;gap:16px;align-items:baseline;font-size:12px;white-space:nowrap}
+.dbp-amts b{font-size:13px}
+.dbp-actions{display:flex;gap:6px}
+.dbp-actions .btn{font-size:11px!important;padding:5px 11px!important;white-space:nowrap}
+/* Paramètres : libellés de champ (visibles seulement sur mobile) */
+.bien-f{display:contents}
+.bien-l{display:none}
+/* Simulateur : colonne « Régime » figée pendant le défilement horizontal */
+.sim-cmp th:first-child,.sim-cmp td:first-child{position:sticky;left:0;z-index:1;background:#141922}
+@media (max-width:640px){
+  #home-kpis{grid-template-columns:1fr!important;gap:12px!important}
+  .dbp-row{flex-wrap:wrap;row-gap:8px;padding:12px 4px}
+  .dbp-key{display:none}
+  .dbp-id{flex-basis:100%}
+  .dbp-amts{flex:1;gap:12px}
+  .dbp-actions{flex-basis:100%}
+  .dbp-actions .btn{flex:1;justify-content:center}
+  .dbp-actions .btn:last-child{flex:0 0 auto}
+  .db-head-actions{margin-left:0;width:100%}
+  .db-head-actions .btn{flex:1;justify-content:center}
+  .bien-hdr{display:none!important}
+  .bien-row{grid-template-columns:1fr 1fr!important;grid-auto-flow:row dense;position:relative;padding:14px 0!important;row-gap:10px}
+  .bien-f{display:flex;flex-direction:column;gap:4px;min-width:0}
+  .bien-f-wide{grid-column:1/-1}
+  .bien-l{display:block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text2)}
+  .bien-row .param-del{position:absolute;top:8px;right:0}
+  .bien-row input,.bien-row select{font-size:16px!important;padding:9px 10px!important}
+  .sim-cmp th:first-child,.sim-cmp td:first-child{white-space:normal;min-width:128px;max-width:150px}
+  .mkt-topbar{padding:0 16px!important}
+  .mkt-topbar .btn{white-space:nowrap;padding:10px 16px!important}
+  .mkt-body{padding:20px 16px!important}
+  .hide-sm{display:none}
+}

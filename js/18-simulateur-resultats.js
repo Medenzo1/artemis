@@ -24,11 +24,13 @@ let SIM_DETAIL_REGIME = null;
 function simBarRankingChart(items, opts) {
   opts = opts || {};
   const fmt = opts.fmt || simFmtEUR;
-  const W = 680;
-  const barH = 26, gap = 12, labelW = 175;
-  const chartW = W - labelW - 90;
+  // Sur mobile : libellé au-dessus de la barre, graphique à la largeur de l'écran
+  const narrow = window.innerWidth < 640;
+  const W = narrow ? Math.max(260, window.innerWidth - 72) : 680;
+  const barH = narrow ? 14 : 26, gap = narrow ? 14 : 12, labelW = narrow ? 0 : 175, lblH = narrow ? 18 : 0;
+  const chartW = W - labelW - (narrow ? 78 : 90);
   const n = items.length;
-  const H = n * (barH + gap) - gap + 8;
+  const H = n * (barH + gap + lblH) - gap + 8;
   const vals = items.map(it => it.value || 0);
   const maxVal = Math.max(...vals, 0);
   const minVal = Math.min(...vals, 0);
@@ -38,21 +40,21 @@ function simBarRankingChart(items, opts) {
 
   let bars = '';
   items.forEach((it, i) => {
-    const y = i * (barH + gap) + 4;
+    const y = i * (barH + gap + lblH) + 4 + lblH;
     const v = it.value || 0;
     const isBest = v === bestVal;
     const barW = Math.max(Math.abs(v) / scaleMax * chartW, v === 0 ? 0 : 2);
     const x = v >= 0 ? zeroX : zeroX - barW;
     const color = isBest ? '#34d399' : 'rgba(255,255,255,.14)';
     bars +=
-      '<text x="' + (labelW - 10) + '" y="' + (y + barH / 2 + 4) + '" text-anchor="end" font-size="11" fill="' + (isBest ? '#eaf0ff' : 'rgba(234,240,255,.65)') + '" font-weight="' + (isBest ? 700 : 500) + '">' + simSvgEsc(it.label) + '</text>' +
+      '<text x="' + (narrow ? 0 : labelW - 10) + '" y="' + (narrow ? y - 6 : y + barH / 2 + 4) + '" text-anchor="' + (narrow ? 'start' : 'end') + '" font-size="11" fill="' + (isBest ? '#eaf0ff' : 'rgba(234,240,255,.65)') + '" font-weight="' + (isBest ? 700 : 500) + '">' + simSvgEsc(it.label) + '</text>' +
       '<rect x="' + x.toFixed(1) + '" y="' + y + '" width="' + barW.toFixed(1) + '" height="' + barH + '" rx="5" fill="' + color + '">' +
         '<title>' + simSvgEsc(it.label) + ' — ' + fmt(v) + '</title>' +
       '</rect>' +
       '<text x="' + (v >= 0 ? (x + barW + 8) : (x - 8)) + '" y="' + (y + barH / 2 + 4) + '" text-anchor="' + (v >= 0 ? 'start' : 'end') + '" font-size="11" font-family="Archivo, sans-serif" font-weight="700" fill="' + (isBest ? '#34d399' : 'var(--text2)') + '">' + fmt(v) + '</text>';
   });
 
-  return '<div style="overflow-x:auto"><svg viewBox="0 0 ' + W + ' ' + H + '" width="' + W + '" height="' + H + '" style="display:block;min-width:' + W + 'px">' + bars + '</svg></div>';
+  return '<div style="overflow-x:auto"><svg viewBox="0 0 ' + W + ' ' + H + '" width="' + W + '" height="' + H + '" style="display:block;max-width:100%;height:auto">' + bars + '</svg></div>';
 }
 
 // ════════════════════════════════════════════
@@ -219,7 +221,7 @@ function simRenderResults() {
     '</div>' +
 
     '<div class="sim-card" style="padding:0;overflow-x:auto">' +
-      '<table style="width:100%;border-collapse:collapse;font-size:12.5px;white-space:nowrap">' +
+      '<table class="sim-cmp" style="width:100%;border-collapse:collapse;font-size:12.5px;white-space:nowrap">' +
         '<thead><tr style="border-bottom:1px solid rgba(255,255,255,.08);color:var(--text2);text-transform:uppercase;font-size:11px;letter-spacing:.05em">' +
           '<th style="padding:12px;text-align:left">Régime</th>' +
           '<th style="padding:12px;text-align:right">Cash-flow net-net cumulé</th>' +

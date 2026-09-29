@@ -1041,7 +1041,7 @@ function _renderSynRecap() {
   const mapSection = '';
 
   el.innerHTML = `
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-bottom:18px">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr));gap:12px;margin-bottom:18px">
       ${kpiPBI('Chiffre d\'affaires (P&L)', (cur.rev>=0?'+':'')+_fmtK(cur.rev), 'var(--green)',
         sparkline(caByM,'var(--green)'),
         delta(curM.rev,preM.rev), pct(curM.rev,preM.rev),
@@ -1105,7 +1105,7 @@ function _renderSynMap(biens) {
         <span style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#4a6080">📍 Portefeuille immobilier</span>
         <span style="font-size:11px;color:#4a6080">&mdash; ${biens.length} bien${biens.length>1?'s':''}</span>
       </div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1px;background:rgba(255,255,255,.04)">
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(200px,100%),1fr));gap:1px;background:rgba(255,255,255,.04)">
         ${biens.map(b => {
           const col = COLS[b.type] || '#9b6ef3';
           const sci = (b.sci||'').replace('SCI - ','');

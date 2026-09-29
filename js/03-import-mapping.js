@@ -1351,7 +1351,7 @@ function renderRecentActivity() {
       </div>
       <span style="font-size:11px;color:var(--text3)">${periods.length} période${periods.length>1?'s':''} · cliquer pour reprendre</span>
     </div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px">
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(270px,100%),1fr));gap:12px">
       ${cards.join('')}
     </div>`;
 }
@@ -1531,7 +1531,14 @@ document.getElementById('dbPeriodList').innerHTML = periods.map(p => {
 const rev = p.lines.filter(l => parseFloat(l.montant||0)>0).reduce((s,l)=>s+parseFloat(l.montant||0),0);
 const chg = p.lines.filter(l => parseFloat(l.montant||0)<0).reduce((s,l)=>s+parseFloat(l.montant||0),0);
 const net = rev + chg;
-return `<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border);gap:12px"><div style="display:flex;align-items:center;gap:12px"><div style="font-size:13px;font-weight:700;color:var(--cyan)">${p.period}</div><div style="font-size:13px;color:var(--text1)">${p.monthName} ${p.year}</div><div style="font-size:11px;color:var(--text2)">${p.linesCount} lignes</div></div><div style="display:flex;gap:16px;align-items:center"><span style="font-size:12px;color:var(--green)">+${fmt(rev)}</span><span style="font-size:12px;color:var(--red)">${fmt(chg)}</span><span style="font-size:13px;font-weight:700;color:${net>=0?'var(--green)':'var(--red)'}">${net>=0?'+':''}${fmt(net)}</span><button class="btn btn-outline" style="font-size:11px;padding:4px 10px;border-color:rgba(34,211,200,.2);color:var(--cyan)" onclick="consultPeriod('${p.period}')">👁 Consulter</button><button class="btn btn-outline" style="font-size:11px;padding:4px 10px;border-color:rgba(240,86,106,.3);color:#f0566a" onclick="deletePeriod('${p.period}')">✕</button><button class="btn btn-outline" style="font-size:11px;padding:4px 10px;border-color:rgba(0,229,255,.3);color:var(--cyan)" onclick="editPeriod('${p.period}')">✎ Éditer</button></div></div>`;
+return `<div class="dbp-row">`
+  + `<div class="dbp-id"><span class="dbp-key">${p.period}</span><span class="dbp-name">${p.monthName} ${p.year}</span><span class="dbp-count">${p.linesCount} lignes</span></div>`
+  + `<div class="dbp-amts"><span style="color:var(--green)">+${fmt(rev)}</span><span style="color:var(--red)">${fmt(chg)}</span><b style="color:${net>=0?'var(--green)':'var(--red)'}">${net>=0?'+':''}${fmt(net)}</b></div>`
+  + `<div class="dbp-actions">`
+  +   `<button class="btn btn-outline" style="border-color:rgba(34,211,200,.2);color:var(--cyan)" onclick="consultPeriod('${p.period}')">👁 Consulter</button>`
+  +   `<button class="btn btn-outline" style="border-color:rgba(34,211,200,.2);color:var(--cyan)" onclick="editPeriod('${p.period}')">✎ Éditer</button>`
+  +   `<button class="btn btn-outline" aria-label="Supprimer ${p.monthName} ${p.year}" style="border-color:rgba(240,86,106,.3);color:#f0566a" onclick="deletePeriod('${p.period}')">✕</button>`
+  + `</div></div>`;
 }).join('');
 }
 
