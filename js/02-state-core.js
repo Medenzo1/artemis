@@ -1,3 +1,15 @@
+// Séparateur de milliers : fr-FR produit une espace fine insécable (U+202F), si étroite en Archivo
+// que « 12 345 € » paraît collé. On la remplace par une espace insécable standard partout.
+(() => {
+  const fix = s => typeof s === 'string' ? s.replace(/\u202f/g, '\u00a0') : s;
+  const numLS = Number.prototype.toLocaleString;
+  Number.prototype.toLocaleString = function () { return fix(numLS.apply(this, arguments)); };
+  const fmtGet = Object.getOwnPropertyDescriptor(Intl.NumberFormat.prototype, 'format').get;
+  Object.defineProperty(Intl.NumberFormat.prototype, 'format', {
+    configurable: true, get() { const f = fmtGet.call(this); return v => fix(f(v)); }
+  });
+})();
+
 var HOME_QUOTES = [
   { text: "L'immobilier ne perd jamais sa valeur - si vous l'avez acheté au bon prix.", author: "Warren Buffett" },
   { text: "Ne pas investir, c'est prendre le risque le plus grand qui soit.", author: "Peter Lynch" },
@@ -444,8 +456,8 @@ buildMappingTable();
 // silencieusement, ce qui casse entre autres la détection des échéances d'emprunt (montant < 0).
 function _parseMontantCell(raw) {
   const s = String(raw || '');
-  const isParenNegative = /\(\s*[\d.,\s   ]+\s*\)/.test(s);
-  const cleaned = s.replace(/[\s   ]/g,'').replace(/[^0-9.,\-]/g,'');
+  const isParenNegative = /\(\s*[\d.,\s   ]+\s*\)/.test(s);
+  const cleaned = s.replace(/[\s   ]/g,'').replace(/[^0-9.,\-]/g,'');
   // Les exports bancaires mélangent les conventions : "," décimale (1097,19), "."
   // décimale (982.37), ou "." de milliers + "," décimale (1.097,19). On repère le
   // DERNIER séparateur ('.' ou ',') comme décimale et on retire les précédents —

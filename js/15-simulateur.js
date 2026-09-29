@@ -369,8 +369,8 @@ function simRefreshApercu(inputs) {
 function simFmtEURCompact(n) {
   n = n || 0;
   const abs = Math.abs(n);
-  const s = Math.round(abs).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
-  return (n < 0 ? '-' : '') + s + ' €';
+  const s = Math.round(abs).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+  return (n < 0 ? '-' : '') + s + ' €';
 }
 
 function simToast(msg) {

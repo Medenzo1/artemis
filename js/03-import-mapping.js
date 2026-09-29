@@ -1392,7 +1392,7 @@ function consultPeriod(periodKey) {
       <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px" title="${(l.full||l.libelle||'').replace(/"/g,'')}">${l.full||l.libelle||'-'}</td>
       <td><span style="background:rgba(34,211,200,.08);border:1px solid rgba(34,211,200,.15);color:var(--cyan);font-size:11px;font-weight:700;padding:2px 6px;border-radius:4px">${l.cat||'-'}</span></td>
       <td style="font-size:11px;color:var(--text2)">${schema.n2||''}</td>
-      <td style="text-align:right;font-family:inherit;font-weight:700;${cls}">${amt>=0?'+':''}${(()=>{const _v=amt;const _a=Math.abs(_v);const _i=Math.floor(_a);const _d=Math.round((_a-_i)*100).toString().padStart(2,'0');return ((_v<0?'-':'')+String(_i).replace(/\B(?=(\d{3})+(?!\d))/g,'\u202f')+','+_d+'\u202f€')})()} €</td>
+      <td style="text-align:right;font-family:inherit;font-weight:700;${cls}">${amt>=0?'+':''}${(()=>{const _v=amt;const _a=Math.abs(_v);const _i=Math.floor(_a);const _d=Math.round((_a-_i)*100).toString().padStart(2,'0');return ((_v<0?'-':'')+String(_i).replace(/\B(?=(\d{3})+(?!\d))/g,'\u00a0')+','+_d+'\u00a0€')})()} €</td>
       <td style="font-size:11px;color:var(--text2)">${l.bienName||l.bien||'-'}</td>
     </tr>`;
   }).join('');
@@ -1407,9 +1407,9 @@ function consultPeriod(periodKey) {
 
   document.getElementById('consultTitle').textContent = (MONTH_NAMES[p.month]||'') + ' ' + p.year + ' - ' + lines.length + ' opérations';
   document.getElementById('consultSummary').innerHTML = `
-    <span style="margin-right:16px">💰 <b style="color:var(--green)">CA : +${(()=>{const _v=totalCA;const _a=Math.abs(_v);const _i=Math.floor(_a);const _d=Math.round((_a-_i)*100).toString().padStart(2,'0');return ((_v<0?'-':'')+String(_i).replace(/\B(?=(\d{3})+(?!\d))/g,'\u202f')+','+_d+'\u202f€')})()} €</b></span>
-    <span style="margin-right:16px">📉 <b style="color:var(--red)">Charges : ${(()=>{const _v=totalChg;const _a=Math.abs(_v);const _i=Math.floor(_a);const _d=Math.round((_a-_i)*100).toString().padStart(2,'0');return ((_v<0?'-':'')+String(_i).replace(/\B(?=(\d{3})+(?!\d))/g,'\u202f')+','+_d+'\u202f€')})()} €</b></span>
-    <span>⚖️ <b style="color:${total>=0?'var(--cyan)':'var(--red)'}">Net : ${total>=0?'+':''}${(()=>{const _v=total;const _a=Math.abs(_v);const _i=Math.floor(_a);const _d=Math.round((_a-_i)*100).toString().padStart(2,'0');return ((_v<0?'-':'')+String(_i).replace(/\B(?=(\d{3})+(?!\d))/g,'\u202f')+','+_d+'\u202f€')})()} €</b></span>
+    <span style="margin-right:16px">💰 <b style="color:var(--green)">CA : +${(()=>{const _v=totalCA;const _a=Math.abs(_v);const _i=Math.floor(_a);const _d=Math.round((_a-_i)*100).toString().padStart(2,'0');return ((_v<0?'-':'')+String(_i).replace(/\B(?=(\d{3})+(?!\d))/g,'\u00a0')+','+_d+'\u00a0€')})()} €</b></span>
+    <span style="margin-right:16px">📉 <b style="color:var(--red)">Charges : ${(()=>{const _v=totalChg;const _a=Math.abs(_v);const _i=Math.floor(_a);const _d=Math.round((_a-_i)*100).toString().padStart(2,'0');return ((_v<0?'-':'')+String(_i).replace(/\B(?=(\d{3})+(?!\d))/g,'\u00a0')+','+_d+'\u00a0€')})()} €</b></span>
+    <span>⚖️ <b style="color:${total>=0?'var(--cyan)':'var(--red)'}">Net : ${total>=0?'+':''}${(()=>{const _v=total;const _a=Math.abs(_v);const _i=Math.floor(_a);const _d=Math.round((_a-_i)*100).toString().padStart(2,'0');return ((_v<0?'-':'')+String(_i).replace(/\B(?=(\d{3})+(?!\d))/g,'\u00a0')+','+_d+'\u00a0€')})()} €</b></span>
   `;
   body.innerHTML = `
     <div style="overflow-x:auto">
@@ -1638,7 +1638,7 @@ function openEditModal(periodKey) {
           <option value="">-</option>${lotOptions(l.lot, getParams())}
         </select>
       </td>
-      <td style="padding:6px 8px;text-align:right;font-family:inherit;font-weight:700;font-size:11px;${amtCls}">${amt>=0?'+':''}${(()=>{const _v=amt;const _a=Math.abs(_v);const _i=Math.floor(_a);const _d=Math.round((_a-_i)*100).toString().padStart(2,'0');return ((_v<0?'-':'')+String(_i).replace(/\B(?=(\d{3})+(?!\d))/g,'\u202f')+','+_d+'\u202f€')})()} €</td>
+      <td style="padding:6px 8px;text-align:right;font-family:inherit;font-weight:700;font-size:11px;${amtCls}">${amt>=0?'+':''}${(()=>{const _v=amt;const _a=Math.abs(_v);const _i=Math.floor(_a);const _d=Math.round((_a-_i)*100).toString().padStart(2,'0');return ((_v<0?'-':'')+String(_i).replace(/\B(?=(\d{3})+(?!\d))/g,'\u00a0')+','+_d+'\u00a0€')})()} €</td>
     </tr>`;
   }).join('');
 

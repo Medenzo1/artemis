@@ -405,24 +405,23 @@ function _kpiCard(icon, label, value, color, sub, varBadges, sparkData) {
     const col  = b.isGood ? '#22c97a' : '#f0566a';
     const bg   = b.isGood ? 'rgba(34,201,122,.12)' : 'rgba(240,86,106,.12)';
     const sign = b.delta >= 0 ? '+' : '';
-    const fmtD = (()=>{const _v=Math.round(b.delta);const _s=String(Math.abs(_v)).replace(/\B(?=(\d{3})+(?!\d))/g,'\u202f');return sign+_s+'\u202f€';})();
+    const fmtD = (()=>{const _v=Math.round(b.delta);const _s=String(Math.abs(_v)).replace(/\B(?=(\d{3})+(?!\d))/g,'\u00a0');return sign+_s+'\u00a0€';})();
     const fmtP = (b.pct >= 0 ? '+' : '')+b.pct.toFixed(0)+'%';
     return (
-      '<div style="display:flex;align-items:center;gap:6px;padding:3px 0;margin-top:2px">'
-      + '<span style="font-size:11px;color:rgba(126,143,168,0.7);font-weight:600;min-width:36px">'+b.label+'</span>'
-      + '<span style="font-size:11px;font-weight:700;color:'+col+';font-family:inherit;background:'+bg+';border-radius:10px;padding:1px 7px">'+fmtD+' · '+fmtP+'</span>'
+      '<div class="kpi-v2-badge">'
+      + '<span class="kpi-v2-blbl">'+b.label+'</span>'
+      + '<span class="kpi-v2-pill" style="color:'+col+';background:'+bg+'">'+fmtD+' · '+fmtP+'</span>'
       + '</div>'
     );
   }).join('') : '';
   const spark = sparkData && sparkData.length >= 2 ? _sparkline(sparkData, color) : '';
-  return '<div class="card kpi-card" style="padding:0">'
-    + '<div style="flex:1;min-width:0;padding:14px 0 14px 16px;overflow:hidden">'
-    + '<div style="font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--text2);margin-bottom:6px">' + icon + '&nbsp;' + label + '</div>'
-    + '<div style="font-size:26px;font-weight:800;color:' + color + ';font-family:inherit;letter-spacing:-.02em;line-height:1;margin-bottom:' + (sub||badgeHtml?'6':'0') + 'px">' + value + '</div>'
-    + (sub ? '<div style="font-size:11px;color:var(--text2);margin-bottom:5px">' + sub + '</div>' : '')
-    + (badgeHtml ? '<div style="border-top:1px solid rgba(255,255,255,.06);padding-top:6px">' + badgeHtml + '</div>' : '')
-    + '</div>'
-    + (spark ? '<div style="flex-shrink:0;padding:0 14px;display:flex;align-items:center;opacity:.85">' + spark + '</div>' : '')
+  // Libellé + mini-courbe sur la 1re ligne ; le montant a toute la largeur et ne se coupe jamais
+  return '<div class="card kpi-card kpi-v2">'
+    + '<div class="kpi-v2-head"><div class="kpi-v2-lbl">' + icon + '<span>' + label + '</span></div>'
+    + (spark ? '<div class="kpi-v2-spark">' + spark + '</div>' : '') + '</div>'
+    + '<div class="kpi-v2-val" style="color:' + color + '">' + value + '</div>'
+    + (sub ? '<div class="kpi-v2-sub">' + sub + '</div>' : '')
+    + (badgeHtml ? '<div class="kpi-v2-badges">' + badgeHtml + '</div>' : '')
     + '</div>';
 }
 

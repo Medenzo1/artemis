@@ -962,3 +962,40 @@ body{font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
 .toast .art-emo,.btn .art-emo--ok,.btn .art-emo--warn,.btn .art-emo--err{color:inherit}
 .art-emo-dot{display:inline-block;width:.6em;height:.6em;border-radius:50%;vertical-align:.05em}
 #homeScreen .art-emo:not(button .art-emo){color:var(--cyan)}
+
+/* ═══ Graphiques (ArtCharts) ═══ */
+.card-title[style*="space-between"]{justify-content:flex-start!important}
+.card-title .chart-mode-toggle{margin-left:auto;flex-shrink:0}
+.card-title>span{min-width:0}
+.ac-wrap{position:relative;width:100%}
+.ac-tip{position:absolute;left:0;top:0;z-index:20;pointer-events:none;min-width:150px;max-width:260px;padding:10px 12px;border-radius:12px;background:rgba(17,21,29,.96);border:1px solid rgba(255,255,255,.08);box-shadow:0 12px 32px -6px rgba(0,0,0,.6);font-size:12px;color:var(--text);opacity:0;transition:opacity .12s ease;font-variant-numeric:tabular-nums}
+.ac-tip.on{opacity:1}
+.ac-tip-head{font-size:11px;font-weight:700;color:var(--text2);letter-spacing:.02em;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ac-tip-row{display:flex;align-items:center;gap:8px;white-space:nowrap;color:var(--text2)}
+.ac-tip-row+.ac-tip-row{margin-top:3px}
+.ac-tip-row b{margin-left:auto;padding-left:12px;font-size:13px;font-weight:800;color:var(--text)}
+.ac-tip-sub{margin-top:6px;padding-top:6px;border-top:1px solid rgba(255,255,255,.06);font-size:11px;color:var(--text2)}
+.ac-tip-sub span{font-weight:700}
+.ac-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;display:inline-block}
+.ac-leg-row{display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:8px;font-size:12px;cursor:default;transition:opacity .15s,background .15s}
+.ac-leg-row:hover{background:rgba(255,255,255,.035)}
+.ac-leg-row.dim{opacity:.4}
+.ac-leg-lbl{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text)}
+.ac-leg-val{font-weight:700;white-space:nowrap}
+.ac-leg-pct{width:48px;text-align:right;color:var(--text2);white-space:nowrap}
+/* Cartes KPI avec mini-courbe */
+.kpi-card.kpi-v2{display:flex;flex-direction:column;align-items:stretch;flex-wrap:nowrap;gap:0;padding:14px 16px!important;min-width:0}
+.kpi-v2-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;min-height:30px}
+.kpi-v2-lbl{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--text2);min-width:0;padding-top:2px}
+.kpi-v2-lbl span{line-height:1.3}
+.kpi-v2-spark{flex-shrink:0;width:76px;height:32px;opacity:.9}
+.kpi-v2-spark svg{width:100%;height:100%}
+.kpi-v2-val{font-size:clamp(20px,2.1vw,26px);font-weight:800;letter-spacing:-.02em;line-height:1.05;white-space:nowrap;margin-top:4px}
+.kpi-v2-sub{font-size:11px;color:var(--text2);margin-top:4px}
+.kpi-v2-badges{border-top:1px solid rgba(255,255,255,.06);margin-top:10px;padding-top:6px}
+.kpi-v2-badge{display:flex;align-items:center;gap:6px;padding:2px 0;white-space:nowrap;min-width:0}
+.kpi-v2-blbl{font-size:11px;color:var(--text2);font-weight:600;min-width:38px}
+.kpi-v2-pill{font-size:11px;font-weight:700;border-radius:10px;padding:1px 7px;overflow:hidden;text-overflow:ellipsis}
+/* Les éléments de grille ne doivent jamais élargir la page : un tableau trop large défile dans sa carte */
+.dash-grid-2>*,.dash-grid-4>*{min-width:0}
+#ca-ops-wrap,#dep-ops-wrap,#tres-ops-wrap{overflow:auto!important}

@@ -823,7 +823,7 @@ function mktFmtPeriod(period, short) {
 // Les polices standard des PDF (WinAnsi) ne supportent pas l'espace fine insécable
 // (U+202F) utilisée par défaut par toLocaleString('fr-FR') pour grouper les milliers :
 // jsPDF retombe alors sur un caractère parasite ("/"). On la remplace par un espace normal.
-function mktFmtNum(n, opts) { return n.toLocaleString('fr-FR', opts).replace(/[  ]/g, ' '); }
+function mktFmtNum(n, opts) { return n.toLocaleString('fr-FR', opts).replace(/[  ]/g, ' '); }
 function mktFmtEUR(n) { return mktFmtNum(Math.round(n)) + ' €'; }
 function mktFmtK(n) {
   if (Math.abs(n) >= 1000) return mktFmtNum(n / 1000, { maximumFractionDigits: 1 }) + ' k€';

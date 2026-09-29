@@ -107,7 +107,7 @@ function importAmortFile(input) {
       const amorts = dataRows.map(r => ({
         libelle:   String(r[iLib]||'').trim(),
         dateAchat: (function(v){ if(!v) return ''; if(v instanceof Date){ var d=v.getDate().toString().padStart(2,'0'), m=(v.getMonth()+1).toString().padStart(2,'0'), y=v.getFullYear(); return d+'/'+m+'/'+y; } return String(v).trim(); })(r[iDate]),
-        valeurHT:  (function(v){ if(typeof v==='number') return Math.round(v*100)/100; var s=String(v||'0').replace(/[\s\u00a0\u202f\u2009\u200a]+/g,'').replace(/[\u20ac$\xa3]/g,'').trim(); if(!s||s==='-') return 0; var hasDot=s.indexOf('.')>=0,hasComma=s.indexOf(',')>=0; if(hasDot&&hasComma){ if(s.lastIndexOf('.')>s.lastIndexOf(',')){ s=s.replace(/,/g,''); } else { s=s.replace(/\./g,'').replace(',','.'); } } else if(hasComma){ var p=s.split(','); if(p.length===2&&p[1].length<=2){ s=s.replace(',','.'); } else { s=s.replace(/,/g,''); } } var r2=parseFloat(s); return isNaN(r2)?0:Math.round(r2*100)/100; })(r[iVal]),
+        valeurHT:  (function(v){ if(typeof v==='number') return Math.round(v*100)/100; var s=String(v||'0').replace(/[\s\u00a0\u00a0\u2009\u200a]+/g,'').replace(/[\u20ac$\xa3]/g,'').trim(); if(!s||s==='-') return 0; var hasDot=s.indexOf('.')>=0,hasComma=s.indexOf(',')>=0; if(hasDot&&hasComma){ if(s.lastIndexOf('.')>s.lastIndexOf(',')){ s=s.replace(/,/g,''); } else { s=s.replace(/\./g,'').replace(',','.'); } } else if(hasComma){ var p=s.split(','); if(p.length===2&&p[1].length<=2){ s=s.replace(',','.'); } else { s=s.replace(/,/g,''); } } var r2=parseFloat(s); return isNaN(r2)?0:Math.round(r2*100)/100; })(r[iVal]),
         duree:     parseInt(String(r[iDur]||'0').replace(/[^\d]/g,'')) || 0,
         methode:   'Lin\u00e9aire',
         lot:       '',
@@ -1011,7 +1011,7 @@ function updateLimPreview(){
   var iC=+document.getElementById("lim-col-cap").value;
   var iI=+document.getElementById("lim-col-int").value;
   var data=_limRows.slice(1).filter(Boolean).slice(0,3);
-  var f=function(v){return (()=>{const _v=parseFloat(v||0);const _a=Math.abs(_v);const _i=Math.floor(_a);const _d=Math.round((_a-_i)*100).toString().padStart(2,'0');return ((_v<0?'-':'')+String(_i).replace(/\B(?=(\d{3})+(?!\d))/g,'\u202f')+','+_d+'\u202f€')})()+" €";};
+  var f=function(v){return (()=>{const _v=parseFloat(v||0);const _a=Math.abs(_v);const _i=Math.floor(_a);const _d=Math.round((_a-_i)*100).toString().padStart(2,'0');return ((_v<0?'-':'')+String(_i).replace(/\B(?=(\d{3})+(?!\d))/g,'\u00a0')+','+_d+'\u00a0€')})()+" €";};
   document.getElementById("lim-preview").innerHTML=
     "<div style='font-size:11px;color:var(--text2);margin-bottom:8px'>Aperçu - 3 premières lignes</div>"+
     (data.length?data.map(function(r){

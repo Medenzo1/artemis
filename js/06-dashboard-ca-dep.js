@@ -71,10 +71,10 @@ function _renderSynCA() {
     '</div>'+
     '<div class="card" style="margin-bottom:18px">'+
       '<div class="card-title" style="justify-content:space-between">'+
-        '<span>CA — évolution '+gran+'</span>'+
+        '<span>CA — évolution mensuelle</span>'+
         _chartModeToggleHtml('window._redrawCaChart')+
       '</div>'+
-      '<div style="position:relative;width:100%;height:220px">'+
+      '<div class="ac-wrap">'+
         '<canvas id="'+chartId+'" style="width:100%;height:100%"></canvas>'+
       '</div>'+
     '</div>'+
@@ -134,7 +134,7 @@ function _renderSynCA() {
             '<canvas id="ca-donut-cv" style="display:block;width:100%;height:260px;cursor:default"></canvas>'+
             '<div id="ca-donut-tip" style="display:none;position:absolute;pointer-events:none;background:var(--bg2);border:1px solid var(--border2);border-radius:8px;padding:8px 12px;font-size:11px;box-shadow:0 8px 24px rgba(0,0,0,.5);min-width:140px;z-index:10"></div>'+
           '</div>'+
-          '<div id="ca-donut-legend" style="margin-top:12px;display:flex;flex-direction:column;gap:5px"></div>'+
+          '<div id="ca-donut-legend" style="margin-top:12px;display:flex;flex-direction:column;gap:1px"></div>'+
         '</div>'+
       '</div>'+
     '</div>'+
@@ -149,338 +149,27 @@ function _renderSynCA() {
     if (kpis.length > 1) {
       kpis.forEach(k => k.style.height = '');
       const maxH = Math.max(...[...kpis].map(k => k.offsetHeight));
-      kpis.forEach(k => k.style.height = maxH + 'px');
+      // hauteur égale par ligne : assurée par la grille CSS (align-items:stretch)
     }
   });
 
-  // Draw area chart on canvas
+  // Courbe d'évolution (moteur commun ArtCharts)
   const _drawAreaChart = () => {
-    const cv = document.getElementById(chartId);
-    if (!cv) return;
-    const dpr = window.devicePixelRatio || 1;
-    const rect = cv.parentElement.getBoundingClientRect();
-    const W = rect.width || cv.parentElement.clientWidth; const H = rect.height || 220;
-    cv.width  = W * dpr; cv.height = H * dpr;
-    cv.style.width  = W + 'px'; cv.style.height = H + 'px';
-    const cx = cv.getContext('2d');
-    cx.scale(dpr, dpr);
-
-    const PAD = { top: 28, right: 24, bottom: 44, left: 58 };
-    const cW = W - PAD.left - PAD.right;
-    const cH = H - PAD.top  - PAD.bottom;
-
-    const rawVals = pEntries.map(([,v]) => v);
-    const labels = pEntries.map(([l]) => l);
-    // Cumulé ou mensuel selon le mode
-    let cumul = 0;
-    const vals = _chartMode === 'cumul'
-      ? rawVals.map(v => { cumul += v; return cumul; })
-      : rawVals;
-    const maxV = Math.max(...vals, 1);
-    const minV = Math.min(...vals, 0);
-    const range = maxV - minV || 1;
-
-    const scale = _niceScale(minV, maxV, 5);
-    const axisMin = scale.min, axisMax = scale.max, axisTicks = scale.ticks;
-
-    const xOf = i => PAD.left + (i / Math.max(vals.length - 1, 1)) * cW;
-    const yOf = v => PAD.top  + cH - ((v - axisMin) / (axisMax - axisMin || 1)) * cH;
-
-    // Grid lines (horizontal, dotted)
-    cx.setLineDash([3, 5]);
-    cx.lineWidth = 1;
-    cx.strokeStyle = 'rgba(255,255,255,0.06)';
-    axisTicks.forEach(v => {
-      const y = yOf(v);
-      if (y >= PAD.top - 2 && y <= PAD.top + cH + 2) {
-        cx.beginPath(); cx.moveTo(PAD.left, y); cx.lineTo(PAD.left + cW, y); cx.stroke();
-      }
-    });
-    cx.setLineDash([]);
-
-    // Y axis labels
-    cx.font = '10px Archivo, sans-serif';
-    cx.fillStyle = 'rgba(126,143,168,0.8)';
-    cx.textAlign = 'right';
-    axisTicks.forEach(v => {
-      const y = yOf(v);
-      if (y >= PAD.top - 2 && y <= PAD.top + cH + 2) {
-        const lbl = Math.round(v).toLocaleString('fr-FR')+' €';
-        cx.fillText(lbl, PAD.left - 8, y + 3.5);
-      }
-    });
-
-    // Area fill (gradient)
-    const grad = cx.createLinearGradient(0, PAD.top, 0, PAD.top + cH);
-    grad.addColorStop(0,   'rgba(34,211,200,0.30)');
-    grad.addColorStop(0.5, 'rgba(34,211,200,0.10)');
-    grad.addColorStop(1,   'rgba(34,211,200,0.00)');
-    cx.beginPath();
-    cx.moveTo(xOf(0), yOf(vals[0]));
-    for (let i = 1; i < vals.length; i++) cx.lineTo(xOf(i), yOf(vals[i]));
-    cx.lineTo(xOf(vals.length - 1), PAD.top + cH);
-    cx.lineTo(xOf(0), PAD.top + cH);
-    cx.closePath();
-    cx.fillStyle = grad;
-    cx.fill();
-
-    // Line stroke
-    cx.beginPath();
-    cx.moveTo(xOf(0), yOf(vals[0]));
-    for (let i = 1; i < vals.length; i++) cx.lineTo(xOf(i), yOf(vals[i]));
-    cx.strokeStyle = '#22d3c8';
-    cx.lineWidth = 2.5;
-    cx.lineJoin = 'round';
-    cx.stroke();
-
-    // Data point dots + labels
-    cx.font = 'bold 9px Archivo,sans-serif';
-    for (let i = 0; i < vals.length; i++) {
-      const x = xOf(i); const y = yOf(vals[i]);
-      // Dot
-      cx.beginPath(); cx.arc(x, y, 3.5, 0, Math.PI*2);
-      cx.fillStyle = '#22d3c8'; cx.fill();
-      cx.strokeStyle = '#0b0d12'; cx.lineWidth = 1.5; cx.stroke();
-      // Value label — only first, last, and on hover (too many = cluttered)
-      const showLabel = vals.length <= 6 || i === 0 || i === vals.length - 1;
-      if (showLabel && vals[i] > 0) {
-        const lbl = Math.round(vals[i]).toLocaleString('fr-FR')+' €';
-        // Adaptive alignment: left-align first point, right-align last, center others
-        const isFirst = i === 0;
-        const isLast  = i === vals.length - 1;
-        cx.textAlign = isFirst ? 'left' : isLast ? 'right' : 'center';
-        const lx = isFirst ? x + 6 : isLast ? x - 6 : x;
-        const ly = y - 13;
-        // Background pill for readability
-        cx.font = 'bold 9px Archivo,sans-serif';
-        const tw = cx.measureText(lbl).width;
-        const pad = 4;
-        const bx = cx.textAlign === 'left' ? lx - pad : cx.textAlign === 'right' ? lx - tw - pad : lx - tw/2 - pad;
-        cx.fillStyle = 'rgba(11,13,18,0.72)';
-        cx.beginPath();
-        cx.roundRect(bx, ly - 9, tw + pad*2, 13, 3);
-        cx.fill();
-        // Text
-        cx.fillStyle = 'rgba(34,211,200,0.95)';
-        cx.fillText(lbl, lx, ly);
-      }
-    }
-
-    // X axis labels
-    cx.font = '9px Archivo, sans-serif';
-    cx.fillStyle = 'rgba(126,143,168,0.7)';
-    cx.textAlign = 'center';
-    const step = vals.length <= 12 ? 1 : Math.ceil(vals.length / 12);
-    for (let i = 0; i < labels.length; i += step) {
-      cx.fillText(labels[i], xOf(i), PAD.top + cH + 16);
-    }
-  }; // end _drawAreaChart
+    const raw = pEntries.map(([,v]) => v); let c = 0;
+    ArtCharts.area(document.getElementById(chartId), {
+      labels: pEntries.map(([l]) => l), values: _chartMode === 'cumul' ? raw.map(v => c += v) : raw,
+      color: '#22d3c8', name: _chartMode === 'cumul' ? 'CA cumulé' : 'CA' });
+  };
   requestAnimationFrame(_drawAreaChart);
   window._redrawCaChart = _drawAreaChart;
 
-  // Re-draw area chart on resize
-  if (window._caAreaRO) window._caAreaRO.disconnect();
-  window._caAreaRO = new ResizeObserver(() => requestAnimationFrame(_drawAreaChart));
-  const areaCv = document.getElementById(chartId);
-  if (areaCv) window._caAreaRO.observe(areaCv.parentElement);
-
-  // ── Donut répartition par catégorie ─────────
+  // ── Anneau répartition par catégorie ────────
   requestAnimationFrame(() => {
-    const cv = document.getElementById('ca-donut-cv');
-    if (!cv) return;
-
     const catMapD = {};
-    lines.forEach(l => {
-      const k = l.cat||l.categorie||'Autre';
-      const v = parseFloat(l.montant||0);
-      if (v > 0) catMapD[k] = (catMapD[k]||0) + v;
-    });
-    const entries = Object.entries(catMapD).sort((a,b)=>b[1]-a[1]);
-    const total = entries.reduce((s,[,v])=>s+v, 0);
-    if (!total) return;
-
-    const PALETTE = ['#22d3c8','#22c97a','#9b6ef3','#f5b731','#f0566a','#38bdf8','#a3e635','#fb923c','#e879f9','#34d399'];
-
-    const resizeAndDraw = () => {
-    const dpr = window.devicePixelRatio || 1;
-    const W = cv.parentElement.clientWidth;
-    const H = 260;
-    cv.width  = W * dpr; cv.height = H * dpr;
-    cv.style.width  = W + 'px'; cv.style.height = H + 'px';
-    const ctx = cv.getContext('2d');
-    ctx.scale(dpr, dpr);
-
-    const cx0 = W / 2, cy0 = H / 2 - 5;
-    const R = Math.max(10, Math.min(W, H) / 2 - 14);
-    const r = R * 0.52;
-
-    // Build slice data with start/end angles
-    const slices = [];
-    let angle = -Math.PI / 2;
-    entries.forEach(([cat, val], i) => {
-      const sweep = (val / total) * Math.PI * 2;
-      slices.push({ cat, val, color: PALETTE[i % PALETTE.length], a0: angle, a1: angle + sweep });
-      angle += sweep;
-    });
-
-    // Draw function
-    const draw = (hovered) => {
-      ctx.clearRect(0, 0, W, H);
-      slices.forEach((s, i) => {
-        const isHov = i === hovered;
-        const rOut  = isHov ? R + 6 : R;
-        ctx.beginPath();
-        ctx.moveTo(cx0, cy0);
-        ctx.arc(cx0, cy0, rOut, s.a0, s.a1);
-        ctx.closePath();
-        ctx.fillStyle = isHov ? s.color : s.color + 'cc';
-        ctx.fill();
-        ctx.strokeStyle = '#111318';
-        ctx.lineWidth   = isHov ? 2 : 1.5;
-        ctx.stroke();
-      });
-      // Hole
-      ctx.beginPath();
-      ctx.arc(cx0, cy0, r, 0, Math.PI * 2);
-      ctx.fillStyle = '#111318';
-      ctx.fill();
-      // Center label
-      if (hovered !== null && hovered >= 0 && slices[hovered]) {
-        const s = slices[hovered];
-        const pct = ((s.val/total)*100).toFixed(1);
-        ctx.font = 'bold 13px Archivo,sans-serif';
-        ctx.fillStyle = s.color;
-        ctx.textAlign = 'center';
-        const fmtV = Math.round(s.val).toLocaleString('fr-FR')+' €';
-        ctx.fillText('+'+fmtV, cx0, cy0 + 2);
-        ctx.font = '9px Archivo,sans-serif';
-        ctx.fillStyle = 'rgba(126,143,168,0.8)';
-        ctx.fillText(pct+'%', cx0, cy0 + 15);
-      } else {
-        ctx.font = 'bold 13px Archivo,sans-serif';
-        ctx.fillStyle = '#e2e8f3';
-        ctx.textAlign = 'center';
-        const fmtT = Math.round(total).toLocaleString('fr-FR')+' €';
-        ctx.fillText('+'+fmtT, cx0, cy0 + 2);
-        ctx.font = '9px Archivo,sans-serif';
-        ctx.fillStyle = 'rgba(126,143,168,0.8)';
-        ctx.fillText('CA total', cx0, cy0 + 15);
-      }
-    };
-
-    draw(null);
-
-    // Tooltip hover
-    const tip = document.getElementById('ca-donut-tip');
-    const hitTest = (mx, my) => {
-      const dx = mx - cx0, dy = my - cy0;
-      const dist = Math.sqrt(dx*dx + dy*dy);
-      if (dist < r || dist > R + 8) return -1;
-      let a = Math.atan2(dy, dx);
-      if (a < -Math.PI/2) a += Math.PI*2;
-      // normalize to start at -PI/2
-      const aNorm = ((a + Math.PI/2) + Math.PI*2) % (Math.PI*2);
-      for (let i = 0; i < slices.length; i++) {
-        const a0 = ((slices[i].a0 + Math.PI/2) + Math.PI*2) % (Math.PI*2);
-        const a1 = ((slices[i].a1 + Math.PI/2) + Math.PI*2) % (Math.PI*2);
-        if (a0 <= a1 ? (aNorm >= a0 && aNorm < a1) : (aNorm >= a0 || aNorm < a1)) return i;
-      }
-      return -1;
-    };
-
-    // Remove previous listeners by replacing canvas clone
-    cv.onmousemove = (e) => {
-      const rect = cv.getBoundingClientRect();
-      // Scale mouse coords to canvas logical size
-      const scaleX = W / rect.width;
-      const scaleY = H / rect.height;
-      const mx = (e.clientX - rect.left) * scaleX;
-      const my = (e.clientY - rect.top)  * scaleY;
-      const idx = hitTest(mx, my);
-      draw(idx >= 0 ? idx : null);
-      // Cursor: pointer only when over a real slice
-      cv.style.cursor = idx >= 0 ? 'pointer' : 'default';
-      if (idx >= 0 && tip) {
-        const s = slices[idx];
-        const pct = ((s.val/total)*100).toFixed(1);
-        const fmtV = (()=>{const _v=s.val;const _a=Math.abs(_v);const _i=Math.floor(_a);const _d=Math.round((_a-_i)*100).toString().padStart(2,'0');return ((_v<0?'-':'')+String(_i).replace(/\B(?=(\d{3})+(?!\d))/g,'\u202f')+','+_d+'\u202f€')})();
-        tip.style.display = 'block';
-        tip.style.width = '170px';
-        tip.innerHTML =
-          '<div style="display:flex;align-items:center;gap:7px;margin-bottom:7px">'+
-            '<div style="width:9px;height:9px;border-radius:50%;background:'+s.color+';flex-shrink:0"></div>'+
-            '<span style="font-weight:700;color:#e2e8f3;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+s.cat+'</span>'+
-          '</div>'+
-          '<div style="font-family:inherit;font-size:14px;font-weight:800;color:var(--green);letter-spacing:.02em">+'+fmtV+' €</div>'+
-          '<div style="font-size:11px;color:var(--text2);margin-top:4px">'+pct+'% du CA total</div>';
-        // Position: follow cursor, keep inside canvas bounds
-        const tipW = 182, tipH = 82;
-        let tx = (e.clientX - rect.left) + 14;
-        let ty = (e.clientY - rect.top)  - 30;
-        if (tx + tipW > rect.width)  tx = (e.clientX - rect.left) - tipW - 10;
-        if (ty < 4) ty = 4;
-        if (ty + tipH > rect.height) ty = rect.height - tipH - 4;
-        tip.style.left = tx + 'px';
-        tip.style.top  = ty + 'px';
-      } else if (tip) {
-        tip.style.display = 'none';
-      }
-    };
-    cv.onmouseleave = () => {
-      draw(null);
-      cv.style.cursor = 'default';
-      if (tip) tip.style.display = 'none';
-    };
-
-    // Legend
-    const legend = document.getElementById('ca-donut-legend');
-    if (legend) {
-      legend.innerHTML = entries.slice(0,6).map(([cat, val], i) => {
-        const pct = ((val/total)*100).toFixed(1);
-        const color = PALETTE[i % PALETTE.length];
-        const fmtV = Math.round(val).toLocaleString('fr-FR')+' €';
-        return '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:pointer" onmouseenter="_donutHover('+i+')" onmouseleave="_donutHover(null)">'+
-          '<div style="display:flex;align-items:center;gap:6px;min-width:0">'+
-            '<div style="width:8px;height:8px;border-radius:50%;background:'+color+';flex-shrink:0"></div>'+
-            '<span style="font-size:11px;color:rgba(226,232,243,0.8);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+cat+'</span>'+
-          '</div>'+
-          '<div style="display:flex;gap:8px;flex-shrink:0">'+
-            '<span style="font-size:11px;font-family:inherit;color:var(--green);font-weight:600">+'+fmtV+'</span>'+
-            '<span style="font-size:11px;color:var(--text2);width:36px;text-align:right">'+pct+'%</span>'+
-          '</div>'+
-        '</div>';
-      }).join('');
-      if (entries.length > 6) {
-        const rest = entries.slice(6).reduce((s,[,v])=>s+v,0);
-        const pct  = ((rest/total)*100).toFixed(1);
-        const fmtV = Math.round(rest).toLocaleString('fr-FR')+' €';
-        legend.innerHTML += '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px">'+
-          '<div style="display:flex;align-items:center;gap:6px">'+
-            '<div style="width:8px;height:8px;border-radius:50%;background:rgba(126,143,168,0.4);flex-shrink:0"></div>'+
-            '<span style="font-size:11px;color:var(--text2)">Autres ('+(entries.length-6)+')</span>'+
-          '</div>'+
-          '<div style="display:flex;gap:8px;flex-shrink:0">'+
-            '<span style="font-size:11px;font-family:inherit;color:var(--green)">+'+fmtV+'</span>'+
-            '<span style="font-size:11px;color:var(--text2);width:36px;text-align:right">'+pct+'%</span>'+
-          '</div>'+
-        '</div>';
-      }
-    }
-
-    // Expose draw for legend hover
-    window._caDonutDraw  = draw;
-    window._caDonutSlices = slices;
-    }; // end resizeAndDraw
-
-    resizeAndDraw();
-
-    // Re-draw on resize
-    if (window._caDonutRO) window._caDonutRO.disconnect();
-    window._caDonutRO = new ResizeObserver(() => {
-      resizeAndDraw();
-      if (window._caDonutDraw) window._caDonutDraw(null);
-    });
-    window._caDonutRO.observe(cv.parentElement);
+    lines.forEach(l => { const k = l.cat||l.categorie||'Autre', v = parseFloat(l.montant||0); if (v > 0) catMapD[k] = (catMapD[k]||0) + v; });
+    ArtCharts.donut(document.getElementById('ca-donut-cv'), {
+      entries: Object.entries(catMapD).sort((a,b)=>b[1]-a[1]), palette: ['#22d3c8','#22c97a','#9b6ef3','#f5b731','#38bdf8','#fb923c'],
+      centerLabel: 'CA total', sign: '+', valueColor: '#22c97a', legendEl: document.getElementById('ca-donut-legend') });
   });
 
   // ── Waterfall drivers ────────────────────────
@@ -617,118 +306,11 @@ function _renderCaWaterfall(el) {
     '</div>'+
     '<div id="ca-wf-narrative" style="margin-top:16px;border-top:1px solid var(--border);padding-top:4px"></div>';
 
-  const _drawWaterfall = () => {
-    const cv = document.getElementById(wfId);
-    if (!cv) return;
-    const dpr = window.devicePixelRatio || 1;
-    // Use the card element width to avoid measuring an already-oversized canvas
-    const W = Math.floor(wfEl.clientWidth - 32); // subtract card padding
-    const rowH = 52;
-    const H   = drivers.length * rowH + 40;
-    cv.width  = W * dpr; cv.height = H * dpr;
-    cv.style.width  = W + 'px'; cv.style.height = H + 'px';
-    cv.style.height = H + 'px'; // also fix HTML height
-    const cx = cv.getContext('2d');
-    cx.scale(dpr, dpr);
-
-    // Bidirectional: positive → right (green), negative → left (red)
-    const LBL_W = 160, VAL_W = 90, PAD_L = 8, PAD_R = 4;
-    // Bar zone: from LBL_W to W, split in half at AXIS_X
-    // Each half = (W - LBL_W) / 2, minus VAL_W for the value label
-    const HALF_ZONE = (W - LBL_W) / 2;
-    const AXIS_X = LBL_W + HALF_ZONE;
-    const halfMax = Math.max(10, HALF_ZONE - VAL_W);
-
-    // Clip everything to canvas bounds
-    cx.save(); cx.beginPath(); cx.rect(0, 0, W, H); cx.clip();
-
-    // Draw centre axis line
-    cx.strokeStyle = 'rgba(255,255,255,0.12)';
-    cx.lineWidth = 1; cx.setLineDash([]);
-    cx.beginPath(); cx.moveTo(AXIS_X, 0); cx.lineTo(AXIS_X, H); cx.stroke();
-
-    drivers.forEach((d, i) => {
-      const y = i * rowH + 10;
-      // CA: positive delta = good (green right), negative = bad (red left)
-      const isPos = d.delta >= 0;
-      const color = isPos ? '#22c97a' : '#f0566a';
-      const colorFill = isPos ? 'rgba(34,201,122,0.18)' : 'rgba(240,86,106,0.18)';
-      const barW = Math.min(halfMax, Math.max(4, (Math.abs(d.delta) / maxAbs) * halfMax));
-      const pct  = d.p2 > 0 ? ((d.delta/d.p2)*100) : (d.delta > 0 ? 100 : -100);
-      // Bar starts at axis, goes right (pos) or left (neg)
-      const barX = isPos ? AXIS_X : AXIS_X - barW;
-
-      // Label (left side)
-      const parts = d.key.split(' · ');
-      const catLbl = parts[0] || d.key, bienLbl = parts[1] || '';
-      const maxLblW = LBL_W - PAD_L - 6;
-      cx.font = 'bold 10px Archivo,sans-serif'; cx.fillStyle = 'rgba(226,232,243,0.9)'; cx.textAlign = 'left';
-      let catTxt = catLbl;
-      while (cx.measureText(catTxt).width > maxLblW && catTxt.length > 4) catTxt = catTxt.slice(0,-1);
-      if (catTxt !== catLbl) catTxt += '…';
-      cx.fillText(catTxt, PAD_L, y + 13);
-      if (bienLbl) {
-        cx.font = '9px Archivo,sans-serif'; cx.fillStyle = 'rgba(126,143,168,0.8)';
-        let bTxt = bienLbl;
-        while (cx.measureText(bTxt).width > maxLblW && bTxt.length > 4) bTxt = bTxt.slice(0,-1);
-        if (bTxt !== bienLbl) bTxt += '…';
-        cx.fillText(bTxt, PAD_L, y + 26);
-      }
-
-      // Bar background = exactly the half zone (clip handles the rest)
-      const bgW = W - AXIS_X - 2;  // right half available
-      cx.fillStyle = 'rgba(255,255,255,0.03)';
-      cx.beginPath();
-      if (isPos) cx.roundRect(AXIS_X, y+2, bgW, rowH-16, [0,4,4,0]);
-      else       cx.roundRect(LBL_W, y+2, AXIS_X - LBL_W, rowH-16, [4,0,0,4]);
-      cx.fill();
-
-      // Bar fill
-      cx.fillStyle = colorFill; cx.strokeStyle = color; cx.lineWidth = 1;
-      cx.beginPath(); cx.roundRect(barX, y+2, barW, rowH-16, 4); cx.fill(); cx.stroke();
-
-      // Value label: outside bar tip
-      cx.font = 'bold 11px Archivo,sans-serif'; cx.fillStyle = color;
-      const deltaStr = (d.delta>=0?'+':'')+Math.round(d.delta).toLocaleString('fr-FR')+' €';
-      const pctStr = (pct>=0?'+':'')+pct.toFixed(0)+'%';
-      if (isPos) {
-        // Value to the right of bar, clamped to canvas right edge
-        const vx = Math.min(AXIS_X + barW + 6, W - VAL_W + 2);
-        cx.textAlign = 'left';
-        cx.fillText(deltaStr, vx, y + 14);
-        cx.font = '9px Archivo,sans-serif'; cx.fillStyle = 'rgba(126,143,168,0.7)';
-        cx.fillText(pctStr, vx, y + 26);
-      } else {
-        // Value to the left of bar, clamped to left edge (LBL_W)
-        const vx = Math.max(AXIS_X - barW - 6, LBL_W + 2);
-        cx.textAlign = 'right';
-        cx.fillText(deltaStr, vx, y + 14);
-        cx.font = '9px Archivo,sans-serif'; cx.fillStyle = 'rgba(126,143,168,0.7)';
-        cx.fillText(pctStr, vx, y + 26);
-      }
-      cx.textAlign = 'left';
-
-      // Separator
-      if (i < drivers.length - 1) {
-        cx.strokeStyle = 'rgba(35,42,56,0.8)';
-        cx.lineWidth = 1;
-        cx.setLineDash([3,4]);
-        cx.beginPath();
-        cx.moveTo(0, y + rowH - 2);
-        cx.lineTo(W, y + rowH - 2);
-        cx.stroke();
-        cx.setLineDash([]);
-      }
-    });
-
-  }; // end _drawWaterfall
-  requestAnimationFrame(_drawWaterfall);
-
-  // Re-draw waterfall on resize
-  if (window._caWfRO) window._caWfRO.disconnect();
-  window._caWfRO = new ResizeObserver(() => requestAnimationFrame(_drawWaterfall));
-  const wfCv = document.getElementById(wfId);
-  if (wfCv) window._caWfRO.observe(wfCv.parentElement);
+  const _wfRows = drivers.map(d => { const parts = d.key.split(' · ');
+    return { label: parts[0] || d.key, sub: parts[1] || '', delta: d.delta, p1: d.p1, p2: d.p2,
+             pct: d.p2 ? d.delta / Math.abs(d.p2) * 100 : undefined }; });
+  requestAnimationFrame(() => ArtCharts.diverging(document.getElementById(wfId), {
+    rows: _wfRows, upIsGood: true, p1Label: 'P1 · '+fmtFR(p1Min)+' → '+fmtFR(p1Max), p2Label: 'P2 · '+fmtFR(p2Min)+' → '+fmtFR(p2Max) }));
 
     // ── Narrative bullets ────────────────────
     const narrativeEl = document.getElementById('ca-wf-narrative');
@@ -744,12 +326,12 @@ function _renderCaWaterfall(el) {
 
     // Bullet 1 — résumé global
     const sign = totalDelta >= 0 ? '+' : '';
-    const trend = totalDelta >= 0 ? '↑ Progression' : '↓ Recul';
+    const trend = totalDelta >= 0 ? 'Progression globale' : 'Recul global';
     const trendColor = totalDelta >= 0 ? 'var(--green)' : 'var(--red)';
     bullets.push({
       icon: totalDelta >= 0 ? '📈' : '📉',
       color: trendColor,
-      text: '<strong>'+trend+' globale</strong> — Le CA de P1 ('+p1Label+') '+
+      text: '<strong>'+trend+'</strong> — Le CA de P1 ('+p1Label+') '+
             (totalDelta>=0?'progresse de <strong style="color:var(--green)">'+fmtAmt(totalDelta)+'</strong>':'recule de <strong style="color:var(--red)">'+fmtAmt(totalDelta)+'</strong>')+
             ' par rapport à P2 ('+p2Label+') sur une fenêtre de <strong>'+mthLabel(driver)+'</strong>.'
     });
@@ -882,10 +464,10 @@ function _renderSynDepenses() {
     '</div>'+
     '<div class="card" style="margin-bottom:18px">'+
       '<div class="card-title" style="justify-content:space-between">'+
-        '<span>Dépenses — évolution '+gran+'</span>'+
+        '<span>Dépenses — évolution mensuelle</span>'+
         _chartModeToggleHtml('window._redrawDepChart')+
       '</div>'+
-      '<div style="position:relative;width:100%;height:220px">'+
+      '<div class="ac-wrap">'+
         '<canvas id="'+chartId+'" style="width:100%;height:100%"></canvas>'+
       '</div>'+
     '</div>'+
@@ -940,7 +522,7 @@ function _renderSynDepenses() {
             '<canvas id="dep-donut-cv" style="display:block;width:100%;height:260px;cursor:default"></canvas>'+
             '<div id="dep-donut-tip" style="display:none;position:absolute;pointer-events:none;background:var(--bg2);border:1px solid var(--border2);border-radius:8px;padding:8px 12px;font-size:11px;box-shadow:0 8px 24px rgba(0,0,0,.5);min-width:140px;z-index:10"></div>'+
           '</div>'+
-          '<div id="dep-donut-legend" style="margin-top:12px;display:flex;flex-direction:column;gap:5px"></div>'+
+          '<div id="dep-donut-legend" style="margin-top:12px;display:flex;flex-direction:column;gap:1px"></div>'+
         '</div>'+
       '</div>'+
     '</div>'+
@@ -952,245 +534,24 @@ function _renderSynDepenses() {
     if (kpis.length > 1) {
       kpis.forEach(k => k.style.height = '');
       const maxH = Math.max(...[...kpis].map(k => k.offsetHeight));
-      kpis.forEach(k => k.style.height = maxH + 'px');
+      // hauteur égale par ligne : assurée par la grille CSS (align-items:stretch)
     }
   });
 
-  // Draw area chart — RED theme for depenses
+  // Courbe d'évolution (moteur commun ArtCharts)
   const _drawDepArea = () => {
-    const cv = document.getElementById(chartId);
-    if (!cv) return;
-    const dpr = window.devicePixelRatio || 1;
-    const rect = cv.parentElement.getBoundingClientRect();
-    const W = rect.width || cv.parentElement.clientWidth; const H = rect.height || 220;
-    cv.width = W*dpr; cv.height = H*dpr;
-    cv.style.width = W+'px'; cv.style.height = H+'px';
-    const cx = cv.getContext('2d');
-    cx.scale(dpr, dpr);
-
-    const PAD = { top:28, right:24, bottom:44, left:58 };
-    const cW = W-PAD.left-PAD.right;
-    const cH = H-PAD.top-PAD.bottom;
-    const rawVals = pEntries.map(([,v])=>v);
-    const labels = pEntries.map(([l])=>l);
-    let cumul2 = 0;
-    const vals = _chartMode === 'cumul'
-      ? rawVals.map(v => { cumul2 += v; return cumul2; })
-      : rawVals;
-    const maxV = Math.max(...vals,1);
-    const minV2 = Math.min(...vals, 0);
-    const scaleD = _niceScale(minV2, maxV, 5);
-    const xOf = i => PAD.left+(i/Math.max(vals.length-1,1))*cW;
-    const yOf = v => PAD.top+cH-((v-scaleD.min)/(scaleD.max-scaleD.min||1))*cH;
-
-    // Grid
-    cx.setLineDash([3,5]); cx.lineWidth=1; cx.strokeStyle='rgba(255,255,255,0.06)';
-    scaleD.ticks.forEach(v => {
-      const y=yOf(v);
-      if(y>=PAD.top-2&&y<=PAD.top+cH+2){cx.beginPath();cx.moveTo(PAD.left,y);cx.lineTo(PAD.left+cW,y);cx.stroke();}
-    });
-    cx.setLineDash([]);
-
-    // Y labels
-    cx.font='10px Archivo,sans-serif'; cx.fillStyle='rgba(126,143,168,0.8)'; cx.textAlign='right';
-    scaleD.ticks.forEach(v => {
-      const y=yOf(v);
-      if(y>=PAD.top-2&&y<=PAD.top+cH+2)
-        cx.fillText(Math.round(v).toLocaleString('fr-FR')+' €', PAD.left-8, y+3.5);
-    });
-
-    // Area fill — red gradient
-    const grad = cx.createLinearGradient(0,PAD.top,0,PAD.top+cH);
-    grad.addColorStop(0,'rgba(240,86,106,0.30)');
-    grad.addColorStop(0.5,'rgba(240,86,106,0.10)');
-    grad.addColorStop(1,'rgba(240,86,106,0.00)');
-    cx.beginPath(); cx.moveTo(xOf(0),yOf(vals[0]));
-    for(let i=1;i<vals.length;i++) cx.lineTo(xOf(i),yOf(vals[i]));
-    cx.lineTo(xOf(vals.length-1),PAD.top+cH); cx.lineTo(xOf(0),PAD.top+cH);
-    cx.closePath(); cx.fillStyle=grad; cx.fill();
-
-    // Line
-    cx.beginPath(); cx.moveTo(xOf(0),yOf(vals[0]));
-    for(let i=1;i<vals.length;i++) cx.lineTo(xOf(i),yOf(vals[i]));
-    cx.strokeStyle='#f0566a'; cx.lineWidth=2.5; cx.lineJoin='round'; cx.stroke();
-
-    // Points + labels
-    cx.font='bold 9px Archivo,sans-serif';
-    for(let i=0;i<vals.length;i++){
-      const x=xOf(i),y=yOf(vals[i]);
-      cx.beginPath();cx.arc(x,y,3.5,0,Math.PI*2);
-      cx.fillStyle='#f0566a';cx.fill();
-      cx.strokeStyle='#0b0d12';cx.lineWidth=1.5;cx.stroke();
-      const showLabel = vals.length <= 6 || i === 0 || i === vals.length - 1;
-      if(showLabel && vals[i]>0){
-        const lbl=Math.round(vals[i]).toLocaleString('fr-FR')+' €';
-        const isFirst=i===0, isLast=i===vals.length-1;
-        cx.textAlign = isFirst?'left':isLast?'right':'center';
-        const lx=isFirst?x+6:isLast?x-6:x, ly=y-13;
-        const tw=cx.measureText(lbl).width, pad=4;
-        const bx=cx.textAlign==='left'?lx-pad:cx.textAlign==='right'?lx-tw-pad:lx-tw/2-pad;
-        cx.fillStyle='rgba(11,13,18,0.72)';
-        cx.beginPath();cx.roundRect(bx,ly-9,tw+pad*2,13,3);cx.fill();
-        cx.fillStyle='rgba(240,86,106,0.95)';
-        cx.fillText(lbl,lx,ly);
-      }
-    }
-
-    // X labels
-    cx.font='9px Archivo,sans-serif'; cx.fillStyle='rgba(126,143,168,0.7)'; cx.textAlign='center';
-    const step=vals.length<=12?1:Math.ceil(vals.length/12);
-    for(let i=0;i<labels.length;i+=step) cx.fillText(labels[i],xOf(i),PAD.top+cH+16);
-  }; // end _drawDepArea
+    const raw = pEntries.map(([,v]) => v); let c = 0;
+    ArtCharts.area(document.getElementById(chartId), {
+      labels: pEntries.map(([l]) => l), values: _chartMode === 'cumul' ? raw.map(v => c += v) : raw,
+      color: '#f0566a', name: _chartMode === 'cumul' ? 'Dépenses cumulées' : 'Dépenses', deltaGoodWhenUp: false });
+  };
   requestAnimationFrame(_drawDepArea);
   window._redrawDepChart = _drawDepArea;
-  if (window._depAreaRO) window._depAreaRO.disconnect();
-  window._depAreaRO = new ResizeObserver(() => requestAnimationFrame(_drawDepArea));
-  const depAreaCv = document.getElementById(chartId);
-  if (depAreaCv) window._depAreaRO.observe(depAreaCv.parentElement);
 
-  // ── Donut dépenses par catégorie ─────────────
-  requestAnimationFrame(() => {
-    const cv = document.getElementById('dep-donut-cv');
-    if (!cv) return;
-    const DEP_PALETTE = ['#f0566a','#f5b731','#9b6ef3','#fb923c','#38bdf8','#22d3c8','#a3e635','#e879f9','#34d399','#22c97a'];
-    const total = catEntries.reduce((s,[,v])=>s+v, 0);
-    if (!total) return;
-
-    const depDonutDraw = (hovered) => {
-      const dpr = window.devicePixelRatio || 1;
-      const W = cv.parentElement.clientWidth;
-      const H = 260;
-      cv.width  = W*dpr; cv.height = H*dpr;
-      cv.style.width = W+'px'; cv.style.height = H+'px';
-      const ctx = cv.getContext('2d');
-      ctx.scale(dpr, dpr);
-      const cx0 = W/2, cy0 = H/2-5;
-      const R = Math.max(10, Math.min(W,H)/2-14);
-      const r = R*0.52;
-      const slices = [];
-      let angle = -Math.PI/2;
-      catEntries.forEach(([cat,val],i) => {
-        const sweep = (val/total)*Math.PI*2;
-        slices.push({cat,val,color:DEP_PALETTE[i%DEP_PALETTE.length],a0:angle,a1:angle+sweep});
-        angle += sweep;
-      });
-      ctx.clearRect(0,0,W,H);
-      slices.forEach((s,i) => {
-        const isHov = i===hovered;
-        ctx.beginPath(); ctx.moveTo(cx0,cy0);
-        ctx.arc(cx0,cy0,isHov?R+6:R,s.a0,s.a1); ctx.closePath();
-        ctx.fillStyle = isHov ? s.color : s.color+'cc'; ctx.fill();
-        ctx.strokeStyle='#111318'; ctx.lineWidth=isHov?2:1.5; ctx.stroke();
-      });
-      ctx.beginPath(); ctx.arc(cx0,cy0,r,0,Math.PI*2);
-      ctx.fillStyle='#111318'; ctx.fill();
-      if (hovered!==null && hovered>=0 && slices[hovered]) {
-        const s=slices[hovered];
-        const pct=((s.val/total)*100).toFixed(1);
-        ctx.font='bold 13px Archivo,sans-serif'; ctx.fillStyle=s.color; ctx.textAlign='center';
-        ctx.fillText('-'+Math.round(s.val).toLocaleString('fr-FR')+' €',cx0,cy0+2);
-        ctx.font='9px Archivo,sans-serif'; ctx.fillStyle='rgba(126,143,168,0.8)';
-        ctx.fillText(pct+'%',cx0,cy0+15);
-      } else {
-        ctx.font='bold 13px Archivo,sans-serif'; ctx.fillStyle='#e2e8f3'; ctx.textAlign='center';
-        ctx.fillText('-'+(Math.round(total).toLocaleString('fr-FR')+' €'),cx0,cy0+2);
-        ctx.font='9px Archivo,sans-serif'; ctx.fillStyle='rgba(126,143,168,0.8)';
-        ctx.fillText('Dép. totales',cx0,cy0+15);
-      }
-      window._depDonutDraw   = depDonutDraw;
-      window._depDonutSlices = slices;
-      window._depDonutW = W; window._depDonutH = H;
-    };
-    depDonutDraw(null);
-
-    const tip = document.getElementById('dep-donut-tip');
-    const hitTest = (mx,my,W,H) => {
-      const cx0=W/2, cy0=H/2-5;
-      const R=Math.max(10,Math.min(W,H)/2-14), r=R*0.52;
-      const dx=mx-cx0, dy=my-cy0;
-      const dist=Math.sqrt(dx*dx+dy*dy);
-      if (dist<r||dist>R+8) return -1;
-      let a=Math.atan2(dy,dx);
-      const aNorm=((a+Math.PI/2)+Math.PI*2)%(Math.PI*2);
-      const slices=window._depDonutSlices||[];
-      for(let i=0;i<slices.length;i++){
-        const a0=((slices[i].a0+Math.PI/2)+Math.PI*2)%(Math.PI*2);
-        const a1=((slices[i].a1+Math.PI/2)+Math.PI*2)%(Math.PI*2);
-        if(a0<=a1?(aNorm>=a0&&aNorm<a1):(aNorm>=a0||aNorm<a1)) return i;
-      }
-      return -1;
-    };
-    cv.onmousemove = (e) => {
-      const rect=cv.getBoundingClientRect();
-      const W=window._depDonutW||cv.parentElement.clientWidth;
-      const H=window._depDonutH||260;
-      const mx=(e.clientX-rect.left)*(W/rect.width);
-      const my=(e.clientY-rect.top)*(H/rect.height);
-      const idx=hitTest(mx,my,W,H);
-      if(window._depDonutDraw) window._depDonutDraw(idx>=0?idx:null);
-      cv.style.cursor=idx>=0?'pointer':'default';
-      if(idx>=0&&tip){
-        const sl=(window._depDonutSlices||[])[idx];
-        if(!sl){tip.style.display='none';return;}
-        const pct=((sl.val/total)*100).toFixed(1);
-        const fmtV=(()=>{const _v=sl.val;const _a=Math.abs(_v);const _i=Math.floor(_a);const _d=Math.round((_a-_i)*100).toString().padStart(2,'0');return ((_v<0?'-':'')+String(_i).replace(/\B(?=(\d{3})+(?!\d))/g,'\u202f')+','+_d+'\u202f€')})();
-        tip.style.display='block'; tip.style.width='170px';
-        tip.innerHTML=
-          '<div style="display:flex;align-items:center;gap:7px;margin-bottom:7px">'+
-            '<div style="width:9px;height:9px;border-radius:50%;background:'+sl.color+';flex-shrink:0"></div>'+
-            '<span style="font-weight:700;color:#e2e8f3;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+sl.cat+'</span>'+
-          '</div>'+
-          '<div style="font-family:inherit;font-size:14px;font-weight:800;color:var(--red)">-'+fmtV+' €</div>'+
-          '<div style="font-size:11px;color:var(--text2);margin-top:4px">'+pct+'% des dépenses</div>';
-        const tipW=182,tipH=82;
-        let tx=(e.clientX-rect.left)+14, ty=(e.clientY-rect.top)-30;
-        if(tx+tipW>rect.width) tx=(e.clientX-rect.left)-tipW-10;
-        if(ty<4) ty=4;
-        if(ty+tipH>rect.height) ty=rect.height-tipH-4;
-        tip.style.left=tx+'px'; tip.style.top=ty+'px';
-      } else if(tip) tip.style.display='none';
-    };
-    cv.onmouseleave = () => { if(window._depDonutDraw)window._depDonutDraw(null); cv.style.cursor='default'; if(tip)tip.style.display='none'; };
-
-    // Legend
-    const legend=document.getElementById('dep-donut-legend');
-    if(legend){
-      legend.innerHTML=catEntries.slice(0,6).map(([cat,val],i)=>{
-        const pct=((val/total)*100).toFixed(1);
-        const color=DEP_PALETTE[i%DEP_PALETTE.length];
-        const fmtV=Math.round(val).toLocaleString('fr-FR')+' €';
-        return '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:pointer" onmouseenter="_depDonutHover('+i+')" onmouseleave="_depDonutHover(null)">'+
-          '<div style="display:flex;align-items:center;gap:6px;min-width:0">'+
-            '<div style="width:8px;height:8px;border-radius:50%;background:'+color+';flex-shrink:0"></div>'+
-            '<span style="font-size:11px;color:rgba(226,232,243,0.8);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+cat+'</span>'+
-          '</div>'+
-          '<div style="display:flex;gap:8px;flex-shrink:0">'+
-            '<span style="font-size:11px;font-family:inherit;color:var(--red);font-weight:600">-'+fmtV+'</span>'+
-            '<span style="font-size:11px;color:var(--text2);width:36px;text-align:right">'+pct+'%</span>'+
-          '</div>'+
-        '</div>';
-      }).join('');
-      if(catEntries.length>6){
-        const rest=catEntries.slice(6).reduce((s,[,v])=>s+v,0);
-        const pct=((rest/total)*100).toFixed(1);
-        const fmtV=Math.round(rest).toLocaleString('fr-FR')+' €';
-        legend.innerHTML+='<div style="display:flex;align-items:center;justify-content:space-between;gap:8px">'+
-          '<div style="display:flex;align-items:center;gap:6px">'+
-            '<div style="width:8px;height:8px;border-radius:50%;background:rgba(126,143,168,0.4);flex-shrink:0"></div>'+
-            '<span style="font-size:11px;color:var(--text2)">Autres ('+(catEntries.length-6)+')</span>'+
-          '</div>'+
-          '<div style="display:flex;gap:8px;flex-shrink:0">'+
-            '<span style="font-size:11px;font-family:inherit;color:var(--red)">-'+fmtV+'</span>'+
-            '<span style="font-size:11px;color:var(--text2);width:36px;text-align:right">'+pct+'%</span>'+
-          '</div>'+
-        '</div>';
-      }
-    }
-    // ResizeObserver for donut
-    if(window._depDonutRO) window._depDonutRO.disconnect();
-    window._depDonutRO=new ResizeObserver(()=>{if(window._depDonutDraw)window._depDonutDraw(null);});
-    window._depDonutRO.observe(cv.parentElement);
-  });
+  // ── Anneau dépenses par catégorie ───────────
+  requestAnimationFrame(() => ArtCharts.donut(document.getElementById('dep-donut-cv'), {
+    entries: catEntries, palette: ['#f0566a','#f5b731','#9b6ef3','#fb923c','#38bdf8','#22d3c8'], centerLabel: 'Dépenses totales', sign: '-',
+    valueColor: '#f0566a', legendEl: document.getElementById('dep-donut-legend') }));
 
   // ── Waterfall Dépenses P1 vs P2 ──────────────
   requestAnimationFrame(() => _renderDepWaterfall(el));
@@ -1270,84 +631,11 @@ function _renderDepWaterfall(el) {
     '</div>'+
     '<div id="dep-wf-narrative" style="margin-top:16px;border-top:1px solid var(--border);padding-top:4px"></div>';
 
-  const _drawDepWaterfall = () => {
-    const cv=document.getElementById(wfId); if(!cv) return;
-    const dpr=window.devicePixelRatio||1;
-    const W=Math.floor(wfEl.clientWidth-32);
-    const rowH=52, H=drivers.length*rowH+40;
-    cv.width=W*dpr; cv.height=H*dpr;
-    cv.style.width=W+'px'; cv.style.height=H+'px';
-    const cx=cv.getContext('2d'); cx.scale(dpr,dpr);
-    // Bidirectional: cost increase (bad) → left (red), cost decrease (good) → right (green)
-    const LBL_W=160, VAL_W=90, PAD_L=8, PAD_R=4;
-    const HALF_ZONE=(W-LBL_W)/2;
-    const AXIS_X=LBL_W+HALF_ZONE;
-    const halfMax=Math.max(10,HALF_ZONE-VAL_W);
-
-    cx.save(); cx.beginPath(); cx.rect(0,0,W,H); cx.clip();
-    cx.strokeStyle='rgba(255,255,255,0.12)'; cx.lineWidth=1; cx.setLineDash([]);
-    cx.beginPath(); cx.moveTo(AXIS_X,0); cx.lineTo(AXIS_X,H); cx.stroke();
-
-    drivers.forEach((d,i)=>{
-      const y=i*rowH+10;
-      // Dépenses: delta<0 = costs down = good (green right), delta>0 = costs up = bad (red left)
-      const isGood=d.delta<=0;
-      const color=isGood?'#22c97a':'#f0566a';
-      const colorFill=isGood?'rgba(34,201,122,0.18)':'rgba(240,86,106,0.18)';
-      const barW=Math.min(halfMax, Math.max(4,(Math.abs(d.delta)/maxAbs)*halfMax));
-      const pct=d.p2>0?((d.delta/d.p2)*100):(d.delta>0?100:-100);
-      const barX=isGood?AXIS_X:AXIS_X-barW;
-      const parts=d.key.split(' · ');
-      const catLbl=parts[0]||d.key, bienLbl=parts[1]||'';
-      const maxLblW=LBL_W-PAD_L-6;
-      cx.font='bold 10px Archivo,sans-serif'; cx.fillStyle='rgba(226,232,243,0.9)'; cx.textAlign='left';
-      let cTxt=catLbl;
-      while(cx.measureText(cTxt).width>maxLblW&&cTxt.length>4) cTxt=cTxt.slice(0,-1);
-      if(cTxt!==catLbl) cTxt+='…';
-      cx.fillText(cTxt,PAD_L,y+13);
-      if(bienLbl){
-        cx.font='9px Archivo,sans-serif'; cx.fillStyle='rgba(126,143,168,0.8)';
-        let bTxt=bienLbl;
-        while(cx.measureText(bTxt).width>maxLblW&&bTxt.length>4) bTxt=bTxt.slice(0,-1);
-        if(bTxt!==bienLbl) bTxt+='…';
-        cx.fillText(bTxt,PAD_L,y+26);
-      }
-      const bgW=W-AXIS_X-2;
-      cx.fillStyle='rgba(255,255,255,0.03)'; cx.beginPath();
-      if(isGood) cx.roundRect(AXIS_X,y+2,bgW,rowH-16,[0,4,4,0]);
-      else       cx.roundRect(LBL_W,y+2,AXIS_X-LBL_W,rowH-16,[4,0,0,4]);
-      cx.fill();
-      cx.fillStyle=colorFill; cx.strokeStyle=color; cx.lineWidth=1;
-      cx.beginPath(); cx.roundRect(barX,y+2,barW,rowH-16,4); cx.fill(); cx.stroke();
-      cx.font='bold 11px Archivo,sans-serif'; cx.fillStyle=color;
-      const deltaStr=(d.delta>0?'+':'')+d.delta.toLocaleString('fr-FR',{minimumFractionDigits:0,maximumFractionDigits:0})+' €';
-      const pctStr=(pct>=0?'+':'')+pct.toFixed(0)+'%';
-      if(isGood){
-        const vx=Math.min(AXIS_X+barW+6, W-VAL_W+2);
-        cx.textAlign='left';
-        cx.fillText(deltaStr,vx,y+14);
-        cx.font='9px Archivo,sans-serif'; cx.fillStyle='rgba(126,143,168,0.7)';
-        cx.fillText(pctStr,vx,y+26);
-      } else {
-        const vx=Math.max(AXIS_X-barW-6, LBL_W+2);
-        cx.textAlign='right';
-        cx.fillText(deltaStr,vx,y+14);
-        cx.font='9px Archivo,sans-serif'; cx.fillStyle='rgba(126,143,168,0.7)';
-        cx.fillText(pctStr,vx,y+26);
-      }
-      cx.textAlign='left';
-      if(i<drivers.length-1){
-        cx.strokeStyle='rgba(35,42,56,0.8)'; cx.lineWidth=1; cx.setLineDash([3,4]);
-        cx.beginPath(); cx.moveTo(0,y+rowH-2); cx.lineTo(W,y+rowH-2); cx.stroke();
-        cx.setLineDash([]);
-      }
-    });
-  };
-  requestAnimationFrame(_drawDepWaterfall);
-  if(window._depWfRO) window._depWfRO.disconnect();
-  window._depWfRO=new ResizeObserver(()=>requestAnimationFrame(_drawDepWaterfall));
-  const depWfCv=document.getElementById(wfId);
-  if(depWfCv) window._depWfRO.observe(depWfCv.parentElement);
+  const _wfRows = drivers.map(d => { const parts = d.key.split(' · ');
+    return { label: parts[0] || d.key, sub: parts[1] || '', delta: d.delta, p1: d.p1, p2: d.p2,
+             pct: d.p2 ? d.delta / Math.abs(d.p2) * 100 : undefined }; });
+  requestAnimationFrame(() => ArtCharts.diverging(document.getElementById(wfId), {
+    rows: _wfRows, upIsGood: false, p1Label: 'P1 · '+fmtFR(p1Min)+' → '+fmtFR(p1Max), p2Label: 'P2 · '+fmtFR(p2Min)+' → '+fmtFR(p2Max) }));
 
   // ── Narrative bullets ──────────────────────
   const narrativeEl=document.getElementById('dep-wf-narrative');
@@ -1357,7 +645,7 @@ function _renderDepWaterfall(el) {
   const mthLabel=n=>n===1?'1 mois':n+' mois';
   const bullets=[];
   const sign=totalDelta>=0?'+':'';
-  const trend=totalDelta<=0?'↓ Réduction des charges':'↑ Hausse des charges';
+  const trend=totalDelta<=0?'Réduction des charges':'Hausse des charges';
   const trendColor=totalDelta<=0?'var(--green)':'var(--red)';
   bullets.push({
     icon:totalDelta<=0?'📉':'📈',

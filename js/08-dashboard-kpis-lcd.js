@@ -224,12 +224,12 @@ function _renderKpiLCD() {
   const fmt2 = n => n.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2});
 
   el.innerHTML = `
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:14px;margin-bottom:20px;align-items:stretch">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-bottom:20px;align-items:stretch">
 
       <!-- Taux d'occupation vs Point mort (%) -->
       <div class="card" style="display:flex;flex-direction:column;align-items:center;padding:18px 14px 14px;margin-top:0!important;">
         <div style="font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text2);margin-bottom:12px;text-align:center">Taux d'occupation vs Point mort</div>
-        <canvas id="${gaugeId1}" width="180" height="100" style="display:block;max-width:180px;flex:1;min-height:80px;max-height:120px"></canvas>
+        <div class="ac-wrap" style="max-width:220px"><canvas id="${gaugeId1}"></canvas></div>
         <div style="display:flex;justify-content:space-between;width:100%;margin-top:6px;font-size:11px">
           <span style="color:var(--text2)">0%</span>
           <span style="color:var(--text2)">100%</span>
@@ -250,7 +250,7 @@ function _renderKpiLCD() {
       <!-- Jours d'occupation vs Point mort -->
       <div class="card" style="display:flex;flex-direction:column;align-items:center;padding:18px 14px 14px;margin-top:0!important;">
         <div style="font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text2);margin-bottom:12px;text-align:center">Jours d'occupation vs Point mort</div>
-        <canvas id="${gaugeId2}" width="180" height="100" style="display:block;max-width:180px;flex:1;min-height:80px;max-height:120px"></canvas>
+        <div class="ac-wrap" style="max-width:220px"><canvas id="${gaugeId2}"></canvas></div>
         <div style="display:flex;justify-content:space-between;width:100%;margin-top:6px;font-size:11px">
           <span style="color:var(--text2)">0</span>
           <span style="color:var(--text2)">${nuitsDisponibles} nuits dispo</span>
@@ -284,10 +284,10 @@ function _renderKpiLCD() {
     </div>
 
     <!-- Compte de résultat en paliers -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px;margin-top:14px">
       <div class="card" style="margin-top:0!important">
         <div class="card-title">Compte de résultat en paliers</div>
-        <canvas id="kpi-waterfall-cv" style="width:100%;display:block"></canvas>
+        <div class="ac-wrap"><canvas id="kpi-waterfall-cv"></canvas></div>
       </div>
       <div class="card" style="margin-top:0!important;padding:0;overflow:hidden">
         <div class="card-title" style="padding:14px 16px 0">Détail par catégorie</div>
@@ -296,14 +296,14 @@ function _renderKpiLCD() {
     </div>
 
     <!-- Graphiques tendance CF + CV -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px;margin-top:14px">
       <div class="card" style="margin-top:0!important">
-        <div class="card-title">Évolution CF + Courbe de tendance + Prévision à M+10</div>
-        <canvas id="kpi-trend-cf" style="width:100%;display:block;height:180px"></canvas>
+        <div class="card-title gold">Charges fixes — tendance et prévision à 10 mois</div>
+        <div class="ac-wrap"><canvas id="kpi-trend-cf"></canvas></div>
       </div>
       <div class="card" style="margin-top:0!important">
-        <div class="card-title">Évolution CV + Courbe de tendance + Prévision à M+10</div>
-        <canvas id="kpi-trend-cv2" style="width:100%;display:block;height:180px"></canvas>
+        <div class="card-title">Charges variables — tendance et prévision à 10 mois</div>
+        <div class="ac-wrap"><canvas id="kpi-trend-cv2"></canvas></div>
       </div>
     </div>`;
 
@@ -324,51 +324,7 @@ function _renderKpiLCD() {
       { label: 'Charges fixes',     val: cfTotal, color: '#f0566a' },
       { label: 'Résultat net',      val: result, color: result >= 0 ? '#f5b731' : '#f0566a' },
     ];
-    const maxAbs = Math.max(...rows.map(r => Math.abs(r.val)), 1);
-    const dpr = window.devicePixelRatio || 1;
-    const W = cv2.parentElement.clientWidth - 44;
-    const ROW_H = 36, GAP = 10, PAD_L = 110, PAD_R = 16, PAD_T = 8, PAD_B = 8;
-    const H = rows.length * (ROW_H + GAP) - GAP + PAD_T + PAD_B;
-    cv2.width = W * dpr; cv2.height = H * dpr;
-    cv2.style.width = W + 'px'; cv2.style.height = H + 'px';
-    const ctx = cv2.getContext('2d');
-    ctx.scale(dpr, dpr);
-
-    const barAreaW = W - PAD_L - PAD_R;
-
-    rows.forEach((r, i) => {
-      const y = PAD_T + i * (ROW_H + GAP);
-      const pct = Math.abs(r.val) / maxAbs;
-      const bw = Math.round(pct * barAreaW);
-      const bx = PAD_L + (barAreaW - bw) / 2; // centré
-
-      // Label
-      ctx.font = '11px Archivo, sans-serif';
-      ctx.fillStyle = '#7e8fa8';
-      ctx.textAlign = 'right';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(r.label, PAD_L - 8, y + ROW_H / 2);
-
-      // Fond barre
-      ctx.fillStyle = 'rgba(255,255,255,0.04)';
-      ctx.beginPath();
-      ctx.roundRect(PAD_L, y, barAreaW, ROW_H, 5);
-      ctx.fill();
-
-      // Barre centrée
-      ctx.fillStyle = r.color + 'cc';
-      ctx.beginPath();
-      ctx.roundRect(bx, y, bw, ROW_H, 5);
-      ctx.fill();
-
-      // Valeur dans la barre
-      const lbl = _fmtK(Math.abs(r.val));
-      ctx.font = 'bold 11px Archivo,sans-serif';
-      ctx.textBaseline = 'middle';
-      ctx.textAlign = 'center';
-      ctx.fillStyle = '#0b0d12';
-      ctx.fillText(lbl, bx + bw / 2, y + ROW_H / 2);
-    });
+    ArtCharts.funnel(cv2, { rows });
 
     // ── Tableau de détail par catégorie ──
     const tbl = document.getElementById('kpi-detail-table');
@@ -459,170 +415,13 @@ function _drawTrendChart(canvasId, bienSel, sciSel, type, color, cfExclu) {
   const stdRes = Math.sqrt(residuals.reduce((a,b) => a + b*b, 0) / n);
   const CI = stdRes * 1.5;
 
-  const dpr = window.devicePixelRatio || 1;
-  const W = cv.parentElement.clientWidth - 32;
-  const H = 180;
-  cv.width = W * dpr; cv.height = H * dpr;
-  cv.style.width = W + 'px'; cv.style.height = H + 'px';
-  const ctx = cv.getContext('2d');
-  ctx.scale(dpr, dpr);
-
-  const PAD = {t:16, r:16, b:32, l:56};
-  const plotW = W - PAD.l - PAD.r;
-  const plotH = H - PAD.t - PAD.b;
-
-  const totalPts = n + FORECAST;
-  const allTrend = Array.from({length: totalPts}, (_, i) => trend(i));
-  const maxV = Math.max(...vals, ...allTrend.map(t => t + CI)) * 1.1;
-  const minV = 0;
-  const scX = i => PAD.l + (i / (totalPts - 1)) * plotW;
-  const scY = v => PAD.t + plotH - ((v - minV) / (maxV - minV)) * plotH;
-
-  // Fond
-  ctx.clearRect(0, 0, W, H);
-
-  // Grilles Y
-  ctx.strokeStyle = 'rgba(255,255,255,0.05)';
-  ctx.lineWidth = 1;
-  for (let i = 0; i <= 4; i++) {
-    const y = PAD.t + (plotH / 4) * i;
-    ctx.beginPath(); ctx.moveTo(PAD.l, y); ctx.lineTo(W - PAD.r, y); ctx.stroke();
-    const val = maxV - (maxV - minV) * (i / 4);
-    ctx.fillStyle = 'rgba(255,255,255,0.3)';
-    ctx.font = '9px Archivo, sans-serif';
-    ctx.textAlign = 'right';
-    ctx.fillText(_fmtK(val), PAD.l - 4, y + 3);
-  }
-
-  // Séparateur historique/prévision
-  const sepX = scX(n - 1);
-  ctx.setLineDash([3, 4]);
-  ctx.strokeStyle = 'rgba(255,255,255,0.15)';
-  ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.moveTo(sepX, PAD.t); ctx.lineTo(sepX, H - PAD.b); ctx.stroke();
-  ctx.setLineDash([]);
-
-  // Zone de confiance (prévision)
-  ctx.fillStyle = color + '22';
-  ctx.beginPath();
-  ctx.moveTo(scX(n - 1), scY(allTrend[n - 1] + CI));
-  for (let i = n; i < totalPts; i++) ctx.lineTo(scX(i), scY(allTrend[i] + CI));
-  for (let i = totalPts - 1; i >= n - 1; i--) ctx.lineTo(scX(i), scY(allTrend[i] - CI));
-  ctx.closePath(); ctx.fill();
-
-  // Ligne de tendance (historique)
-  ctx.strokeStyle = 'rgba(180,180,180,0.5)';
-  ctx.lineWidth = 1.5;
-  ctx.setLineDash([5, 4]);
-  ctx.beginPath();
-  for (let i = 0; i < n; i++) { i === 0 ? ctx.moveTo(scX(i), scY(allTrend[i])) : ctx.lineTo(scX(i), scY(allTrend[i])); }
-  ctx.stroke();
-  ctx.setLineDash([]);
-
-  // Ligne de tendance (prévision)
-  ctx.strokeStyle = color + 'aa';
-  ctx.lineWidth = 1.5;
-  ctx.beginPath();
-  ctx.moveTo(scX(n - 1), scY(allTrend[n - 1]));
-  for (let i = n; i < totalPts; i++) ctx.lineTo(scX(i), scY(allTrend[i]));
-  ctx.stroke();
-
-  // Courbe principale
-  ctx.strokeStyle = color;
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  vals.forEach((v, i) => { i === 0 ? ctx.moveTo(scX(i), scY(v)) : ctx.lineTo(scX(i), scY(v)); });
-  ctx.stroke();
-
-  // Générer les YM de prévision (nécessaire pour tooltip et labels)
   const forecastYMs = [];
-  const lastYM = sortedYMs[sortedYMs.length - 1];
-  let [fy, fm] = lastYM.split('-').map(Number);
-  for (let i = 1; i <= FORECAST; i++) {
-    fm++;
-    if (fm > 12) { fm = 1; fy++; }
-    forecastYMs.push(fy + '-' + String(fm).padStart(2,'0'));
-  }
-  const allYMs = [...sortedYMs, ...forecastYMs];
-  let savedImage = null; // sera rempli après le dessin complet
-
-  // ── Tooltip au survol ──
-  const tooltip = document.getElementById('kpi-trend-tooltip') || (() => {
-    const t = document.createElement('div');
-    t.id = 'kpi-trend-tooltip';
-    t.style.cssText = 'position:fixed;pointer-events:none;display:none;background:#1a1f2e;border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:10px 14px;font-size:12px;font-family:Archivo,sans-serif;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.4);min-width:140px';
-    document.body.appendChild(t);
-    return t;
-  })();
-
-  cv.onmousemove = (e) => {
-    const rect = cv.getBoundingClientRect();
-    const mx = (e.clientX - rect.left) * (W / rect.width);
-    let closest = 0, minDist = Infinity;
-    for (let i = 0; i < totalPts; i++) {
-      const d = Math.abs(scX(i) - mx);
-      if (d < minDist) { minDist = d; closest = i; }
-    }
-    const isHistory = closest < n;
-    const ym = allYMs[closest];
-    const parts = ym.split('-');
-    const label = new Date(+parts[0], +parts[1]-1, 1).toLocaleDateString('fr-FR', {month:'long', year:'numeric'});
-    const val = isHistory ? vals[closest] : null;
-    const trendVal = allTrend[closest];
-    const ciLow = Math.max(0, trendVal - CI);
-    const ciHigh = trendVal + CI;
-    const typeLabel = type === 'cf' ? 'Charges fixes' : 'Charges variables';
-
-    tooltip.innerHTML = `
-      <div style="font-weight:700;color:#fff;margin-bottom:6px;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:6px">${label}</div>
-      ${isHistory ? `<div style="display:flex;justify-content:space-between;gap:16px;margin-bottom:4px"><span style="color:rgba(255,255,255,0.5)">${typeLabel}</span><span style="color:${color};font-weight:700">${_fmtK(val)} €</span></div>` : ''}
-      <div style="display:flex;justify-content:space-between;gap:16px;margin-bottom:4px"><span style="color:rgba(255,255,255,0.5)">Tendance</span><span style="color:rgba(200,200,200,0.9)">${_fmtK(trendVal)} €</span></div>
-      ${!isHistory ? `<div style="display:flex;justify-content:space-between;gap:16px;margin-bottom:2px"><span style="color:rgba(255,255,255,0.5)">Intervalle bas</span><span style="color:${color}88">${_fmtK(ciLow)} €</span></div><div style="display:flex;justify-content:space-between;gap:16px"><span style="color:rgba(255,255,255,0.5)">Intervalle haut</span><span style="color:${color}88">${_fmtK(ciHigh)} €</span></div>` : ''}
-    `;
-    tooltip.style.display = 'block';
-    tooltip.style.left = (e.clientX + 14) + 'px';
-    tooltip.style.top  = (e.clientY - 10) + 'px';
-
-    // Restaurer le canvas original puis dessiner overlay
-    if (savedImage) ctx.putImageData(savedImage, 0, 0);
-    ctx.save();
-    ctx.scale(dpr, dpr);
-    ctx.strokeStyle = 'rgba(255,255,255,0.25)';
-    ctx.lineWidth = 1;
-    ctx.setLineDash([3,3]);
-    ctx.beginPath();
-    ctx.moveTo(scX(closest), PAD.t);
-    ctx.lineTo(scX(closest), H - PAD.b);
-    ctx.stroke();
-    ctx.setLineDash([]);
-    if (isHistory) {
-      ctx.beginPath();
-      ctx.arc(scX(closest), scY(vals[closest]), 4, 0, Math.PI*2);
-      ctx.fillStyle = color;
-      ctx.fill();
-    }
-    ctx.restore();
-  };
-
-  cv.onmouseleave = () => {
-    tooltip.style.display = 'none';
-    if (savedImage) ctx.putImageData(savedImage, 0, 0);
-  };
-
-  // Labels axe X (quelques mois)
-  ctx.fillStyle = 'rgba(255,255,255,0.3)';
-  ctx.font = '9px Archivo, sans-serif';
-  ctx.textAlign = 'center';
-  const step = Math.ceil(allYMs.length / 8);
-  allYMs.forEach((ym, i) => {
-    if (i % step !== 0 && i !== allYMs.length - 1) return;
-    const parts = ym.split('-');
-    const label = new Date(+parts[0], +parts[1] - 1, 1).toLocaleDateString('fr-FR', {month:'short', year:'2-digit'});
-    ctx.fillText(label, scX(i), H - PAD.b + 12);
-  });
-
-  // Sauvegarder après tout le dessin (labels inclus)
-  savedImage = ctx.getImageData(0, 0, cv.width, cv.height);
+  let [fy, fm] = sortedYMs[sortedYMs.length - 1].split('-').map(Number);
+  for (let i = 1; i <= FORECAST; i++) { fm++; if (fm > 12) { fm = 1; fy++; } forecastYMs.push(fy + '-' + String(fm).padStart(2, '0')); }
+  ArtCharts.forecast(cv, {
+    labels: [...sortedYMs, ...forecastYMs], values: vals,
+    trend: Array.from({ length: n + FORECAST }, (_, i) => Math.max(0, trend(i))), ci: CI,
+    color, name: type === 'cf' ? 'Charges fixes' : 'Charges variables' });
 }
 
 // ── Tableau détail KPI ──
@@ -679,61 +478,9 @@ function _sortKpiDetail(col) {
 
 // ── Jauge demi-cercle ──
 function _drawGauge(canvasId, value, threshold, maxVal, color, centerLabel) {
-  const cv = document.getElementById(canvasId);
-  if (!cv) return;
-  const dpr = window.devicePixelRatio || 1;
-  const W = cv.offsetWidth || 180, H = cv.offsetHeight || 100;
-  cv.width  = W * dpr; cv.height = H * dpr;
-  cv.style.width = W+'px'; cv.style.height = H+'px';
-  const ctx = cv.getContext('2d');
-  ctx.scale(dpr, dpr);
-
-  const cx = W / 2, cy = H - 10;
-  const R = Math.min(W, H * 2) / 2 - 8;
-  const startA = Math.PI;
-  const max = maxVal || 100;
-  const valuePct  = Math.min(value / max, 1);
-  const threshPct = Math.min(threshold / max, 1);
-  const arcColor  = color || '#22d3c8';
-
-  // Fond gris
-  ctx.beginPath();
-  ctx.arc(cx, cy, R, startA, startA + Math.PI);
-  ctx.strokeStyle = 'rgba(255,255,255,0.08)';
-  ctx.lineWidth = 14;
-  ctx.lineCap = 'round';
-  ctx.stroke();
-
-  // Arc valeur
-  const valA = startA + valuePct * Math.PI;
-  if (valuePct > 0) {
-    ctx.beginPath();
-    ctx.arc(cx, cy, R, startA, valA);
-    ctx.strokeStyle = arcColor;
-    ctx.lineWidth = 14;
-    ctx.lineCap = 'round';
-    ctx.stroke();
-  }
-
-  // Marqueur point mort (trait rouge épais)
-  const pmA  = startA + threshPct * Math.PI;
-  const pmX  = cx + (R + 6) * Math.cos(pmA);
-  const pmY  = cy + (R + 6) * Math.sin(pmA);
-  const pmX2 = cx + (R - 20) * Math.cos(pmA);
-  const pmY2 = cy + (R - 20) * Math.sin(pmA);
-  ctx.beginPath();
-  ctx.moveTo(pmX, pmY);
-  ctx.lineTo(pmX2, pmY2);
-  ctx.strokeStyle = '#f0566a';
-  ctx.lineWidth = 4;
-  ctx.lineCap = 'round';
-  ctx.stroke();
-
-  // Valeur centrale
-  ctx.font = 'bold 16px Archivo,sans-serif';
-  ctx.fillStyle = '#e2e8f3';
-  ctx.textAlign = 'center';
-  ctx.fillText(centerLabel !== undefined ? String(centerLabel) : (valuePct * 100).toFixed(1) + '%', cx, cy - R * 0.25);
+  ArtCharts.gauge(document.getElementById(canvasId), {
+    value, max: maxVal || 100, threshold, color: color || '#22d3c8',
+    label: centerLabel !== undefined ? centerLabel : ((value / (maxVal || 100)) * 100).toFixed(1) + '%' });
 }
 
 // ── LLD ────────────────────────────────────────
@@ -890,7 +637,7 @@ function renderPlateformes() {
     <div class="dash-grid-4" style="margin-bottom:20px">
       ${_kpiCard('🏠','Total revenus','+'+_fmtK(total),'var(--green)')}
       ${Object.entries(pltMap).sort((a,b)=>b[1].rev-a[1].rev).slice(0,3).map(([plt,d]) =>
-        _kpiCard('-', plt, '+'+_fmtK(d.rev), PLT_COLORS[plt]||'var(--text2)', _pct(total?d.rev/total*100:0)+' du total')
+        _kpiCard(({Airbnb:'✈',Booking:'🏨'})[plt]||'🏦', plt, '+'+_fmtK(d.rev), PLT_COLORS[plt]||'var(--text2)', _pct(total?d.rev/total*100:0)+' du total')
       ).join('')}
     </div>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px">
