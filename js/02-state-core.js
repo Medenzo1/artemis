@@ -518,6 +518,26 @@ document.getElementById('stBankSub').textContent = name;
 checkReadyToMap();
 }
 
+// Lecture d'un montant d'export (SheetJS raw:false) : « 1,180.95 », « 1 180,95 », « 97.28 », « -10 »…
+// parseFloat seul lirait « 1,180.95 » comme 1 et tronquerait tous les montants à partir de 1 000.
+function _num(v) {
+  if (typeof v === 'number') return isFinite(v) ? v : 0;
+  let s = String(v == null ? '' : v).replace(/[\s  €]/g, '');
+  if (!s) return 0;
+  const hasC = s.includes(','), hasD = s.includes('.');
+  if (hasC && hasD) {
+    // Le dernier séparateur est la décimale : « 1,180.95 » (US) ou « 1.180,95 » (FR)
+    s = s.lastIndexOf(',') > s.lastIndexOf('.') ? s.replace(/\./g, '').replace(',', '.') : s.replace(/,/g, '');
+  } else if (hasC) {
+    // « 1,180 » / « 12,345,678 » = milliers ; « 97,28 » = décimale
+    s = /^-?\d{1,3}(,\d{3})+$/.test(s) ? s.replace(/,/g, '') : s.replace(',', '.');
+  } else if (/^-?\d{1,3}(\.\d{3}){2,}$/.test(s)) {
+    s = s.replace(/\./g, '');   // « 1.180.000 »
+  }
+  const n = parseFloat(s);
+  return isFinite(n) ? n : 0;
+}
+
 function parseAirbnbFile(name, rows) {
 airbnbIndex = {};
 let currentCode = null;
@@ -530,7 +550,7 @@ currentCode = r[12]; if(currentCode) airbnbIndex[currentCode] = {
 code_ref:   currentCode,
 date:       r[0],
 mapping:    r[3],
-montant_verse: parseFloat(r[15]) || 0,
+montant_verse: _num(r[15]),
 reservations: []
 };
 } else if(currentCode && airbnbIndex[currentCode]) {
@@ -540,10 +560,10 @@ code_conf: r[4],
 date_debut: r[6], date_fin: r[7], nuits: r[8],
 voyageur:   r[9],
 logement:   String(r[10]||''),
-montant:    parseFloat(r[14]) || 0,
-frais_service:  parseFloat(r[16]) || 0,
-frais_menage:   parseFloat(r[18]) || 0,
-revenus_bruts:  parseFloat(r[20]) || 0,
+montant:    _num(r[14]),
+frais_service:  _num(r[16]),
+frais_menage:   _num(r[18]),
+revenus_bruts:  _num(r[20]),
 });
 }
 }
@@ -574,7 +594,7 @@ const libRef = String(r[1]||'');   const idEtab = String(r[9]||'');   if(!libRef
 bookingIndex[libRef] = {
 libRef,
 idEtab,
-nomEtab:      String(r[10]||''),          montant:      parseFloat(r[25]) || 0,      dateVersement: r[27],                      reservations: []
+nomEtab:      String(r[10]||''),          montant:      _num(r[25]),      dateVersement: r[27],                      reservations: []
 };
 } else if(type === 'Réservation') {
 const libRef = String(r[1]||'');
@@ -583,10 +603,10 @@ bookingIndex[libRef].reservations.push({
 numRef:      String(r[2]||''),   dateArrivee: r[3],
 dateDepart:  r[4],
 nuits:       r[8],
-montantBrut: parseFloat(r[15]) || 0,
-commission:  parseFloat(r[16]) || 0,
-fraisPaiement: parseFloat(r[18]) || 0,
-montantTransaction: parseFloat(r[21]) || 0,
+montantBrut: _num(r[15]),
+commission:  _num(r[16]),
+fraisPaiement: _num(r[18]),
+montantTransaction: _num(r[21]),
 });
 }
 }

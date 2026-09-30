@@ -660,7 +660,7 @@ function renderPlateformes() {
 
   const months = [...new Set(lines.map(l => l._period))].sort();
   const C = {};
-  Object.keys(CH).forEach(k => C[k] = { rev: 0, byM: {}, biens: {}, nuits: 0, sejours: 0, brut: 0, comm: 0 });
+  Object.keys(CH).forEach(k => C[k] = { rev: 0, byM: {}, biens: {}, nuits: 0, sejours: 0, brut: 0, comm: 0, net: 0 });
   lines.forEach(l => {
     const k = chanOf(l), v = +l.montant, b = l.bienName || l.bien || 'Non attribué';
     C[k].rev += v; C[k].byM[l._period] = (C[k].byM[l._period] || 0) + v; C[k].biens[b] = (C[k].biens[b] || 0) + v;
@@ -683,18 +683,24 @@ function renderPlateformes() {
   };
   const read = k => { try { return JSON.parse(localStorage.getItem(k) || '[]'); } catch (e) { return []; } };
   const seen = new Set();
-  // Airbnb : lignes « Réservation » (code, début, nuits, logement, frais de service, revenus bruts)
-  read('artemis_airbnb_rows').forEach(r => {
-    if (!Array.isArray(r) || String(r[2] || '') === 'Payout') return;
+  // Airbnb : seules les lignes « Réservation » portent le brut et les frais de service.
+  // Les lignes « Versement du co-hôte » (même code, mêmes nuits) sont la part reversée au co-hôte :
+  // elles ne comptent pas comme séjour mais viennent en déduction du net perçu.
+  const airRows = read('artemis_airbnb_rows'), airCodes = new Set();
+  airRows.forEach(r => {
+    if (!Array.isArray(r) || String(r[2] || '') !== 'Réservation') return;
     const n = parseInt(r[8]) || 0, code = String(r[4] || '');
-    if (n <= 0 || !code || seen.has('a' + code)) return;
-    const bien = bienOfLogement(String(r[10] || ''));
-    if (!keep(r[6], bien)) return;
+    if (!code || !keep(r[6], bienOfLogement(String(r[10] || '')))) return;
+    // Montants : toutes les lignes du séjour (y compris un supplément à 0 nuit) ; nuits : une seule fois par code
+    C.Airbnb.brut += _num(r[20]); C.Airbnb.comm += Math.abs(_num(r[16])); C.Airbnb.net += _num(r[14]);
+    airCodes.add(code);
+    if (n <= 0 || seen.has('a' + code)) return;
     seen.add('a' + code);
     C.Airbnb.nuits += n; C.Airbnb.sejours++;
-    C.Airbnb.brut += parseFloat(r[20]) || 0; C.Airbnb.comm += Math.abs(parseFloat(r[16]) || 0);
   });
-  // Booking : lignes « Réservation » (numéro, arrivée, nuits, brut, commission, frais de paiement)
+  airRows.forEach(r => {
+    if (Array.isArray(r) && /co-h[oô]te/i.test(String(r[2] || '')) && airCodes.has(String(r[4] || ''))) C.Airbnb.net += _num(r[14]);
+  });
   // Le bien est porté par la ligne « (Payout) » (ID établissement) : on le rattache via la référence de versement
   const bkRows = read('artemis_booking_rows'), bkBien = {};
   bkRows.forEach(r => {
@@ -710,13 +716,14 @@ function renderPlateformes() {
     if (!keep(r[3], bkBien[String(r[1] || '')])) return;
     seen.add('b' + code);
     C.Booking.nuits += n; C.Booking.sejours++;
-    C.Booking.brut += parseFloat(r[15]) || 0; C.Booking.comm += Math.abs(parseFloat(r[16]) || 0) + Math.abs(parseFloat(r[18]) || 0);
+    const bb = _num(r[15]), bc = Math.abs(_num(r[16])) + Math.abs(_num(r[18]));
+    C.Booking.brut += bb; C.Booking.comm += bc; C.Booking.net += bb - bc;
   });
   // Direct : réservations saisies dans ARTEMIS
   read('artemis_lcd').forEach(a => {
     const n = parseInt(a.nuits) || 0;
     if (n <= 0 || !keep(a.dateDebut, a.bienName)) return;
-    C.Direct.nuits += n; C.Direct.sejours++; C.Direct.brut += +a.montant || 0;
+    C.Direct.nuits += n; C.Direct.sejours++; C.Direct.brut += +a.montant || 0; C.Direct.net += +a.montant || 0;
   });
 
   // ── Indicateurs ───────────────────────────
@@ -727,7 +734,8 @@ function renderPlateformes() {
   const dep = lcdRev ? platRev / lcdRev * 100 : 0;
   const comm = C.Airbnb.comm + C.Booking.comm, brutPlat = C.Airbnb.brut + C.Booking.brut;
   const lcdNuits = LCD_CH.reduce((t, k) => t + C[k].nuits, 0);
-  const revNuit = lcdNuits ? lcdRev / lcdNuits : null;
+  const netOf = k => C[k].net > 0 ? C[k].net : C[k].rev;   // net des réservations si l'export est importé
+  const revNuit = lcdNuits ? LCD_CH.reduce((t, k) => t + (C[k].nuits ? netOf(k) : 0), 0) / lcdNuits : null;
   const pct = v => (Math.abs(v) < 0.05 ? 0 : v).toLocaleString('fr-FR', { maximumFractionDigits: 1 }) + ' %';
   const eur2 = v => v.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
   const totPM = {}; months.forEach(m => totPM[m] = active.reduce((t, k) => t + (C[k].byM[m] || 0), 0));
@@ -742,7 +750,7 @@ function renderPlateformes() {
     if (LCD_CH.includes(k)) {
       stats = stat('Séjours', d.sejours || '—') + stat('Nuits', d.nuits || '—') +
         stat('Durée moyenne', d.sejours ? (d.nuits / d.sejours).toLocaleString('fr-FR', { maximumFractionDigits: 1 }) + ' nuits' : '—') +
-        stat('Revenu net / nuit', d.nuits ? eur2(d.rev / d.nuits) : '—') +
+        stat('Revenu net / nuit', d.nuits ? eur2(netOf(k) / d.nuits) : '—') +
         (k === 'Direct' ? stat('Commission', '0 %') : stat('Commission', d.brut ? pct(d.comm / d.brut * 100) : '—'));
     } else if (k === 'Longue durée') {
       const nb = Object.keys(d.biens).length, mois = months.filter(m => d.byM[m]).length || 1;
