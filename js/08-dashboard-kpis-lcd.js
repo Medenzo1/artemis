@@ -761,6 +761,7 @@ function renderPlateformes() {
         <div class="plt-bar"><i style="width:${Math.max(2, Math.round(share))}%"></i></div>
         <div class="plt-stats">${stats}</div>
         <div class="plt-sub">Par catégorie</div>${byCat.map(([c, v]) => `<div class="plt-row"><span>${c}</span><b>+${_fmtK(v)}</b></div>`).join('')}
+        <div class="plt-sub" style="margin-top:14px">Par bien</div>${Object.entries(d.biens).sort((a, b) => b[1] - a[1]).map(([bn, v]) => `<div class="plt-row"><span>${bn}</span><b>+${_fmtK(v)}</b></div>`).join('')}
       </div>`;
     }
     if (k === 'Direct' && !d.sejours) stats += `<div class="plt-note">Aucune réservation directe saisie (Paramètres › LCD) : séjours et nuits indisponibles</div>`;
