@@ -557,7 +557,7 @@ function _renderKpiLLD() {
       <div class="lld-heat-h" style="text-align:left">${months[0].slice(0, 4)}${months[0].slice(0, 4) !== last.slice(0, 4) ? ' – ' + last.slice(0, 4) : ''}</div>${months.map(m => `<div class="lld-heat-h" title="${monthShort(m)}">${monthShort(m).split(' ')[0]}</div>`).join('')}<div class="lld-heat-h" style="text-align:right">Total</div>
       ${biens.map(b => { const t = B[b].rev + B[b].chg + B[b].cap; return `<div class="lld-heat-b">${b}</div>` + months.map(m => cell(b, m)).join('') + `<div class="lld-cf-tot" style="color:${t >= 0 ? 'var(--green)' : 'var(--red)'}">${t >= 0 ? '+' : ''}${_fmtK(t)}</div>`; }).join('')}
     </div>
-    <div class="lld-heat-legend"><span><i class="lld-cf-key" style="background:rgba(34,201,122,.7)"></i>Mois positif</span><span><i class="lld-cf-key" style="background:rgba(240,86,106,.7)"></i>Mois négatif</span><span><i class="lld-cf-key lld-cf-empty"></i>Aucun loyer encaissé</span><span class="lld-heat-note">Cash-flow = loyers − charges − crédit · couleur plus intense = montant plus élevé</span></div>`;
+    <div class="lld-heat-legend"><span><i class="lld-cf-key" style="background:rgba(34,201,122,.7)"></i>Mois positif</span><span><i class="lld-cf-key" style="background:rgba(240,86,106,.7)"></i>Mois négatif</span><span><i class="lld-cf-key lld-cf-empty"></i>Aucun loyer encaissé</span><span class="lld-heat-note">Cash-flow = loyers − charges − échéance bancaire (capital inclus) · hors apports et remboursements de CCA · couleur plus intense = montant plus élevé</span></div>`;
 
   const rows = biens.map(b => {
     const d = B[b], c = d.rev + d.chg + d.cap, cov = d.loan < 0 ? d.rev / -d.loan : null;
@@ -578,7 +578,7 @@ function _renderKpiLLD() {
     <div class="dash-grid-3 lld-kpis">
       ${_kpiCard('🏡', 'Loyers encaissés', '+' + _fmtK(rev), 'var(--green)', months.length + ' mois', _varBadges(revPM[last], last, revPM, true), series(revPM))}
       ${_kpiCard('📉', 'Charges', _fmtK(chg), 'var(--red)', 'hors remboursement du capital', _varBadges(chgPM[last], last, chgPM, false), series(chgPM))}
-      ${_kpiCard('💰', 'Cash-flow après crédit', (cash >= 0 ? '+' : '') + _fmtK(cash), cash >= 0 ? 'var(--cyan)' : 'var(--red)', 'loyers − charges − capital remboursé', _varBadges(cashPM[last], last, cashPM, true), series(cashPM))}
+      ${_kpiCard('💰', 'Cash-flow après crédit', (cash >= 0 ? '+' : '') + _fmtK(cash), cash >= 0 ? 'var(--cyan)' : 'var(--red)', 'loyers − charges − capital remboursé · hors CCA', _varBadges(cashPM[last], last, cashPM, true), series(cashPM))}
       ${ratioCard('✅', 'Mois loués', pct(tauxEnc), tauxEnc >= 95 ? 'var(--green)' : tauxEnc >= 80 ? 'var(--gold)' : 'var(--red)', `${paid} mois avec loyer sur ${slots} · vacance et impayés`)}
       ${ratioCard('🏦', 'Couverture du crédit', couverture === null ? '—' : couverture.toLocaleString('fr-FR', { maximumFractionDigits: 2 }) + ' ×', couverture === null ? 'var(--text2)' : couverture >= 1.2 ? 'var(--green)' : couverture >= 1 ? 'var(--gold)' : 'var(--red)', couverture === null ? 'aucune échéance sur la période' : 'loyers ÷ échéances (capital + intérêts + assurance)')}
       ${ratioCard('⚖', 'Taux de charges', pct(tauxChg), tauxChg <= 30 ? 'var(--green)' : tauxChg <= 45 ? 'var(--gold)' : 'var(--red)', 'charges ÷ loyers encaissés')}
@@ -604,7 +604,7 @@ function _renderKpiLLD() {
     <div class="card">
       <div class="card-title">Rentabilité par bien</div>
       <div class="tbl-wrap"><table>
-        <thead><tr><th>Bien</th><th style="text-align:right">Dernier loyer</th><th style="text-align:right">Mois loués</th><th style="text-align:right">Loyers</th><th style="text-align:right">Charges</th><th style="text-align:right">Crédit</th><th style="text-align:right">Cash-flow</th><th style="text-align:right">Taux charges</th><th style="text-align:right">Couverture</th></tr></thead>
+        <thead><tr><th>Bien</th><th style="text-align:right">Dernier loyer</th><th style="text-align:right">Mois loués</th><th style="text-align:right">Loyers</th><th style="text-align:right">Charges</th><th style="text-align:right">Crédit</th><th style="text-align:right" title="Loyers − charges − échéance bancaire, hors apports et remboursements de compte courant d'associé">Cash-flow</th><th style="text-align:right">Taux charges</th><th style="text-align:right">Couverture</th></tr></thead>
         <tbody>${rows}</tbody>
       </table></div>
     </div>`;
