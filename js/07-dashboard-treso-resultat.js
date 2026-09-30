@@ -155,7 +155,7 @@ function _renderSynTresorerie() {
   // Courbe d'évolution (moteur commun ArtCharts)
   const _drawTresArea = () => ArtCharts.area(document.getElementById(chartId), {
     labels: pEntries.map(e => e.p || e.lbl), values: _chartMode === 'cumul' ? cumulVals : pEntries.map(e => e.net),
-    color: '#f5b731', signed: true, name: _chartMode === 'cumul' ? 'Solde cumulé' : 'Solde du mois' });
+    color: '#22c97a', signed: true, name: _chartMode === 'cumul' ? 'Solde cumulé' : 'Solde du mois' });
   requestAnimationFrame(_drawTresArea);
   window._redrawTresChart = _drawTresArea;
 

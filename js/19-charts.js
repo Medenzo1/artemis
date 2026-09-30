@@ -191,11 +191,20 @@ const ArtCharts = (() => {
       }
 
       // Surface dégradée jusqu'à la ligne zéro
-      const g = ctx.createLinearGradient(0, P.top, 0, P.top + cH);
-      g.addColorStop(0, hexA(color, 0.28)); g.addColorStop(1, hexA(color, 0));
-      ctx.beginPath(); monotonePath(ctx, pts, true);
-      ctx.lineTo(pts[n - 1].x, y0); ctx.lineTo(pts[0].x, y0); ctx.closePath();
-      ctx.fillStyle = g; ctx.fill();
+      const areaPath = () => { ctx.beginPath(); monotonePath(ctx, pts, true); ctx.lineTo(pts[n - 1].x, y0); ctx.lineTo(pts[0].x, y0); ctx.closePath(); };
+      if (cfg.signed && sc.min < 0) {
+        // Signé : dégradé couleur au-dessus de zéro, rouge en dessous (chacun s'estompe vers la ligne zéro)
+        const gUp = ctx.createLinearGradient(0, P.top, 0, y0);
+        gUp.addColorStop(0, hexA(color, 0.28)); gUp.addColorStop(1, hexA(color, 0.02));
+        const gDn = ctx.createLinearGradient(0, y0, 0, P.top + cH);
+        gDn.addColorStop(0, hexA(C.red, 0.02)); gDn.addColorStop(1, hexA(C.red, 0.28));
+        ctx.save(); ctx.beginPath(); ctx.rect(0, 0, W, y0); ctx.clip(); areaPath(); ctx.fillStyle = gUp; ctx.fill(); ctx.restore();
+        ctx.save(); ctx.beginPath(); ctx.rect(0, y0, W, H); ctx.clip(); areaPath(); ctx.fillStyle = gDn; ctx.fill(); ctx.restore();
+      } else {
+        const g = ctx.createLinearGradient(0, P.top, 0, P.top + cH);
+        g.addColorStop(0, hexA(color, 0.28)); g.addColorStop(1, hexA(color, 0));
+        areaPath(); ctx.fillStyle = g; ctx.fill();
+      }
 
       // Courbe (rouge sous zéro si signée)
       const stroke = col => { ctx.beginPath(); monotonePath(ctx, pts, true); ctx.strokeStyle = col; ctx.lineWidth = 2.25; ctx.lineJoin = 'round'; ctx.lineCap = 'round'; ctx.stroke(); };
