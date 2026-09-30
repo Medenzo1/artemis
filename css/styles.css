@@ -1090,3 +1090,7 @@ body{font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
 .lld-heat-note{margin-left:auto;opacity:.8}
 .lld-mid{grid-template-columns:minmax(0,2fr) minmax(0,1fr)!important}
 @media (max-width:900px){.lld-mid{grid-template-columns:1fr!important}}
+.lld-cf{height:34px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums;white-space:nowrap}
+.lld-cf-empty{outline:1.5px dashed rgba(245,183,49,.8);outline-offset:-2px}
+.lld-cf-tot{font-size:12px;font-weight:800;text-align:right;padding-left:10px;white-space:nowrap}
+.lld-cf-key{display:inline-block;width:12px;height:12px;border-radius:3px}

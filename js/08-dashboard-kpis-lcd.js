@@ -508,8 +508,9 @@ function _renderKpiLLD() {
   lines.forEach(l => {
     const k = kind(l); if (!k) return;
     const v = +l.montant || 0, b = l.bienName || l.bien || 'Non attribué', m = l._period, cat = l.cat || l.categorie || 'Autre';
-    if (!B[b]) B[b] = { rev: 0, chg: 0, cap: 0, loan: 0, byM: {} };
+    if (!B[b]) B[b] = { rev: 0, chg: 0, cap: 0, loan: 0, byM: {}, cashM: {} };
     B[b][k] += v;
+    B[b].cashM[m] = (B[b].cashM[m] || 0) + v;
     if (k === 'cap' || LOAN_COST.has(cat)) B[b].loan += v;
     if (k === 'rev') B[b].byM[m] = (B[b].byM[m] || 0) + v;
     if (M[m]) M[m][k] += v;
@@ -520,13 +521,12 @@ function _renderKpiLLD() {
   const rev = sum('rev'), chg = sum('chg'), cap = sum('cap'), loan = sum('loan');
   const cash = rev + chg + cap;
 
-  // Encaissement : un mois est « payé » si le loyer atteint 90 % du loyer habituel du bien (médiane des mois payés)
-  const median = a => { const s = a.slice().sort((x, y) => x - y); return s.length ? (s.length % 2 ? s[(s.length - 1) / 2] : (s[s.length / 2 - 1] + s[s.length / 2]) / 2) : 0; };
+  // Occupation : un mois est « loué » dès qu'un loyer est encaissé (indépendant du montant, qui peut être révisé)
   let paid = 0, slots = 0;
   biens.forEach(b => {
-    const vals = Object.values(B[b].byM).filter(v => v > 0);
-    B[b].ref = median(vals);
-    B[b].paid = months.filter(m => (B[b].byM[m] || 0) >= B[b].ref * 0.9 && B[b].ref > 0).length;
+    B[b].paid = months.filter(m => (B[b].byM[m] || 0) > 0).length;
+    const lastRent = months.slice().reverse().find(m => (B[b].byM[m] || 0) > 0);
+    B[b].lastRent = lastRent ? B[b].byM[lastRent] : 0;
     paid += B[b].paid; slots += months.length;
   });
   const tauxEnc = slots ? paid / slots * 100 : 0;
@@ -543,24 +543,27 @@ function _renderKpiLLD() {
     `<div class="card kpi-card kpi-v2"><div class="kpi-v2-head"><div class="kpi-v2-lbl">${icon}<span>${label}</span></div></div>
       <div class="kpi-v2-val" style="color:${color}">${value}</div><div class="kpi-v2-sub">${sub}</div></div>`;
 
-  // Grille d'encaissement bien × mois
-  const monthShort = m => { const [y, mo] = m.split('-'); return ['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'][+mo - 1] + (mo === '01' || m === months[0] ? ' ' + y.slice(2) : ''); };
-  const heat = `<div class="lld-heat" style="grid-template-columns:auto repeat(${months.length},minmax(26px,1fr))">
-      <div class="lld-heat-h" style="text-align:left">${months[0].slice(0, 4)}${months[0].slice(0, 4) !== last.slice(0, 4) ? ' – ' + last.slice(0, 4) : ''}</div>${months.map(m => `<div class="lld-heat-h" title="${monthShort(m)}">${monthShort(m).split(' ')[0]}</div>`).join('')}
-      ${biens.map(b => `<div class="lld-heat-b">${b}</div>` + months.map(m => {
-        const v = B[b].byM[m] || 0, r = B[b].ref;
-        const st = v <= 0 ? 'miss' : v >= r * 0.9 ? 'ok' : 'part';
-        const lbl = st === 'miss' ? 'Aucun loyer' : st === 'part' ? 'Loyer partiel' : 'Loyer encaissé';
-        return `<div class="lld-cell lld-${st}" title="${b} · ${monthShort(m)} — ${lbl} : ${v ? _fmtK(v) : '0 €'}${r ? ' (habituel ' + _fmtK(r) + ')' : ''}"></div>`;
-      }).join('')).join('')}
+  // Grille cash-flow bien × mois : montant réel du mois, couleur selon le signe, intensité selon l'ampleur
+  const monthShort = m => { const [y, mo] = m.split('-'); return ['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'][+mo - 1] + ' ' + y; };
+  const maxAbs = Math.max(1, ...biens.flatMap(b => months.map(m => Math.abs(B[b].cashM[m] || 0))));
+  const compact = v => { const a = Math.abs(v); const t = a >= 1000 ? (a / 1000).toLocaleString('fr-FR', { maximumFractionDigits: 1 }) + 'k' : Math.round(a).toString(); return (v < 0 ? '−' : v > 0 ? '+' : '') + t; };
+  const cell = (b, m) => {
+    const v = B[b].cashM[m] || 0, noRent = !((B[b].byM[m] || 0) > 0);
+    const a = Math.min(1, Math.abs(v) / maxAbs), alpha = v ? (0.18 + a * 0.62).toFixed(2) : 0;
+    const bg = v > 0 ? `rgba(34,201,122,${alpha})` : v < 0 ? `rgba(240,86,106,${alpha})` : 'rgba(255,255,255,.03)';
+    return `<div class="lld-cf${noRent ? ' lld-cf-empty' : ''}" style="background:${bg}" title="${b} · ${monthShort(m)} — cash-flow ${_fmtK(v)}${noRent ? ' · aucun loyer encaissé' : ' · loyer ' + _fmtK(B[b].byM[m])}">${v ? compact(v) : '0'}</div>`;
+  };
+  const heat = `<div class="lld-heat" style="grid-template-columns:auto repeat(${months.length},minmax(40px,1fr)) minmax(64px,auto)">
+      <div class="lld-heat-h" style="text-align:left">${months[0].slice(0, 4)}${months[0].slice(0, 4) !== last.slice(0, 4) ? ' – ' + last.slice(0, 4) : ''}</div>${months.map(m => `<div class="lld-heat-h" title="${monthShort(m)}">${monthShort(m).split(' ')[0]}</div>`).join('')}<div class="lld-heat-h" style="text-align:right">Total</div>
+      ${biens.map(b => { const t = B[b].rev + B[b].chg + B[b].cap; return `<div class="lld-heat-b">${b}</div>` + months.map(m => cell(b, m)).join('') + `<div class="lld-cf-tot" style="color:${t >= 0 ? 'var(--green)' : 'var(--red)'}">${t >= 0 ? '+' : ''}${_fmtK(t)}</div>`; }).join('')}
     </div>
-    <div class="lld-heat-legend"><span><i class="lld-cell lld-ok"></i>Loyer complet</span><span><i class="lld-cell lld-part"></i>Partiel</span><span><i class="lld-cell lld-miss"></i>Aucun loyer</span><span class="lld-heat-note">Référence : loyer habituel du bien (médiane)</span></div>`;
+    <div class="lld-heat-legend"><span><i class="lld-cf-key" style="background:rgba(34,201,122,.7)"></i>Mois positif</span><span><i class="lld-cf-key" style="background:rgba(240,86,106,.7)"></i>Mois négatif</span><span><i class="lld-cf-key lld-cf-empty"></i>Aucun loyer encaissé</span><span class="lld-heat-note">Cash-flow = loyers − charges − crédit · couleur plus intense = montant plus élevé</span></div>`;
 
   const rows = biens.map(b => {
     const d = B[b], c = d.rev + d.chg + d.cap, cov = d.loan < 0 ? d.rev / -d.loan : null;
     return `<tr>
       <td style="font-weight:600">${b}</td>
-      <td class="td-right">${d.ref ? _fmtK(d.ref) : '—'}</td>
+      <td class="td-right">${d.lastRent ? _fmtK(d.lastRent) : '—'}</td>
       <td class="td-right" style="color:${d.paid === months.length ? 'var(--green)' : 'var(--gold)'}">${d.paid} / ${months.length}</td>
       <td class="td-pos">+${_fmtK(d.rev)}</td>
       <td class="td-neg">${_fmtK(d.chg)}</td>
@@ -576,20 +579,15 @@ function _renderKpiLLD() {
       ${_kpiCard('🏡', 'Loyers encaissés', '+' + _fmtK(rev), 'var(--green)', months.length + ' mois', _varBadges(revPM[last], last, revPM, true), series(revPM))}
       ${_kpiCard('📉', 'Charges', _fmtK(chg), 'var(--red)', 'hors remboursement du capital', _varBadges(chgPM[last], last, chgPM, false), series(chgPM))}
       ${_kpiCard('💰', 'Cash-flow après crédit', (cash >= 0 ? '+' : '') + _fmtK(cash), cash >= 0 ? 'var(--cyan)' : 'var(--red)', 'loyers − charges − capital remboursé', _varBadges(cashPM[last], last, cashPM, true), series(cashPM))}
-      ${ratioCard('✅', "Taux d'encaissement", pct(tauxEnc), tauxEnc >= 95 ? 'var(--green)' : tauxEnc >= 80 ? 'var(--gold)' : 'var(--red)', `${paid} mois payés sur ${slots} · vacance et impayés`)}
+      ${ratioCard('✅', 'Mois loués', pct(tauxEnc), tauxEnc >= 95 ? 'var(--green)' : tauxEnc >= 80 ? 'var(--gold)' : 'var(--red)', `${paid} mois avec loyer sur ${slots} · vacance et impayés`)}
       ${ratioCard('🏦', 'Couverture du crédit', couverture === null ? '—' : couverture.toLocaleString('fr-FR', { maximumFractionDigits: 2 }) + ' ×', couverture === null ? 'var(--text2)' : couverture >= 1.2 ? 'var(--green)' : couverture >= 1 ? 'var(--gold)' : 'var(--red)', couverture === null ? 'aucune échéance sur la période' : 'loyers ÷ échéances (capital + intérêts + assurance)')}
       ${ratioCard('⚖', 'Taux de charges', pct(tauxChg), tauxChg <= 30 ? 'var(--green)' : tauxChg <= 45 ? 'var(--gold)' : 'var(--red)', 'charges ÷ loyers encaissés')}
     </div>
 
-    <div class="card" style="margin-bottom:18px">
-      <div class="card-title">Loyers, charges et cash-flow par mois</div>
-      <div class="ac-wrap"><canvas id="lld-combo"></canvas></div>
-    </div>
-
     <div class="dash-grid-2 lld-mid" style="align-items:stretch">
       <div class="card">
-        <div class="card-title">Suivi des encaissements</div>
-        <div style="overflow-x:auto">${heat}</div>
+        <div class="card-title">Loyers, charges et cash-flow par mois</div>
+        <div class="ac-wrap"><canvas id="lld-combo"></canvas></div>
       </div>
       <div class="card">
         <div class="card-title red">Répartition des charges</div>
@@ -598,10 +596,15 @@ function _renderKpiLLD() {
       </div>
     </div>
 
+    <div class="card" style="margin-bottom:18px">
+      <div class="card-title">Cash-flow par bien et par mois</div>
+      <div style="overflow-x:auto">${heat}</div>
+    </div>
+
     <div class="card">
       <div class="card-title">Rentabilité par bien</div>
       <div class="tbl-wrap"><table>
-        <thead><tr><th>Bien</th><th style="text-align:right">Loyer habituel</th><th style="text-align:right">Mois payés</th><th style="text-align:right">Loyers</th><th style="text-align:right">Charges</th><th style="text-align:right">Crédit</th><th style="text-align:right">Cash-flow</th><th style="text-align:right">Taux charges</th><th style="text-align:right">Couverture</th></tr></thead>
+        <thead><tr><th>Bien</th><th style="text-align:right">Dernier loyer</th><th style="text-align:right">Mois loués</th><th style="text-align:right">Loyers</th><th style="text-align:right">Charges</th><th style="text-align:right">Crédit</th><th style="text-align:right">Cash-flow</th><th style="text-align:right">Taux charges</th><th style="text-align:right">Couverture</th></tr></thead>
         <tbody>${rows}</tbody>
       </table></div>
     </div>`;
