@@ -639,7 +639,7 @@ function renderPlateformes() {
     'Booking':        { color: '#9b6ef3', icon: '🏨' },
     'Direct':         { color: '#22d3c8', icon: '🏡' },
     'Longue durée':   { color: '#22c97a', icon: '🏦' },
-    'Autres revenus': { color: '#8a9ab2', icon: '✨' },
+    'Revenus annexes':{ color: '#8a9ab2', icon: '✨' },
   };
   const LCD_CH = ['Airbnb', 'Booking', 'Direct'];
   const chanOf = l => {
@@ -648,7 +648,7 @@ function renderPlateformes() {
     if (l.sourcePlatform === 'Booking' || c === 'Booking') return 'Booking';
     if (c === 'Location directe' || c === 'Stripe') return 'Direct';
     if (c === 'Loyer mensuel') return 'Longue durée';
-    return 'Autres revenus';
+    return 'Revenus annexes'; // ventes additionnelles, remboursements, régularisations…
   };
 
   // ── Revenus encaissés (relevés bancaires) — filtres Année / Bien de l'onglet ──
@@ -675,6 +675,8 @@ function renderPlateformes() {
   };
   const keep = (date, bien) => {
     const d = iso(date);
+    // Même fenêtre que les revenus bancaires : sinon le revenu par nuit compare des périodes différentes
+    if (!d || d.slice(0, 7) < months[0] || d.slice(0, 7) > months[months.length - 1]) return false;
     if (yearSel !== 'all' && d.slice(0, 4) !== String(yearSel)) return false;
     if (bienSel !== 'all' && bien !== bienSel) return false;
     return !!d;
@@ -748,6 +750,20 @@ function renderPlateformes() {
     } else {
       stats = stat('Opérations', lines.filter(l => chanOf(l) === k).length);
     }
+    if (k === 'Revenus annexes') {
+      const cats = {};
+      lines.filter(l => chanOf(l) === k).forEach(l => { const c = l.cat || l.categorie || 'Autre'; cats[c] = (cats[c] || 0) + (+l.montant); });
+      stats += `<div class="plt-note">Revenus hors loyers et nuitées</div>`;
+      const byCat = Object.entries(cats).sort((a, b) => b[1] - a[1]);
+      return `<div class="card plt-card" style="--ch:${col}">
+        <div class="plt-card-head"><span class="plt-card-name">${CH[k].icon} ${k}</span><span class="plt-card-share">${pct(share)} des revenus</span></div>
+        <div class="plt-card-val">+${_fmtK(d.rev)}</div>
+        <div class="plt-bar"><i style="width:${Math.max(2, Math.round(share))}%"></i></div>
+        <div class="plt-stats">${stats}</div>
+        <div class="plt-sub">Par catégorie</div>${byCat.map(([c, v]) => `<div class="plt-row"><span>${c}</span><b>+${_fmtK(v)}</b></div>`).join('')}
+      </div>`;
+    }
+    if (k === 'Direct' && !d.sejours) stats += `<div class="plt-note">Aucune réservation directe saisie (Paramètres › LCD) : séjours et nuits indisponibles</div>`;
     const top = Object.entries(d.biens).sort((a, b) => b[1] - a[1]);
     return `<div class="card plt-card" style="--ch:${col}">
       <div class="plt-card-head"><span class="plt-card-name">${CH[k].icon} ${k}</span><span class="plt-card-share">${pct(share)} des revenus</span></div>
@@ -789,7 +805,7 @@ function renderPlateformes() {
       </div>
     </div>
 
-    <div class="plt-cards" style="--n:${Math.min(active.length, 4)}">${active.sort((a, b) => C[b].rev - C[a].rev).map(chanCard).join('')}</div>
+    <div class="plt-cards">${active.slice().sort((a, b) => Object.keys(CH).indexOf(a) - Object.keys(CH).indexOf(b)).map(chanCard).join('')}</div>
 
     <div class="card" style="margin-top:18px">
       <div class="card-title">Revenus par bien et par canal</div>
