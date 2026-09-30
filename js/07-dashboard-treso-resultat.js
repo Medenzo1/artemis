@@ -626,33 +626,15 @@ function _buildResultatHTML(year, sci, bienParam) {
     </div>`;
 }
 
-function switchResSubTab(btn) {
-  const rtab = btn.dataset.rstab;
-  // Styler les boutons
-  btn.closest('.dnav-subs').querySelectorAll('.res-stab').forEach(b => {
-    b.style.background = 'transparent';
-    b.style.border = '1px solid transparent';
-    b.style.color = 'var(--text2)';
-  });
-  btn.style.background = 'rgba(34,211,200,.12)';
-  btn.style.border = '1px solid rgba(34,211,200,.3)';
-  btn.style.color = 'var(--cyan)';
-  // Déplacer syn-filters : dans le panel SIG si onglet SIG, sinon dans dp-synthese
+// Onglet Résultat : affiche uniquement les SIG, avec les filtres de la synthèse
+function _showResultatSIG() {
   const synFilters = document.getElementById('syn-filters');
   const sigPanel   = document.getElementById('res-panel-sig');
-  const synParent  = document.getElementById('dp-synthese');
-  if (synFilters && sigPanel && synParent) {
-    if (rtab === 'sig') {
-      if (!sigPanel.contains(synFilters)) sigPanel.insertBefore(synFilters, sigPanel.firstChild);
-    } else {
-      if (!synParent.contains(synFilters)) synParent.insertBefore(synFilters, synParent.firstChild);
-    }
-  }
-  // Afficher le bon panel
-  document.getElementById('res-panel-compte').style.display = rtab === 'compte' ? '' : 'none';
-  document.getElementById('res-panel-sig').style.display    = rtab === 'sig'    ? '' : 'none';
-  if (rtab === 'compte') renderResultat();
-  else if (rtab === 'sig') _renderSIG();
+  if (synFilters && sigPanel && !sigPanel.contains(synFilters)) sigPanel.insertBefore(synFilters, sigPanel.firstChild);
+  const compte = document.getElementById('res-panel-compte');
+  if (compte) compte.style.display = 'none';
+  if (sigPanel) sigPanel.style.display = '';
+  _renderSIG();
 }
 
 // ─────────────────────────────────────────────

@@ -141,14 +141,13 @@ function _applyDefaultDates() {
 function _renderDashTab() {
   _applyDefaultDates();
   const tab = _dashTab;
-  if (tab === 'synthese')    renderSynthese();
-  else if (tab === 'bilan')       renderBilan();
-  else if (tab === 'resultat') {
-    // Activer le premier sous-onglet par défaut si aucun actif
-    const firstResBtn = document.querySelector('.res-stab');
-    if (firstResBtn && !document.querySelector('.res-stab[style*="rgba(34,211"]')) switchResSubTab(firstResBtn);
-    else renderResultat();
+  // Les filtres partagés vivent dans la synthèse, sauf sur Résultat (SIG) qui les emprunte
+  if (tab !== 'resultat') {
+    const synFilters = document.getElementById('syn-filters'), synParent = document.getElementById('dp-synthese');
+    if (synFilters && synParent && !synParent.contains(synFilters)) synParent.insertBefore(synFilters, synParent.firstChild);
   }
+  if (tab === 'synthese')    renderSynthese();
+  else if (tab === 'resultat')   _showResultatSIG(); // Résultat = SIG uniquement (compte de résultat et bilan retirés)
   else if (tab === 'kpis')        renderKpis();
   else if (tab === 'plateformes') renderPlateformes();
 }

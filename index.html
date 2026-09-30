@@ -14,7 +14,7 @@
 <meta name="application-name" content="ARTEMIS">
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<link rel="stylesheet" href="css/styles.css?v=202609301903">
+<link rel="stylesheet" href="css/styles.css?v=202609301912">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 </head>
@@ -65,9 +65,9 @@
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
-<script src="js/00-icons.js?v=202609301903"></script>
-<script src="js/00-firebase-config.js?v=202609301903"></script>
-<script src="js/01-login.js?v=202609301903"></script>
+<script src="js/00-icons.js?v=202609301912"></script>
+<script src="js/00-firebase-config.js?v=202609301912"></script>
+<script src="js/01-login.js?v=202609301912"></script>
 </div>
 
 
@@ -116,7 +116,7 @@
         <div class="h-entry-card h-card-dash" onclick="enterDashboard()">
           <div class="h-card-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;color:#9b6ef3"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg></div>
           <div class="h-card-label">Dashboard</div>
-          <div class="h-card-desc">P&L · Bilan · Trésorerie · Résultat net · KPIs</div>
+          <div class="h-card-desc">P&L · Trésorerie · SIG · KPIs</div>
           <div class="h-card-arrow">→</div>
         </div>
         <div class="h-entry-card h-card-market" onclick="showMarketplace()">
@@ -195,7 +195,7 @@
           </div>
           <div style="display:flex;align-items:center;gap:12px">
             <div style="width:6px;height:6px;border-radius:50%;background:#22d3c8;flex-shrink:0"></div>
-            <span style="font-size:13px;color:rgba(200,216,240,.7)">Dashboard P&amp;L, Bilan, Trésorerie, KPIs</span>
+            <span style="font-size:13px;color:rgba(200,216,240,.7)">Dashboard P&amp;L, Trésorerie, SIG, KPIs</span>
           </div>
           <div style="display:flex;align-items:center;gap:12px">
             <div style="width:6px;height:6px;border-radius:50%;background:#22d3c8;flex-shrink:0"></div>
@@ -321,7 +321,7 @@
       <div class="h-feat">
         <div class="h-feat-icon">📊</div>
         <div class="h-feat-title">Dashboard analytique</div>
-        <div class="h-feat-desc">P&L, Bilan, Trésorerie, KPIs LCD/LLD, variation EBIT, carte des biens. Export Excel.</div>
+        <div class="h-feat-desc">P&L, Trésorerie, SIG, KPIs LCD/LLD, variation EBIT, carte des biens. Export Excel.</div>
       </div>
       <div class="h-feat">
         <div class="h-feat-icon">⚙️</div>
@@ -1018,15 +1018,6 @@
       </div>
     </div>
 
-    <!-- Bilan -->
-    <div class="dnav-group" data-group="bilan" style="display:flex;align-items:stretch;height:100%">
-      <button class="dnav-head dtab" data-tab="bilan"
-        onclick="switchNavHead(this)"
-        style="font-size:13px;font-weight:700;padding:0 18px;height:100%;background:none;border:none;border-bottom:3px solid transparent;color:var(--text2);cursor:pointer;white-space:nowrap;font-family:inherit;letter-spacing:.02em;border-right:1px solid var(--border);display:flex;align-items:center;gap:7px;flex-shrink:0">
-        <span style="display:inline-flex"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle"><path d="M12 3v18" /><path d="m19 8 3 8a5 5 0 0 1-6 0zV7" /><path d="M3 7h1a17 17 0 0 0 8-2 17 17 0 0 0 8 2h1" /><path d="m5 8 3 8a5 5 0 0 1-6 0zV7" /><path d="M7 21h10" /></svg></span> Bilan
-      </button>
-    </div>
-
     <!-- Résultat -->
     <div class="dnav-group" data-group="resultat" style="display:flex;align-items:stretch;height:100%">
       <button class="dnav-head dtab" data-tab="resultat"
@@ -1034,12 +1025,6 @@
         style="font-size:13px;font-weight:700;padding:0 18px;height:100%;background:none;border:none;border-bottom:3px solid transparent;color:var(--text2);cursor:pointer;white-space:nowrap;font-family:inherit;letter-spacing:.02em;border-right:1px solid var(--border);display:flex;align-items:center;gap:7px;flex-shrink:0">
         <span style="display:inline-flex"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle"><rect width="8" height="4" x="8" y="2" rx="1" ry="1" /><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" /><path d="M12 11h4" /><path d="M12 16h4" /><path d="M8 11h.01" /><path d="M8 16h.01" /></svg></span> Résultat
       </button>
-      <div class="dnav-subs" style="display:none;align-items:center;gap:4px;padding:0 8px">
-        <button class="dnav-sub res-stab" data-rstab="compte" onclick="switchResSubTab(this)"
-          style="font-size:11px;font-weight:600;padding:3px 10px;height:22px;background:transparent;border:1px solid transparent;border-radius:20px;color:var(--text2);cursor:pointer;white-space:nowrap;font-family:inherit;transition:all .15s">Compte de résultat</button>
-        <button class="dnav-sub res-stab" data-rstab="sig" onclick="switchResSubTab(this)"
-          style="font-size:11px;font-weight:600;padding:3px 10px;height:22px;background:transparent;border:1px solid transparent;border-radius:20px;color:var(--text2);cursor:pointer;white-space:nowrap;font-family:inherit;transition:all .15s">SIG</button>
-      </div>
     </div>
 
     <!-- KPIs -->
@@ -1091,48 +1076,12 @@
     <button class="ddrawer-sub" data-stab="tresorerie" onclick="dashDrawerSub(this,'synthese')">Trésorerie</button>
   </div>
 
-  <!-- Bilan -->
-  <button class="ddrawer-tab" data-tab="bilan" onclick="dashDrawerTab(this)">
-    <span class="ddrawer-tab-icon">⚖️</span>
-    <span class="ddrawer-tab-label">Bilan</span>
-    <span class="ddrawer-tab-arrow">›</span>
-  </button>
-  <div class="ddrawer-subs" id="ddrawer-subs-bilan">
-    <div class="ddrawer-filter">
-      <label>Année</label>
-      <select id="m-bil-year" onchange="document.getElementById('bil-year').value=this.value;renderBilan()">
-        <option value="all">Dernière période</option>
-      </select>
-    </div>
-    <div class="ddrawer-filter">
-      <label>SCI</label>
-      <select id="m-bil-sci" onchange="document.getElementById('bil-sci').value=this.value;renderBilan()">
-        <option value="all">Toutes</option>
-      </select>
-    </div>
-  </div>
-
   <!-- Résultat -->
   <button class="ddrawer-tab" data-tab="resultat" onclick="dashDrawerTab(this)">
     <span class="ddrawer-tab-icon">📋</span>
     <span class="ddrawer-tab-label">Résultat</span>
     <span class="ddrawer-tab-arrow">›</span>
   </button>
-  <div class="ddrawer-subs" id="ddrawer-subs-resultat">
-    <div class="ddrawer-filter">
-      <label>Année</label>
-      <select id="m-res-year" onchange="document.getElementById('res-year').value=this.value;renderResultat()">
-        <option value="all">Toutes années</option>
-      </select>
-    </div>
-    <div class="ddrawer-filter">
-      <label>SCI</label>
-      <select id="m-res-sci" onchange="document.getElementById('res-sci').value=this.value;renderResultat()">
-        <option value="all">Toutes</option>
-      </select>
-    </div>
-
-  </div>
 
   <!-- KPIs -->
   <button class="ddrawer-tab" data-tab="kpis" onclick="dashDrawerTab(this)">
@@ -1454,7 +1403,7 @@
             <span style="font-size:28px">📊</span>
             <span class="home-btn-label" style="font-size:16px">Dashboard</span>
           </div>
-          <div style="font-size:11px;color:rgba(255,255,255,.5);line-height:1.7">Synthèse · Bilan · Résultat<br>KPIs · Plateformes</div>
+          <div style="font-size:11px;color:rgba(255,255,255,.5);line-height:1.7">Synthèse · Résultat<br>KPIs · Plateformes</div>
           <div style="margin-top:18px;font-size:11px;font-weight:700;color:#9b6ef3;letter-spacing:.08em">ACCÉDER →</div>
         </button>
       </div>
@@ -1977,7 +1926,6 @@
   <!-- Main tabs -->
   <div style="display:flex;gap:2px;flex:1">
     <button class="dtab active" data-tab="synthese"    onclick="switchDashTab(this)">💰 Synthèse</button>
-    <button class="dtab"        data-tab="bilan"       onclick="switchDashTab(this)">⚖️ Bilan</button>
     <button class="dtab"        data-tab="resultat"    onclick="switchDashTab(this)">📋 Résultat</button>
     <button class="dtab"        data-tab="kpis"        onclick="switchDashTab(this)">📈 KPIs</button>
     <button class="dtab"        data-tab="plateformes" onclick="switchDashTab(this)">🏠 Plateformes</button>
@@ -2204,28 +2152,28 @@
 
 </div>
 
-<script src="js/02-state-core.js?v=202609301903"></script>
-<script src="js/03-import-mapping.js?v=202609301903"></script>
-<script src="js/04-params-settings.js?v=202609301903"></script>
-<script src="js/05-dashboard-core.js?v=202609301903"></script>
-<script src="js/06-dashboard-ca-dep.js?v=202609301903"></script>
-<script src="js/07-dashboard-treso-resultat.js?v=202609301903"></script>
-<script src="js/08-dashboard-kpis-lcd.js?v=202609301903"></script>
-<script src="js/09-home-screen.js?v=202609301903"></script>
+<script src="js/02-state-core.js?v=202609301912"></script>
+<script src="js/03-import-mapping.js?v=202609301912"></script>
+<script src="js/04-params-settings.js?v=202609301912"></script>
+<script src="js/05-dashboard-core.js?v=202609301912"></script>
+<script src="js/06-dashboard-ca-dep.js?v=202609301912"></script>
+<script src="js/07-dashboard-treso-resultat.js?v=202609301912"></script>
+<script src="js/08-dashboard-kpis-lcd.js?v=202609301912"></script>
+<script src="js/09-home-screen.js?v=202609301912"></script>
 
-<script src="js/10-mobile-drawer.js?v=202609301903"></script>
+<script src="js/10-mobile-drawer.js?v=202609301912"></script>
 
-<script src="js/11-ca-table-sort.js?v=202609301903"></script>
+<script src="js/11-ca-table-sort.js?v=202609301912"></script>
 
 <!-- ══ MOBILE NAV SCRIPT ══ -->
-<script src="js/12-mobile-nav.js?v=202609301903"></script>
-<script src="js/13-init-patch.js?v=202609301903"></script>
+<script src="js/12-mobile-nav.js?v=202609301912"></script>
+<script src="js/13-init-patch.js?v=202609301912"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="js/14-marketplace.js?v=202609301903"></script>
-<script src="js/15-simulateur.js?v=202609301903"></script>
-<script src="js/16-simulateur-moteur.js?v=202609301903"></script>
-<script src="js/17-simulateur-regimes.js?v=202609301903"></script>
-<script src="js/18-simulateur-resultats.js?v=202609301903"></script>
-<script src="js/19-charts.js?v=202609301903"></script>
+<script src="js/14-marketplace.js?v=202609301912"></script>
+<script src="js/15-simulateur.js?v=202609301912"></script>
+<script src="js/16-simulateur-moteur.js?v=202609301912"></script>
+<script src="js/17-simulateur-regimes.js?v=202609301912"></script>
+<script src="js/18-simulateur-resultats.js?v=202609301912"></script>
+<script src="js/19-charts.js?v=202609301912"></script>
 </body>
 </html>
