@@ -1108,3 +1108,7 @@ body{font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
 .plt-row{display:flex;justify-content:space-between;font-size:12px;padding:5px 0;border-bottom:1px solid var(--border)}
 .plt-row:last-child{border-bottom:none}
 .plt-row b{color:var(--ch);font-weight:700}
+
+/* Dans une grille, la marge « .card+.card » (prévue pour l'empilement vertical) décale toutes les cartes
+   sauf la première : on l'annule pour tous les conteneurs en grille */
+.dash-grid-2>.card,.dash-grid-3>.card,.dash-grid-4>.card,.lld-kpis>.card,.lld-mid>.card,[style*="display:grid"]>.card{margin-top:0!important}
