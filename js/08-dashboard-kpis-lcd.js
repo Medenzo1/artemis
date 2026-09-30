@@ -630,61 +630,183 @@ function renderPlateformes() {
   const el = document.getElementById('plt-content');
   if (!el) return;
   _dashFillYears(_getDB());
+  const yearSel = _getV('plt-year'), bienSel = _getV('plt-bien');
+  const params = getParams();
 
-  const lines = _dashLines(_getV('plt-year'), 'all', 'all', _getV('plt-bien'));
-  if (!lines.length) { el.innerHTML = _emptyState(); return; }
-
-  const pltMap = {};
-  lines.filter(l=>+l.montant>0).forEach(l => {
-    const plt = l.sourcePlatform || 'Direct / Autre';
-    if (!pltMap[plt]) pltMap[plt] = {rev:0, biens:{}};
-    pltMap[plt].rev += +l.montant;
-    const b = l.bienName||l.bien||'?';
-    pltMap[plt].biens[b] = (pltMap[plt].biens[b]||0)+(+l.montant);
-  });
-
-  const total  = Object.values(pltMap).reduce((s,v)=>s+v.rev,0);
-  const maxPlt = Math.max(...Object.values(pltMap).map(v=>v.rev),1);
-
-  const PLT_COLORS = {
-    'Airbnb': 'var(--gold)',
-    'Booking': 'var(--purple)',
-    'Direct / Autre': 'var(--cyan)',
+  // ── Canaux ────────────────────────────────
+  const CH = {
+    'Airbnb':         { color: '#f5b731', icon: '✈' },
+    'Booking':        { color: '#9b6ef3', icon: '🏨' },
+    'Direct':         { color: '#22d3c8', icon: '🏡' },
+    'Longue durée':   { color: '#22c97a', icon: '🏦' },
+    'Autres revenus': { color: '#8a9ab2', icon: '✨' },
+  };
+  const LCD_CH = ['Airbnb', 'Booking', 'Direct'];
+  const chanOf = l => {
+    const c = l.cat || l.categorie || '';
+    if (l.sourcePlatform === 'Airbnb' || c === 'Airbnb') return 'Airbnb';
+    if (l.sourcePlatform === 'Booking' || c === 'Booking') return 'Booking';
+    if (c === 'Location directe' || c === 'Stripe') return 'Direct';
+    if (c === 'Loyer mensuel') return 'Longue durée';
+    return 'Autres revenus';
   };
 
-  const pltCards = Object.entries(pltMap).sort((a,b)=>b[1].rev-a[1].rev).map(([plt,d]) => {
-    const color = PLT_COLORS[plt] || 'var(--text2)';
-    const pct   = total ? d.rev/total*100 : 0;
-    const bienRows = Object.entries(d.biens).sort((a,b)=>b[1]-a[1]).map(([b,v]) =>
-      `<div style="display:flex;justify-content:space-between;font-size:11px;padding:4px 0;border-bottom:1px solid var(--border)">
-        <span>${b}</span>
-        <span style="font-family:inherit;color:${color}">+${_fmtK(v)}</span>
-      </div>`
-    ).join('');
-    return `<div class="card">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-        <span style="font-size:13px;font-weight:700;color:${color}">${plt}</span>
-        <span style="font-size:11px;color:var(--text2)">${_pct(pct)} du total</span>
-      </div>
-      <div style="font-size:20px;font-weight:800;color:${color};font-family:inherit;margin-bottom:12px">+${_fmtK(d.rev)}</div>
-      <div style="background:var(--bg3);border-radius:3px;height:4px;margin-bottom:16px;overflow:hidden">
-        <div style="background:${color};height:100%;width:${Math.round(pct)}%;border-radius:3px;opacity:.85"></div>
-      </div>
-      <div style="font-size:11px;font-weight:700;color:var(--text2);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px">Par bien</div>
-      ${bienRows || '<div style="color:var(--text2);font-size:11px">-</div>'}
+  // ── Revenus encaissés (relevés bancaires) — filtres Année / Bien de l'onglet ──
+  const lines = _synLines({ sci: [], bien: [], cat: [], dmin: '', dmax: '' })
+    .filter(l => _isCA(l) && +l.montant > 0)
+    .filter(l => yearSel === 'all' || String(l._year) === String(yearSel))
+    .filter(l => bienSel === 'all' || (l.bienName || l.bien) === bienSel);
+  if (!lines.length) { el.innerHTML = _emptyState('Aucun revenu pour cette sélection'); return; }
+
+  const months = [...new Set(lines.map(l => l._period))].sort();
+  const C = {};
+  Object.keys(CH).forEach(k => C[k] = { rev: 0, byM: {}, biens: {}, nuits: 0, sejours: 0, brut: 0, comm: 0 });
+  lines.forEach(l => {
+    const k = chanOf(l), v = +l.montant, b = l.bienName || l.bien || 'Non attribué';
+    C[k].rev += v; C[k].byM[l._period] = (C[k].byM[l._period] || 0) + v; C[k].biens[b] = (C[k].biens[b] || 0) + v;
+  });
+
+  // ── Réservations (exports Airbnb / Booking, réservations directes) ──
+  const iso = d => (_normDateStr(d).sort || '').slice(0, 10);
+  const bienOfLogement = lg => {
+    const id = (typeof AIRBNB_MAP !== 'undefined' && AIRBNB_MAP) ? AIRBNB_MAP[lg] : null;
+    const b = (params.biens || []).find(x => (id && x.id === id) || x.name === lg || x.nom === lg || (lg && (lg.includes(x.name) || (x.nom && lg.includes(x.nom)))));
+    return b ? b.name : lg;
+  };
+  const keep = (date, bien) => {
+    const d = iso(date);
+    if (yearSel !== 'all' && d.slice(0, 4) !== String(yearSel)) return false;
+    if (bienSel !== 'all' && bien !== bienSel) return false;
+    return !!d;
+  };
+  const read = k => { try { return JSON.parse(localStorage.getItem(k) || '[]'); } catch (e) { return []; } };
+  const seen = new Set();
+  // Airbnb : lignes « Réservation » (code, début, nuits, logement, frais de service, revenus bruts)
+  read('artemis_airbnb_rows').forEach(r => {
+    if (!Array.isArray(r) || String(r[2] || '') === 'Payout') return;
+    const n = parseInt(r[8]) || 0, code = String(r[4] || '');
+    if (n <= 0 || !code || seen.has('a' + code)) return;
+    const bien = bienOfLogement(String(r[10] || ''));
+    if (!keep(r[6], bien)) return;
+    seen.add('a' + code);
+    C.Airbnb.nuits += n; C.Airbnb.sejours++;
+    C.Airbnb.brut += parseFloat(r[20]) || 0; C.Airbnb.comm += Math.abs(parseFloat(r[16]) || 0);
+  });
+  // Booking : lignes « Réservation » (numéro, arrivée, nuits, brut, commission, frais de paiement)
+  // Le bien est porté par la ligne « (Payout) » (ID établissement) : on le rattache via la référence de versement
+  const bkRows = read('artemis_booking_rows'), bkBien = {};
+  bkRows.forEach(r => {
+    if (!Array.isArray(r) || String(r[0] || '') !== '(Payout)') return;
+    const id = (typeof BOOKING_ID_MAP !== 'undefined' && BOOKING_ID_MAP) ? BOOKING_ID_MAP[String(r[9] || '')] : null;
+    const b = (params.biens || []).find(x => x.id === id);
+    bkBien[String(r[1] || '')] = b ? b.name : bienOfLogement(String(r[10] || ''));
+  });
+  bkRows.forEach(r => {
+    if (!Array.isArray(r) || String(r[0] || '') !== 'Réservation') return;
+    const n = parseInt(r[8]) || 0, code = String(r[2] || '');
+    if (n <= 0 || !code || seen.has('b' + code)) return;
+    if (!keep(r[3], bkBien[String(r[1] || '')])) return;
+    seen.add('b' + code);
+    C.Booking.nuits += n; C.Booking.sejours++;
+    C.Booking.brut += parseFloat(r[15]) || 0; C.Booking.comm += Math.abs(parseFloat(r[16]) || 0) + Math.abs(parseFloat(r[18]) || 0);
+  });
+  // Direct : réservations saisies dans ARTEMIS
+  read('artemis_lcd').forEach(a => {
+    const n = parseInt(a.nuits) || 0;
+    if (n <= 0 || !keep(a.dateDebut, a.bienName)) return;
+    C.Direct.nuits += n; C.Direct.sejours++; C.Direct.brut += +a.montant || 0;
+  });
+
+  // ── Indicateurs ───────────────────────────
+  const active = Object.keys(CH).filter(k => C[k].rev > 0 || C[k].nuits > 0);
+  const total = active.reduce((t, k) => t + C[k].rev, 0);
+  const lcdRev = LCD_CH.reduce((t, k) => t + C[k].rev, 0);
+  const platRev = C.Airbnb.rev + C.Booking.rev;
+  const dep = lcdRev ? platRev / lcdRev * 100 : 0;
+  const comm = C.Airbnb.comm + C.Booking.comm, brutPlat = C.Airbnb.brut + C.Booking.brut;
+  const lcdNuits = LCD_CH.reduce((t, k) => t + C[k].nuits, 0);
+  const revNuit = lcdNuits ? lcdRev / lcdNuits : null;
+  const pct = v => (Math.abs(v) < 0.05 ? 0 : v).toLocaleString('fr-FR', { maximumFractionDigits: 1 }) + ' %';
+  const eur2 = v => v.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
+  const totPM = {}; months.forEach(m => totPM[m] = active.reduce((t, k) => t + (C[k].byM[m] || 0), 0));
+  const last = months[months.length - 1];
+  const ratio = (icon, label, value, color, sub) => `<div class="card kpi-card kpi-v2"><div class="kpi-v2-head"><div class="kpi-v2-lbl">${icon}<span>${label}</span></div></div><div class="kpi-v2-val" style="color:${color}">${value}</div><div class="kpi-v2-sub">${sub}</div></div>`;
+
+  // Fiche par canal
+  const stat = (lbl, val) => `<div class="plt-stat"><span>${lbl}</span><b>${val}</b></div>`;
+  const chanCard = k => {
+    const d = C[k], col = CH[k].color, share = total ? d.rev / total * 100 : 0;
+    let stats = '';
+    if (LCD_CH.includes(k)) {
+      stats = stat('Séjours', d.sejours || '—') + stat('Nuits', d.nuits || '—') +
+        stat('Durée moyenne', d.sejours ? (d.nuits / d.sejours).toLocaleString('fr-FR', { maximumFractionDigits: 1 }) + ' nuits' : '—') +
+        stat('Revenu net / nuit', d.nuits ? eur2(d.rev / d.nuits) : '—') +
+        (k === 'Direct' ? stat('Commission', '0 %') : stat('Commission', d.brut ? pct(d.comm / d.brut * 100) : '—'));
+    } else if (k === 'Longue durée') {
+      const nb = Object.keys(d.biens).length, mois = months.filter(m => d.byM[m]).length || 1;
+      stats = stat('Biens loués', nb) + stat('Loyer moyen / mois', _fmtK(d.rev / mois)) + stat('Mois encaissés', months.filter(m => d.byM[m]).length + ' / ' + months.length);
+    } else {
+      stats = stat('Opérations', lines.filter(l => chanOf(l) === k).length);
+    }
+    const top = Object.entries(d.biens).sort((a, b) => b[1] - a[1]);
+    return `<div class="card plt-card" style="--ch:${col}">
+      <div class="plt-card-head"><span class="plt-card-name">${CH[k].icon} ${k}</span><span class="plt-card-share">${pct(share)} des revenus</span></div>
+      <div class="plt-card-val">+${_fmtK(d.rev)}</div>
+      <div class="plt-bar"><i style="width:${Math.max(2, Math.round(share))}%"></i></div>
+      <div class="plt-stats">${stats}</div>
+      ${top.length ? `<div class="plt-sub">Par bien</div>${top.map(([b, v]) => `<div class="plt-row"><span>${b}</span><b>+${_fmtK(v)}</b></div>`).join('')}` : ''}
     </div>`;
-  }).join('');
+  };
+
+  // Matrice bien × canal
+  const allBiens = [...new Set(active.flatMap(k => Object.keys(C[k].biens)))].sort((a, b) => active.reduce((t, k) => t + (C[k].biens[b] || 0), 0) - active.reduce((t, k) => t + (C[k].biens[a] || 0), 0));
+  const matrix = `<div class="tbl-wrap"><table>
+      <thead><tr><th>Bien</th>${active.map(k => `<th style="text-align:right;color:${CH[k].color}">${k}</th>`).join('')}<th style="text-align:right">Total</th><th style="text-align:right">Part plateformes</th></tr></thead>
+      <tbody>${allBiens.map(b => {
+        const t = active.reduce((s2, k) => s2 + (C[k].biens[b] || 0), 0);
+        const lcd = LCD_CH.reduce((s2, k) => s2 + (C[k].biens[b] || 0), 0), pl = (C.Airbnb.biens[b] || 0) + (C.Booking.biens[b] || 0);
+        return `<tr><td style="font-weight:600">${b}</td>${active.map(k => `<td class="td-right">${C[k].biens[b] ? _fmtK(C[k].biens[b]) : '<span style="color:var(--text3)">—</span>'}</td>`).join('')}<td class="td-right" style="font-weight:700">${_fmtK(t)}</td><td class="td-right td-muted">${lcd ? pct(pl / lcd * 100) : '—'}</td></tr>`;
+      }).join('')}</tbody>
+    </table></div>`;
 
   el.innerHTML = `
-    <div class="dash-grid-4" style="margin-bottom:20px">
-      ${_kpiCard('🏠','Total revenus','+'+_fmtK(total),'var(--green)')}
-      ${Object.entries(pltMap).sort((a,b)=>b[1].rev-a[1].rev).slice(0,3).map(([plt,d]) =>
-        _kpiCard(({Airbnb:'✈',Booking:'🏨'})[plt]||'🏦', plt, '+'+_fmtK(d.rev), PLT_COLORS[plt]||'var(--text2)', _pct(total?d.rev/total*100:0)+' du total')
-      ).join('')}
+    <div class="dash-grid-4" style="margin-bottom:18px">
+      ${_kpiCard('💰', 'Revenus encaissés', '+' + _fmtK(total), 'var(--green)', months.length + ' mois · ' + active.length + ' canaux', _varBadges(totPM[last], last, totPM, true), months.map(m => totPM[m]))}
+      ${ratio('🔗', 'Dépendance plateformes', lcdRev ? pct(dep) : '—', dep > 80 ? 'var(--red)' : dep > 60 ? 'var(--gold)' : 'var(--green)', 'part Airbnb + Booking dans la courte durée')}
+      ${ratio('💸', 'Commissions payées', comm ? _fmtK(comm) : '—', 'var(--red)', brutPlat ? pct(comm / brutPlat * 100) + ' du montant brut des réservations' : 'importez les exports Airbnb / Booking')}
+      ${ratio('🌙', 'Revenu net par nuit', revNuit ? eur2(revNuit) : '—', 'var(--cyan)', lcdNuits ? lcdNuits + ' nuits vendues en courte durée' : 'aucune réservation courte durée')}
     </div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr));gap:16px">
-      ${pltCards || _emptyState()}
+
+    <div class="dash-grid-2 lld-mid" style="align-items:stretch">
+      <div class="card">
+        <div class="card-title">Revenus par canal et par mois</div>
+        <div class="ac-wrap"><canvas id="plt-combo"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Répartition des revenus</div>
+        <div class="ac-wrap"><canvas id="plt-donut"></canvas></div>
+        <div id="plt-donut-legend" style="margin-top:12px;display:flex;flex-direction:column;gap:1px"></div>
+      </div>
+    </div>
+
+    <div class="plt-cards" style="--n:${Math.min(active.length, 4)}">${active.sort((a, b) => C[b].rev - C[a].rev).map(chanCard).join('')}</div>
+
+    <div class="card" style="margin-top:18px">
+      <div class="card-title">Revenus par bien et par canal</div>
+      ${matrix}
     </div>`;
+
+  requestAnimationFrame(() => {
+    ArtCharts.combo(document.getElementById('plt-combo'), {
+      labels: months, stacked: true,
+      bars: active.map(k => ({ name: k, values: months.map(m => C[k].byM[m] || 0), color: CH[k].color }))
+    });
+    ArtCharts.donut(document.getElementById('plt-donut'), {
+      entries: active.map(k => [k, C[k].rev]).sort((a, b) => b[1] - a[1]),
+      palette: active.slice().sort((a, b) => C[b].rev - C[a].rev).map(k => CH[k].color),
+      centerLabel: 'Revenus', sign: '+', valueColor: '#22c97a', legendEl: document.getElementById('plt-donut-legend'), height: 220
+    });
+  });
 }
 
 // ─────────────────────────────────────────────

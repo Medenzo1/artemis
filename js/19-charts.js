@@ -533,7 +533,7 @@ const ArtCharts = (() => {
   }
 
   // ════════════════ BARRES GROUPÉES + COURBE ════════════════
-  // cfg: { labels (YYYY-MM), bars:[{name, values, color}], line?:{name, values, color}, height? }
+  // cfg: { labels (YYYY-MM), bars:[{name, values, color}], line?:{name, values, color}, stacked?, height? }
   function combo(cv, cfg) {
     if (!cv || !cfg.labels || !cfg.labels.length) return;
     const H = cfg.height || 260, n = cfg.labels.length, bars = cfg.bars || [], line = cfg.line;
@@ -542,7 +542,8 @@ const ArtCharts = (() => {
     let hover = -1, L;
     function draw() {
       const { ctx, W } = setup(cv, H);
-      const all = [0, ...bars.flatMap(b => b.values), ...(line ? line.values : [])];
+      const sums = cfg.stacked ? cfg.labels.map((_, i) => bars.reduce((t, b) => t + Math.max(0, b.values[i] || 0), 0)) : [];
+      const all = [0, ...(cfg.stacked ? sums : bars.flatMap(b => b.values)), ...(line ? line.values : [])];
       const sc = niceScale(Math.min(...all), Math.max(...all) || 1, 4);
       ctx.font = '500 11px ' + FONT;
       const yW = Math.max(...sc.ticks.map(t => ctx.measureText(fmtAxis(t)).width));
@@ -555,8 +556,22 @@ const ArtCharts = (() => {
       sc.ticks.forEach(t => { const y = Math.round(yOf(t)) + 0.5; ctx.strokeStyle = t === 0 ? C.zero : C.grid; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(P.left, y); ctx.lineTo(P.left + cW, y); ctx.stroke(); ctx.fillStyle = C.text2; ctx.fillText(fmtAxis(t), P.left - 10, y); });
       if (hover >= 0) { ctx.fillStyle = 'rgba(255,255,255,0.035)'; ctx.fillRect(P.left + slot * hover, P.top, slot, cH); }
       // Barres
+      if (cfg.stacked) {
+        // Barres empilées : un segment par série, coins arrondis seulement en haut de la pile
+        const bw = Math.min(slot * 0.62, 40);
+        cfg.labels.forEach((_, i) => {
+          let acc = 0; const segs = bars.map(b => Math.max(0, b.values[i] || 0));
+          const topK = segs.reduce((t, v, k) => v > 0 ? k : t, -1);
+          segs.forEach((v, k) => {
+            if (!v) return;
+            const yTop = yOf(acc + v), yBot = yOf(acc); acc += v;
+            ctx.fillStyle = hexA(bars[k].color, hover === i ? 0.95 : 0.8);
+            ctx.beginPath(); ctx.roundRect(cx(i) - bw / 2, yTop, bw, Math.max(yBot - yTop - (k === topK ? 0 : 1.5), 1), k === topK ? [5, 5, 0, 0] : 0); ctx.fill();
+          });
+        });
+      }
       const gw = Math.min(slot * 0.7, 44), bw = gw / Math.max(bars.length, 1), gap = Math.min(3, bw * 0.15);
-      bars.forEach((b, k) => b.values.forEach((v, i) => {
+      if (!cfg.stacked) bars.forEach((b, k) => b.values.forEach((v, i) => {
         if (!v) return;
         const x = cx(i) - gw / 2 + k * bw + gap / 2, y = yOf(Math.max(v, 0)), h = Math.abs(yOf(v) - y0);
         ctx.fillStyle = hexA(b.color, hover === i ? 0.95 : 0.78);
@@ -587,7 +602,9 @@ const ArtCharts = (() => {
       if (idx !== hover) { hover = idx; draw(); }
       if (idx < 0) return T.hide();
       const p = periods[idx];
-      const rows = bars.map(b => '<div class="ac-tip-row"><span class="ac-dot" style="background:' + b.color + '"></span>' + b.name + '<b>' + fmtEur(b.values[idx]) + '</b></div>').join('') +
+      const shown = cfg.stacked ? bars.filter(b => b.values[idx]) : bars;
+      const rows = shown.map(b => '<div class="ac-tip-row"><span class="ac-dot" style="background:' + b.color + '"></span>' + b.name + '<b>' + fmtEur(b.values[idx]) + '</b></div>').join('') +
+        (cfg.stacked ? '<div class="ac-tip-sub" style="display:flex">Total<b style="margin-left:auto;padding-left:12px;color:var(--text)">' + fmtEur(bars.reduce((t, b) => t + (b.values[idx] || 0), 0)) + '</b></div>' : '') +
         (line ? '<div class="ac-tip-sub" style="display:flex;gap:8px;align-items:center"><span class="ac-dot" style="background:' + line.color + '"></span>' + line.name + '<b style="margin-left:auto;padding-left:12px;color:' + (line.values[idx] < 0 ? C.red : line.color) + '">' + fmtEur(line.values[idx], true) + '</b></div>' : '');
       T.show('<div class="ac-tip-head">' + (p ? MONTHS_L[p.m] + ' ' + p.y : cfg.labels[idx]) + '</div>' + rows, L.cx(idx), y);
     };
