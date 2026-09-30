@@ -532,5 +532,70 @@ const ArtCharts = (() => {
     return { redraw: draw };
   }
 
-  return { area, donut, diverging, gauge, funnel, forecast, fmtEur, fmtAxis, fmtPct, colors: C };
+  // ════════════════ BARRES GROUPÉES + COURBE ════════════════
+  // cfg: { labels (YYYY-MM), bars:[{name, values, color}], line?:{name, values, color}, height? }
+  function combo(cv, cfg) {
+    if (!cv || !cfg.labels || !cfg.labels.length) return;
+    const H = cfg.height || 260, n = cfg.labels.length, bars = cfg.bars || [], line = cfg.line;
+    const periods = cfg.labels.map(parsePeriod);
+    const T = tip(cv);
+    let hover = -1, L;
+    function draw() {
+      const { ctx, W } = setup(cv, H);
+      const all = [0, ...bars.flatMap(b => b.values), ...(line ? line.values : [])];
+      const sc = niceScale(Math.min(...all), Math.max(...all) || 1, 4);
+      ctx.font = '500 11px ' + FONT;
+      const yW = Math.max(...sc.ticks.map(t => ctx.measureText(fmtAxis(t)).width));
+      const P = { top: 16, right: 12, bottom: 40, left: Math.ceil(yW) + 16 };
+      const cW = W - P.left - P.right, cH = H - P.top - P.bottom, slot = cW / n;
+      const yOf = v => P.top + cH - (v - sc.min) / (sc.max - sc.min || 1) * cH, y0 = yOf(0);
+      const cx = i => P.left + slot * (i + 0.5);
+      L = { P, cW, slot, cx };
+      ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+      sc.ticks.forEach(t => { const y = Math.round(yOf(t)) + 0.5; ctx.strokeStyle = t === 0 ? C.zero : C.grid; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(P.left, y); ctx.lineTo(P.left + cW, y); ctx.stroke(); ctx.fillStyle = C.text2; ctx.fillText(fmtAxis(t), P.left - 10, y); });
+      if (hover >= 0) { ctx.fillStyle = 'rgba(255,255,255,0.035)'; ctx.fillRect(P.left + slot * hover, P.top, slot, cH); }
+      // Barres
+      const gw = Math.min(slot * 0.7, 44), bw = gw / Math.max(bars.length, 1), gap = Math.min(3, bw * 0.15);
+      bars.forEach((b, k) => b.values.forEach((v, i) => {
+        if (!v) return;
+        const x = cx(i) - gw / 2 + k * bw + gap / 2, y = yOf(Math.max(v, 0)), h = Math.abs(yOf(v) - y0);
+        ctx.fillStyle = hexA(b.color, hover === i ? 0.95 : 0.78);
+        ctx.beginPath(); ctx.roundRect(x, v >= 0 ? y : y0, bw - gap, Math.max(h, 1), v >= 0 ? [4, 4, 0, 0] : [0, 0, 4, 4]); ctx.fill();
+      }));
+      // Courbe
+      if (line) {
+        const pts = line.values.map((v, i) => ({ x: cx(i), y: yOf(v) }));
+        ctx.beginPath(); monotonePath(ctx, pts, true); ctx.strokeStyle = line.color; ctx.lineWidth = 2.25; ctx.lineJoin = 'round'; ctx.stroke();
+        pts.forEach((p, i) => { ctx.beginPath(); ctx.arc(p.x, p.y, i === hover ? 4.5 : 3, 0, Math.PI * 2); ctx.fillStyle = line.values[i] < 0 ? C.red : line.color; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = C.card; ctx.stroke(); });
+      }
+      // Axe X
+      ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+      const step = Math.max(1, Math.ceil(44 / slot));
+      for (let i = 0; i < n; i += step) {
+        const p = periods[i];
+        ctx.font = '500 11px ' + FONT; ctx.fillStyle = i === hover ? C.text : C.text2;
+        ctx.fillText(p ? MONTHS_S[p.m] : String(cfg.labels[i]), cx(i), H - P.bottom + 18);
+        if (p && (i === 0 || p.m < step)) { ctx.font = '600 10px ' + FONT; ctx.fillStyle = 'rgba(138,154,178,0.6)'; ctx.fillText(String(p.y), cx(i), H - P.bottom + 31); }
+      }
+    }
+    cv.style.touchAction = 'pan-y';
+    cv.onpointermove = e => {
+      if (!L) return;
+      const { x, y } = pointer(cv, e);
+      const i = Math.floor((x - L.P.left) / L.slot);
+      const idx = i >= 0 && i < n ? i : -1;
+      if (idx !== hover) { hover = idx; draw(); }
+      if (idx < 0) return T.hide();
+      const p = periods[idx];
+      const rows = bars.map(b => '<div class="ac-tip-row"><span class="ac-dot" style="background:' + b.color + '"></span>' + b.name + '<b>' + fmtEur(b.values[idx]) + '</b></div>').join('') +
+        (line ? '<div class="ac-tip-sub" style="display:flex;gap:8px;align-items:center"><span class="ac-dot" style="background:' + line.color + '"></span>' + line.name + '<b style="margin-left:auto;padding-left:12px;color:' + (line.values[idx] < 0 ? C.red : line.color) + '">' + fmtEur(line.values[idx], true) + '</b></div>' : '');
+      T.show('<div class="ac-tip-head">' + (p ? MONTHS_L[p.m] + ' ' + p.y : cfg.labels[idx]) + '</div>' + rows, L.cx(idx), y);
+    };
+    cv.onpointerdown = cv.onpointermove;
+    cv.onpointerleave = () => { if (hover !== -1) { hover = -1; draw(); } T.hide(); };
+    draw(); observe(cv, draw);
+    return { redraw: draw };
+  }
+
+  return { area, donut, diverging, gauge, funnel, forecast, combo, fmtEur, fmtAxis, fmtPct, colors: C };
 })();

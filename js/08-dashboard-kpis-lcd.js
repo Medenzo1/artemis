@@ -486,99 +486,138 @@ function _drawGauge(canvasId, value, threshold, maxVal, color, centerLabel) {
 // ── LLD ────────────────────────────────────────
 function _renderKpiLLD() {
   const el = document.getElementById('kpi-content');
-  const year    = _getV('kpi-year');
-  const bienSel = _getV('kpi-bien');
-  const doCmp   = _getV('kpi-cmp') === 'prev';
-  const params  = getParams();
+  const params = getParams();
+  const lldNames = (params.biens || []).filter(b => b.type === 'LLD').map(b => b.name);
+  const isLLD = l => { const n = l.bienName || l.bien || ''; return lldNames.some(x => n.includes(x)) || l.type === 'LLD'; };
 
-  const lldBienNames = (params.biens||[]).filter(b=>b.type==='LLD').map(b=>b.name);
-
-  const allLines = _dashLines(year,'all','all',bienSel);
-  const lines = allLines.filter(l => {
-    const bname = l.bienName||l.bien||'';
-    return lldBienNames.some(n=>bname.includes(n)) || l.type==='LLD';
-  });
-
-  const prevYear = doCmp && year!=='all' ? String(+year-1) : null;
-  const linesP = prevYear ? _dashLines(prevYear,'all','all',bienSel).filter(l=>{
-    const bname=l.bienName||l.bien||'';
-    return lldBienNames.some(n=>bname.includes(n))||l.type==='LLD';
-  }) : [];
-
+  const allLines = _dashLines(_getV('kpi-year'), 'all', 'all', _getV('kpi-bien'));
+  const lines = allLines.filter(isLLD);
   if (!lines.length) { el.innerHTML = _emptyState('Aucune donnée LLD pour cette sélection'); return; }
 
-  const rev  = lines.filter(l=>+l.montant>0).reduce((s,l)=>s+(+l.montant),0);
-  const chg  = lines.filter(l=>+l.montant<0).reduce((s,l)=>s+(+l.montant),0);
-  const net  = rev+chg;
-  const revP = linesP.filter(l=>+l.montant>0).reduce((s,l)=>s+(+l.montant),0);
-  const chgP = linesP.filter(l=>+l.montant<0).reduce((s,l)=>s+(+l.montant),0);
+  // Nature des flux : loyers = produits, charges = exploitation + financières,
+  // crédit = capital + intérêts + assurance emprunt. Les flux de bilan (apports, déblocages) sont exclus.
+  const CAP = new Set(['Remboursement emprunt', 'Versement emprunt']);
+  const LOAN_COST = new Set(['Intérêts de crédit', 'Assurance emprunt']);
+  const kind = l => _isCA(l) ? 'rev' : _isDep(l) ? 'chg' : CAP.has(l.cat || l.categorie) ? 'cap' : null;
+  const months = [...new Set(allLines.map(l => l._period).filter(Boolean))].sort();
 
-  const dRev = _kpiDelta(rev,revP), dChg = _kpiDelta(chg,chgP), dNet = _kpiDelta(net,revP+chgP);
-
-  // By bien
-  const bienMap = {};
+  const B = {};           // par bien
+  const M = {};           // par mois
+  const catChg = {};      // charges par poste
+  months.forEach(m => M[m] = { rev: 0, chg: 0, cap: 0 });
   lines.forEach(l => {
-    const k = l.bienName||l.bien||'Non attribué';
-    if(!bienMap[k]) bienMap[k]={rev:0,chg:0};
-    if(+l.montant>0) bienMap[k].rev+=(+l.montant);
-    else bienMap[k].chg+=(+l.montant);
+    const k = kind(l); if (!k) return;
+    const v = +l.montant || 0, b = l.bienName || l.bien || 'Non attribué', m = l._period, cat = l.cat || l.categorie || 'Autre';
+    if (!B[b]) B[b] = { rev: 0, chg: 0, cap: 0, loan: 0, byM: {} };
+    B[b][k] += v;
+    if (k === 'cap' || LOAN_COST.has(cat)) B[b].loan += v;
+    if (k === 'rev') B[b].byM[m] = (B[b].byM[m] || 0) + v;
+    if (M[m]) M[m][k] += v;
+    if (k === 'chg') catChg[cat] = (catChg[cat] || 0) - v;
   });
+  const biens = Object.keys(B).sort((a, b) => B[b].rev - B[a].rev);
+  const sum = k => biens.reduce((t, b) => t + B[b][k], 0);
+  const rev = sum('rev'), chg = sum('chg'), cap = sum('cap'), loan = sum('loan');
+  const cash = rev + chg + cap;
 
-  // Monthly revenue trend
-  const periods = _dashPeriods(year,'all');
-  const revByM = periods.map(p=>(p.lines||[]).filter(l=>{
-    const bname=l.bienName||l.bien||'';
-    return (lldBienNames.some(n=>bname.includes(n))||l.type==='LLD')&&+l.montant>0;
-  }).reduce((s,l)=>s+(+l.montant),0));
-  const _mNames2 = ['Jan','Fév','Mar','Avr','Mai','Juin','Juil','Aoû','Sep','Oct','Nov','Déc'];
-  const mLabels = periods.map(p => {
-    const [pY2, pM2] = (p.period||'').split('-');
-    const nm = _mNames2[(parseInt(pM2)||1)-1] || pM2 || '';
-    return nm + ' ' + (pY2 || p.year || '');
+  // Encaissement : un mois est « payé » si le loyer atteint 90 % du loyer habituel du bien (médiane des mois payés)
+  const median = a => { const s = a.slice().sort((x, y) => x - y); return s.length ? (s.length % 2 ? s[(s.length - 1) / 2] : (s[s.length / 2 - 1] + s[s.length / 2]) / 2) : 0; };
+  let paid = 0, slots = 0;
+  biens.forEach(b => {
+    const vals = Object.values(B[b].byM).filter(v => v > 0);
+    B[b].ref = median(vals);
+    B[b].paid = months.filter(m => (B[b].byM[m] || 0) >= B[b].ref * 0.9 && B[b].ref > 0).length;
+    paid += B[b].paid; slots += months.length;
   });
-  const maxM = Math.max(...revByM,1);
-  const barW = Math.max(periods.length*64,300);
+  const tauxEnc = slots ? paid / slots * 100 : 0;
+  const couverture = loan < 0 ? rev / -loan : null;
+  const tauxChg = rev ? -chg / rev * 100 : 0;
 
-  const mBars = periods.map((p,i)=>{
-    const h=Math.round((revByM[i]/maxM)*90);
-    return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:56px">
-      <div style="font-size:10px;font-family:inherit;color:var(--gold)">+${Math.round(revByM[i]/1000*10)/10}k</div>
-      <div style="height:90px;display:flex;align-items:flex-end;width:100%;justify-content:center">
-        <div style="width:65%;background:var(--gold);opacity:.8;border-radius:3px 3px 0 0;height:${Math.max(h,2)}px"></div>
-      </div>
-      <div style="font-size:10px;color:var(--text2);text-align:center">${mLabels[i]}</div>
-    </div>`;
-  }).join('');
+  const pm = k => { const o = {}; months.forEach(m => o[m] = k === 'cash' ? M[m].rev + M[m].chg + M[m].cap : k === 'chg' ? -M[m].chg : M[m][k]); return o; };
+  const last = months[months.length - 1];
+  const revPM = pm('rev'), chgPM = pm('chg'), cashPM = pm('cash');
+  const series = o => months.map(m => o[m]);
+  const pct = v => (Math.abs(v) < 0.05 ? 0 : v).toLocaleString('fr-FR', { maximumFractionDigits: 1 }) + ' %';
 
-  const bienRows = Object.entries(bienMap).sort((a,b)=>b[1].rev-a[1].rev).map(([bien,d])=>{
-    const n=d.rev+d.chg;
+  const ratioCard = (icon, label, value, color, sub) =>
+    `<div class="card kpi-card kpi-v2"><div class="kpi-v2-head"><div class="kpi-v2-lbl">${icon}<span>${label}</span></div></div>
+      <div class="kpi-v2-val" style="color:${color}">${value}</div><div class="kpi-v2-sub">${sub}</div></div>`;
+
+  // Grille d'encaissement bien × mois
+  const monthShort = m => { const [y, mo] = m.split('-'); return ['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'][+mo - 1] + (mo === '01' || m === months[0] ? ' ' + y.slice(2) : ''); };
+  const heat = `<div class="lld-heat" style="grid-template-columns:auto repeat(${months.length},minmax(26px,1fr))">
+      <div class="lld-heat-h" style="text-align:left">${months[0].slice(0, 4)}${months[0].slice(0, 4) !== last.slice(0, 4) ? ' – ' + last.slice(0, 4) : ''}</div>${months.map(m => `<div class="lld-heat-h" title="${monthShort(m)}">${monthShort(m).split(' ')[0]}</div>`).join('')}
+      ${biens.map(b => `<div class="lld-heat-b">${b}</div>` + months.map(m => {
+        const v = B[b].byM[m] || 0, r = B[b].ref;
+        const st = v <= 0 ? 'miss' : v >= r * 0.9 ? 'ok' : 'part';
+        const lbl = st === 'miss' ? 'Aucun loyer' : st === 'part' ? 'Loyer partiel' : 'Loyer encaissé';
+        return `<div class="lld-cell lld-${st}" title="${b} · ${monthShort(m)} — ${lbl} : ${v ? _fmtK(v) : '0 €'}${r ? ' (habituel ' + _fmtK(r) + ')' : ''}"></div>`;
+      }).join('')).join('')}
+    </div>
+    <div class="lld-heat-legend"><span><i class="lld-cell lld-ok"></i>Loyer complet</span><span><i class="lld-cell lld-part"></i>Partiel</span><span><i class="lld-cell lld-miss"></i>Aucun loyer</span><span class="lld-heat-note">Référence : loyer habituel du bien (médiane)</span></div>`;
+
+  const rows = biens.map(b => {
+    const d = B[b], c = d.rev + d.chg + d.cap, cov = d.loan < 0 ? d.rev / -d.loan : null;
     return `<tr>
-      <td style="font-weight:600">${bien}</td>
+      <td style="font-weight:600">${b}</td>
+      <td class="td-right">${d.ref ? _fmtK(d.ref) : '—'}</td>
+      <td class="td-right" style="color:${d.paid === months.length ? 'var(--green)' : 'var(--gold)'}">${d.paid} / ${months.length}</td>
       <td class="td-pos">+${_fmtK(d.rev)}</td>
       <td class="td-neg">${_fmtK(d.chg)}</td>
-      <td class="td-right" style="color:${n>=0?'var(--gold)':'var(--red)'};font-weight:700">${n>=0?'+':''}${_fmtK(n)}</td>
-      <td class="td-right td-muted">${d.rev?_pct(Math.abs(d.chg)/d.rev*100):'-'}</td>
+      <td class="td-neg">${d.loan ? _fmtK(d.loan) : '—'}</td>
+      <td class="td-right" style="color:${c >= 0 ? 'var(--green)' : 'var(--red)'};font-weight:700">${c >= 0 ? '+' : ''}${_fmtK(c)}</td>
+      <td class="td-right td-muted">${d.rev ? pct(-d.chg / d.rev * 100) : '—'}</td>
+      <td class="td-right" style="color:${cov === null ? 'var(--text2)' : cov >= 1 ? 'var(--green)' : 'var(--red)'}">${cov === null ? '—' : cov.toLocaleString('fr-FR', { maximumFractionDigits: 2 }) + ' ×'}</td>
     </tr>`;
   }).join('');
 
   el.innerHTML = `
-    <div class="dash-grid-4" style="margin-bottom:18px">
-      ${_kpiCard('🏡','Loyers encaissés','+'+_fmtK(rev),'var(--gold)',dRev!==null?`<span style="color:${_kpiDeltaColor(dRev)}">${_kpiDeltaLabel(dRev)}</span>`:'')}
-      ${_kpiCard('📉','Charges LLD',_fmtK(chg),'var(--red)',dChg!==null?`<span style="color:${_kpiDeltaColor(dChg)}">${_kpiDeltaLabel(dChg)}</span>`:'')}
-      ${_kpiCard('📊','Résultat LLD',(net>=0?'+':'')+_fmtK(net),net>=0?'var(--gold)':'var(--red)',dNet!==null?`<span style="color:${_kpiDeltaColor(dNet)}">${_kpiDeltaLabel(dNet)}</span>`:'')}
-      ${_kpiCard('🏠','Nb biens LLD',Object.keys(bienMap).length,'var(--cyan)')}
+    <div class="dash-grid-3 lld-kpis">
+      ${_kpiCard('🏡', 'Loyers encaissés', '+' + _fmtK(rev), 'var(--green)', months.length + ' mois', _varBadges(revPM[last], last, revPM, true), series(revPM))}
+      ${_kpiCard('📉', 'Charges', _fmtK(chg), 'var(--red)', 'hors remboursement du capital', _varBadges(chgPM[last], last, chgPM, false), series(chgPM))}
+      ${_kpiCard('💰', 'Cash-flow après crédit', (cash >= 0 ? '+' : '') + _fmtK(cash), cash >= 0 ? 'var(--cyan)' : 'var(--red)', 'loyers − charges − capital remboursé', _varBadges(cashPM[last], last, cashPM, true), series(cashPM))}
+      ${ratioCard('✅', "Taux d'encaissement", pct(tauxEnc), tauxEnc >= 95 ? 'var(--green)' : tauxEnc >= 80 ? 'var(--gold)' : 'var(--red)', `${paid} mois payés sur ${slots} · vacance et impayés`)}
+      ${ratioCard('🏦', 'Couverture du crédit', couverture === null ? '—' : couverture.toLocaleString('fr-FR', { maximumFractionDigits: 2 }) + ' ×', couverture === null ? 'var(--text2)' : couverture >= 1.2 ? 'var(--green)' : couverture >= 1 ? 'var(--gold)' : 'var(--red)', couverture === null ? 'aucune échéance sur la période' : 'loyers ÷ échéances (capital + intérêts + assurance)')}
+      ${ratioCard('⚖', 'Taux de charges', pct(tauxChg), tauxChg <= 30 ? 'var(--green)' : tauxChg <= 45 ? 'var(--gold)' : 'var(--red)', 'charges ÷ loyers encaissés')}
     </div>
+
     <div class="card" style="margin-bottom:18px">
-      <div class="card-title">Loyers - évolution mensuelle</div>
-      <div style="overflow-x:auto"><div style="display:flex;align-items:flex-end;gap:4px;min-width:${barW}px;padding:4px">${mBars}</div></div>
+      <div class="card-title">Loyers, charges et cash-flow par mois</div>
+      <div class="ac-wrap"><canvas id="lld-combo"></canvas></div>
     </div>
+
+    <div class="dash-grid-2 lld-mid" style="align-items:stretch">
+      <div class="card">
+        <div class="card-title">Suivi des encaissements</div>
+        <div style="overflow-x:auto">${heat}</div>
+      </div>
+      <div class="card">
+        <div class="card-title red">Répartition des charges</div>
+        <div class="ac-wrap"><canvas id="lld-donut"></canvas></div>
+        <div id="lld-donut-legend" style="margin-top:12px;display:flex;flex-direction:column;gap:1px"></div>
+      </div>
+    </div>
+
     <div class="card">
-      <div class="card-title">KPIs par bien - LLD</div>
+      <div class="card-title">Rentabilité par bien</div>
       <div class="tbl-wrap"><table>
-        <thead><tr><th>Bien</th><th style="text-align:right">Loyers</th><th style="text-align:right">Charges</th><th style="text-align:right">Net</th><th style="text-align:right">Taux charge</th></tr></thead>
-        <tbody>${bienRows||'<tr><td colspan="5" style="color:var(--text2)">Aucune donnée LLD</td></tr>'}</tbody>
+        <thead><tr><th>Bien</th><th style="text-align:right">Loyer habituel</th><th style="text-align:right">Mois payés</th><th style="text-align:right">Loyers</th><th style="text-align:right">Charges</th><th style="text-align:right">Crédit</th><th style="text-align:right">Cash-flow</th><th style="text-align:right">Taux charges</th><th style="text-align:right">Couverture</th></tr></thead>
+        <tbody>${rows}</tbody>
       </table></div>
     </div>`;
+
+  requestAnimationFrame(() => {
+    ArtCharts.combo(document.getElementById('lld-combo'), {
+      labels: months,
+      bars: [{ name: 'Loyers', values: series(revPM), color: '#22c97a' }, { name: 'Charges', values: series(chgPM).map(v => -v), color: '#f0566a' }],
+      line: { name: 'Cash-flow après crédit', values: series(cashPM), color: '#22d3c8' }
+    });
+    ArtCharts.donut(document.getElementById('lld-donut'), {
+      entries: Object.entries(catChg).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]),
+      palette: ['#f0566a', '#f5b731', '#9b6ef3', '#fb923c', '#38bdf8', '#22d3c8'],
+      centerLabel: 'Charges', sign: '-', valueColor: '#f0566a', legendEl: document.getElementById('lld-donut-legend'), height: 220
+    });
+  });
 }
 
 // ─────────────────────────────────────────────
