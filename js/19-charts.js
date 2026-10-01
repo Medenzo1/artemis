@@ -64,12 +64,13 @@ const ArtCharts = (() => {
   }
   function observe(cv, fn) {
     if (cv._acRO) cv._acRO.disconnect();
-    let lastW = cv.parentElement.clientWidth;
+    let lastW = cv.parentElement.clientWidth, lastH = cv.parentElement.clientHeight;
     cv._acRO = new ResizeObserver(() => {
       if (!document.body.contains(cv)) { cv._acRO.disconnect(); return; }
-      const w = cv.parentElement.clientWidth;
-      if (Math.abs(w - lastW) < 1) return;
-      lastW = w; requestAnimationFrame(fn);
+      const w = cv.parentElement.clientWidth, h = cv.parentElement.clientHeight;
+      const fill = cv.parentElement.classList.contains('ac-fill');
+      if (Math.abs(w - lastW) < 1 && (!fill || Math.abs(h - lastH) < 1)) return;
+      lastW = w; lastH = h; requestAnimationFrame(fn);
     });
     cv._acRO.observe(cv.parentElement);
   }
@@ -102,6 +103,16 @@ const ArtCharts = (() => {
     const step = Math.pow(10, Math.floor(Math.log10((max - min) / n || 1)));
     const ticks = []; for (let v = Math.floor(min / step) * step; v <= max + step * 1e-3; v += step) ticks.push(v);
     return { ticks, min: ticks[0], max: ticks[ticks.length - 1] };
+  }
+  function tightScale(min, max) {
+    let best = null;
+    for (let n = 4; n <= 7; n++) {
+      const sc = niceScale(min, max, n);
+      if (sc.ticks.length > 8) continue;
+      const waste = (sc.max - sc.min) / ((max - min) || 1);
+      if (!best || waste < best.waste - 0.02) best = Object.assign(sc, { waste });
+    }
+    return best || niceScale(min, max, 4);
   }
   // Courbe monotone (Fritsch–Carlson) : lisse sans jamais dépasser les données
   function monotonePath(ctx, pts, move) {
@@ -536,15 +547,18 @@ const ArtCharts = (() => {
   // cfg: { labels (YYYY-MM), bars:[{name, values, color}], line?:{name, values, color}, stacked?, height? }
   function combo(cv, cfg) {
     if (!cv || !cfg.labels || !cfg.labels.length) return;
-    const H = cfg.height || 260, n = cfg.labels.length, bars = cfg.bars || [], line = cfg.line;
+    const n = cfg.labels.length, bars = cfg.bars || [], line = cfg.line;
+    // height: 'fill' = occupe toute la hauteur de son conteneur (.ac-fill), utile quand la carte est étirée par sa voisine
+    const heightOf = () => cfg.height === 'fill' ? Math.max(cfg.minHeight || 240, Math.floor(cv.parentElement.clientHeight)) : (cfg.height || 260);
     const periods = cfg.labels.map(parsePeriod);
     const T = tip(cv);
     let hover = -1, L;
     function draw() {
+      const H = heightOf();
       const { ctx, W } = setup(cv, H);
       const sums = cfg.stacked ? cfg.labels.map((_, i) => bars.reduce((t, b) => t + Math.max(0, b.values[i] || 0), 0)) : [];
       const all = [0, ...(cfg.stacked ? sums : bars.flatMap(b => b.values)), ...(line ? line.values : [])];
-      const sc = niceScale(Math.min(...all), Math.max(...all) || 1, 4);
+      const sc = tightScale(Math.min(...all), Math.max(...all) || 1);
       ctx.font = '500 11px ' + FONT;
       const yW = Math.max(...sc.ticks.map(t => ctx.measureText(fmtAxis(t)).width));
       const P = { top: 16, right: 12, bottom: 40, left: Math.ceil(yW) + 16 };

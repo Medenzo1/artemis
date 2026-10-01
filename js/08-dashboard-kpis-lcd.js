@@ -585,9 +585,9 @@ function _renderKpiLLD() {
     </div>
 
     <div class="dash-grid-2 lld-mid" style="align-items:stretch">
-      <div class="card">
+      <div class="card" style="display:flex;flex-direction:column">
         <div class="card-title">Loyers, charges et cash-flow par mois</div>
-        <div class="ac-wrap"><canvas id="lld-combo"></canvas></div>
+        <div class="ac-wrap ac-fill"><canvas id="lld-combo"></canvas></div>
       </div>
       <div class="card">
         <div class="card-title red">Répartition des charges</div>
@@ -611,7 +611,7 @@ function _renderKpiLLD() {
 
   requestAnimationFrame(() => {
     ArtCharts.combo(document.getElementById('lld-combo'), {
-      labels: months,
+      labels: months, height: 'fill',
       bars: [{ name: 'Loyers', values: series(revPM), color: '#22c97a' }, { name: 'Charges', values: series(chgPM).map(v => -v), color: '#f0566a' }],
       line: { name: 'Cash-flow après crédit', values: series(cashPM), color: '#22d3c8' }
     });
@@ -803,9 +803,9 @@ function renderPlateformes() {
     </div>
 
     <div class="dash-grid-2 lld-mid" style="align-items:stretch">
-      <div class="card">
+      <div class="card" style="display:flex;flex-direction:column">
         <div class="card-title">Revenus par canal et par mois</div>
-        <div class="ac-wrap"><canvas id="plt-combo"></canvas></div>
+        <div class="ac-wrap ac-fill"><canvas id="plt-combo"></canvas></div>
       </div>
       <div class="card">
         <div class="card-title">Répartition des revenus</div>
@@ -823,7 +823,7 @@ function renderPlateformes() {
 
   requestAnimationFrame(() => {
     ArtCharts.combo(document.getElementById('plt-combo'), {
-      labels: months, stacked: true,
+      labels: months, stacked: true, height: 'fill',
       bars: active.map(k => ({ name: k, values: months.map(m => C[k].byM[m] || 0), color: CH[k].color }))
     });
     ArtCharts.donut(document.getElementById('plt-donut'), {

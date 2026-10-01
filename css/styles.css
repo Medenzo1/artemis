@@ -1112,3 +1112,6 @@ body{font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
 /* Dans une grille, la marge « .card+.card » (prévue pour l'empilement vertical) décale toutes les cartes
    sauf la première : on l'annule pour tous les conteneurs en grille */
 .dash-grid-2>.card,.dash-grid-3>.card,.dash-grid-4>.card,.lld-kpis>.card,.lld-mid>.card,[style*="display:grid"]>.card{margin-top:0!important}
+/* Graphique qui occupe toute la hauteur libre de sa carte (canvas hors flux pour ne pas l'agrandir) */
+.ac-fill{flex:1;min-height:240px;position:relative}
+.ac-fill>canvas{position:absolute;inset:0}
