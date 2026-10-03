@@ -298,7 +298,6 @@ function simRenderForm() {
     '<div class="sim-head">' +
       '<div>' +
         '<h1 class="sim-h1">Simulateur de rentabilité immobilière</h1>' +
-        '<div class="sim-sub">Mêmes règles de calcul que le classeur « Simulateur de Rentabilité V4 » : 9 régimes fiscaux comparés (LMNP, LMP, revenus fonciers, Pinel, société à l\'IS).</div>' +
       '</div>' +
       '<button class="btn btn-outline sim-example-btn" onclick="simLoadExcelExample()" title="Remplit le formulaire avec l\'exemple livré dans le classeur V4">' + icon('file-spreadsheet',{size:13}) + ' Exemple du classeur</button>' +
     '</div>' +
