@@ -81,7 +81,7 @@ function simRegimeRows(wb, inputs) {
     const cell = typeof r.elig === 'function' ? r.elig(inputs) : r.elig;
     const st = cell ? wb.get(r.sheet, cell) : 'POSSIBLE';
     o.impossible = typeof st === 'string' && /^IMPOSSIBLE/i.test(st)
-      ? simSentence(st).replace(/(\d{4,})\s*€/, (m, n) => (+n).toLocaleString('fr-FR') + ' €')
+      ? simSentence(st).replace(/(\d{4,})\s*€/, (m, n) => (+n).toLocaleString('fr-FR') + ' €').replace(/loyers > à/i, 'loyers supérieurs à').replace(/loyer > à/i, 'loyer supérieur à')
       : null;
     return o;
   });
@@ -240,6 +240,8 @@ function simRenderResults() {
         '<tbody>' + tableRows + '</tbody>' +
       '</table></div>' +
     '</div>' +
+
+    simAnalysisCard(wb, inputs, winner ? winner.key : rows[0].key) +
 
     '<div class="sim-charts">' +
       '<div class="sim-card"><div class="sim-card-h">Cash-flow net-net cumulé</div>' + simHBars(chartItems('cf'), { colors: ['#7e8fa8'] }) + '</div>' +
@@ -400,6 +402,7 @@ function simRenderRegimeDetail(el, wb, inputs, key) {
       (sale && nYears >= 1 ? '<div class="ac-wrap"><canvas id="sim-cf-chart"></canvas></div>' : '') +
       (sale ? '<div class="sim-sale-line">' + icon('key', {size:14}) + '<span>Année ' + H + ', revente : cash-flow net de <b class="' + (annual[H - 1] < 0 ? 'neg' : '') + '">' + simFmtEUR(annual[H - 1]) + '</b>, après encaissement du prix de cession (' + simFmtEUR(saleTotal) + '), remboursement du crédit restant et impôt sur la plus-value.</span></div>' : '') +
       (sale ? '' : '<div class="ac-wrap"><canvas id="sim-cf-chart"></canvas></div>') + '</div>' +
+    '<div class="sim-card sim-analysis"><div class="sim-card-head"><div class="sim-card-h">Lecture des résultats</div></div>' + simAnalysisHtml(wb, inputs, key) + '</div>' +
     sectionsHtml +
     loanHtml;
 
@@ -412,4 +415,178 @@ function simRenderRegimeDetail(el, wb, inputs, key) {
       height: 260,
     });
   }
+}
+
+// ════════════════════════════════════════════
+//  ANALYSE COMMENTÉE — lecture des résultats avec les chiffres de la simulation
+//  Tout est lu dans le classeur (onglets des régimes et synthèse) ; aucun chiffre n'est recalculé
+//  autrement que par des sommes de lignes du classeur.
+// ════════════════════════════════════════════
+function simLabelRow(wb, sheet, re) {
+  const si = SIM_MODEL.sheets.indexOf(sheet);
+  return (SIM_MODEL.m[si] || []).map(m => m[0]).find(r => {
+    const l = wb.getRC(sheet, r, 2);
+    return typeof l === 'string' && re.test(l.trim());
+  });
+}
+function simRowValues(wb, sheet, re, H) {
+  const r = simLabelRow(wb, sheet, re);
+  return Array.from({ length: H }, (_, k) => { const v = r ? wb.getRC(sheet, r, 3 + k) : 0; return simIsNum(v) ? v : 0; });
+}
+const simSum = a => a.reduce((t, v) => t + v, 0);
+
+// Chiffres d'un régime sur la durée de la simulation
+function simRegimeFacts(wb, inputs, key) {
+  const conf = SIM_REGIMES.find(r => r.key === key);
+  const row = simRegimeRows(wb, inputs).find(r => r.key === key);
+  const H = simHorizon(wb), s = conf.sheet;
+  const produits = simRowValues(wb, s, /^PRODUITS ENCAISSÉS/, H);
+  const charges = simRowValues(wb, s, /^CHARGES DÉCAISSÉES/, H);
+  const capital = simRowValues(wb, s, /^AMORTISSEMENT EMPRUNT/, H);
+  const impot = simRowValues(wb, s, /^IMPÔT SUR LES REVENUS LOCATIFS/, H);
+  const cession = simRowValues(wb, s, /CESSION ENCAISSÉ|ENCAISSÉ SUR LA CESSION/, H);
+  const cf = simRowValues(wb, s, /^CASH FLOW NET NET ANNUEL/, H);
+  const amort = simRowValues(wb, s, /^AMORTISSEMENT$/, H);
+  const resImp = simRowValues(wb, s, /^RÉSULTAT IMPOSABLE AVANT (IMPÔT|IS)/, H);
+  const f = {
+    key, conf, row, H, sale: inputs.dureeDetention !== SIM_NO_RESALE,
+    apport: +inputs.apportPersonnel || 0,
+    rate: +inputs.tauxActualisation || 0,
+    produits: simSum(produits), charges: simSum(charges), capital: simSum(capital),
+    impot: simSum(impot), cession: simSum(cession), cfTotal: simSum(cf), cf,
+    amort: simSum(amort), yearsNoTax: resImp.filter(v => v <= 0).length,
+  };
+  // Ce qui n'entre dans aucune des lignes ci-dessus (ex. fiscalité des dividendes en société)
+  f.autres = f.cfTotal - (f.produits - f.charges - f.capital - f.impot + f.cession);
+  const opYears = f.sale ? cf.slice(0, H - 1) : cf;
+  f.negYears = opYears.filter(v => v < 0).length;
+  f.worstMonth = Math.min(0, ...opYears) / 12;
+  f.firstYearMonth = (cf[0] || 0) / 12;
+  f.lastCF = cf[H - 1] || 0;
+  return f;
+}
+
+const simEur = v => '<b>' + simFmtEUR(v) + '</b>';
+const simPctB = v => '<b>' + simFmtPct(v) + '</b>';
+
+function simAnalysisHtml(wb, inputs, key) {
+  const f = simRegimeFacts(wb, inputs, key);
+  const r = f.row;
+  const all = simRegimeRows(wb, inputs);
+  const possible = all.filter(x => !x.impossible);
+  const P = [];   // paragraphes
+
+  // 1. D'où vient le cash-flow
+  const lines = [
+    ['Loyers et charges récupérées encaissés', f.produits],
+    ['Charges payées (copropriété, taxe foncière, gestion, intérêts, assurances…)', -f.charges],
+    ['Capital du crédit remboursé' + (f.sale ? ' (y compris le solde à la revente)' : ''), -f.capital],
+    [f.sale ? 'Impôts sur les loyers et sur la plus-value' : 'Impôts sur les loyers', -f.impot],
+  ];
+  if (f.cession) lines.push(['Prix de revente encaissé', f.cession]);
+  if (Math.abs(f.autres) >= 1) lines.push([f.key === 'is_avec' ? 'Fiscalité des dividendes et autres flux' : 'Autres flux', f.autres]);
+  const table = '<div class="sim-an-flow">' +
+    lines.map(([l, v]) => '<div class="sim-an-line"><span>' + l + '</span><span class="' + (v < 0 ? 'neg' : 'pos') + '">' + (v > 0 ? '+' : '') + simFmtEUR(v) + '</span></div>').join('') +
+    '<div class="sim-an-line sim-an-total"><span>Cash-flow net-net cumulé sur ' + f.H + ' ans</span><span>' + simFmtEUR(f.cfTotal) + '</span></div>' +
+    '<div class="sim-an-line"><span>Votre apport de départ</span><span class="neg">' + simFmtEUR(-f.apport) + '</span></div>' +
+    '<div class="sim-an-line sim-an-total"><span>Gain net, apport déduit (sans tenir compte du temps)</span><span class="' + (f.cfTotal - f.apport < 0 ? 'neg' : '') + '">' + simFmtEUR(f.cfTotal - f.apport) + '</span></div>' +
+  '</div>';
+  const opSum = f.cfTotal - (f.sale ? f.lastCF : 0);
+  const opNote = f.sale && opSum < 0
+    ? '<p>À noter : hors année de revente, les ' + (f.H - 1) + ' années d\'exploitation coûtent au total ' + simEur(-opSum) + ' (loyers insuffisants pour couvrir charges, crédit et impôts). <b>Tout le gain provient de la revente</b>, et donc de l\'hypothèse de prix de revente.</p>'
+    : (f.sale && f.H > 1 ? '<p>Hors année de revente, les ' + (f.H - 1) + ' années d\'exploitation dégagent ' + simEur(opSum) + ' ; la revente apporte le reste.</p>' : '');
+  P.push(['D\'où vient le résultat', '<p>Sur ' + f.H + ' ans, le régime ' + escHtml(r.label) + ' dégage un cash-flow net-net cumulé de ' + simEur(f.cfTotal) +
+    '. Ce chiffre additionne tout ce qui entre et sort de votre poche année après année, <b>mais il ne retire pas votre apport</b> de ' + simFmtEUR(f.apport) + ' versé au départ :</p>' + table + opNote]);
+
+  // 2. Cash-flow vs VAN vs TRI
+  const van = r.van, tri = r.tri, gain = f.cfTotal - f.apport;
+  const disc = 1 / Math.pow(1 + f.rate, f.H);
+  let t = '';
+  if (simIsNum(van)) {
+    t += '<p>La VAN (valeur actuelle nette) part de votre apport, qu\'elle compte en négatif, puis ajoute chaque cash-flow annuel ramené en « euros d\'aujourd\'hui » au taux d\'actualisation de ' + simPctB(f.rate) +
+      ' : 1 € encaissé dans ' + f.H + ' ans ne vaut que ' + '<b>' + disc.toLocaleString('fr-FR', { maximumFractionDigits: 2 }) + ' €</b> aujourd\'hui. Elle répond à la question : ce projet rapporte-t-il plus que de placer mon apport à ' + simFmtPct(f.rate) + ' par an ?</p>';
+    if (gain < 0) {
+      t += '<p>Ici, les flux cumulés (' + simFmtEUR(f.cfTotal) + ') ne suffisent même pas à rendre l\'apport : il manque ' + simEur(-gain) + '. La VAN (' + simEur(van) + ') et le TRI sont donc mécaniquement négatifs, même si certaines années dégagent un cash-flow positif.</p>';
+    } else if (van < 0) {
+      const lastPV = f.lastCF * disc;
+      t += '<p><b>Pourquoi un cash-flow positif mais une VAN négative ?</b> Le gain net de ' + simEur(gain) + ' existe bien, mais il arrive trop tard et trop lentement pour battre un placement à ' + simFmtPct(f.rate) + '.' +
+        (f.sale && f.lastCF > 0 ? (f.lastCF >= 0.5 * f.cfTotal ? ' L\'essentiel' : ' Une partie') + ' arrive l\'année de la revente (' + simFmtEUR(f.lastCF) + '), qui ne vaut plus que ' + simEur(lastPV) + ' en euros d\'aujourd\'hui.' : '') +
+        ' Résultat : la VAN est de ' + simEur(van) + '.</p>';
+    } else {
+      t += '<p>La VAN est positive (' + simEur(van) + ') : même en tenant compte du temps, le projet fait mieux qu\'un placement à ' + simFmtPct(f.rate) + ' par an. C\'est l\'excédent créé, en euros d\'aujourd\'hui.</p>';
+    }
+  }
+  if (simIsNum(tri)) {
+    const cmp = tri > f.rate ? 'supérieur' : 'inférieur';
+    t += '<p>Le TRI (' + simPctB(tri) + ') est le rendement annuel équivalent de votre apport, tous flux compris. Il est ' + cmp + ' au taux d\'actualisation (' + simFmtPct(f.rate) + '), ce qui est cohérent avec une VAN ' + (tri > f.rate ? 'positive' : 'négative') + '.' +
+      (f.apport < 1000 ? ' Avec un apport très faible, le TRI devient très élevé ou instable : il mesure le rendement de presque rien.' : '') + '</p>';
+  } else {
+    t += '<p>Il n\'y a pas de TRI calculable : les flux ne permettent pas de trouver un taux qui équilibre l\'apport et les gains (typiquement quand l\'apport n\'est jamais récupéré, ou quand il est nul).</p>';
+  }
+  if (simIsNum(r.drci)) t += '<p>Le délai de récupération (DRCI) est de ' + '<b>' + r.drci + ' an' + (r.drci > 1 ? 's' : '') + '</b> : c\'est l\'année où le cash-flow cumulé dépasse votre apport.</p>';
+  else t += '<p>L\'apport n\'est pas récupéré sur la durée de la simulation (pas de DRCI).</p>';
+  P.push(['Cash-flow, VAN et TRI : ce que chacun mesure', t]);
+
+  // 3. Fiscalité
+  let fis = '';
+  const P_ = '⚙️ PARAMÈTRES';
+  if (key === 'lmnp_reel' || key === 'lmp_reel') {
+    fis += '<p>Au régime réel, le bien, les travaux et le mobilier sont <b>amortis</b> : ' + simEur(f.amort) + ' de charges comptables sur ' + f.H + ' ans, sans aucune sortie d\'argent. Elles effacent le bénéfice imposable : ' +
+      '<b>' + f.yearsNoTax + ' année' + (f.yearsNoTax > 1 ? 's' : '') + ' sur ' + f.H + '</b> sans résultat imposable.</p>';
+    if (key === 'lmp_reel') fis += '<p>En LMP, les bénéfices supportent aussi les cotisations sociales (environ ' + simFmtPct(wb.get(P_, 'M19')) + ', minimum ' + simFmtEUR(wb.get(P_, 'M18')) + ' par an), ce qui alourdit l\'impôt même quand le résultat est faible.</p>';
+  } else if (key === 'lmnp_micro') {
+    const ab = inputs.meubleTourisme === 'OUI' ? wb.get(P_, 'I18') : wb.get(P_, 'I17');
+    fis += '<p>Au micro-BIC, l\'administration retient un abattement forfaitaire de ' + simPctB(ab) + ' sur les loyers, quelles que soient vos charges réelles. Pas d\'amortissement : l\'impôt et les prélèvements sociaux commencent dès la première année.</p>';
+  } else if (key === 'rf_micro' || key === 'pinel_micro') {
+    fis += '<p>Au micro-foncier, l\'abattement forfaitaire est de ' + simPctB(wb.get(P_, 'I16')) + ' sur les loyers, sans tenir compte des intérêts d\'emprunt ni des travaux.</p>';
+  } else if (key === 'rf_reel' || key === 'pinel_reel') {
+    fis += '<p>En location nue au réel, les charges, intérêts et travaux sont déductibles ; un déficit peut réduire vos autres revenus dans la limite de 10 700 € par an. En revanche, rien n\'est amorti : une fois les travaux déduits, les loyers deviennent imposables à votre tranche marginale plus 17,2 % de prélèvements sociaux.</p>';
+  } else if (key === 'is_sans' || key === 'is_avec') {
+    fis += '<p>En société à l\'IS, le bien est amorti (' + simEur(f.amort) + ' sur ' + f.H + ' ans) et le bénéfice est taxé à ' + simPctB(wb.get(P_, 'M6')) + ' jusqu\'à ' + simFmtEUR(wb.get(P_, 'L6')) + ' puis ' + simPctB(wb.get(P_, 'M7')) + '. ' +
+      'À la revente, la plus-value est calculée sur la valeur nette comptable (prix moins amortissements), d\'où un impôt sur la plus-value plus élevé : ' + simEur(r.impPv) + '.</p>';
+    if (key === 'is_avec') fis += '<p>Avec distribution, les bénéfices versés en dividendes sont taxés une seconde fois chez vous (' + (inputs.impositionDividendes === 'FLAT TAX' ? 'flat tax de ' + simFmtPct(wb.get(P_, 'Q8')) : 'barème progressif après abattement de ' + simFmtPct(wb.get(P_, 'Q7'))) + '), ce qui explique l\'écart avec la version sans distribution.</p>';
+  }
+  const taxed = possible.filter(x => simIsNum(x.impRev) && simIsNum(x.impPv)).map(x => ({ x, tot: x.impRev + x.impPv }));
+  if (taxed.length > 1 && simIsNum(r.impRev)) {
+    const me = r.impRev + (simIsNum(r.impPv) ? r.impPv : 0);
+    const worst = taxed.reduce((a, b) => (b.tot > a.tot ? b : a));
+    const bestT = taxed.reduce((a, b) => (b.tot < a.tot ? b : a));
+    fis += '<p>Au total, ce régime coûte ' + simEur(me) + ' d\'impôts sur ' + f.H + ' ans (loyers ' + simFmtEUR(r.impRev) + ' + plus-value ' + simFmtEUR(simIsNum(r.impPv) ? r.impPv : 0) + '). ' +
+      (bestT.x.key === key ? 'C\'est le régime possible le moins imposé' : 'Le moins imposé des régimes possibles est ' + escHtml(bestT.x.label) + ' (' + simFmtEUR(bestT.tot) + ')') +
+      (worst.x.key !== key ? ', le plus imposé est ' + escHtml(worst.x.label) + ' (' + simFmtEUR(worst.tot) + ')' : '') + '.</p>';
+  }
+  if (fis) P.push(['Fiscalité', fis]);
+
+  // 4. Points d'attention
+  const warn = [];
+  if (f.negYears) warn.push('<li>Effort d\'épargne : ' + f.negYears + ' année' + (f.negYears > 1 ? 's' : '') + ' avec un cash-flow négatif et un effort allant jusqu\'à ' + simEur(Math.abs(f.worstMonth)) + ' par mois.</li>');
+  else if (f.firstYearMonth > 0) warn.push('<li>Le projet s\'autofinance dès la première année : ' + simEur(f.firstYearMonth) + ' par mois de cash-flow net en année 1.</li>');
+  if (r.regle === 'NON') warn.push('<li>La règle de financement de la banque (' + simFmtPct(+inputs.reglesFinancementPct || 0, 0) + ' des loyers doivent couvrir la mensualité) n\'est pas respectée : le crédit pourrait être refusé ou demander plus d\'apport.</li>');
+  if (r.impossible) warn.push('<li>Selon le classeur, ce régime est ' + escHtml(r.impossible.toLowerCase()) + ' : ses chiffres ne sont qu\'indicatifs.</li>');
+  const imp = all.filter(x => x.impossible && x.key !== key);
+  if (imp.length) warn.push('<li>Écartés car impossibles dans votre situation : ' + imp.map(x => escHtml(x.label) + ' (' + escHtml(x.impossible.replace(/^Impossible car /i, '').toLowerCase()) + ')').join(', ') + '.</li>');
+  if (!f.sale) warn.push('<li>Sans revente, la valeur du bien en fin de période n\'est pas comptée : la VAN et le TRI sont donc prudents.</li>');
+  if (warn.length) P.push(['Points d\'attention', '<ul class="sim-an-list">' + warn.join('') + '</ul>']);
+
+  return P.map(([h, body]) => '<section class="sim-an-sec"><h3>' + h + '</h3>' + body + '</section>').join('') +
+    '<p class="sim-an-foot">Analyse générée automatiquement à partir des chiffres du classeur pour cette simulation. Elle ne remplace pas le conseil personnalisé d\'un expert-comptable.</p>';
+}
+
+let SIM_ANALYSIS_KEY = null;
+function simAnalysisCard(wb, inputs, defaultKey) {
+  const key = SIM_ANALYSIS_KEY && SIM_REGIMES.some(r => r.key === SIM_ANALYSIS_KEY) ? SIM_ANALYSIS_KEY : defaultKey;
+  const rows = simRegimeRows(wb, inputs);
+  return '<div class="sim-card sim-analysis" id="sim-analysis">' +
+    '<div class="sim-card-head"><div class="sim-card-h">Lecture des résultats</div>' +
+      '<label class="sim-an-pick">Régime analysé <select onchange="SIM_ANALYSIS_KEY=this.value;simRefreshAnalysis()">' +
+        rows.map(r => '<option value="' + r.key + '"' + (r.key === key ? ' selected' : '') + '>' + escHtml(r.label) + (r.impossible ? ' (impossible)' : '') + '</option>').join('') +
+      '</select></label></div>' +
+    '<div id="sim-analysis-body">' + simAnalysisHtml(wb, inputs, key) + '</div>' +
+  '</div>';
+}
+function simRefreshAnalysis() {
+  const body = document.getElementById('sim-analysis-body');
+  if (!body || !SIM_LAST_RESULTS) return;
+  const wb = simCompute(SIM_LAST_RESULTS.inputs);
+  body.innerHTML = simAnalysisHtml(wb, SIM_LAST_RESULTS.inputs, SIM_ANALYSIS_KEY);
 }

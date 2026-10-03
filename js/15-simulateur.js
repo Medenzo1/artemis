@@ -493,6 +493,7 @@ function simCalculer() {
     return;
   }
   SIM_DETAIL_REGIME = null;
+  SIM_ANALYSIS_KEY = null;
   simShowView('results');
 }
 

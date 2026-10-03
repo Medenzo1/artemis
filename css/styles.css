@@ -1261,3 +1261,22 @@ body{font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
 .sim-sale-line b{color:#eaf0ff}
 .sim-sale-line b.neg{color:var(--red)}
 @media (max-width:560px){.sim-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.sim-field .lbl{font-size:11.5px}}
+/* Simulateur — lecture des résultats */
+.sim-analysis .sim-card-head{margin-bottom:6px}
+.sim-an-pick{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--text2)}
+.sim-an-pick select{background:var(--bg3);border:1px solid var(--border2);border-radius:10px;color:var(--text);font-family:inherit;font-size:12.5px;padding:7px 10px;max-width:280px}
+.sim-an-sec{padding:16px 0;border-top:1px solid rgba(255,255,255,.06)}
+.sim-an-sec:first-child{border-top:0;padding-top:8px}
+.sim-an-sec h3{font-size:13.5px;font-weight:700;color:#eaf0ff;margin-bottom:8px}
+.sim-an-sec p,.sim-an-list li{font-size:13px;line-height:1.65;color:var(--text2);max-width:78ch}
+.sim-an-sec p+p{margin-top:8px}
+.sim-an-sec b{color:#eaf0ff;font-weight:700;font-variant-numeric:tabular-nums}
+.sim-an-list{padding-left:18px;display:flex;flex-direction:column;gap:6px}
+.sim-an-flow{margin-top:12px;max-width:620px;font-size:12.5px;font-variant-numeric:tabular-nums}
+.sim-an-line{display:flex;justify-content:space-between;gap:16px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04);color:var(--text2)}
+.sim-an-line span:last-child{white-space:nowrap;color:var(--text);font-weight:600}
+.sim-an-line .neg{color:var(--red)!important}
+.sim-an-total{border-bottom:1px solid rgba(255,255,255,.12)}
+.sim-an-total span{color:#eaf0ff!important;font-weight:700!important}
+.sim-an-foot{font-size:11px;color:var(--text3);margin-top:6px}
+@media (max-width:560px){.sim-an-pick{width:100%}.sim-an-pick select{flex:1;min-width:0;max-width:none}}
