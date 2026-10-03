@@ -189,7 +189,7 @@ function simField(id, label, value, opts) {
     inputHtml = '<select id="sim-f-' + id + '" onchange="simOnFieldChange(\'' + id + '\',this)">' +
       opts.options.map(o => '<option value="' + o.v + '"' + (String(value) === String(o.v) ? ' selected' : '') + '>' + o.l + '</option>').join('') + '</select>';
   } else {
-    inputHtml = '<input type="text" inputmode="decimal" id="sim-f-' + id + '" value="' + simFmtInput(value) + '" oninput="simOnFieldChange(\'' + id + '\',this)" autocomplete="off">';
+    inputHtml = '<input type="text" inputmode="decimal" id="sim-f-' + id + '" value="' + simFmtInput(value) + '" oninput="simLiveFormat(this);simOnFieldChange(\'' + id + '\',this)" onblur="simBlurField(this)" autocomplete="off">';
   }
   return '<div class="sim-field' + (opts.cls ? ' ' + opts.cls : '') + '"' + (opts.hidden ? ' style="display:none"' : '') + ' data-field="' + id + '">' +
     '<label class="lbl" for="sim-f-' + id + '">' + label + help + '</label>' +
@@ -201,7 +201,7 @@ function simField(id, label, value, opts) {
 // Grille « ligne × colonne » : une ligne par poste, une colonne par mode de location
 function simMatrix(cols, rows, i) {
   const cell = (id, rowLabel, colLabel, suffix) => id
-    ? '<div class="sim-suffix-wrap"><input type="text" inputmode="decimal" id="sim-f-' + id + '" aria-label="' + escHtml(rowLabel + ' — ' + colLabel) + '" value="' + simFmtInput(i[id]) + '" oninput="simOnFieldChange(\'' + id + '\',this)" onblur="simBlurField(this)" autocomplete="off"><span class="sim-suffix">' + (suffix || '€') + '</span></div>'
+    ? '<div class="sim-suffix-wrap"><input type="text" inputmode="decimal" id="sim-f-' + id + '" aria-label="' + escHtml(rowLabel + ' — ' + colLabel) + '" value="' + simFmtInput(i[id]) + '" oninput="simLiveFormat(this);simOnFieldChange(\'' + id + '\',this)" onblur="simBlurField(this)" autocomplete="off"><span class="sim-suffix">' + (suffix || '€') + '</span></div>'
     : '<div class="sim-mx-na" aria-hidden="true">—</div>';
   return '<div class="sim-mx" style="grid-template-columns:minmax(0,1.3fr) repeat(' + cols.length + ',minmax(0,1fr))">' +
     '<div></div>' + cols.map(c => '<div class="sim-mx-col">' + c + '</div>').join('') +
@@ -222,6 +222,28 @@ function simParseInput(str) {
   return isNaN(v) ? 0 : v;
 }
 function simBlurField(el) { el.value = simFmtInput(simParseInput(el.value)); }
+
+// Mise en forme pendant la frappe (« 1450 » → « 1 450 ») sans déplacer le curseur
+function simLiveFormat(el) {
+  const raw = el.value;
+  const caret = el.selectionStart == null ? raw.length : el.selectionStart;
+  const keep = c => /[0-9,.\-]/.test(c);
+  let before = 0;
+  for (let i = 0; i < caret; i++) if (keep(raw[i])) before++;
+  let t = raw.replace(/[^0-9,.\-]/g, '').replace(/\./g, ',');
+  const neg = t.startsWith('-');
+  t = t.replace(/-/g, '');
+  const ci = t.indexOf(',');
+  let intPart = ci >= 0 ? t.slice(0, ci) : t;
+  const dec = ci >= 0 ? ',' + t.slice(ci + 1).replace(/,/g, '') : '';
+  intPart = intPart.replace(/^0+(?=\d)/, '').replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0');
+  const out = (neg ? '-' : '') + intPart + dec;
+  if (out === raw) return;
+  el.value = out;
+  let pos = 0, seen = 0;
+  while (pos < out.length && seen < before) { if (keep(out[pos])) seen++; pos++; }
+  try { el.setSelectionRange(pos, pos); } catch (e) {}
+}
 
 let _simApercuTimer = null;
 function simOnFieldChange(id, el) {
