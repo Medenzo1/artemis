@@ -1,9 +1,6 @@
 #!/usr/bin/env python3
-"""Extrait le modèle de calcul d'un classeur Excel du simulateur (outil de contrôle).
-
-En production, c'est le navigateur qui fait cette extraction (js/17-simulateur-import.js, même
-transformation, vérifiée identique) : le contenu du classeur n'est jamais publié dans le dépôt.
-Ce script sert aux vérifications (check_model.py) ; sa sortie va dans tools/simulateur/out/ (ignoré par git).
+"""Génère js/17-simulateur-modele.js (formules du classeur exécutées par le site) à partir du
+classeur Excel du simulateur.
 
 Le site ne réécrit pas les calculs : il exécute les formules du classeur lui-même
 (moteur js/16-simulateur-moteur.js). Ce script extrait toutes les formules et les
@@ -25,7 +22,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 from xl_oracle import tokenize, parse_ref, load_workbook  # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-OUT = os.path.join(HERE, 'out', 'simulateur-modele.js')
+OUT = os.path.join(HERE, '..', '..', 'js', '17-simulateur-modele.js')
 
 
 def convert(formula, sheet, row, col, sheet_index):
@@ -116,7 +113,7 @@ def main():
     body = json.dumps(model, ensure_ascii=False, separators=(',', ':'))
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     with open(OUT, 'w', encoding='utf-8') as f:
-        f.write('// Généré par tools/simulateur/build_model.py depuis « %s » — ne pas publier.\n' % os.path.basename(src))
+        f.write('// FICHIER GÉNÉRÉ par tools/simulateur/build_model.py depuis « %s » — ne pas modifier à la main.\n' % os.path.basename(src))
         f.write('const SIM_MODEL = ' + body + ';\n')
     n = sum(len(x) for x in model['f'])
     print('%d formules, %d modèles distincts, %d octets -> %s' % (n, len(model['t']), len(body.encode()), os.path.relpath(OUT)))

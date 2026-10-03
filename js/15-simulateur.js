@@ -130,6 +130,7 @@ function saveSimDraft(inputs) { const d = getSimData(); d.draft = inputs; saveSi
 
 // ── Calcul : on écrit les saisies dans les cellules du classeur, le moteur fait le reste ──
 let _simWB = null;
+try { localStorage.removeItem('artemis_sim_model'); } catch (e) {} // ancien import de classeur, plus utilisé
 function simWorkbook() {
   if (!_simWB) _simWB = new SimXL.Workbook(SIM_MODEL);
   return _simWB;
@@ -148,13 +149,12 @@ function simCompute(inputs) {
 }
 
 // ── Navigation écran ──
-async function showSimulateur() {
+function showSimulateur() {
   const ss = document.getElementById('simulateurScreen');
   const hs = document.getElementById('homeScreen');
   if (hs) hs.style.display = 'none';
   if (ss) { ss.style.display = 'block'; ss.scrollTop = 0; }
   window.scrollTo(0, 0);
-  try { await simEnsureModel(); } catch (e) { console.error('[simulateur] modèle illisible', e); SIM_MODEL = null; }
   simShowView('form');
 }
 function exitSimulateur() {
@@ -170,7 +170,6 @@ function simShowView(view) {
   SIM_CURRENT_VIEW = view;
   const ss = document.getElementById('simulateurScreen');
   if (ss) ss.scrollTop = 0;
-  if (!SIM_MODEL && view !== 'scenarios') { simRenderNoModel(); return; }
   if (view === 'form') simRenderForm();
   else if (view === 'results') simRenderResults();
 }
@@ -257,13 +256,10 @@ function simRenderForm() {
     '<div class="sim-head">' +
       '<div>' +
         '<h1 class="sim-h1">Simulateur de rentabilité immobilière</h1>' +
-        '<div class="sim-sub">9 régimes fiscaux comparés (LMNP, LMP, revenus fonciers, Pinel, société à l\'IS), avec les formules du classeur <b>' + escHtml(SIM_MODEL_INFO ? SIM_MODEL_INFO.name : '') + '</b>' +
-          (SIM_MODEL_INFO && SIM_MODEL_INFO.importedAt ? ' (importé le ' + new Date(SIM_MODEL_INFO.importedAt).toLocaleDateString('fr-FR') + ')' : '') +
-          ' · <a href="#" class="sim-link" onclick="simToggleImport();return false">Remplacer</a></div>' +
+        '<div class="sim-sub">Mêmes règles de calcul que le classeur « Simulateur de Rentabilité V4 » : 9 régimes fiscaux comparés (LMNP, LMP, revenus fonciers, Pinel, société à l\'IS).</div>' +
       '</div>' +
       '<button class="btn btn-outline sim-example-btn" onclick="simLoadExcelExample()" title="Remplit le formulaire avec l\'exemple livré dans le classeur V4">' + icon('file-spreadsheet',{size:13}) + ' Exemple du classeur</button>' +
     '</div>' +
-    '<div id="sim-import-slot"></div>' +
     '<div class="sim-layout">' +
     '<div class="sim-form">' +
 
@@ -355,22 +351,6 @@ function simRenderForm() {
     '</div>';
 
   simRefreshApercu(i);
-}
-
-// Aucun classeur importé : on ne peut rien calculer, on propose l'import
-function simRenderNoModel() {
-  const el = document.getElementById('sim-content');
-  const actions = document.getElementById('sim-header-actions');
-  if (!el) return;
-  actions.innerHTML = '';
-  el.innerHTML = '<div class="sim-head"><div><h1 class="sim-h1">Simulateur de rentabilité immobilière</h1>' +
-    '<div class="sim-sub">9 régimes fiscaux comparés (LMNP, LMP, revenus fonciers, Pinel, société à l\'IS), calculés avec les formules de votre classeur Excel.</div></div></div>' +
-    simImportCard(false);
-}
-
-function simToggleImport() {
-  const box = document.getElementById('sim-import-slot');
-  if (box) box.innerHTML = box.innerHTML ? '' : simImportCard(true);
 }
 
 function simLoadExcelExample() {

@@ -25,7 +25,6 @@ const _SYNC_KEYS = new Set([
   'artemis_reservations',
   'artemis_airbnb_rows',
   'artemis_booking_rows',
-  'artemis_sim_model',     // formules du classeur du simulateur (importé par l'utilisateur, jamais publié)
 ]);
 
 // NB: on a essayé d'intercepter localStorage.setItem/removeItem directement,

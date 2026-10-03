@@ -1223,10 +1223,3 @@ body{font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
 .sim-sheet-table td.neg{color:var(--red)}
 .sim-zero,.sim-err{color:var(--text3)}
 .sim-loan-table th:first-child,.sim-loan-table td:first-child{min-width:90px}
-.sim-import{display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:18px}
-.sim-import-ico{width:48px;height:48px;border-radius:14px;background:rgba(52,211,153,.1);color:#34d399;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.sim-import-txt{flex:1;min-width:240px}
-.sim-import-txt .sim-card-note{line-height:1.55;max-width:640px;margin-top:4px}
-.sim-import-btn{cursor:pointer;white-space:nowrap}
-.sim-link{color:#34d399;text-decoration:none;font-weight:600}
-.sim-link:hover{text-decoration:underline}

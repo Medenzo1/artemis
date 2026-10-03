@@ -1,26 +1,22 @@
 # Simulateur — calculs identiques au classeur Excel
 
 Le simulateur du site n'a pas ses propres règles de calcul : il exécute les formules du
-classeur « Simulateur de Rentabilité » (V4). Le contenu du classeur n'est **jamais publié** dans
-ce dépôt public : l'utilisateur importe son fichier une fois dans le simulateur, le navigateur en
-extrait les formules et les range dans les données privées synchronisées (`artemis_sim_model`,
-Firestore, après connexion).
+classeur « Simulateur de Rentabilité » (V4), extraites dans `js/17-simulateur-modele.js`.
 
 | Fichier | Rôle |
 |---|---|
-| `js/17-simulateur-import.js` | Import du classeur dans le navigateur (SheetJS) → modèle compact (26 325 formules → 1 113 modèles relatifs), stocké compressé dans `artemis_sim_model`. |
+| `js/17-simulateur-modele.js` | **Généré.** Les 26 325 formules (→ 1 113 modèles relatifs) et les valeurs fixes du classeur. |
 | `js/16-simulateur-moteur.js` | Moteur qui exécute ces formules avec la sémantique d'Excel (SI, SIERREUR, RECHERCHEH/V, INDEX/EQUIV, SOMME.SI.ENS, SOMMEPROD, VAN, TRI, ARRONDI, formules matricielles, erreurs). |
 | `js/15-simulateur.js` | Formulaire = onglet « ✏️ A COMPLÉTER » (`SIM_CELLS` : champ → cellule). |
 | `js/18-simulateur-resultats.js` | Synthèse = onglet « 💰 SYNTHÈSE » ; détail d'un régime = son onglet. |
 | `tools/simulateur/xl_oracle.py` | Moteur de référence en Python (même algorithme), vérifié sur les valeurs enregistrées par Excel. |
-| `tools/simulateur/build_model.py` | Même extraction en Python (contrôles uniquement ; sortie dans `out/`, ignorée par git). Vérifié identique à l'import navigateur. |
+| `tools/simulateur/build_model.py` | Régénère `js/17-simulateur-modele.js` depuis le classeur. |
 | `tools/simulateur/check_model.py` | Compare le moteur du site au moteur de référence sur des centaines de simulations aléatoires. |
 
 ## Nouvelle version du classeur
 
-Dans le simulateur : « Remplacer » → choisir le nouveau fichier. Pour contrôler le moteur :
-
 ```
+python3 tools/simulateur/build_model.py "~/Desktop/Simulateur de Rentabilité_V5.xlsm"
 python3 tools/simulateur/check_model.py "~/Desktop/Simulateur de Rentabilité_V5.xlsm" 200
 ```
 
