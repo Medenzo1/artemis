@@ -23,21 +23,24 @@ const SIM_REGIMES = [
 
 // Colonnes de la synthèse Excel
 const SIM_COLS = [
-  { k: 'cf',     col: 'H',  label: 'Cash-flow net-net cumulé',  fmt: 'eur', best: 'max' },
-  { k: 'impRev', col: 'K',  label: 'Impôt sur les revenus locatifs', fmt: 'eur', best: 'min' },
-  { k: 'impPv',  col: 'N',  label: 'Impôt sur la plus-value',   fmt: 'eur', best: 'min' },
-  { k: 'rnn',    col: 'Q',  label: 'Rendement net-net',          fmt: 'pct', best: 'max' },
-  { k: 'van',    col: 'T',  label: 'VAN nette',                  fmt: 'eur', best: 'max' },
-  { k: 'tri',    col: 'W',  label: 'TRI',                        fmt: 'pct', best: 'max' },
-  { k: 'drci',   col: 'Z',  label: 'DRCI',                       fmt: 'yrs', best: 'min' },
+  { k: 'cf',     col: 'H',  label: 'Cash-flow net-net cumulé',       short: 'Cash-flow cumulé', fmt: 'eur', best: 'max', sign: true },
+  { k: 'impRev', col: 'K',  label: 'Impôt sur les revenus locatifs', short: 'Impôt revenus',    fmt: 'eur', best: 'min' },
+  { k: 'impPv',  col: 'N',  label: 'Impôt sur la plus-value',        short: 'Impôt plus-value', fmt: 'eur', best: 'min' },
+  { k: 'rnn',    col: 'Q',  label: 'Rendement net-net',              short: 'Rdt net-net',      fmt: 'pct', best: 'max', sign: true },
+  { k: 'van',    col: 'T',  label: 'VAN nette',                      short: 'VAN',              fmt: 'eur', best: 'max', sign: true },
+  { k: 'tri',    col: 'W',  label: 'TRI',                            short: 'TRI',              fmt: 'pct', best: 'max', sign: true },
+  { k: 'drci',   col: 'Z',  label: 'DRCI (délai de récupération)',   short: 'DRCI',             fmt: 'yrs', best: 'min' },
 ];
 
 let SIM_DETAIL_REGIME = null;
+let SIM_SORT = { k: null, dir: -1 };   // tri du tableau de synthèse (null = ordre du classeur)
 
 // ── Formats ──
+// Montants : « 165 993 € », signe moins typographique « − 10 423 € »
 function simFmtEUR(n) {
   if (typeof n !== 'number' || isNaN(n)) return '—';
-  return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n);
+  const r = Math.round(n);
+  return (r < 0 ? '−' : '') + Math.abs(r).toLocaleString('fr-FR') + '\u00a0€';
 }
 function simFmtPct(n, dec) {
   if (typeof n !== 'number' || isNaN(n)) return '—';
@@ -160,12 +163,26 @@ function simRenderResults() {
   const title = simSentence(wb.get(SIM_SYN, 'B1')) || 'Synthèse du projet';
   const LMNP = SIM_REGIMES[0].sheet;
   const cout = wb.get(LMNP, 'C3'), emprunt = +inputs.dureeEmprunt > 0 ? wb.get(LMNP, 'P5') : 0;
-  const regleLbl = 'Règle des ' + Math.round((+inputs.reglesFinancementPct || 0) * 100) + ' %';
+  const regleLbl = 'Règle ' + Math.round((+inputs.reglesFinancementPct || 0) * 100) + '\u00a0%';
 
-  const tableRows = rows.map(r => {
+  let ordered = rows.slice();
+  if (SIM_SORT.k) {
+    const key = r => simIsNum(r[SIM_SORT.k]) ? r[SIM_SORT.k] : null;
+    ordered.sort((a, b) => {
+      if (!!a.impossible !== !!b.impossible) return a.impossible ? 1 : -1;   // régimes possibles d'abord
+      const x = key(a), y = key(b);
+      if (x === null && y === null) return 0;
+      if (x === null) return 1;
+      if (y === null) return -1;
+      return (x - y) * SIM_SORT.dir;
+    });
+  }
+  const tableRows = ordered.map(r => {
     const cells = SIM_COLS.map(c => {
-      const isBest = !r.impossible && simIsNum(r[c.k]) && best[c.k] !== null && r[c.k] === best[c.k];
-      return '<td class="num' + (isBest ? ' is-best' : '') + '">' + simDisp(r[c.k], c.fmt) + '</td>';
+      const v = r[c.k];
+      const isBest = !r.impossible && simIsNum(v) && best[c.k] !== null && v === best[c.k];
+      const neg = c.sign && simIsNum(v) && v < 0;
+      return '<td class="num' + (isBest ? ' is-best' : '') + (neg ? ' neg' : '') + '">' + simDisp(v, c.fmt) + '</td>';
     }).join('');
     const regle = String(r.regle);
     return '<tr class="sim-row-click' + (r.impossible ? ' is-impossible' : '') + '" onclick="simOpenRegimeDetail(\'' + r.key + '\')" tabindex="0" onkeydown="if(event.key===\'Enter\')simOpenRegimeDetail(\'' + r.key + '\')">' +
@@ -193,22 +210,33 @@ function simRenderResults() {
     '</div>' +
 
     (winner ?
-      '<div class="sim-card sim-winner">' +
-        '<div class="sim-winner-top">' + icon('trophy', {size:16}) + '<span>Meilleur cash-flow net-net cumulé parmi les régimes possibles</span></div>' +
-        '<div class="sim-winner-name">' + escHtml(winner.label) + '</div>' +
-        '<div class="sim-kpis">' +
-          simDetailKpi('Cash-flow net-net cumulé', simDisp(winner.cf, 'eur')) +
-          simDetailKpi('VAN nette', simDisp(winner.van, 'eur')) +
-          simDetailKpi('TRI', simDisp(winner.tri, 'pct')) +
-          simDetailKpi('DRCI', simDisp(winner.drci, 'yrs')) +
+      '<div class="sim-card sim-verdict">' +
+        '<div class="sim-verdict-head">' +
+          '<span class="sim-verdict-ico">' + icon('trophy', {size:18}) + '</span>' +
+          '<div><h2 class="sim-verdict-title">' + escHtml(winner.label) + '</h2>' +
+          '<div class="sim-verdict-sub">Meilleur cash-flow net-net cumulé parmi les régimes possibles</div></div>' +
+          '<button class="btn btn-outline sim-verdict-btn" onclick="simOpenRegimeDetail(\'' + winner.key + '\')">Voir le détail</button>' +
         '</div>' +
+        simStats([
+          ['Cash-flow net-net cumulé', simDisp(winner.cf, 'eur'), simIsNum(winner.cf) && winner.cf < 0],
+          ['VAN nette', simDisp(winner.van, 'eur'), simIsNum(winner.van) && winner.van < 0],
+          ['TRI', simDisp(winner.tri, 'pct'), simIsNum(winner.tri) && winner.tri < 0],
+          ['DRCI', simDisp(winner.drci, 'yrs')],
+        ]) +
       '</div>' : '') +
 
     '<div class="sim-card sim-table-card">' +
-      '<div class="sim-card-head"><div class="sim-card-h">Synthèse chiffrée</div><div class="sim-card-note">En vert : la meilleure valeur parmi les régimes possibles. Cliquez sur un régime pour son détail année par année.</div></div>' +
+      '<div class="sim-card-head"><div class="sim-card-h">Les 9 régimes comparés</div><div class="sim-card-note">' +
+        (SIM_SORT.k ? '<a href="#" class="sim-link" onclick="SIM_SORT.k=null;simRenderResults();return false">Ordre du classeur</a> · ' : '') +
+        'En vert, la meilleure valeur parmi les régimes possibles · Cliquez sur un régime pour son détail</div></div>' +
       '<div class="sim-table-scroll">' +
       '<table class="sim-cmp">' +
-        '<thead><tr><th>Régime</th>' + SIM_COLS.map(c => '<th class="num">' + c.label + '</th>').join('') + '<th class="num">' + regleLbl + '</th></tr></thead>' +
+        '<thead><tr><th scope="col">Régime fiscal</th>' + SIM_COLS.map(c => {
+          const on = SIM_SORT.k === c.k;
+          return '<th scope="col" class="num" aria-sort="' + (on ? (SIM_SORT.dir > 0 ? 'ascending' : 'descending') : 'none') + '">' +
+            '<button class="sim-sort' + (on ? ' on' : '') + '" onclick="simSortBy(\'' + c.k + '\')" title="' + escHtml(c.label) + ' — cliquer pour trier">' + c.short +
+            '<span class="sim-sort-ico">' + (on ? (SIM_SORT.dir > 0 ? '↑' : '↓') : '↕') + '</span></button></th>';
+        }).join('') + '<th scope="col" class="num" title="Les loyers couvrent-ils la mensualité selon la règle de la banque ?">' + regleLbl + '</th></tr></thead>' +
         '<tbody>' + tableRows + '</tbody>' +
       '</table></div>' +
     '</div>' +
@@ -228,8 +256,16 @@ function simOpenRegimeDetail(key) {
   if (ss) ss.scrollTop = 0;
 }
 
-function simDetailKpi(label, value) {
-  return '<div class="sim-kpi"><div class="sim-kpi-l">' + label + '</div><div class="sim-kpi-v">' + value + '</div></div>';
+function simSortBy(k) {
+  if (SIM_SORT.k === k) SIM_SORT.dir = -SIM_SORT.dir;
+  else { SIM_SORT.k = k; SIM_SORT.dir = (SIM_COLS.find(c => c.k === k) || {}).best === 'min' ? 1 : -1; }
+  simRenderResults();
+}
+
+// Rangée de chiffres clés séparés par des filets (un seul bloc, pas une carte par chiffre)
+function simStats(items) {
+  return '<dl class="sim-stats">' + items.map(([l, v, neg]) =>
+    '<div class="sim-stat"><dt>' + l + '</dt><dd' + (neg ? ' class="neg"' : '') + '>' + v + '</dd></div>').join('') + '</dl>';
 }
 
 // ════════════════════════════════════════════
@@ -296,18 +332,29 @@ function simRenderRegimeDetail(el, wb, inputs, key) {
   // Graphique : cash-flow annuel (barres) et cumulé (courbe), lignes « CASH FLOW NET NET … » de l'onglet
   const si = SIM_MODEL.sheets.indexOf(sheet);
   const findRow = txt => (SIM_MODEL.m[si] || []).map(m => m[0]).find(r => wb.getRC(sheet, r, 2) === txt);
-  const rA = findRow('CASH FLOW NET NET ANNUEL'), rC = findRow('CASH FLOW NET NET CUMULÉ');
+  const rA = findRow('CASH FLOW NET NET ANNUEL');
+  const rS = (SIM_MODEL.m[si] || []).map(m => m[0]).find(r => /CESSION ENCAISSÉ|ENCAISSÉ SUR LA CESSION/.test(String(wb.getRC(sheet, r, 2))));
   const yearVals = r => Array.from({ length: H }, (_, k) => { const v = r ? wb.getRC(sheet, r, 3 + k) : 0; return simIsNum(v) ? v : 0; });
 
+  // L'année de revente (produit de cession, remboursement du crédit restant, impôt sur la plus-value)
+  // écraserait l'échelle : le graphique montre les années d'exploitation, l'année de revente est résumée à part.
+  const annual = yearVals(rA), saleVals = yearVals(rS);
+  const sale = inputs.dureeDetention !== SIM_NO_RESALE ? H : 0;   // colonne de l'année de revente
+  const nYears = sale ? H - 1 : H;
+  const opCF = annual.slice(0, nYears);
+  let acc = 0;
+  const opCum = opCF.map(v => (acc += v));
+  const saleTotal = saleVals.reduce((t, v) => t + v, 0);
   const sections = simSheetSections(wb, sheet, H);
-  const head = '<tr><th>' + 'Année' + '</th>' + Array.from({ length: H }, (_, k) => '<th class="num">' + (k + 1) + '</th>').join('') + '</tr>';
+  const colCls = k => k + 1 === sale ? ' is-sale' : '';
+  const head = '<tr><th scope="col">Montants en euros</th>' + Array.from({ length: H }, (_, k) => '<th scope="col" class="num' + colCls(k) + '">An ' + (k + 1) + (k + 1 === sale ? '<span class="sim-sale-tag">revente</span>' : '') + '</th>').join('') + '</tr>';
   const sectionsHtml = sections.map(s => {
     const nDetail = s.rows.filter(x => x.hidden).length;
     const body = s.rows.map(x => {
       if (x.sub) return '<tr class="sim-sub-row' + (x.hidden ? ' is-detail' : '') + '"><td colspan="' + (H + 1) + '">' + escHtml(simSentence(x.label)) + '</td></tr>';
       const strong = /CASH FLOW NET NET|IMPÔT SUR LE REVENU AVEC|RÉSULTAT IMPOSABLE|IMPÔT SUR LA PLUS-VALUE AVEC|^PRODUITS$|^CHARGES/.test(x.label);
       return '<tr class="' + (x.hidden ? 'is-detail' : '') + (strong ? ' is-strong' : '') + '"><td>' + escHtml(simSentence(x.label)) + '</td>' +
-        x.vals.map(v => '<td class="num' + (simIsNum(v) && v < 0 && x.code === 'e' && Math.round(v) !== 0 ? ' neg' : '') + '">' + simCellFmt(v, x.code) + '</td>').join('') + '</tr>';
+        x.vals.map((v, k) => '<td class="num' + colCls(k) + (simIsNum(v) && v < 0 && x.code === 'e' && Math.round(v) !== 0 ? ' neg' : '') + '">' + simCellFmt(v, x.code) + '</td>').join('') + '</tr>';
     }).join('');
     return '<div class="sim-card sim-sheet">' +
       '<div class="sim-card-head"><div class="sim-card-h">' + escHtml(simSentence(s.title)) + '</div>' +
@@ -344,21 +391,24 @@ function simRenderRegimeDetail(el, wb, inputs, key) {
       '</div>' +
     '</div>' +
     (row.impossible ? '<div class="sim-alert">' + icon('alert-triangle', {size:14}) + '<span>Selon le classeur, ce régime est <b>' + escHtml(row.impossible.toLowerCase()) + '</b>. Les chiffres sont donnés à titre indicatif.</span></div>' : '') +
-    '<div class="sim-kpis sim-kpis-detail">' +
-      SIM_COLS.map(c => simDetailKpi(c.label, simDisp(row[c.k], c.fmt))).join('') +
-      simDetailKpi('Règle des ' + Math.round((+inputs.reglesFinancementPct || 0) * 100) + ' %', '<span class="sim-yn ' + (regle === 'OUI' ? 'ok' : regle === 'NON' ? 'ko' : '') + '">' + escHtml(regle === 'NS' ? 'Sans objet' : simSentence(regle)) + '</span>') +
+    '<div class="sim-card sim-detail-stats">' +
+      simStats(SIM_COLS.map(c => [c.label, simDisp(row[c.k], c.fmt), c.sign && simIsNum(row[c.k]) && row[c.k] < 0]).concat([
+        ['Règle des ' + Math.round((+inputs.reglesFinancementPct || 0) * 100) + '\u00a0%', '<span class="sim-yn ' + (regle === 'OUI' ? 'ok' : regle === 'NON' ? 'ko' : '') + '">' + escHtml(regle === 'NS' ? 'Sans objet' : simSentence(regle)) + '</span>'],
+      ])) +
     '</div>' +
-    '<div class="sim-card"><div class="sim-card-head"><div class="sim-card-h">Cash-flow net-net par année</div><div class="sim-card-note">Barres : cash-flow de l\'année (produit de cession inclus l\'année de revente) · Courbe : cumul</div></div>' +
-      '<div class="ac-wrap"><canvas id="sim-cf-chart"></canvas></div></div>' +
+    '<div class="sim-card"><div class="sim-card-head"><div class="sim-card-h">' + (sale ? 'Cash-flow net-net des années d\'exploitation' : 'Cash-flow net-net par année') + '</div></div>' +
+      (sale && nYears >= 1 ? '<div class="ac-wrap"><canvas id="sim-cf-chart"></canvas></div>' : '') +
+      (sale ? '<div class="sim-sale-line">' + icon('key', {size:14}) + '<span>Année ' + H + ', revente : cash-flow net de <b class="' + (annual[H - 1] < 0 ? 'neg' : '') + '">' + simFmtEUR(annual[H - 1]) + '</b>, après encaissement du prix de cession (' + simFmtEUR(saleTotal) + '), remboursement du crédit restant et impôt sur la plus-value.</span></div>' : '') +
+      (sale ? '' : '<div class="ac-wrap"><canvas id="sim-cf-chart"></canvas></div>') + '</div>' +
     sectionsHtml +
     loanHtml;
 
   const cv = document.getElementById('sim-cf-chart');
   if (cv && typeof ArtCharts !== 'undefined') {
     ArtCharts.combo(cv, {
-      labels: Array.from({ length: H }, (_, k) => 'An ' + (k + 1)),
-      bars: [{ name: 'Cash-flow annuel', values: yearVals(rA), color: '#9b6ef3' }],
-      line: { name: 'Cumulé', values: yearVals(rC), color: '#34d399' },
+      labels: Array.from({ length: nYears }, (_, k) => 'An ' + (k + 1)),
+      bars: [{ name: 'Cash-flow de l\'année', values: opCF, color: '#9b6ef3' }],
+      line: { name: 'Cumul', values: opCum, color: '#34d399' },
       height: 260,
     });
   }

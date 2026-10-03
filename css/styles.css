@@ -1127,7 +1127,7 @@ body{font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
 .sim-sec-ico{width:30px;height:30px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .sim-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(178px,1fr));gap:14px 16px}
 .sim-field{display:flex;flex-direction:column;justify-content:flex-start;min-width:0}
-.sim-field .lbl{display:flex;align-items:flex-end;gap:5px;font-size:10.5px;line-height:1.35;margin-bottom:6px;min-height:28px}
+.sim-field .lbl{display:flex;align-items:flex-end;gap:5px;font-size:12px;font-weight:600;line-height:1.35;margin-bottom:6px;min-height:32px;text-transform:none;letter-spacing:0;color:var(--text2)}
 .sim-form .sim-field input,.sim-form .sim-field select{font-size:13px;padding:9px 11px;font-variant-numeric:tabular-nums}
 .sim-suffix-wrap input{padding-right:46px!important}
 .sim-help{display:inline-flex;color:var(--text3);cursor:help;flex-shrink:0}
@@ -1135,7 +1135,7 @@ body{font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
 .sim-calc{font-size:11px;color:var(--text3);margin-top:5px;min-height:14px;font-variant-numeric:tabular-nums}
 .sim-calc:empty{display:none}
 .sim-form-actions{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;padding-bottom:40px}
-.sim-apercu{position:sticky;top:16px}
+.sim-apercu-wrap{position:sticky;top:76px;align-self:start}
 .sim-ap-title{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--text2);font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:6px}
 .sim-ap-lbl{font-size:10.5px;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px}
 .sim-ap-big{font-size:26px;font-weight:800;color:#eaf0ff;letter-spacing:-.02em}
@@ -1153,24 +1153,13 @@ body{font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
 .sim-ap-best-val{font-size:18px;font-weight:800;color:#34d399}
 @media (max-width:900px){
   .sim-layout{grid-template-columns:1fr}
-  .sim-apercu-wrap{order:-1}
-  .sim-apercu{position:static}
+  .sim-apercu-wrap{order:-1;position:static}
 }
 .sim-empty{text-align:center;padding:80px 20px;color:var(--text2)}
-#sim-content>.sim-card,#sim-content>.sim-kpis,#sim-content>.sim-alert,.sim-charts{margin-bottom:18px}
+#sim-content>.sim-card,#sim-content>.sim-alert,.sim-charts{margin-bottom:18px}
 .sim-card-head{display:flex;justify-content:space-between;align-items:center;gap:8px 16px;flex-wrap:wrap;margin-bottom:14px}
 .sim-card-h{font-size:13px;font-weight:700;color:#eaf0ff}
 .sim-card-note{font-size:11px;color:var(--text2)}
-.sim-winner{background:#13201c!important}
-.sim-winner-top{display:flex;align-items:center;gap:8px;color:#34d399;font-size:11px;text-transform:uppercase;letter-spacing:.06em;font-weight:700}
-.sim-winner-name{font-size:20px;font-weight:800;color:#eaf0ff;margin:6px 0 14px;letter-spacing:-.01em}
-.sim-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px}
-.sim-kpi{background:rgba(255,255,255,.035);border-radius:12px;padding:12px 14px;min-width:0}
-.sim-kpis-detail{grid-template-columns:repeat(4,minmax(0,1fr))}
-@media (max-width:700px){.sim-kpis-detail{grid-template-columns:repeat(2,minmax(0,1fr))}}
-.sim-kpis-detail .sim-kpi{background:#141922;box-shadow:0 6px 22px rgba(0,0,0,.28)}
-.sim-kpi-l{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);margin-bottom:6px;line-height:1.35}
-.sim-kpi-v{font-size:18px;font-weight:800;color:#eaf0ff;white-space:nowrap;font-variant-numeric:tabular-nums}
 .sim-table-card{padding:0!important;overflow:hidden}
 .sim-table-card .sim-card-head{padding:18px 20px 0}
 .sim-table-scroll{overflow-x:auto}
@@ -1223,3 +1212,52 @@ body{font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
 .sim-sheet-table td.neg{color:var(--red)}
 .sim-zero,.sim-err{color:var(--text3)}
 .sim-loan-table th:first-child,.sim-loan-table td:first-child{min-width:90px}
+
+/* Simulateur — grilles « poste × mode de location » (colonnes du classeur) */
+.sim-mx{display:grid;gap:10px 14px;align-items:center}
+.sim-mx-col{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);padding-bottom:2px}
+.sim-mx-lbl{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text);font-weight:500;min-width:0}
+.sim-mx-na{color:var(--text3);font-size:13px;padding-left:12px}
+.sim-form .sim-mx input{font-size:13px;padding:9px 11px;font-variant-numeric:tabular-nums}
+.sim-grid-after{margin-top:16px}
+.sim-subhead{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);margin:22px 0 10px;padding-top:18px;border-top:1px solid rgba(255,255,255,.06)}
+@media (max-width:560px){.sim-mx{grid-template-columns:1fr 1fr!important}.sim-mx>div:first-child{display:none}.sim-mx-lbl{grid-column:1/-1;margin-top:6px}}
+/* Simulateur — synthèse : verdict, chiffres clés, tri */
+.sim-verdict-head{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:18px}
+.sim-verdict-ico{width:40px;height:40px;border-radius:12px;background:rgba(52,211,153,.12);color:#34d399;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sim-verdict-head>div{flex:1;min-width:200px}
+.sim-verdict-title{font-size:20px;font-weight:800;letter-spacing:-.015em;color:#eaf0ff;line-height:1.25}
+.sim-verdict-sub{font-size:12.5px;color:var(--text2);margin-top:3px}
+.sim-verdict-btn{padding:9px 18px!important;font-size:11px!important}
+.sim-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin:0}
+.sim-stat{padding:4px 18px;border-left:1px solid rgba(255,255,255,.07);min-width:0}
+.sim-stat:first-child{border-left:0;padding-left:0}
+.sim-stat dt{font-size:11.5px;color:var(--text2);margin-bottom:6px;line-height:1.35}
+.sim-stat dd{margin:0;font-size:20px;font-weight:800;letter-spacing:-.01em;color:#eaf0ff;white-space:nowrap;font-variant-numeric:tabular-nums}
+.sim-stats dd.neg{color:var(--red)}
+.sim-detail-stats .sim-stats{grid-template-columns:repeat(4,minmax(0,1fr));row-gap:18px}
+.sim-detail-stats .sim-stat:nth-child(4n+1){border-left:0;padding-left:0}
+@media (max-width:700px){
+  .sim-stats,.sim-detail-stats .sim-stats{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:16px}
+  .sim-stat{border-left:0;padding-left:0}
+  .sim-stat dd{font-size:17px}
+}
+.sim-cmp td.neg{color:var(--red)}
+.sim-sort{all:unset;cursor:pointer;display:inline-flex;align-items:flex-end;gap:4px;text-align:right;color:inherit;font:inherit;letter-spacing:inherit;text-transform:inherit}
+.sim-sort:hover,.sim-sort.on{color:#eaf0ff}
+.sim-sort:focus-visible{outline:2px solid #34d399;outline-offset:2px;border-radius:4px}
+.sim-sort-ico{font-size:10px;opacity:.55}
+.sim-sort.on .sim-sort-ico{opacity:1;color:#34d399}
+.sim-cmp th{min-width:0;padding:10px 9px}
+.sim-cmp td{padding:12px 9px}
+.sim-cmp th:first-child,.sim-cmp td.sim-reg-name{min-width:170px;padding-left:20px}
+.sim-cmp th:last-child,.sim-cmp td:last-child{padding-right:20px}
+.sim-sheet-table .is-sale{background:rgba(245,183,49,.06)}
+.sim-sheet-table th.is-sale{color:var(--gold)}
+.sim-sale-tag{display:block;font-size:9.5px;letter-spacing:.04em;color:var(--gold);font-weight:700}
+.sim-note-strong{color:#eaf0ff;font-weight:700}
+.sim-sale-line{display:flex;gap:10px;align-items:flex-start;margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,.06);font-size:12.5px;color:var(--text2);line-height:1.5}
+.sim-sale-line svg{color:var(--gold);flex-shrink:0;margin-top:2px}
+.sim-sale-line b{color:#eaf0ff}
+.sim-sale-line b.neg{color:var(--red)}
+@media (max-width:560px){.sim-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.sim-field .lbl{font-size:11.5px}}

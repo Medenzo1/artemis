@@ -197,11 +197,31 @@ function simField(id, label, value, opts) {
     (opts.calc ? '<div class="sim-calc" id="sim-calc-' + id + '"></div>' : '') +
   '</div>';
 }
-function simFmtInput(v) {
-  if (v === 0) return '0';
-  if (v === null || v === undefined || v === '') return '';
-  return String(v).replace('.', ',');
+// Valeur affichée dans un champ : « 130 000 », « 1,45 » (espace insécable comme séparateur de milliers)
+// Grille « ligne × colonne » : une ligne par poste, une colonne par mode de location
+function simMatrix(cols, rows, i) {
+  const cell = (id, rowLabel, colLabel, suffix) => id
+    ? '<div class="sim-suffix-wrap"><input type="text" inputmode="decimal" id="sim-f-' + id + '" aria-label="' + escHtml(rowLabel + ' — ' + colLabel) + '" value="' + simFmtInput(i[id]) + '" oninput="simOnFieldChange(\'' + id + '\',this)" onblur="simBlurField(this)" autocomplete="off"><span class="sim-suffix">' + (suffix || '€') + '</span></div>'
+    : '<div class="sim-mx-na" aria-hidden="true">—</div>';
+  return '<div class="sim-mx" style="grid-template-columns:minmax(0,1.3fr) repeat(' + cols.length + ',minmax(0,1fr))">' +
+    '<div></div>' + cols.map(c => '<div class="sim-mx-col">' + c + '</div>').join('') +
+    rows.map(([label, ids, help]) => '<div class="sim-mx-lbl">' + label +
+      (help ? '<span class="sim-help" tabindex="0" title="' + escHtml(help) + '" aria-label="' + escHtml(help) + '">' + icon('info', {size:12}) + '</span>' : '') + '</div>' +
+      ids.map((id, k) => cell(id, label, cols[k])).join('')).join('') +
+  '</div>';
 }
+
+function simFmtInput(v) {
+  if (v === null || v === undefined || v === '') return '';
+  const n = +v;
+  if (!isFinite(n)) return String(v);
+  return n.toLocaleString('fr-FR', { maximumFractionDigits: 4, useGrouping: true });
+}
+function simParseInput(str) {
+  const v = parseFloat(String(str).replace(/[\s\u00a0\u202f]/g, '').replace(',', '.'));
+  return isNaN(v) ? 0 : v;
+}
+function simBlurField(el) { el.value = simFmtInput(simParseInput(el.value)); }
 
 let _simApercuTimer = null;
 function simOnFieldChange(id, el) {
@@ -286,11 +306,12 @@ function simRenderForm() {
       simField('apportPersonnel', 'Apport personnel', i.apportPersonnel, {suffix:'€'}) +
     '</div></div>' +
 
-    '<div class="sim-card">' + simSectionHeader('banknote', 'Produits mensuels', '#34d399') + '<div class="sim-grid">' +
-      simField('loyerMeuble', 'Loyer hors charges — meublé', i.loyerMeuble, {suffix:'€', help:'Un meublé se loue en général 5 à 30 % plus cher que la location nue.'}) +
-      simField('chargesRecupMeuble', 'Charges récupérables — meublé', i.chargesRecupMeuble, {suffix:'€'}) +
-      simField('loyerNu', 'Loyer hors charges — nu', i.loyerNu, {suffix:'€'}) +
-      simField('chargesRecupNu', 'Charges récupérables — nu', i.chargesRecupNu, {suffix:'€'}) +
+    '<div class="sim-card">' + simSectionHeader('banknote', 'Produits mensuels', '#34d399') +
+      simMatrix(['Location meublée', 'Location nue'], [
+        ['Loyer mensuel hors charges', ['loyerMeuble', 'loyerNu'], 'Un meublé se loue en général 5 à 30 % plus cher que la location nue.'],
+        ['Charges récupérables / mois', ['chargesRecupMeuble', 'chargesRecupNu']],
+      ], i) +
+      '<div class="sim-grid sim-grid-after">' +
       simField('modeLocationSociete', 'Location en société', i.modeLocationSociete, {type:'select', options:[
         {v:'MEUBLE',l:'Location meublée'},{v:'NU',l:'Location nue'}
       ], help:'Détermine le loyer, les charges et le mobilier retenus pour les régimes en société.'}) +
@@ -301,15 +322,17 @@ function simRenderForm() {
       simField('assurances', 'Assurances (PNO, GLI…)', i.assurances, {suffix:'€'}) +
       simField('taxeFonciere', 'Taxe foncière', i.taxeFonciere, {suffix:'€'}) +
       simField('entretien', 'Entretien & réparations', i.entretien, {suffix:'€'}) +
-      simField('tauxGestionLocative', 'Gestion locative', pct('tauxGestionLocative'), {suffix:'% des loyers', calc:true}) +
+      simField('tauxGestionLocative', 'Gestion locative (% des loyers)', pct('tauxGestionLocative'), {suffix:'%', calc:true}) +
       simField('fraisMiseEnLocation', 'Frais de mise en location', i.fraisMiseEnLocation, {suffix:'€'}) +
-      simField('fraisBancaires', 'Frais bancaires (meublé / nu)', i.fraisBancaires, {suffix:'€'}) +
-      simField('fraisBancairesSociete', 'Frais bancaires (société)', i.fraisBancairesSociete, {suffix:'€'}) +
-      simField('fraisComptabilite', 'Comptabilité (meublé)', i.fraisComptabilite, {suffix:'€'}) +
-      simField('fraisComptabiliteSociete', 'Comptabilité (société)', i.fraisComptabiliteSociete, {suffix:'€'}) +
-      simField('cga', 'CGA (meublé)', i.cga, {suffix:'€'}) +
-      simField('cfe', 'CFE', i.cfe, {suffix:'€', help:'Location meublée et société uniquement.', calc:true}) +
-    '</div></div>' +
+      simField('cfe', 'CFE', i.cfe, {suffix:'€', help:'Location meublée et société uniquement.'}) +
+    '</div>' +
+    '<div class="sim-subhead">Frais de gestion par an</div>' +
+    simMatrix(['En nom propre', 'En société'], [
+      ['Frais bancaires', ['fraisBancaires', 'fraisBancairesSociete']],
+      ['Comptabilité', ['fraisComptabilite', 'fraisComptabiliteSociete'], 'En nom propre : location meublée uniquement.'],
+      ['CGA', ['cga', null], 'Location meublée uniquement.'],
+    ], i) +
+    '</div>' +
 
     '<div class="sim-card">' + simSectionHeader('users', 'Foyer fiscal', '#f472b6') + '<div class="sim-grid">' +
       simField('revenusNets', 'Revenus nets imposables du foyer', i.revenusNets, {suffix:'€', help:'Après abattement de 10 % ou déduction des frais réels.'}) +
