@@ -70,6 +70,17 @@ const SIM_DEFAULT_INPUTS = {
   pinelSurfaceUtile: 50,
   pinelDuree: 12,
   amortFraisAcquisition: 'NON',
+
+  // Amortissement (onglet « 🔎 AMORTISSEMENT ») — valeurs du classeur par défaut
+  amortPart_terrain: 0.15,
+  amortPart_grosOeuvre: 0.5,   amortDuree_grosOeuvre: 50,
+  amortPart_toiture: 0.1,      amortDuree_toiture: 25,
+  amortPart_agencement: 0.15,  amortDuree_agencement: 15,
+  amortPart_electricite: 0.05, amortDuree_electricite: 25,
+  amortPart_etancheite: 0.05,  amortDuree_etancheite: 15,
+  amortDuree_travaux: 10,
+  amortDuree_mobilier: 5,
+  amortDuree_constitution: 5,
 };
 
 // Exemple livré dans le classeur V4 — sert à vérifier que le site et Excel donnent les mêmes chiffres
@@ -102,7 +113,24 @@ const SIM_CELLS = {
 };
 
 // Champs stockés en fraction (0.08) mais affichés/saisis en % (8)
-const SIM_PCT_FIELDS = ['tauxNotaire','tauxEmprunt','tauxAssuranceEmprunt','tauxGestionLocative','tauxVacance','tauxActualisation','reglesFinancementPct'];
+// Paramètres d'amortissement → cellules de l'onglet « 🔎 AMORTISSEMENT »
+// (la durée du terrain reste à 0 : un terrain ne s'amortit pas, et la formule du classeur ne le permet pas)
+const SIM_SHEET_AMORT = '🔎 AMORTISSEMENT';
+const SIM_AMORT_COMPONENTS = [
+  { k: 'terrain', label: 'Terrain', row: 6, fixedYears: true },
+  { k: 'grosOeuvre', label: 'Gros œuvre', row: 7 },
+  { k: 'toiture', label: 'Toiture', row: 8 },
+  { k: 'agencement', label: 'Agencement', row: 9 },
+  { k: 'electricite', label: 'Électricité', row: 10 },
+  { k: 'etancheite', label: 'Étanchéité', row: 11 },
+];
+const SIM_AMORT_CELLS = { amortDuree_travaux: 'D26', amortDuree_mobilier: 'D31', amortDuree_constitution: 'D36' };
+SIM_AMORT_COMPONENTS.forEach(c => {
+  SIM_AMORT_CELLS['amortPart_' + c.k] = 'C' + c.row;
+  if (!c.fixedYears) SIM_AMORT_CELLS['amortDuree_' + c.k] = 'D' + c.row;
+});
+
+const SIM_PCT_FIELDS = ['tauxNotaire','tauxEmprunt','tauxAssuranceEmprunt','tauxGestionLocative','tauxVacance','tauxActualisation','reglesFinancementPct'].concat(SIM_AMORT_COMPONENTS.map(c => 'amortPart_' + c.k));
 
 // Anciennes simulations (avant l'alignement sur le classeur) → format actuel
 function simMigrateInputs(i) {
@@ -145,6 +173,7 @@ function simCellValue(k, v) {
 function simCompute(inputs) {
   const wb = simWorkbook();
   Object.keys(SIM_CELLS).forEach(k => wb.set(SIM_SHEET_IN, SIM_CELLS[k], simCellValue(k, inputs[k])));
+  Object.keys(SIM_AMORT_CELLS).forEach(k => wb.set(SIM_SHEET_AMORT, SIM_AMORT_CELLS[k], +inputs[k] || 0));
   return wb;
 }
 
@@ -199,15 +228,15 @@ function simField(id, label, value, opts) {
 }
 // Valeur affichée dans un champ : « 130 000 », « 1,45 » (espace insécable comme séparateur de milliers)
 // Grille « ligne × colonne » : une ligne par poste, une colonne par mode de location
-function simMatrix(cols, rows, i) {
+function simMatrix(cols, rows, i, suffixes) {
   const cell = (id, rowLabel, colLabel, suffix) => id
-    ? '<div class="sim-suffix-wrap"><input type="text" inputmode="decimal" id="sim-f-' + id + '" aria-label="' + escHtml(rowLabel + ' — ' + colLabel) + '" value="' + simFmtInput(i[id]) + '" oninput="simLiveFormat(this);simOnFieldChange(\'' + id + '\',this)" onblur="simBlurField(this)" autocomplete="off"><span class="sim-suffix">' + (suffix || '€') + '</span></div>'
+    ? '<div class="sim-suffix-wrap"><input type="text" inputmode="decimal" id="sim-f-' + id + '" aria-label="' + escHtml(rowLabel + ' — ' + colLabel) + '" value="' + simFmtInput(SIM_PCT_FIELDS.includes(id) ? simPctVal(i[id]) : i[id]) + '" oninput="simLiveFormat(this);simOnFieldChange(\'' + id + '\',this)" onblur="simBlurField(this)" autocomplete="off"><span class="sim-suffix">' + (suffix || '€') + '</span></div>'
     : '<div class="sim-mx-na" aria-hidden="true">—</div>';
   return '<div class="sim-mx" style="grid-template-columns:minmax(0,1.3fr) repeat(' + cols.length + ',minmax(0,1fr))">' +
     '<div></div>' + cols.map(c => '<div class="sim-mx-col">' + c + '</div>').join('') +
     rows.map(([label, ids, help]) => '<div class="sim-mx-lbl">' + label +
       (help ? '<span class="sim-help" tabindex="0" title="' + escHtml(help) + '" aria-label="' + escHtml(help) + '">' + icon('info', {size:12}) + '</span>' : '') + '</div>' +
-      ids.map((id, k) => cell(id, label, cols[k])).join('')).join('') +
+      ids.map((id, k) => cell(id, label, cols[k], suffixes && suffixes[k])).join('')).join('') +
   '</div>';
 }
 
@@ -384,6 +413,19 @@ function simRenderForm() {
       simField('pinelDuree', "Pinel — durée d'engagement", i.pinelDuree, {type:'select', options:[{v:6,l:'6 ans'},{v:9,l:'9 ans'},{v:12,l:'12 ans'}]}) +
     '</div></div>' +
 
+    '<div class="sim-card">' + simSectionHeader('calculator', 'Amortissement', '#4f9eff') +
+      '<div class="sim-sec-note">Utilisé en LMNP et LMP au réel et en société à l\'IS. Le prix du bien est réparti en composants, chacun amorti sur sa durée de vie. ' +
+        '<a href="#" class="sim-link" onclick="simResetAmort();return false">Revenir aux valeurs du classeur</a></div>' +
+      simMatrix(['Part du prix', 'Durée'], SIM_AMORT_COMPONENTS.map(c => [c.label, ['amortPart_' + c.k, c.fixedYears ? null : 'amortDuree_' + c.k], c.fixedYears ? 'Un terrain ne s\'amortit pas.' : '']), i, ['%', 'ans']) +
+      '<div class="sim-calc sim-amort-sum" id="sim-calc-amortSum"></div>' +
+      '<div class="sim-subhead">Autres durées d\'amortissement</div>' +
+      '<div class="sim-grid">' +
+        simField('amortDuree_travaux', 'Travaux & équipements', i.amortDuree_travaux, {suffix:'ans'}) +
+        simField('amortDuree_mobilier', 'Mobilier', i.amortDuree_mobilier, {suffix:'ans'}) +
+        simField('amortDuree_constitution', 'Frais de constitution (société)', i.amortDuree_constitution, {suffix:'ans', help:'Amortis seulement si « Amortir les frais d\'acquisition » est sur Oui.'}) +
+      '</div>' +
+    '</div>' +
+
     '<div class="sim-form-actions">' +
       '<button class="btn btn-outline" onclick="simSaveScenarioPrompt()">' + icon('save',{size:13}) + ' Enregistrer cette simulation</button>' +
       '<button class="btn btn-green" onclick="simCalculer()">Calculer →</button>' +
@@ -395,6 +437,13 @@ function simRenderForm() {
     '</div>';
 
   simRefreshApercu(i);
+}
+
+function simResetAmort() {
+  const inputs = simGetFormInputs();
+  Object.keys(SIM_AMORT_CELLS).forEach(k => { inputs[k] = SIM_DEFAULT_INPUTS[k]; });
+  saveSimDraft(inputs);
+  simRenderForm();
 }
 
 function simLoadExcelExample() {
@@ -423,6 +472,13 @@ function simRefreshApercu(inputs) {
   const crl = wb.get(IN, 'E32');
   setCalc('societeTVA', 'CRL société : ' + (typeof crl === 'number' ? simFmtEURCompact(crl) + ' / an' : String(crl)));
 
+  const partSum = SIM_AMORT_COMPONENTS.reduce((t, c) => t + (+i['amortPart_' + c.k] || 0), 0);
+  const sumEl = document.getElementById('sim-calc-amortSum');
+  if (sumEl) {
+    const ok = Math.abs(partSum - 1) < 1e-6;
+    sumEl.className = 'sim-calc sim-amort-sum' + (ok ? '' : ' warn');
+    sumEl.innerHTML = 'Total des parts : <b>' + simFmtNum(partSum * 100, 2) + ' %</b>' + (ok ? '' : ' — le total devrait faire 100 %');
+  }
   const cout = simV(wb, LMNP, 'C3');
   const emprunt = +i.dureeEmprunt > 0 ? simV(wb, LMNP, 'P5') : 0;
   const mensualite = +i.dureeEmprunt > 0 ? simV(wb, '🔎 EMPRUNT', 'C14') / 12 : 0;
