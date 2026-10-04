@@ -1290,3 +1290,4 @@ body{font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
   .sim-an-grid>.sim-an-sec+.sim-an-sec{border-left:0;padding-left:0;border-top:1px solid rgba(255,255,255,.06)}
   .sim-an-split{gap:12px}
 }
+.sim-an-bridge{margin:12px 0}

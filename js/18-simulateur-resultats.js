@@ -503,17 +503,30 @@ function simAnalysisHtml(wb, inputs, key) {
   const disc = 1 / Math.pow(1 + f.rate, f.H);
   let t = '';
   if (simIsNum(van)) {
-    t += '<p>La VAN (valeur actuelle nette) part de votre apport, qu\'elle compte en négatif, puis ajoute chaque cash-flow annuel ramené en « euros d\'aujourd\'hui » au taux d\'actualisation de ' + simPctB(f.rate) +
-      ' : 1 € encaissé dans ' + f.H + ' ans ne vaut que ' + '<b>' + disc.toLocaleString('fr-FR', { maximumFractionDigits: 2 }) + ' €</b> aujourd\'hui. Elle répond à la question : ce projet rapporte-t-il plus que de placer mon apport à ' + simFmtPct(f.rate) + ' par an ?</p>';
+    // VAN = valeur d'aujourd'hui des cash-flows − apport (formule du classeur) : on montre le passage pas à pas
+    const pv = van + f.apport, timeEffect = pv - f.cfTotal;
+    const ln = (l, v, cls) => '<div class="sim-an-line' + (cls ? ' ' + cls : '') + '"><span>' + l + '</span><span class="' + (v < 0 ? 'neg' : '') + '">' + simFmtEUR(v) + '</span></div>';
+    t += '<p>Il y a deux façons de compter le gain. <b>Sans tenir compte du temps</b>, on additionne les cash-flows et on retire l\'apport. ' +
+      '<b>En tenant compte du temps</b> (c\'est la VAN, valeur actuelle nette), chaque euro futur est d\'abord ramené en « euros d\'aujourd\'hui » au taux d\'actualisation de ' + simPctB(f.rate) +
+      ' : 1 € encaissé dans ' + f.H + ' ans ne vaut que <b>' + disc.toLocaleString('fr-FR', { maximumFractionDigits: 2 }) + ' €</b> aujourd\'hui.</p>' +
+      '<div class="sim-an-flow sim-an-bridge">' +
+        ln('Cash-flows cumulés sur ' + f.H + ' ans', f.cfTotal) +
+        ln('Votre apport', -f.apport) +
+        ln('Gain sans tenir compte du temps', gain, 'sim-an-total') +
+        ln('Effet du temps (actualisation à ' + simFmtPct(f.rate) + ')', timeEffect) +
+        ln('VAN : gain en euros d\'aujourd\'hui', van, 'sim-an-total') +
+      '</div>';
     if (gain < 0) {
-      t += '<p>Ici, les flux cumulés (' + simFmtEUR(f.cfTotal) + ') ne suffisent même pas à rendre l\'apport : il manque ' + simEur(-gain) + '. La VAN (' + simEur(van) + ') et le TRI sont donc mécaniquement négatifs' + (f.cf.some(v => v > 0) ? ', même si certaines années dégagent un cash-flow positif' : '') + '.</p>';
+      t += '<p>Ici, les cash-flows ne suffisent pas à rendre l\'apport : il manque ' + simEur(-gain) + ' en additionnant simplement les montants. ' +
+        'Ramenés en euros d\'aujourd\'hui, ces mêmes cash-flows ne valent plus que ' + simEur(pv) + ' : il manque alors ' + simEur(-van) + ', c\'est la VAN. ' +
+        'Les ' + simFmtEUR(Math.abs(timeEffect)) + ' d\'écart entre les deux viennent uniquement de l\'effet du temps.</p>';
     } else if (van < 0) {
       const lastPV = f.lastCF * disc;
-      t += '<p><b>Pourquoi un cash-flow positif mais une VAN négative ?</b> Le gain net de ' + simEur(gain) + ' existe bien, mais il arrive trop tard et trop lentement pour battre un placement à ' + simFmtPct(f.rate) + '.' +
-        (f.sale && f.lastCF > 0 ? (f.lastCF >= 0.5 * f.cfTotal ? ' L\'essentiel' : ' Une partie') + ' arrive l\'année de la revente (' + simFmtEUR(f.lastCF) + '), qui ne vaut plus que ' + simEur(lastPV) + ' en euros d\'aujourd\'hui.' : '') +
-        ' Résultat : la VAN est de ' + simEur(van) + '.</p>';
+      t += '<p><b>Pourquoi un gain positif mais une VAN négative ?</b> Le projet rend votre apport avec ' + simEur(gain) + ' de gain, mais ce gain arrive tard : l\'effet du temps (' + simFmtEUR(timeEffect) + ') l\'efface entièrement.' +
+        (f.sale && f.lastCF > 0 ? (f.lastCF >= 0.5 * f.cfTotal ? ' L\'essentiel' : ' Une partie') + ' des cash-flows arrive l\'année de la revente (' + simFmtEUR(f.lastCF) + '), qui ne vaut plus que ' + simEur(lastPV) + ' en euros d\'aujourd\'hui.' : '') +
+        ' Autrement dit, placer l\'apport à ' + simFmtPct(f.rate) + ' par an aurait rapporté davantage.</p>';
     } else {
-      t += '<p>La VAN est positive (' + simEur(van) + ') : même en tenant compte du temps, le projet fait mieux qu\'un placement à ' + simFmtPct(f.rate) + ' par an. C\'est l\'excédent créé, en euros d\'aujourd\'hui.</p>';
+      t += '<p>Même après l\'effet du temps (' + simFmtEUR(timeEffect) + '), il reste ' + simEur(van) + ' en euros d\'aujourd\'hui : le projet fait mieux qu\'un placement de l\'apport à ' + simFmtPct(f.rate) + ' par an.</p>';
     }
   }
   if (simIsNum(tri)) {
