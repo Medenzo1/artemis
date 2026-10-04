@@ -145,7 +145,7 @@ const ArtCharts = (() => {
   }
 
   // ════════════════ COURBE D'ÉVOLUTION ════════════════
-  // cfg: { labels, values, color, height?, name?, signed?, deltaGoodWhenUp? }
+  // cfg: { labels, values, color, height?, name?, signed?, deltaGoodWhenUp?, budget?:[valeur|null] }
   function area(cv, cfg) {
     if (!cv || !cfg.values || !cfg.values.length) return;
     const color = cfg.color || C.cyan, H = cfg.height || 240;
@@ -156,9 +156,12 @@ const ArtCharts = (() => {
     const T = tip(cv);
     let hover = -1, L;
     const colAt = i => cfg.signed && vals[i] < 0 ? C.red : color;
+    // Série budget facultative (pointillés) : null = mois sans budget
+    const bud = Array.isArray(cfg.budget) && cfg.budget.length === n && cfg.budget.some(v => v !== null && v !== undefined) ? cfg.budget.map(v => v === null || v === undefined ? null : +v) : null;
+    const budVals = bud ? bud.filter(v => v !== null) : [];
 
     function layout(ctx, W) {
-      const minV = Math.min(...vals, 0), maxV = Math.max(...vals, 0);
+      const minV = Math.min(...vals, ...budVals, 0), maxV = Math.max(...vals, ...budVals, 0);
       const sc = niceScale(minV, maxV === minV ? minV + 1 : maxV, 4);
       ctx.font = '500 11px ' + FONT;
       const yW = Math.max(...sc.ticks.map(t => ctx.measureText(fmtAxis(t)).width));
@@ -224,6 +227,27 @@ const ArtCharts = (() => {
         ctx.save(); ctx.beginPath(); ctx.rect(0, y0, W, H); ctx.clip(); stroke(C.red); ctx.restore();
       } else stroke(color);
 
+      // Budget : pointillés dorés par tronçons de mois budgétés consécutifs, + légende
+      if (bud) {
+        ctx.save(); ctx.setLineDash([5, 4]); ctx.strokeStyle = C.gold; ctx.lineWidth = 1.75; ctx.lineJoin = 'round';
+        let seg = [];
+        const flush = () => {
+          if (seg.length === 1) { ctx.beginPath(); ctx.moveTo(seg[0].x - 6, seg[0].y); ctx.lineTo(seg[0].x + 6, seg[0].y); ctx.stroke(); }
+          else if (seg.length > 1) { ctx.beginPath(); seg.forEach((p, k) => ctx[k ? 'lineTo' : 'moveTo'](p.x, p.y)); ctx.stroke(); }
+          seg = [];
+        };
+        bud.forEach((v, i) => { if (v === null) flush(); else seg.push({ x: xOf(i), y: yOf(v) }); });
+        flush(); ctx.restore();
+        if (hover >= 0 && bud[hover] !== null) { ctx.beginPath(); ctx.arc(xOf(hover), yOf(bud[hover]), 3.5, 0, Math.PI * 2); ctx.fillStyle = C.gold; ctx.fill(); }
+        ctx.font = '600 11px ' + FONT; ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
+        const lx = P.left + 4, ly = 10;
+        ctx.strokeStyle = color; ctx.lineWidth = 2.25; ctx.beginPath(); ctx.moveTo(lx, ly); ctx.lineTo(lx + 16, ly); ctx.stroke();
+        ctx.fillStyle = C.text2; ctx.fillText('Réel', lx + 22, ly + 0.5);
+        const bx = lx + 22 + ctx.measureText('Réel').width + 16;
+        ctx.save(); ctx.setLineDash([5, 4]); ctx.strokeStyle = C.gold; ctx.lineWidth = 1.75; ctx.beginPath(); ctx.moveTo(bx, ly); ctx.lineTo(bx + 16, ly); ctx.stroke(); ctx.restore();
+        ctx.fillStyle = C.text2; ctx.fillText('Budget', bx + 22, ly + 0.5);
+      }
+
       // Survol : repère vertical + point mis en valeur
       if (hover >= 0) {
         const x = Math.round(pts[hover].x) + 0.5;
@@ -264,7 +288,14 @@ const ArtCharts = (() => {
       }
       T.show('<div class="ac-tip-head">' + longLbl(hover) + '</div>' +
         '<div class="ac-tip-row"><span class="ac-dot" style="background:' + colAt(hover) + '"></span>' + (cfg.name || 'Valeur') +
-        '<b style="color:' + colAt(hover) + '">' + fmtEur(v) + '</b></div>' + delta, L.pts[hover].x, Math.min(L.pts[hover].y, y));
+        '<b style="color:' + colAt(hover) + '">' + fmtEur(v) + '</b></div>' + budTip(hover) + delta, L.pts[hover].x, Math.min(L.pts[hover].y, y));
+    }
+    function budTip(i) {
+      if (!bud || bud[i] === null) return '';
+      const d = vals[i] - bud[i], good = cfg.deltaGoodWhenUp === false ? d <= 0 : d >= 0;
+      const pct = bud[i] ? ' (' + fmtPct(d / Math.abs(bud[i]) * 100) + ')' : '';
+      return '<div class="ac-tip-row"><span class="ac-dot" style="background:' + C.gold + '"></span>Budget<b>' + fmtEur(bud[i]) + '</b></div>' +
+        '<div class="ac-tip-sub">Écart <span style="color:' + (Math.abs(d) < 0.5 ? C.text2 : good ? C.green : C.red) + '">' + fmtEur(d, true) + pct + '</span></div>';
     }
     function onLeave() { if (hover !== -1) { hover = -1; draw(); } T.hide(); }
 

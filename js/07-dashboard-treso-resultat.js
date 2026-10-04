@@ -142,6 +142,8 @@ function _renderSynTresorerie() {
     '</div>'+
     '<div class="card" id="tres-wf-card" style="margin-top:18px"></div>';
 
+  budInjectStrip(el, 'treso');   // bloc réel vs budget (js/21)
+
   // ── KPI equalizer
   requestAnimationFrame(() => {
     const kpis = el.querySelectorAll('.kpi-card');
@@ -155,7 +157,8 @@ function _renderSynTresorerie() {
   // Courbe d'évolution (moteur commun ArtCharts)
   const _drawTresArea = () => ArtCharts.area(document.getElementById(chartId), {
     labels: pEntries.map(e => e.p || e.lbl), values: _chartMode === 'cumul' ? cumulVals : pEntries.map(e => e.net),
-    color: '#22c97a', signed: true, name: _chartMode === 'cumul' ? 'Solde cumulé' : 'Solde du mois' });
+    color: '#22c97a', signed: true, name: _chartMode === 'cumul' ? 'Solde cumulé' : 'Solde du mois',
+    budget: budChartSeries('treso', pEntries.map(e => e.p), pEntries.map(e => e.net), _chartMode === 'cumul') });
   requestAnimationFrame(_drawTresArea);
   window._redrawTresChart = _drawTresArea;
 
@@ -908,6 +911,7 @@ function _renderSIG() {
       <tbody>${rows}</tbody>
     </table>
   </div>${cascadeHTML}`;
+  try { const bh = budSigCardHtml(); if (bh) sigBody.insertAdjacentHTML('afterbegin', bh); } catch (e) { console.warn('[budget] SIG', e); }
 }
 
 

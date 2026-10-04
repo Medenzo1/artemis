@@ -150,6 +150,7 @@ function _renderDashTab() {
   else if (tab === 'resultat')   _showResultatSIG(); // Résultat = SIG uniquement (compte de résultat et bilan retirés)
   else if (tab === 'kpis')        renderKpis();
   else if (tab === 'plateformes') renderPlateformes();
+  else if (tab === 'budget')      renderBudgetTab();
 }
 
 // ── Shared helpers ──────────────────────────

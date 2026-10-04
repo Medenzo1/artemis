@@ -306,6 +306,7 @@ function _renderKpiLCD() {
         <div class="ac-wrap"><canvas id="kpi-trend-cv2"></canvas></div>
       </div>
     </div>`;
+  _budAfterFirst(el, budLcdKpiHtml(dateMin, dateMax, bienSel2Raw && bienSel2Raw.length ? bienSel2Raw : null));   // objectifs (js/21)
 
   // ── Dessiner les jauges demi-cercle ──
   requestAnimationFrame(() => {
@@ -608,6 +609,7 @@ function _renderKpiLLD() {
         <tbody>${rows}</tbody>
       </table></div>
     </div>`;
+  _budAfterFirst(el, budLldKpiHtml());   // réel vs budget (js/21)
 
   requestAnimationFrame(() => {
     ArtCharts.combo(document.getElementById('lld-combo'), {
@@ -820,6 +822,7 @@ function renderPlateformes() {
       <div class="card-title">Revenus par bien et par canal</div>
       ${matrix}
     </div>`;
+  _budAfterFirst(el, budPltHtml(yearSel, bienSel));   // réel vs budget (js/21)
 
   requestAnimationFrame(() => {
     ArtCharts.combo(document.getElementById('plt-combo'), {

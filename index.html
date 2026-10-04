@@ -14,7 +14,7 @@
 <meta name="application-name" content="ARTEMIS">
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<link rel="stylesheet" href="css/styles.css?v=202610041522">
+<link rel="stylesheet" href="css/styles.css?v=202610041555">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 </head>
@@ -65,9 +65,9 @@
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
-<script src="js/00-icons.js?v=202610041522"></script>
-<script src="js/00-firebase-config.js?v=202610041522"></script>
-<script src="js/01-login.js?v=202610041522"></script>
+<script src="js/00-icons.js?v=202610041555"></script>
+<script src="js/00-firebase-config.js?v=202610041555"></script>
+<script src="js/01-login.js?v=202610041555"></script>
 </div>
 
 
@@ -486,6 +486,19 @@
 
 </div>
 
+<!-- ══ BUDGET — saisie (js/20-budget.js) ══ -->
+<div id="budgetScreen" class="art-mesh-bg" style="display:none;position:fixed;inset:0;z-index:600;background-color:#04080f;overflow-y:auto;font-family:'Archivo',system-ui,sans-serif">
+  <div id="bud-topbar">
+    <div style="display:flex;align-items:center;gap:12px">
+      <button class="bud-back" onclick="exitBudget()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>Retour</button>
+      <span style="color:rgba(255,255,255,.15)">·</span>
+      <span class="bud-brand">ARTEM<span>IS</span> <span class="bud-brand-sub">Budget</span></span>
+    </div>
+    <div id="bud-header-actions" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+  </div>
+  <div id="bud-content"></div>
+</div>
+
 
 <nav class="sidebar" id="sidebar">
 <img src="data:image/webp;base64,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" id="mainLogo" class="sb-logo" alt="Artemis">
@@ -499,6 +512,7 @@
 <div class="sb-item" id="nav-loans" onclick="navTo(5);document.querySelectorAll('.sb-item').forEach(e=>e.classList.remove('active'));document.getElementById('nav-loans').classList.add('active');setTimeout(()=>{document.querySelectorAll('.param-tab').forEach(t=>t.style.display='none');document.querySelectorAll('.ptab').forEach(b=>b.classList.remove('active'));const t=document.getElementById('tab-loans');if(t)t.style.display='';renderLoansList();},50)" tabindex="0" role="button" aria-label="Emprunts"><span class="sb-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle"><path d="M10 18v-7" /><path d="M11.119 2.205a2 2 0 0 1 1.762 0l7.84 3.846A.5.5 0 0 1 20.5 7h-17a.5.5 0 0 1-.22-.949z" /><path d="M14 18v-7" /><path d="M18 18v-7" /><path d="M3 22h18" /><path d="M6 18v-7" /></svg></span><span class="sb-label">Emprunts</span></div>
 <div class="sb-item" id="nav-lcd" onclick="navTo(5);document.querySelectorAll('.sb-item').forEach(e=>e.classList.remove('active'));document.getElementById('nav-lcd').classList.add('active');setTimeout(()=>{document.querySelectorAll('.param-tab').forEach(t=>t.style.display='none');document.querySelectorAll('.ptab').forEach(b=>b.classList.remove('active'));const t=document.getElementById('tab-lcd');if(t)t.style.display='';document.querySelectorAll('#paramsTabs').forEach(el=>el.style.display='none');document.querySelectorAll('#paramsActionBar').forEach(el=>el.style.display='none');loadLcdOnOpen();},50)" tabindex="0" role="button" aria-label="Location directe"><span class="sb-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle"><path d="M2 20v-8a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v8" /><path d="M4 10V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4" /><path d="M12 4v6" /><path d="M2 18h20" /></svg></span><span class="sb-label">LCD</span></div>
 <div class="sb-item" id="nav-amort" onclick="navTo(5);document.querySelectorAll('.sb-item').forEach(e=>e.classList.remove('active'));document.getElementById('nav-amort').classList.add('active');setTimeout(()=>{document.querySelectorAll('.param-tab').forEach(t=>t.style.display='none');document.querySelectorAll('.ptab').forEach(b=>b.classList.remove('active'));const t=document.getElementById('tab-amort');if(t)t.style.display='';loadAmortOnOpen();},50)" tabindex="0" role="button" aria-label="Amortissements"><span class="sb-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle"><path d="M16 17h6v-6" /><path d="m22 17-8.5-8.5-5 5L2 7" /></svg></span><span class="sb-label">Amortissements</span></div>
+<div class="sb-item" id="nav-budget" onclick="showBudget('tools')" tabindex="0" role="button" aria-label="Budget"><span class="sb-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span><span class="sb-label">Budget</span></div>
 
 <div class="sb-sep"></div>
 <div class="sb-item" onclick="logout();" tabindex="0" role="button" aria-label="Déconnexion" style="color:rgba(240,86,106,.6)"><span class="sb-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle"><path d="M12 2v10" /><path d="M18.4 6.6a9 9 0 1 1-12.77.04" /></svg></span><span class="sb-label">Déconnexion</span></div>
@@ -1051,6 +1065,15 @@
       </button>
     </div>
 
+    <!-- Budget -->
+    <div class="dnav-group" data-group="budget" style="display:flex;align-items:stretch;height:100%">
+      <button class="dnav-head dtab" data-tab="budget"
+        onclick="switchNavHead(this)"
+        style="font-size:13px;font-weight:700;padding:0 18px;height:100%;background:none;border:none;border-bottom:3px solid transparent;color:var(--text2);cursor:pointer;white-space:nowrap;font-family:inherit;letter-spacing:.02em;border-right:1px solid var(--border);display:flex;align-items:center;gap:7px;flex-shrink:0">
+        <span style="display:inline-flex"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span> Budget
+      </button>
+    </div>
+
   </div>
 
   <!-- Export -->
@@ -1122,6 +1145,12 @@
       </select>
     </div>
   </div>
+
+  <button class="ddrawer-tab" data-tab="budget" onclick="dashDrawerTab(this)">
+    <span class="ddrawer-tab-icon">🎯</span>
+    <span class="ddrawer-tab-label">Budget</span>
+    <span class="ddrawer-tab-arrow">›</span>
+  </button>
 
   <div class="ddrawer-sep"></div>
   <button class="ddrawer-tab" onclick="exitDashboard();closeDashDrawer()" style="color:rgba(34,211,200,.7)">
@@ -1298,6 +1327,12 @@
     </div>
   </div>
   <div id="plt-content"><div class="dash-empty">Chargement…</div></div>
+</div>
+
+<!-- 6. BUDGET (js/21-budget-dashboard.js) -->
+<div class="dash-panel" id="dp-budget" style="display:none">
+  <div class="dash-filters bud-dash-filters" id="bud-dash-filters"></div>
+  <div id="bud-dash-content"><div class="dash-empty">Chargement…</div></div>
 </div>
 
 </div><!-- /dash-inner -->
@@ -2152,28 +2187,30 @@
 
 </div>
 
-<script src="js/02-state-core.js?v=202610041522"></script>
-<script src="js/03-import-mapping.js?v=202610041522"></script>
-<script src="js/04-params-settings.js?v=202610041522"></script>
-<script src="js/05-dashboard-core.js?v=202610041522"></script>
-<script src="js/06-dashboard-ca-dep.js?v=202610041522"></script>
-<script src="js/07-dashboard-treso-resultat.js?v=202610041522"></script>
-<script src="js/08-dashboard-kpis-lcd.js?v=202610041522"></script>
-<script src="js/09-home-screen.js?v=202610041522"></script>
+<script src="js/02-state-core.js?v=202610041555"></script>
+<script src="js/03-import-mapping.js?v=202610041555"></script>
+<script src="js/04-params-settings.js?v=202610041555"></script>
+<script src="js/05-dashboard-core.js?v=202610041555"></script>
+<script src="js/06-dashboard-ca-dep.js?v=202610041555"></script>
+<script src="js/07-dashboard-treso-resultat.js?v=202610041555"></script>
+<script src="js/08-dashboard-kpis-lcd.js?v=202610041555"></script>
+<script src="js/09-home-screen.js?v=202610041555"></script>
 
-<script src="js/10-mobile-drawer.js?v=202610041522"></script>
+<script src="js/10-mobile-drawer.js?v=202610041555"></script>
 
-<script src="js/11-ca-table-sort.js?v=202610041522"></script>
+<script src="js/11-ca-table-sort.js?v=202610041555"></script>
 
 <!-- ══ MOBILE NAV SCRIPT ══ -->
-<script src="js/12-mobile-nav.js?v=202610041522"></script>
-<script src="js/13-init-patch.js?v=202610041522"></script>
+<script src="js/12-mobile-nav.js?v=202610041555"></script>
+<script src="js/13-init-patch.js?v=202610041555"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="js/14-marketplace.js?v=202610041522"></script>
-<script src="js/15-simulateur.js?v=202610041522"></script>
-<script src="js/16-simulateur-moteur.js?v=202610041522"></script>
-<script src="js/17-simulateur-modele.js?v=202610041522"></script>
-<script src="js/18-simulateur-resultats.js?v=202610041522"></script>
-<script src="js/19-charts.js?v=202610041522"></script>
+<script src="js/14-marketplace.js?v=202610041555"></script>
+<script src="js/15-simulateur.js?v=202610041555"></script>
+<script src="js/16-simulateur-moteur.js?v=202610041555"></script>
+<script src="js/17-simulateur-modele.js?v=202610041555"></script>
+<script src="js/18-simulateur-resultats.js?v=202610041555"></script>
+<script src="js/19-charts.js?v=202610041555"></script>
+<script src="js/20-budget.js?v=202610041555"></script>
+<script src="js/21-budget-dashboard.js?v=202610041555"></script>
 </body>
 </html>

@@ -143,6 +143,8 @@ function _renderSynCA() {
     '</div>';
 
 
+  budInjectStrip(el, 'ca');   // bloc réel vs budget (js/21)
+
   // Equalise KPI card heights
   requestAnimationFrame(() => {
     const kpis = el.querySelectorAll('.kpi-card');
@@ -158,7 +160,8 @@ function _renderSynCA() {
     const raw = pEntries.map(([,v]) => v); let c = 0;
     ArtCharts.area(document.getElementById(chartId), {
       labels: pEntries.map(([l]) => l), values: _chartMode === 'cumul' ? raw.map(v => c += v) : raw,
-      color: '#22d3c8', name: _chartMode === 'cumul' ? 'CA cumulé' : 'CA' });
+      color: '#22d3c8', name: _chartMode === 'cumul' ? 'CA cumulé' : 'CA',
+      budget: budChartSeries('ca', periods.map(p => p.period), raw, _chartMode === 'cumul') });
   };
   requestAnimationFrame(_drawAreaChart);
   window._redrawCaChart = _drawAreaChart;
@@ -528,6 +531,8 @@ function _renderSynDepenses() {
     '</div>'+
     '<div class="card" id="dep-wf-card" style="margin-top:18px"></div>';
 
+  budInjectStrip(el, 'dep');
+
   // Equalise KPI card heights
   requestAnimationFrame(() => {
     const kpis = el.querySelectorAll('.kpi-card');
@@ -543,7 +548,8 @@ function _renderSynDepenses() {
     const raw = pEntries.map(([,v]) => v); let c = 0;
     ArtCharts.area(document.getElementById(chartId), {
       labels: pEntries.map(([l]) => l), values: _chartMode === 'cumul' ? raw.map(v => c += v) : raw,
-      color: '#f0566a', name: _chartMode === 'cumul' ? 'Dépenses cumulées' : 'Dépenses', deltaGoodWhenUp: false });
+      color: '#f0566a', name: _chartMode === 'cumul' ? 'Dépenses cumulées' : 'Dépenses', deltaGoodWhenUp: false,
+      budget: budChartSeries('dep', periods.map(p => p.period), raw, _chartMode === 'cumul') });
   };
   requestAnimationFrame(_drawDepArea);
   window._redrawDepChart = _drawDepArea;
