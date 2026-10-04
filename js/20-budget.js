@@ -127,16 +127,27 @@ function budPeriod(year, mi) { return year + '-' + _pad2(mi + 1); }
 
 // Année de référence de chaque mois d'un budget : dernier mois civil identique déjà importé avant l'année budgétée
 // (ex. budget 2027 préparé en octobre 2026 : janv.–sept. 2026 et oct.–déc. 2025).
-function budBaseYears(year) {
+function budBaseYears(year, baseYear) {
   const { periods } = budActual();
+  // Année imposée (ex. repartir de 2024) : ses mois importés, rien pour les autres
+  if (baseYear) return BUD_MONTHS.map((_, mi) => periods.has(budPeriod(+baseYear, mi)) ? +baseYear : null);
   return BUD_MONTHS.map((_, mi) => {
     for (let y = year - 1; y >= year - 6; y--) if (periods.has(budPeriod(y, mi))) return y;
     return null;
   });
 }
-function budBaseLabel(year) {
-  const ys = budBaseYears(year);
-  if (ys.every(y => y === null)) return 'aucun réel importé avant ' + year;
+// Réel de référence d'une version : son année choisie (v.baseYear) ou, à défaut, les derniers mois importés
+function budVBase(v) { return budBaseYears(v.year, v.baseYear || null); }
+function budRefShort(v) { return v && v.baseYear ? String(v.baseYear) : 'N-1'; }
+// Années qui ont au moins un relevé importé
+function budDataYears() { return [...new Set([...budActual().periods].map(p => +p.slice(0, 4)))].sort((a, b) => b - a); }
+function budBaseOptions(selected) {
+  return `<option value=""${selected ? '' : ' selected'}>Automatique — derniers mois importés</option>` +
+    budDataYears().map(y => `<option value="${y}"${+selected === y ? ' selected' : ''}>Réel ${y}</option>`).join('');
+}
+function budBaseLabel(year, baseYear) {
+  const ys = budBaseYears(year, baseYear);
+  if (ys.every(y => y === null)) return baseYear ? 'aucun relevé ' + baseYear + ' importé' : 'aucun réel importé avant ' + year;
   const parts = [];
   let i = 0;
   while (i < 12) {
@@ -212,15 +223,16 @@ function budBuildVersion(name, year, source) {
   const v = { id: budNewId(), name, year: +year, created: new Date().toISOString(), updated: new Date().toISOString(), rows: {}, lcd: {} };
   if (source.kind === 'copy') {
     const src = budGetStore().versions[source.from];
-    if (src) { v.rows = JSON.parse(JSON.stringify(src.rows || {})); v.lcd = JSON.parse(JSON.stringify(src.lcd || {})); }
+    if (src) { v.rows = JSON.parse(JSON.stringify(src.rows || {})); v.lcd = JSON.parse(JSON.stringify(src.lcd || {})); v.baseYear = src.year === +year ? src.baseYear || null : null; }
   } else if (source.kind === 'base') {
+    v.baseYear = source.baseYear || null;
     budFillFromBase(v, source.pctProd || 0, source.pctChg || 0, true);
   }
   return v;
 }
 // Remplit (ou recalcule) une version depuis le réel de référence, avec un ajustement en % sur les produits et sur les charges
 function budFillFromBase(v, pctProd, pctChg, withLcd) {
-  const by = budBaseYears(v.year);
+  const by = budVBase(v);
   v.rows = {};
   budBaseKeys(v.year, by).forEach(k => {
     const [ent, cat] = budSplitKey(k);
@@ -349,7 +361,11 @@ function budRender() {
         <button class="bud-btn bud-btn-danger" onclick="budDelete()">${icon('trash-2', { size: 14 })}Supprimer</button>
       </div>
     </div>
-    <div class="bud-base-note">Réel de référence (N-1) : ${budEsc(budBaseLabel(v.year))}</div>
+    <div class="bud-base-note">
+      <label for="bud-base-sel">Réel de référence</label>
+      <select id="bud-base-sel" class="sel bud-base-sel" onchange="budSetBaseYear(this.value)">${budBaseOptions(v.baseYear)}</select>
+      <span>${budEsc(budBaseLabel(v.year, v.baseYear))} · sert à la colonne « Réel ${budRefShort(v)} », aux « % » et à « Repartir du réel »</span>
+    </div>
     <div class="bud-tabs" role="tablist">
       ${[['montants', 'Montants par bien'], ['lcd', 'Objectifs courte durée'], ['overview', 'Vue d\'ensemble']].map(([k, l]) =>
         `<button role="tab" aria-selected="${_bud.tab === k}" class="bud-tab${_bud.tab === k ? ' active' : ''}" onclick="_bud.tab='${k}';budRender()">${l}</button>`).join('')}
@@ -381,7 +397,7 @@ function budRenderMontants(v) {
   const ents = budEntities();
   const used = new Set(Object.keys(v.rows || {}).map(k => budSplitKey(k)[0]));
   // Entités : biens + « hors bien » des SCI qui ont du budget ou du réel
-  const baseEnts = new Set(budBaseKeys(v.year).map(k => budSplitKey(k)[0]));
+  const baseEnts = new Set(budBaseKeys(v.year, budVBase(v)).map(k => budSplitKey(k)[0]));
   const shown = ents.filter(e => e.type !== 'SCI' || used.has(e.id) || baseEnts.has(e.id));
   if (!_bud.entity || !shown.some(e => e.id === _bud.entity)) _bud.entity = shown[0] ? shown[0].id : null;
 
@@ -412,7 +428,7 @@ function budRenderGrid(v) {
   const wrap = document.getElementById('bud-grid-wrap');
   if (!wrap || !_bud.entity) { if (wrap) wrap.innerHTML = '<div class="bud-empty-small">Aucun bien dans les paramètres.</div>'; return; }
   const ent = _bud.entity, info = budEntityInfo(ent);
-  const by = budBaseYears(v.year);
+  const by = budVBase(v);
   const baseKeys = new Set(budBaseKeys(v.year, by).filter(k => budSplitKey(k)[0] === ent).map(k => budSplitKey(k)[1]));
   const rowCats = new Set(Object.keys(v.rows || {}).filter(k => budSplitKey(k)[0] === ent).map(k => budSplitKey(k)[1]));
   const cats = [...new Set([...rowCats, ...baseKeys])];
@@ -443,7 +459,7 @@ function budRenderGrid(v) {
       <div>
         <h3>${budEsc(info.type === 'SCI' ? 'Hors bien — ' + info.sci : info.label)}</h3>
         <p>${info.type === 'SCI' ? 'Flux de la SCI non rattachés à un bien (après ventilation des frais généraux).' : budEsc(info.sci) + (info.type ? ' · ' + budEsc(info.type) : '')}
-          · Montants en euros, dans leur sens naturel (une charge est saisie en positif). Le « % » recalcule la ligne à partir du réel N-1 ; le total annuel est modifiable et se répartit sur les mois.</p>
+          · Montants en euros, dans leur sens naturel (une charge est saisie en positif). Le « % » recalcule la ligne à partir du réel ${budRefShort(v)} ; le total annuel est modifiable et se répartit sur les mois.</p>
       </div>
       <div class="bud-grid-tools">
         <button class="bud-btn" onclick="budApplyEntityPct()">${icon('percent', { size: 14 })}Ajuster tout le bien…</button>
@@ -453,8 +469,8 @@ function budRenderGrid(v) {
       <table class="bud-grid">
         <thead><tr>
           <th class="bud-c-cat">Catégorie</th>
-          <th class="bud-c-base" title="Réel de référence sur 12 mois">Réel N-1</th>
-          <th class="bud-c-pct" title="Ajustement appliqué au réel N-1">% vs N-1</th>
+          <th class="bud-c-base" title="Réel de référence sur 12 mois">Réel ${budRefShort(v)}</th>
+          <th class="bud-c-pct" title="Ajustement appliqué au réel de référence">% vs ${budRefShort(v)}</th>
           ${BUD_MONTHS.map(m => `<th class="bud-c-m">${m}</th>`).join('')}
           <th class="bud-c-tot">Total</th>
           <th class="bud-c-del"><span class="sr-only">Supprimer</span></th>
@@ -480,7 +496,7 @@ function budGridRow(v, ent, cat, by) {
   return `<tr data-k="${ka}">
     <td class="bud-c-cat" title="${budAttr(cat)}">${budEsc(cat)}${!r ? '<span class="bud-tag">non budgété</span>' : ''}</td>
     <td class="bud-c-base">${budFmt(baseTot, { dashZero: true })}</td>
-    <td class="bud-c-pct"><input class="bud-in bud-in-pct" inputmode="decimal" value="${pct}" placeholder="${baseTot ? '0' : ''}" ${baseTot ? '' : 'disabled title="Pas de réel N-1 pour cette ligne"'} aria-label="% vs N-1 — ${budAttr(cat)}" onchange="budSetPct(this)"></td>
+    <td class="bud-c-pct"><input class="bud-in bud-in-pct" inputmode="decimal" value="${pct}" placeholder="${baseTot ? '0' : ''}" ${baseTot ? '' : 'disabled title="Pas de réel de référence pour cette ligne"'} aria-label="% vs réel de référence — ${budAttr(cat)}" onchange="budSetPct(this)"></td>
     ${m.map((x, i) => `<td class="bud-c-m"><input class="bud-in" inputmode="decimal" data-m="${i}" value="${x ? budFmt(x * d) : ''}" placeholder="${base[i] ? budFmt(base[i] * d) : '0'}" aria-label="${budAttr(cat)} — ${BUD_MONTHS_L[i]}" onchange="budSetCell(this)" onfocus="this.select()"></td>`).join('')}
     <td class="bud-c-tot"><input class="bud-in bud-in-tot" inputmode="decimal" value="${budFmt(budRowTotal(r) * d)}" aria-label="Total annuel — ${budAttr(cat)}" onchange="budSetTotal(this)" onfocus="this.select()"></td>
     <td class="bud-c-del"><button class="bud-del" title="Retirer la ligne du budget" aria-label="Retirer ${budAttr(cat)}" onclick="budDelRow(this)">${icon('x', { size: 13 })}</button></td>
@@ -506,7 +522,7 @@ function budSetPct(inp) {
   const raw = inp.value.trim();
   const v0 = budCurrent();
   const [ent] = budSplitKey(k);
-  const base = budBaseRow(ent, cat, v0.year);
+  const base = budBaseRow(ent, cat, v0.year, budVBase(v0));
   if (raw === '') { budMutate(v => { if (v.rows[k]) v.rows[k].pct = null; }); return; }
   const p = budParse(raw);
   const v = budMutate(v => { const r = budEnsureRow(v, k); r.m = base.map(x => Math.round(x * (1 + p / 100))); r.pct = p; });
@@ -529,7 +545,7 @@ function budSetTotal(inp) {
   const v0 = budCurrent();
   const [ent] = budSplitKey(k);
   const cur = v0.rows[k] ? v0.rows[k].m : null;
-  const profile = cur && cur.some(x => x) ? cur : budBaseRow(ent, cat, v0.year);
+  const profile = cur && cur.some(x => x) ? cur : budBaseRow(ent, cat, v0.year, budVBase(v0));
   const v = budMutate(v => { const r = budEnsureRow(v, k); r.m = budSpread(tot, profile); r.pct = null; });
   budUpdateRowDom(tr, v.rows[k], cat, true);
   budRefreshTotals();
@@ -559,7 +575,7 @@ function budRefreshTotals() {
   const ent = _bud.entity;
   const secM = {}; BUD_SECTIONS.forEach(s => secM[s.id] = BUD_MONTHS.map(() => 0));
   const secBase = {}; BUD_SECTIONS.forEach(s => secBase[s.id] = 0);
-  const by = budBaseYears(v.year);
+  const by = budVBase(v);
   Object.entries(v.rows).forEach(([k, r]) => {
     const [e, cat] = budSplitKey(k); if (e !== ent) return;
     r.m.forEach((x, i) => secM[budSectionOf(cat)][i] += +x || 0);
@@ -625,15 +641,16 @@ function budOpenNew() {
   const copyOpts = budVersionsList(store).map(x => `<option value="${x.id}">${budEsc(x.year + ' · ' + x.name)}</option>`).join('');
   budModal('Nouveau budget', `
     <label class="lbl">Année</label>
-    <select class="sel" id="bud-new-year" onchange="document.getElementById('bud-new-base').textContent=budBaseLabel(+this.value)">${years.map(x => `<option${x === defYear ? ' selected' : ''}>${x}</option>`).join('')}</select>
+    <select class="sel" id="bud-new-year" onchange="budNewBaseRefresh()">${years.map(x => `<option${x === defYear ? ' selected' : ''}>${x}</option>`).join('')}</select>
     <label class="lbl" style="margin-top:14px">Nom de la version</label>
     <input class="bud-text" id="bud-new-name" value="Budget initial" maxlength="60">
     <label class="lbl" style="margin-top:14px">Point de départ</label>
     <div class="bud-radio">
-      <label><input type="radio" name="bud-src" value="base" checked> Réel N-1, avec un ajustement
-        <span class="bud-src-detail">Produits <input class="bud-text bud-text-sm" id="bud-new-pp" value="0" inputmode="decimal"> %
+      <label><input type="radio" name="bud-src" value="base" checked> Réel d'une année, avec un ajustement
+        <select class="sel bud-sel-inline" id="bud-new-baseyear" onchange="budNewBaseRefresh()">${budBaseOptions(null)}</select><br>
+        <span class="bud-src-detail" style="margin-left:22px">Produits <input class="bud-text bud-text-sm" id="bud-new-pp" value="0" inputmode="decimal"> %
         · Charges <input class="bud-text bud-text-sm" id="bud-new-pc" value="0" inputmode="decimal"> %</span>
-        <small id="bud-new-base">${budEsc(budBaseLabel(defYear))}</small></label>
+        <small id="bud-new-base">${budEsc(budBaseLabel(defYear, null))}</small></label>
       ${copyOpts ? `<label><input type="radio" name="bud-src" value="copy"> Copie d'une version <select class="sel bud-sel-inline" id="bud-new-from">${copyOpts}</select></label>` : ''}
       <label><input type="radio" name="bud-src" value="empty"> Budget vide</label>
     </div>`, 'Créer', m => {
@@ -641,7 +658,7 @@ function budOpenNew() {
     const name = m.querySelector('#bud-new-name').value.trim() || 'Budget';
     const kind = (m.querySelector('input[name="bud-src"]:checked') || {}).value || 'base';
     const src = kind === 'copy' ? { kind, from: m.querySelector('#bud-new-from').value }
-      : kind === 'base' ? { kind, pctProd: budParse(m.querySelector('#bud-new-pp').value), pctChg: budParse(m.querySelector('#bud-new-pc').value) } : { kind };
+      : kind === 'base' ? { kind, baseYear: +m.querySelector('#bud-new-baseyear').value || null, pctProd: budParse(m.querySelector('#bud-new-pp').value), pctChg: budParse(m.querySelector('#bud-new-pc').value) } : { kind };
     const v = budBuildVersion(name, year, src);
     const s = budGetStore();
     s.versions[v.id] = v;
@@ -651,6 +668,16 @@ function budOpenNew() {
     budRender();
     showToast('Budget ' + year + ' créé');
   });
+}
+function budNewBaseRefresh() {
+  const y = +document.getElementById('bud-new-year').value, b = +document.getElementById('bud-new-baseyear').value || null;
+  document.getElementById('bud-new-base').textContent = budBaseLabel(y, b);
+}
+// Change l'année de référence sans toucher aux montants saisis
+function budSetBaseYear(val) {
+  const v = budMutate(x => { x.baseYear = +val || null; });
+  budRender();
+  showToast('Réel de référence : ' + (v.baseYear ? v.baseYear : 'automatique') + ' (montants inchangés)');
 }
 function budSetRef() {
   const v = budCurrent(); if (!v) return;
@@ -686,23 +713,27 @@ function budDelete() {
 }
 function budOpenRebase() {
   const v = budCurrent(); if (!v) return;
-  budModal('Repartir du réel N-1', `
-    <p class="bud-modal-p">Tous les montants de « ${budEsc(v.name)} » seront remplacés par le réel de référence (${budEsc(budBaseLabel(v.year))}), ajusté des pourcentages ci-dessous. Les objectifs courte durée ne changent pas.</p>
-    <div class="bud-src-detail">Produits <input class="bud-text bud-text-sm" id="bud-rb-pp" value="0" inputmode="decimal"> %
+  budModal('Repartir du réel', `
+    <p class="bud-modal-p">Tous les montants de « ${budEsc(v.name)} » seront remplacés par le réel de l'année choisie, ajusté des pourcentages ci-dessous. Les objectifs courte durée ne changent pas.</p>
+    <label class="lbl">Réel de référence</label>
+    <select class="sel" id="bud-rb-year" onchange="document.getElementById('bud-rb-lbl').textContent=budBaseLabel(${v.year}, +this.value || null)">${budBaseOptions(v.baseYear)}</select>
+    <small class="bud-modal-small" id="bud-rb-lbl">${budEsc(budBaseLabel(v.year, v.baseYear))}</small>
+    <div class="bud-src-detail" style="margin:14px 0 0">Produits <input class="bud-text bud-text-sm" id="bud-rb-pp" value="0" inputmode="decimal"> %
       · Charges <input class="bud-text bud-text-sm" id="bud-rb-pc" value="0" inputmode="decimal"> %</div>`, 'Remplacer les montants', m => {
     const pp = budParse(m.querySelector('#bud-rb-pp').value), pc = budParse(m.querySelector('#bud-rb-pc').value);
-    budMutate(x => budFillFromBase(x, pp, pc, false));
+    const by = +m.querySelector('#bud-rb-year').value || null;
+    budMutate(x => { x.baseYear = by; budFillFromBase(x, pp, pc, false); });
     budRender(); showToast('Montants recalculés depuis le réel');
   });
 }
 function budApplyEntityPct() {
   const v = budCurrent(); if (!v || !_bud.entity) return;
   budModal('Ajuster tout le bien', `
-    <p class="bud-modal-p">Recalcule chaque ligne de « ${budEsc(budEntityLabel(_bud.entity))} » à partir du réel N-1. Les lignes sans réel N-1 ne changent pas.</p>
+    <p class="bud-modal-p">Recalcule chaque ligne de « ${budEsc(budEntityLabel(_bud.entity))} » à partir du réel ${budRefShort(v)}. Les lignes sans réel de référence ne changent pas.</p>
     <div class="bud-src-detail">Produits <input class="bud-text bud-text-sm" id="bud-ep-pp" value="0" inputmode="decimal"> %
       · Charges <input class="bud-text bud-text-sm" id="bud-ep-pc" value="0" inputmode="decimal"> %</div>`, 'Appliquer', m => {
     const pp = budParse(m.querySelector('#bud-ep-pp').value), pc = budParse(m.querySelector('#bud-ep-pc').value);
-    const by = budBaseYears(v.year);
+    const by = budVBase(v);
     budMutate(x => {
       budBaseKeys(x.year, by).forEach(k => {
         const [e, cat] = budSplitKey(k); if (e !== _bud.entity) return;
@@ -719,7 +750,7 @@ function budRenderLcd(v) {
   const body = document.getElementById('bud-tab-body');
   const lcd = (getParams().biens || []).filter(b => b.type === 'LCD');
   if (!lcd.length) { body.innerHTML = '<div class="bud-empty-small">Aucun bien en courte durée dans les paramètres.</div>'; return; }
-  const by = budBaseYears(v.year), ni = budNightsIndex();
+  const by = budVBase(v), ni = budNightsIndex();
   body.innerHTML = `
     <p class="bud-intro">Objectifs de nuits louées et de prix moyen par nuit, comparés aux KPIs courte durée du dashboard. Le taux d'occupation et le CA hébergement en découlent. Le CA hébergement budgété dans « Montants » est rappelé pour vérifier la cohérence.</p>
     ${lcd.map(b => budLcdCard(v, b, by, ni)).join('')}`;
@@ -739,15 +770,15 @@ function budLcdCard(v, b, by, ni) {
   const inRow = (field, arr, label, pct) => `<tr data-b="${id}" data-f="${field}">
       <td class="bud-c-cat">${label}</td>
       <td class="bud-c-base">${field === 'nuits' ? budFmt(baseN, { dashZero: true }) : budFmt(base.prix[0], { dashZero: true })}</td>
-      <td class="bud-c-pct"><input class="bud-in bud-in-pct" inputmode="decimal" value="${pct !== null && pct !== undefined ? String(pct).replace('.', ',') : ''}" aria-label="% vs N-1 — ${label}" onchange="budLcdPct(this)"></td>
+      <td class="bud-c-pct"><input class="bud-in bud-in-pct" inputmode="decimal" value="${pct !== null && pct !== undefined ? String(pct).replace('.', ',') : ''}" aria-label="% vs réel de référence — ${label}" onchange="budLcdPct(this)"></td>
       ${arr.map((x, i) => `<td class="bud-c-m"><input class="bud-in" inputmode="decimal" data-m="${i}" value="${x ? budFmt(x) : ''}" placeholder="${field === 'nuits' ? (base.nuits[i] || '0') : (base.prix[i] || '0')}" aria-label="${label} — ${BUD_MONTHS_L[i]}" onchange="budLcdCell(this)" onfocus="this.select()"></td>`).join('')}
       <td class="bud-c-tot">${field === 'nuits' ? budFmt(totN) : (totN ? budFmt(totCa / totN) : '—')}</td>
     </tr>`;
   const coh = caMontants ? `CA hébergement budgété dans « Montants » : <b>${budFmt(caMontants, { eur: true })}</b>. Les objectifs (nuits × prix) donnent <b>${budFmt(totCa, { eur: true })}</b>, soit ${budFmtPct((totCa / caMontants - 1) * 100, true)}.` : 'Aucun CA hébergement (Airbnb, Booking, location directe) dans « Montants » pour ce bien.';
   return `<div class="bud-lcd-card">
-    <div class="bud-grid-head"><div><h3>${budEsc(b.name)}</h3><p>${budEsc(b.sci || '')} · réel N-1 : ${budFmt(baseN)} nuits${base.prix[0] ? ', ' + budFmt(base.prix[0], { eur: true }) + ' par nuit en moyenne' : ''}</p></div></div>
+    <div class="bud-grid-head"><div><h3>${budEsc(b.name)}</h3><p>${budEsc(b.sci || '')} · réel ${budRefShort(v)} : ${budFmt(baseN)} nuits${base.prix[0] ? ', ' + budFmt(base.prix[0], { eur: true }) + ' par nuit en moyenne' : ''}</p></div></div>
     <div class="bud-grid-scroll"><table class="bud-grid bud-grid-lcd">
-      <thead><tr><th class="bud-c-cat">Objectif</th><th class="bud-c-base">Réel N-1</th><th class="bud-c-pct">% vs N-1</th>${BUD_MONTHS.map(m => `<th class="bud-c-m">${m}</th>`).join('')}<th class="bud-c-tot">Année</th></tr></thead>
+      <thead><tr><th class="bud-c-cat">Objectif</th><th class="bud-c-base">Réel ${budRefShort(v)}</th><th class="bud-c-pct">% vs ${budRefShort(v)}</th>${BUD_MONTHS.map(m => `<th class="bud-c-m">${m}</th>`).join('')}<th class="bud-c-tot">Année</th></tr></thead>
       <tbody>
         ${inRow('nuits', o.nuits, 'Nuits louées', o.pctN)}
         ${inRow('prix', o.prix, 'Prix moyen / nuit (€)', o.pctP)}
@@ -772,7 +803,7 @@ function budLcdPct(inp) {
   const tr = inp.closest('tr'), id = tr.dataset.b, f = tr.dataset.f;
   const raw = inp.value.trim();
   const v0 = budCurrent();
-  const base = budLcdBase(id, v0.year);
+  const base = budLcdBase(id, v0.year, budVBase(v0));
   budMutate(v => {
     const o = budLcdEnsure(v, id);
     if (raw === '') { o[f === 'nuits' ? 'pctN' : 'pctP'] = null; return; }
@@ -787,7 +818,7 @@ function budLcdPct(inp) {
 function budRenderOverview(v) {
   const body = document.getElementById('bud-tab-body');
   const ents = budEntities();
-  const by = budBaseYears(v.year);
+  const by = budVBase(v), rs = budRefShort(v);
   const baseTot = {};
   budBaseKeys(v.year, by).forEach(k => {
     const [e, cat] = budSplitKey(k);
@@ -830,13 +861,13 @@ function budRenderOverview(v) {
       ${[['Produits', tot.prod, bt.prod, 'up'], ['Charges', -(tot.exp + tot.fin), -(bt.exp + bt.fin), 'down'], ['Résultat (hors amort.)', tot.res, bt.res, 'up'], ['Cash-flow net', tot.cash, bt.cash, 'up']].map(([l, x, b, g]) => {
         const p = b ? (x - b) / Math.abs(b) * 100 : null, fav = g === 'up' ? x >= b : x <= b;
         return `<div class="bud-kpi"><div class="bud-kpi-l">${l} ${v.year}</div><div class="bud-kpi-v ${x < 0 ? 'neg' : ''}">${budFmt(x, { eur: true, signed: l.startsWith('Rés') || l.startsWith('Cash') })}</div>
-          <div class="bud-kpi-s">${p === null ? 'pas de réel N-1' : `<span class="${Math.abs(p) < 0.5 ? '' : fav ? 'pos' : 'neg'}">${budFmtPct(p, true)}</span> vs réel N-1 (${budFmt(b, { eur: true })})`}</div></div>`;
+          <div class="bud-kpi-s">${p === null ? 'pas de réel ' + rs : `<span class="${Math.abs(p) < 0.5 ? '' : fav ? 'pos' : 'neg'}">${budFmtPct(p, true)}</span> vs réel ${rs} (${budFmt(b, { eur: true })})`}</div></div>`;
       }).join('')}
     </div>
     <div class="bud-card">
       <h3 class="bud-h3">Par bien</h3>
       <div class="bud-grid-scroll"><table class="bud-table">
-        <thead><tr><th class="bud-c-cat">Bien</th><th>Produits</th><th>vs N-1</th><th>Charges expl.</th><th>vs N-1</th><th>Charges fin.</th><th>Résultat</th><th>Hors résultat</th><th>Cash-flow</th><th>vs N-1</th></tr></thead>
+        <thead><tr><th class="bud-c-cat">Bien</th><th>Produits</th><th>vs ${rs}</th><th>Charges expl.</th><th>vs ${rs}</th><th>Charges fin.</th><th>Résultat</th><th>Hors résultat</th><th>Cash-flow</th><th>vs N-1</th></tr></thead>
         <tbody>${rowsHtml || '<tr><td colspan="10" class="bud-empty-small">Aucun montant.</td></tr>'}</tbody>
         <tfoot><tr><td class="bud-c-cat">Total</td><td>${budFmt(tot.prod)}</td>${varCell(tot.prod, bt.prod, 'up')}<td>${budFmt(-tot.exp)}</td>${varCell(-tot.exp, -bt.exp, 'down')}<td>${budFmt(-tot.fin)}</td><td class="${tot.res < 0 ? 'neg' : ''}">${budFmt(tot.res, { signed: true })}</td><td>${budFmt(tot.bil, { signed: true })}</td><td class="bud-strong ${tot.cash < 0 ? 'neg' : ''}">${budFmt(tot.cash, { signed: true })}</td>${varCell(tot.cash, bt.cash, 'up')}</tr></tfoot>
       </table></div>

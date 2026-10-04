@@ -1481,3 +1481,16 @@ body{font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
 @media (max-width:1240px){#dash-nav .dnav-head{padding:0 11px!important;font-size:12px!important;gap:5px!important}#dash-nav .dnav-subs{padding:0 6px!important}#dash-topbar>button:first-child{padding:0 10px!important;margin-right:8px!important}}
 .bud-card-title{flex-wrap:wrap;row-gap:10px}
 .bud-seg{flex-wrap:wrap;max-width:100%}
+.bud-base-note{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.bud-base-note label{font-weight:700;color:var(--text2)}
+.bud-base-sel{width:auto!important;font-size:12px!important;padding:5px 28px 5px 10px!important}
+.bud-modal-small{display:block;color:var(--text3);font-size:11px;margin-top:6px}
+/* Accueil : 5 cartes (Outils, Dashboard, Marketplace, Simulateur, Budget) */
+.h-card-budget{background:linear-gradient(135deg,rgba(79,158,255,.10),rgba(79,158,255,.04));border-color:rgba(79,158,255,.15)!important}
+.h-card-budget:hover{border-color:rgba(79,158,255,.35)!important;box-shadow:0 20px 60px rgba(79,158,255,.10)}
+.h-card-budget::before{background:linear-gradient(135deg,rgba(79,158,255,.18),rgba(79,158,255,.04))}
+.h-card-budget .h-card-icon{color:#4f9eff;background:rgba(79,158,255,.12);border:1px solid rgba(79,158,255,.25)}
+.h-hero-cards{grid-template-columns:repeat(5,minmax(0,1fr))}
+@media (max-width:1240px){.h-hero-cards{grid-template-columns:repeat(6,minmax(0,1fr))}.h-hero-cards>.h-entry-card{grid-column:span 2}.h-hero-cards>.h-entry-card:nth-child(n+4){grid-column:span 3}}
+@media (max-width:900px){.h-hero-cards{grid-template-columns:repeat(2,minmax(0,1fr))}.h-hero-cards>.h-entry-card,.h-hero-cards>.h-entry-card:nth-child(n+4){grid-column:auto}.h-hero-cards>.h-entry-card:last-child{grid-column:1/-1}}
+@media (max-width:520px){.h-hero-cards{grid-template-columns:1fr}}
