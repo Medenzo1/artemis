@@ -1494,3 +1494,10 @@ body{font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
 @media (max-width:1240px){.h-hero-cards{grid-template-columns:repeat(6,minmax(0,1fr))}.h-hero-cards>.h-entry-card{grid-column:span 2}.h-hero-cards>.h-entry-card:nth-child(n+4){grid-column:span 3}}
 @media (max-width:900px){.h-hero-cards{grid-template-columns:repeat(2,minmax(0,1fr))}.h-hero-cards>.h-entry-card,.h-hero-cards>.h-entry-card:nth-child(n+4){grid-column:auto}.h-hero-cards>.h-entry-card:last-child{grid-column:1/-1}}
 @media (max-width:520px){.h-hero-cards{grid-template-columns:1fr}}
+/* Simulateur — champs et listes déroulantes de même hauteur (Safari ignore le padding des <select> natifs) */
+.sim-form input[type=text],.sim-form select{height:42px;line-height:normal;box-sizing:border-box}
+.sim-form select{-webkit-appearance:none;appearance:none;padding:0 34px 0 11px!important;cursor:pointer;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238a9ab2' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 12px center;background-size:12px}
+.sim-form select::-ms-expand{display:none}
+.sim-form select option{background:#1e2330;color:var(--text)}
