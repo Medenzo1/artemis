@@ -409,8 +409,6 @@ function simRenderForm() {
       simField('dejaBienMeuble', 'Déjà un bien en meublé ?', i.dejaBienMeuble, {type:'select', options:SIM_YN, help:'Sans bien meublé existant, pas de CFE la première année.'}) +
       simField('societeTVA', 'Société soumise à TVA ?', i.societeTVA, {type:'select', options:SIM_YN, help:'Pas de CRL si la société est soumise à TVA.', calc:true}) +
       simField('amortFraisAcquisition', "Amortir les frais d'acquisition", i.amortFraisAcquisition, {type:'select', options:SIM_YN, help:'Oui : les frais sont immobilisés et amortis. Non : ils sont déduits en charges la première année.'}) +
-      simField('pinelSurfaceUtile', 'Pinel — surface utile', i.pinelSurfaceUtile, {suffix:'m²'}) +
-      simField('pinelDuree', "Pinel — durée d'engagement", i.pinelDuree, {type:'select', options:[{v:6,l:'6 ans'},{v:9,l:'9 ans'},{v:12,l:'12 ans'}]}) +
     '</div></div>' +
 
     '<div class="sim-card">' + simSectionHeader('calculator', 'Amortissement', '#4f9eff') +

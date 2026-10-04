@@ -15,8 +15,7 @@ const SIM_REGIMES = [
   { key: 'lmp_reel',    row: 10, sheet: '✔️ LMP - BIC RÉEL',         loanCol: 2,  elig: 'T3' },
   { key: 'rf_reel',     row: 12, sheet: '✔️ RF - RÉEL',              loanCol: 20, elig: null },
   { key: 'rf_micro',    row: 14, sheet: '✔️ RF - MICRO FONCIER',     loanCol: 20, elig: 'T3' },
-  { key: 'pinel_reel',  row: 16, sheet: '✔️ PINEL - RÉEL',           loanCol: 20, elig: 'T3' },
-  { key: 'pinel_micro', row: 18, sheet: '✔️ PINEL - MICRO FONCIER',  loanCol: 20, elig: 'T3' },
+  // Pinel (lignes 16 et 18 de la synthèse) : dispositif terminé le 31/12/2024, non affiché
   { key: 'is_sans',     row: 20, sheet: '✔ STÉ IS - SANS DISTRIB.',  loanCol: 38, elig: null },
   { key: 'is_avec',     row: 22, sheet: '✔ STÉ IS - AVEC DISTRIB.',  loanCol: 38, elig: null },
 ];
@@ -226,7 +225,7 @@ function simRenderResults() {
       '</div>' : '') +
 
     '<div class="sim-card sim-table-card">' +
-      '<div class="sim-card-head"><div class="sim-card-h">Les 9 régimes comparés</div><div class="sim-card-note">' +
+      '<div class="sim-card-head"><div class="sim-card-h">Les ' + rows.length + ' régimes comparés</div><div class="sim-card-note">' +
         (SIM_SORT.k ? '<a href="#" class="sim-link" onclick="SIM_SORT.k=null;simRenderResults();return false">Ordre du classeur</a> · ' : '') +
         'En vert, la meilleure valeur parmi les régimes possibles · Cliquez sur un régime pour son détail</div></div>' +
       '<div class="sim-table-scroll">' +
@@ -378,7 +377,7 @@ function simRenderRegimeDetail(el, wb, inputs, key) {
       lrows.push('<tr><td>' + y + '</td>' + [1, 2, 3, 4, 5].map(k => '<td class="num">' + simCellFmt(wb.getRC(SIM_LOAN, rr, c0 + k), 'e') + '</td>').join('') + '</tr>');
     }
     loanHtml = '<div class="sim-card sim-sheet">' +
-      '<div class="sim-card-head"><div class="sim-card-h">' + escHtml(simSentence(wb.getRC(SIM_LOAN, 1, c0))) + '</div>' +
+      '<div class="sim-card-head"><div class="sim-card-h">' + escHtml(simSentence(wb.getRC(SIM_LOAN, 1, c0)).replace(/\s*\/\s*pinel/i, '')) + '</div>' +
       '<div class="sim-card-note">Coût total du crédit : ' + simDisp(wb.getRC(SIM_LOAN, 6, c0 + 5), 'eur') + ' (intérêts ' + simDisp(wb.getRC(SIM_LOAN, 4, c0 + 5), 'eur') + ', assurance ' + simDisp(wb.getRC(SIM_LOAN, 5, c0 + 5), 'eur') + ')</div></div>' +
       '<div class="sim-table-scroll"><table class="sim-sheet-table sim-loan-table"><thead><tr><th>Année</th>' + hdr.map(h => '<th class="num">' + escHtml(String(h)) + '</th>').join('') + '</tr></thead><tbody>' + lrows.join('') + '</tbody></table></div>' +
     '</div>';
