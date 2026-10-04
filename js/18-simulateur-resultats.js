@@ -293,6 +293,14 @@ function simCellFmt(v, code) {
   return Number.isInteger(v) ? grp(v, 0) : grp(v, 2);
 }
 
+const SIM_CF_BRIDGE = [
+  { re: /^PRODUITS ENCAISSÉS/, label: 'Produits encaissés' },
+  { re: /^CHARGES DÉCAISSÉES/, label: 'Charges décaissées (hors frais d\'acquisition)', sign: -1 },
+  { re: /^AMORTISSEMENT EMPRUNT/, label: 'Remboursement du capital de l\'emprunt', sign: -1 },
+  { re: /^IMPÔT SUR LES REVENUS LOCATIFS/, label: 'Impôt (revenus locatifs et plus-value)', sign: -1 },
+  { re: /CESSION ENCAISSÉ|ENCAISSÉ SUR LA CESSION/, label: 'Produit de la revente' },
+];
+
 function simSheetSections(wb, sheet, horizon) {
   const si = SIM_MODEL.sheets.indexOf(sheet);
   const meta = SIM_MODEL.m[si] || [];
@@ -311,6 +319,15 @@ function simSheetSections(wb, sheet, horizon) {
     const empty = vals.every(v => v === SimXL.BLANK || v === '' || v == null);
     if (empty && !hidden) { cur = { title: lb, rows: [] }; sections.push(cur); return; }
     if (!cur) { cur = { title: '', rows: [] }; sections.push(cur); }
+    // Lignes qui mènent du résultat au cash-flow : repliées dans le classeur, mais indispensables pour comprendre
+    // le cash-flow (notamment le remboursement du capital) → toujours visibles, sous un intertitre
+    const bridge = SIM_CF_BRIDGE.find(b => b.re.test(lb.trim()));
+    if (bridge) {
+      if (!cur.rows.some(x => x.bridgeHead)) cur.rows.push({ label: 'Du résultat au cash-flow', sub: true, hidden: false, bridgeHead: true });
+      cur.rows.push({ r, label: bridge.label || lb, hidden: false, code, sub: false, bridge: true,
+        vals: bridge.sign < 0 ? vals.map(v => (simIsNum(v) && v !== 0 ? -v : v)) : vals });
+      return;
+    }
     cur.rows.push({ r, label: lb, hidden: !!hidden, code, vals, sub: empty });
   });
   return sections.filter(s => s.rows.some(x => !x.sub));
