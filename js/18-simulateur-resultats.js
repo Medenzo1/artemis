@@ -478,6 +478,8 @@ function simRegimeFacts(wb, inputs, key) {
   f.negYears = opYears.filter(v => v < 0).length;
   f.worstMonth = Math.min(0, ...opYears) / 12;
   f.firstYearMonth = (cf[0] || 0) / 12;
+  f.produitsY1 = produits[0] || 0; f.chargesY1 = charges[0] || 0; f.capitalY1 = capital[0] || 0; f.impotY1 = impot[0] || 0;
+  f.rendBrut = (() => { const v = wb.get(s, 'C' + (simLabelRow(wb, s, /^RENDEMENT BRUT/) || 0)); return simIsNum(v) ? v : 0; })();
   f.lastCF = cf[H - 1] || 0;
   return f;
 }
@@ -505,6 +507,74 @@ function simAmortExplain(wb, inputs, H) {
     : 'Les frais d\'acquisition (notaire, agence) ne sont pas amortis : ils sont déduits en charges dès la première année.';
   return '<p>Le prix du bien (' + simEur(price) + ') est amorti <b>par composants</b>, chacun sur sa durée de vie : ' + parts.join(', ') +
     '. Sur ' + H + ' ans, seuls <b>' + simFmtPct(done, 0) + '</b> du prix sont donc amortis (' + simFmtEUR(price * done) + ') ; le terrain ne l\'est jamais et le gros œuvre continue au-delà. ' + notaire + '</p>';
+}
+
+// ── Pistes d'amélioration : chaque levier est recalculé avec le classeur (même moteur, une seule saisie modifiée) ──
+function simRegimeMetrics(wb, inputs, key) {
+  const row = simRegimeRows(wb, inputs).find(r => r.key === key);
+  const conf = SIM_REGIMES.find(r => r.key === key);
+  const y1 = simRowValues(wb, conf.sheet, /^CASH FLOW NET NET ANNUEL/, 1)[0] / 12;
+  return { cf: row.cf, van: row.van, tri: row.tri, y1, impossible: row.impossible, regle: row.regle };
+}
+
+function simLevers(wb, inputs, key) {
+  const base = simRegimeMetrics(wb, inputs, key);
+  const isReel = ['lmnp_reel', 'lmp_reel', 'is_sans', 'is_avec'].includes(key);
+  const loan = +inputs.dureeEmprunt > 0;
+  const cost = wb.get(SIM_REGIMES[0].sheet, 'C3');
+  const L = [];
+  const add = (title, change) => L.push({ title, change });
+  const prix = +inputs.prixBien || 0;
+  add('Négocier le prix d\'achat de 5 % (' + simFmtEUR(-prix * 0.05) + ')', i => {
+    if (!(+i.valeurRevente > 0)) i.valeurRevente = prix;   // la valeur de revente ne baisse pas avec la négociation
+    i.prixBien = prix * 0.95;
+  });
+  add('Augmenter le loyer de 5 %', i => {
+    i.loyerMeuble = Math.round((+i.loyerMeuble || 0) * 1.05);
+    i.loyerNu = Math.round((+i.loyerNu || 0) * 1.05);
+  });
+  if (loan && +inputs.tauxEmprunt >= 0.006) add('Obtenir un taux d\'emprunt inférieur de 0,5 point (' + simFmtPct(inputs.tauxEmprunt - 0.005) + ')', i => { i.tauxEmprunt = +i.tauxEmprunt - 0.005; });
+  if (loan && +inputs.tauxAssuranceEmprunt >= 0.0015) add('Déléguer l\'assurance emprunteur (taux ' + simFmtPct(inputs.tauxAssuranceEmprunt / 2) + ' au lieu de ' + simFmtPct(inputs.tauxAssuranceEmprunt) + ')', i => { i.tauxAssuranceEmprunt = +i.tauxAssuranceEmprunt / 2; });
+  if (loan && +inputs.dureeEmprunt < 25) add('Allonger le crédit à 25 ans (au lieu de ' + inputs.dureeEmprunt + ')', i => { i.dureeEmprunt = 25; });
+  if (loan && simIsNum(cost) && cost > 0) add('Augmenter l\'apport de 10 % du coût du projet (+' + simFmtEUR(cost * 0.1) + ')', i => { i.apportPersonnel = (+i.apportPersonnel || 0) + cost * 0.1; });
+  if (+inputs.tauxGestionLocative > 0) add('Gérer la location sans agence (gestion locative à 0 %)', i => { i.tauxGestionLocative = 0; });
+  if (+inputs.tauxVacance > 0.02) add('Réduire la vacance locative à ' + simFmtPct(inputs.tauxVacance / 2, 1), i => { i.tauxVacance = +i.tauxVacance / 2; });
+  if (isReel) add(inputs.amortFraisAcquisition === 'OUI' ? 'Déduire les frais d\'acquisition la première année plutôt que les amortir' : 'Amortir les frais d\'acquisition plutôt que les déduire la première année',
+    i => { i.amortFraisAcquisition = i.amortFraisAcquisition === 'OUI' ? 'NON' : 'OUI'; });
+  const out = [];
+  try {
+    L.forEach(l => {
+      const i = JSON.parse(JSON.stringify(inputs));
+      l.change(i);
+      const m = simRegimeMetrics(simCompute(i), i, key);
+      out.push(Object.assign(l, { m, dVan: m.van - base.van, dCf: m.cf - base.cf, dY1: m.y1 - base.y1 }));
+    });
+  } finally {
+    simCompute(inputs);   // le classeur reprend la simulation affichée
+  }
+  // Changer de régime (même simulation)
+  const rows = simRegimeRows(wb, inputs).filter(r => !r.impossible && r.key !== key && simIsNum(r.van) && simIsNum(base.van) && r.van > base.van);
+  rows.sort((a, b) => b.van - a.van);
+  if (rows[0]) {
+    const m = simRegimeMetrics(wb, inputs, rows[0].key);
+    out.push({ title: 'Opter pour le régime ' + rows[0].label, regime: true, m, dVan: m.van - base.van, dCf: m.cf - base.cf, dY1: m.y1 - base.y1 });
+  }
+  return { base, levers: out.filter(l => simIsNum(l.dVan)).sort((a, b) => b.dVan - a.dVan) };
+}
+
+function simDiagnosis(f, base, inputs) {
+  const out = [];
+  const prod1 = f.produitsY1, ch1 = f.chargesY1, cap1 = f.capitalY1, imp1 = f.impotY1;
+  if (prod1 > 0) {
+    const shares = [['les charges courantes (copropriété, taxe foncière, gestion, intérêts, assurances)', ch1], ['le remboursement du capital de l\'emprunt', cap1], ['l\'impôt', imp1]].sort((a, b) => b[1] - a[1]);
+    out.push('<p>En année 1, les loyers encaissés (' + simEur(prod1) + ') servent d\'abord à payer ' + shares[0][0] + ' : ' + simEur(shares[0][1]) + ', soit <b>' + simFmtPct(shares[0][1] / prod1, 0) + '</b> des loyers' +
+      (shares[1][1] > 0 ? ', puis ' + shares[1][0] + ' (' + simFmtPct(shares[1][1] / prod1, 0) + ')' : '') + '. ' +
+      (base.y1 < 0 ? 'Il manque ' + simEur(-base.y1) + ' par mois pour équilibrer : c\'est le premier point à corriger.' : 'Il reste ' + simEur(base.y1) + ' de cash-flow par mois.') + '</p>');
+  }
+  if (f.cfTotal - f.apport < 0) out.push('<p>Le problème est structurel : même sur ' + f.H + ' ans, les flux ne remboursent pas l\'apport. Il faut agir sur le couple prix d\'achat / loyer (rendement brut du projet : ' + simPctB(f.rendBrut) + ').</p>');
+  else if (simIsNum(base.van) && base.van < 0) out.push('<p>Le projet est rentable en valeur absolue mais trop lent : la VAN reste négative. Les leviers qui avancent les gains dans le temps (loyer, prix d\'achat, coût du crédit) sont les plus efficaces.</p>');
+  if (base.regle === 'NON') out.push('<p>La règle bancaire des ' + simFmtPct(+inputs.reglesFinancementPct || 0, 0) + ' n\'est pas respectée : sans correction (loyer, apport ou durée du crédit), le financement risque d\'être refusé.</p>');
+  return out.join('');
 }
 
 function simAnalysisHtml(wb, inputs, key) {
@@ -620,9 +690,28 @@ function simAnalysisHtml(wb, inputs, key) {
   if (!f.sale) warn.push('<li>Sans revente, la valeur du bien en fin de période n\'est pas comptée : la VAN et le TRI sont donc prudents.</li>');
   if (warn.length) P.push(['Points d\'attention', '<ul class="sim-an-list">' + warn.join('') + '</ul>']);
 
+  // 5. Diagnostic et leviers (recalculés avec le classeur)
+  const lev = simLevers(wb, inputs, key);
+  const good = lev.levers.filter(l => l.dVan > 1 || l.dY1 > 1).slice(0, 5);
+  const dTxt = (v, unit) => '<span class="' + (v > 0.5 ? 'up' : v < -0.5 ? 'neg' : '') + '">' + (v > 0.5 ? '+' : '') + simFmtEUR(v) + (unit || '') + '</span>';
+  let lv = simDiagnosis(f, lev.base, inputs);
+  if (good.length) {
+    lv += '<p>Leviers testés sur cette simulation, classés par effet sur la VAN (chaque ligne modifie un seul paramètre) :</p>' +
+      '<div class="sim-an-levers"><div class="sim-an-lv sim-an-lv-h"><span>Levier</span><span>Cash-flow / mois (an 1)</span><span>Cash-flow cumulé</span><span>VAN</span></div>' +
+      good.map(l => '<div class="sim-an-lv"><span>' + escHtml(l.title) + '</span>' + dTxt(l.dY1) + dTxt(l.dCf) + dTxt(l.dVan) + '</div>').join('') + '</div>';
+    const best = good[0];
+    lv += '<p>Le levier le plus efficace est : <b>' + escHtml(best.title.charAt(0).toLowerCase() + best.title.slice(1)) + '</b>. La VAN passerait de ' + simFmtEUR(lev.base.van) + ' à ' + simEur(best.m.van) + '.' +
+      '</p>';
+    const tradeoff = good.filter(l => l.dY1 > 1 && l.dCf < -1);
+    if (tradeoff.length) lv += '<p>À noter : ' + tradeoff.map(l => '« ' + escHtml(l.title.charAt(0).toLowerCase() + l.title.slice(1)) + ' » améliore la trésorerie de ' + simEur(l.dY1) + ' par mois mais coûte ' + simEur(-l.dCf) + ' au total sur la durée') .join(' ; ') +
+      '. C\'est un levier de trésorerie (réduire l\'effort mensuel, respecter la règle bancaire), pas de rentabilité.</p>';
+  }
+  if (lv) P.push(['Diagnostic et pistes d\'amélioration', lv]);
+
   const sec = ([h, body, aside]) => '<section class="sim-an-sec' + (aside ? ' sim-an-split' : '') + '"><div><h3>' + h + '</h3>' + body + '</div>' + (aside ? '<div>' + aside + '</div>' : '') + '</section>';
   const [first, ...rest] = P;
-  const pair = rest.filter(x => x[0] !== 'Points d\'attention'), tail = rest.filter(x => x[0] === 'Points d\'attention');
+  const isTail = x => x[0] === 'Points d\'attention' || x[0].startsWith('Diagnostic');
+  const pair = rest.filter(x => !isTail(x)), tail = rest.filter(isTail);
   return sec(first) + '<div class="sim-an-grid">' + pair.map(sec).join('') + '</div>' + tail.map(sec).join('');
 }
 

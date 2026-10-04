@@ -1297,3 +1297,11 @@ body{font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
 .sim-link{color:#34d399;text-decoration:none;font-weight:600}
 .sim-link:hover{text-decoration:underline}
 .sim-link:focus-visible{outline:2px solid #34d399;outline-offset:2px;border-radius:3px}
+.sim-an-levers{margin:10px 0 12px;font-size:12.5px;font-variant-numeric:tabular-nums}
+.sim-an-lv{display:grid;grid-template-columns:minmax(0,2.4fr) repeat(3,minmax(0,1fr));gap:12px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05);align-items:center;color:var(--text)}
+.sim-an-lv>span:not(:first-child){text-align:right;white-space:nowrap;font-weight:600}
+.sim-an-lv-h{font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text3);border-bottom-color:rgba(255,255,255,.1)}
+.sim-an-lv-h>span{font-weight:700!important}
+.sim-an-lv .up{color:#34d399}
+.sim-an-lv .neg{color:var(--red)}
+@media (max-width:640px){.sim-an-lv{grid-template-columns:1fr 1fr 1fr}.sim-an-lv>span:first-child{grid-column:1/-1}.sim-an-lv-h>span:first-child{display:none}}
