@@ -469,6 +469,28 @@ function simRegimeFacts(wb, inputs, key) {
 const simEur = v => '<b>' + simFmtEUR(v) + '</b>';
 const simPctB = v => '<b>' + simFmtPct(v) + '</b>';
 
+// Amortissement par composants (onglet « 🔎 AMORTISSEMENT ») : part du prix amortie sur la durée simulée
+function simAmortExplain(wb, inputs, H) {
+  const A = '🔎 AMORTISSEMENT';
+  const price = wb.get(A, 'D16');
+  if (!simIsNum(price) || price <= 0) return '';
+  const parts = [];
+  let done = 0;
+  for (let r = 6; r <= 15; r++) {
+    const name = wb.get(A, 'B' + r), share = wb.get(A, 'C' + r), years = wb.get(A, 'D' + r);
+    if (typeof name !== 'string' || !simIsNum(share) || share <= 0) continue;
+    const label = simSentence(name).replace(/étanchéite$/i, 'étanchéité');
+    if (!simIsNum(years) || years <= 0) { parts.push(label.toLowerCase() + ' ' + simFmtPct(share, 0) + ' (jamais amorti)'); continue; }
+    done += share * Math.min(H, years) / years;
+    parts.push(label.toLowerCase() + ' ' + simFmtPct(share, 0) + ' sur ' + years + ' ans');
+  }
+  const notaire = inputs.amortFraisAcquisition === 'OUI'
+    ? 'Les frais d\'acquisition (notaire, agence) sont amortis à part.'
+    : 'Les frais d\'acquisition (notaire, agence) ne sont pas amortis : ils sont déduits en charges dès la première année.';
+  return '<p>Le prix du bien (' + simEur(price) + ') est amorti <b>par composants</b>, chacun sur sa durée de vie : ' + parts.join(', ') +
+    '. Sur ' + H + ' ans, seuls <b>' + simFmtPct(done, 0) + '</b> du prix sont donc amortis (' + simFmtEUR(price * done) + ') ; le terrain ne l\'est jamais et le gros œuvre continue au-delà. ' + notaire + '</p>';
+}
+
 function simAnalysisHtml(wb, inputs, key) {
   const f = simRegimeFacts(wb, inputs, key);
   const r = f.row;
@@ -547,6 +569,7 @@ function simAnalysisHtml(wb, inputs, key) {
   if (key === 'lmnp_reel' || key === 'lmp_reel') {
     fis += '<p>Au régime réel, le bien, les travaux et le mobilier sont <b>amortis</b> : ' + simEur(f.amort) + ' de charges comptables sur ' + f.H + ' ans, sans aucune sortie d\'argent. Elles effacent le bénéfice imposable : ' +
       '<b>' + f.yearsNoTax + ' année' + (f.yearsNoTax > 1 ? 's' : '') + ' sur ' + f.H + '</b> sans résultat imposable.</p>';
+    fis += simAmortExplain(wb, inputs, f.H);
     if (key === 'lmp_reel') fis += '<p>En LMP, les bénéfices supportent aussi les cotisations sociales (environ ' + simFmtPct(wb.get(P_, 'M19')) + ', minimum ' + simFmtEUR(wb.get(P_, 'M18')) + ' par an), ce qui alourdit l\'impôt même quand le résultat est faible.</p>';
   } else if (key === 'lmnp_micro') {
     const ab = inputs.meubleTourisme === 'OUI' ? wb.get(P_, 'I18') : wb.get(P_, 'I17');
@@ -558,6 +581,7 @@ function simAnalysisHtml(wb, inputs, key) {
   } else if (key === 'is_sans' || key === 'is_avec') {
     fis += '<p>En société à l\'IS, le bien est amorti (' + simEur(f.amort) + ' sur ' + f.H + ' ans) et le bénéfice est taxé à ' + simPctB(wb.get(P_, 'M6')) + ' jusqu\'à ' + simFmtEUR(wb.get(P_, 'L6')) + ' puis ' + simPctB(wb.get(P_, 'M7')) + '.' +
       (f.sale ? ' À la revente, la plus-value est calculée sur la valeur nette comptable (prix moins amortissements), ce qui alourdit l\'impôt sur la plus-value : ' + simEur(r.impPv) + '.' : '') + '</p>';
+    fis += simAmortExplain(wb, inputs, f.H);
     if (key === 'is_avec') fis += '<p>Avec distribution, les bénéfices versés en dividendes sont taxés une seconde fois chez l\'associé (' + (inputs.impositionDividendes === 'FLAT TAX' ? 'flat tax de ' + simFmtPct(wb.get(P_, 'Q8')) : 'barème progressif après abattement de ' + simFmtPct(wb.get(P_, 'Q7'))) + '), ce qui explique l\'écart avec la version sans distribution.</p>';
   }
   const taxed = possible.filter(x => simIsNum(x.impRev) && simIsNum(x.impPv)).map(x => ({ x, tot: x.impRev + x.impPv }));
