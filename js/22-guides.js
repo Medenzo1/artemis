@@ -20,7 +20,7 @@ const GUIDES = {
         [92, 102, 521, 344, "Extraction bancaire (obligatoire)", "Le relevé de votre banque, en Excel ou en CSV. ARTEMIS y lit, pour chaque ligne, la date d'opération, le libellé et le montant."],
         [537, 102, 967, 344, "Export Airbnb", "À déposer si vous louez sur Airbnb : le fichier des versements téléchargé sur Airbnb. Il détaille chaque virement par réservation et par logement, ce qui permet de répartir un virement entre plusieurs biens."],
         [983, 102, 1412, 344, "Export Booking", "À déposer si vous louez sur Booking : le relevé des paiements. Chaque versement y est rattaché à un établissement, donc à l'un de vos biens."],
-        [92, 102, 1412, 386, "Fichiers chargés", "Une fois déposé, chaque cadre passe au vert et indique ce qui a été lu : ici 23 lignes bancaires, 52 versements Airbnb et 42 versements Booking. Les exports Airbnb et Booking restent en mémoire d'un mois sur l'autre.", 'import'],
+        [92, 102, 1412, 386, "Fichiers chargés", "Une fois déposé, chaque cadre passe au vert et indique ce qui a été lu : ici 23 lignes bancaires, 52 versements Airbnb et 42 versements Booking. Les exports Airbnb et Booking restent en mémoire d'un mois sur l'autre.", { img: 'import', files: true }],
         [92, 410, 1412, 488, "Période d'import", "Le mois auquel appartiennent les lignes. Les flèches changent de mois. Si ce mois existe déjà dans la base, un avertissement s'affiche avant d'écraser quoi que ce soit.", 'import'],
         [92, 506, 1412, 772, "État des imports et lancement", "Le récapitulatif des fichiers chargés. « Démarrer le mapping » ouvre la répartition ligne par ligne, « Pré-mapper automatiquement » la remplit d'avance. « Sauvegarder » enregistre l'import en cours dans un fichier, « Reprendre » le recharge pour le terminer plus tard.", 'import'],
       ] },
@@ -88,7 +88,7 @@ const GUIDES = {
         [726, 165, 1061, 327, "Moyenne par période", "Le chiffre d'affaires moyen d'un mois : le CA total divisé par le nombre de mois de la période."],
         [1073, 165, 1408, 327, "Meilleur bien", "Le bien qui a rapporté le plus sur la période, avec sa part du chiffre d'affaires total."],
         [32, 347, 1408, 543, "Réel contre budget", "Affiché quand un budget existe pour l'année : chiffre d'affaires réel et budgété depuis janvier, écart en euros et en %, part du budget réalisée, détail par bien et écarts les plus défavorables. « Analyse détaillée » ouvre l'onglet Budget."],
-        [32, 563, 1408, 887, "Évolution mensuelle", "Le chiffre d'affaires de chaque mois (ligne pleine) face au budget (pointillés). « Cumulé » affiche le total qui s'additionne mois après mois."],
+        [32, 563, 1408, 887, "Évolution mensuelle", "Le chiffre d'affaires de chaque mois (ligne pleine) face au budget (pointillés). « Cumulé » affiche le total qui s'additionne mois après mois.", { draw: [100, 640, 1395, 836] }],
         [32, 905, 712, 1664, "Opérations CA", "Toutes les lignes de revenus de la période, triables par date, bien, catégorie, libellé ou montant."],
         [728, 905, 1408, 1168, "Détail CA par bien", "Le chiffre d'affaires de chaque bien et sa part du total."],
         [728, 1184, 1408, 1664, "Répartition par catégorie", "La part de chaque source de revenus : Airbnb, loyers, Booking, locations directes."],
@@ -101,7 +101,7 @@ const GUIDES = {
         [726, 165, 1061, 327, "Moyenne par période", "La dépense moyenne d'un mois sur la période."],
         [1073, 165, 1408, 327, "Poste principal", "La catégorie de dépense la plus lourde et sa part dans le total des dépenses."],
         [32, 347, 1408, 543, "Réel contre budget", "Les dépenses réelles depuis janvier face au budget, l'écart, le détail par bien et les dépassements les plus importants."],
-        [32, 563, 1408, 887, "Évolution mensuelle", "Les dépenses de chaque mois face au budget. Les pics correspondent aux charges ponctuelles, comme la taxe foncière en octobre."],
+        [32, 563, 1408, 887, "Évolution mensuelle", "Les dépenses de chaque mois face au budget. Les pics correspondent aux charges ponctuelles, comme la taxe foncière en octobre.", { draw: [100, 640, 1395, 836] }],
         [32, 905, 712, 1664, "Opérations dépenses", "Toutes les lignes de dépenses, triables par date, bien, catégorie, libellé ou montant."],
         [728, 905, 1408, 1168, "Détail par bien", "Les dépenses de chaque bien et leur part du total."],
         [728, 1184, 1408, 1664, "Répartition par catégorie", "Le poids de chaque catégorie : intérêts, ménage, énergie, taxe foncière…"],
@@ -114,7 +114,7 @@ const GUIDES = {
         [726, 165, 1061, 327, "Solde net", "Entrées moins sorties : l'argent réellement dégagé sur la période."],
         [1073, 165, 1408, 327, "Nombre d'opérations", "Le nombre de lignes bancaires sur la période."],
         [32, 347, 1408, 540, "Réel contre budget", "Le solde de trésorerie réel depuis janvier face au budget, avec l'écart et le détail par bien."],
-        [32, 597, 1408, 921, "Solde mensuel", "Le solde de chaque mois. La zone rouge signale un mois où les sorties ont dépassé les entrées, ici octobre, le mois de la taxe foncière."],
+        [32, 597, 1408, 921, "Solde mensuel", "Le solde de chaque mois. La zone rouge signale un mois où les sorties ont dépassé les entrées, ici octobre, le mois de la taxe foncière.", { draw: [100, 664, 1395, 878] }],
         [32, 939, 712, 1698, "Opérations", "Toutes les lignes, entrées et sorties, triables par colonne."],
         [728, 939, 1408, 1202, "Détail par bien", "Entrées, sorties et solde de chaque bien."],
         [728, 1218, 1408, 1698, "Répartition des entrées", "La part de chaque catégorie dans les entrées d'argent."],
@@ -133,10 +133,10 @@ const GUIDES = {
         [727, 165, 1061, 402, "Durée moyenne de séjour", "Le nombre de nuits divisé par le nombre de séjours, toutes plateformes et locations directes confondues."],
         [1075, 165, 1408, 402, "Revenu par nuit disponible", "Le chiffre d'affaires de courte durée divisé par les nuits disponibles : ce que rapporte chaque nuit ouverte à la location, qu'elle soit louée ou non."],
         [32, 422, 1408, 613, "Objectifs de courte durée", "Si le budget fixe des objectifs : nuits, occupation, prix moyen et chiffre d'affaires d'hébergement réels comparés aux objectifs, bien par bien, avec l'écart."],
-        [32, 627, 713, 992, "Compte de résultat en paliers", "Chiffre d'affaires, moins charges variables = marge sur coûts variables (MSCV). Moins charges fixes, dotations aux amortissements comprises = résultat net."],
+        [32, 627, 713, 992, "Compte de résultat en paliers", "Chiffre d'affaires, moins charges variables = marge sur coûts variables (MSCV). Moins charges fixes, dotations aux amortissements comprises = résultat net.", { draw: [165, 680, 640, 975] }],
         [727, 627, 1408, 992, "Détail par catégorie", "Chaque catégorie de revenus et de charges, en euros et ramenée à une nuit louée (colonne /nuit)."],
-        [32, 1006, 713, 1291, "Charges fixes : tendance et prévision", "L'évolution mensuelle des charges fixes, sa tendance (pointillés) et une projection sur les 10 prochains mois avec sa fourchette."],
-        [727, 1006, 1408, 1291, "Charges variables : tendance et prévision", "La même analyse pour les charges qui varient avec l'activité : ménage, consommables, énergie."],
+        [32, 1006, 713, 1291, "Charges fixes : tendance et prévision", "L'évolution mensuelle des charges fixes, sa tendance (pointillés) et une projection sur les 10 prochains mois avec sa fourchette.", { draw: [85, 1062, 700, 1250] }],
+        [727, 1006, 1408, 1291, "Charges variables : tendance et prévision", "La même analyse pour les charges qui varient avec l'activité : ménage, consommables, énergie.", { draw: [780, 1062, 1395, 1250] }],
       ] },
       { name: 'KPIs · Longue durée', shot: 'lld', steps: [
         [null, "Les KPIs de longue durée", "Les indicateurs des biens loués à l'année."],
@@ -147,7 +147,7 @@ const GUIDES = {
         [495, 341, 945, 448, "Couverture du crédit", "Loyers divisés par les échéances (capital, intérêts et assurance). Au-dessus de 1, les loyers paient le crédit."],
         [959, 341, 1408, 448, "Taux de charges", "Charges divisées par loyers encaissés : la part du loyer absorbée par les charges."],
         [32, 468, 1408, 659, "Réel contre budget", "Loyers, charges, capital et cash-flow de chaque bien depuis janvier, comparés au budget."],
-        [32, 659, 939, 1040, "Loyers, charges et cash-flow par mois", "Chaque mois : loyers, charges et cash-flow. Une barre négative signale un mois déficitaire, par exemple celui de la taxe foncière."],
+        [32, 659, 939, 1040, "Loyers, charges et cash-flow par mois", "Chaque mois : loyers, charges et cash-flow. Une barre négative signale un mois déficitaire, par exemple celui de la taxe foncière.", { draw: [95, 712, 925, 1010] }],
         [955, 659, 1408, 1040, "Répartition des charges", "Le poids de chaque charge : intérêts, taxe foncière, assurance…"],
         [32, 1060, 1408, 1248, "Cash-flow par bien et par mois", "Une case par bien et par mois : verte si le mois est positif, rouge s'il est négatif, avec le total à droite."],
         [32, 1266, 1408, 1435, "Rentabilité par bien", "Dernier loyer, mois loués, loyers, charges, crédit, cash-flow, taux de charges et couverture du crédit de chaque bien."],
@@ -159,7 +159,7 @@ const GUIDES = {
         [726, 167, 1061, 329, "Commissions payées", "Le total des commissions et frais prélevés par les plateformes, et leur part du montant brut des réservations."],
         [1073, 167, 1408, 329, "Revenu net par nuit", "Le montant net encaissé divisé par les nuits vendues en courte durée."],
         [32, 347, 1408, 596, "Revenus par canal : réel contre budget", "Le réel de chaque canal depuis janvier, face au budget, avec l'écart et le pourcentage réalisé."],
-        [32, 596, 939, 1002, "Revenus par canal et par mois", "Chaque barre empile les revenus d'un mois par canal : la saisonnalité et le poids de chaque plateforme apparaissent d'un coup d'œil."],
+        [32, 596, 939, 1002, "Revenus par canal et par mois", "Chaque barre empile les revenus d'un mois par canal : la saisonnalité et le poids de chaque plateforme apparaissent d'un coup d'œil.", { draw: [92, 650, 925, 975] }],
         [955, 596, 1408, 1002, "Répartition des revenus", "La part de chaque canal dans le total."],
         [32, 1022, 364, 1352, "Fiche Airbnb", "Revenus et part du total, séjours, nuits, durée moyenne, revenu net par nuit, commission, et répartition par bien."],
         [380, 1022, 712, 1352, "Fiche Booking", "Les mêmes indicateurs pour Booking."],
@@ -171,7 +171,7 @@ const GUIDES = {
         [null, "L'analyse du budget", "Le réel des mois importés comparé au budget de référence de l'année."],
         [32, 76, 1408, 149, "Année, version, société, bien", "Choisissez l'année, la version de budget, et filtrez par société ou par bien. « Modifier le budget » ouvre l'écran de saisie."],
         [32, 199, 1408, 325, "Les quatre indicateurs", "Chiffre d'affaires, charges, résultat avant amortissements et cash-flow net : réel à date, budget à date, écart, et atterrissage estimé de fin d'année face au budget annuel."],
-        [32, 343, 1408, 693, "Mois par mois", "Le réel (barres pleines) et le budget (barres grises) de chaque mois. Les boutons changent l'indicateur affiché : chiffre d'affaires, charges, résultat ou cash-flow."],
+        [32, 343, 1408, 693, "Mois par mois", "Le réel (barres pleines) et le budget (barres grises) de chaque mois. Les boutons changent l'indicateur affiché : chiffre d'affaires, charges, résultat ou cash-flow.", { draw: [95, 418, 1395, 662] }],
         [32, 711, 1408, 989, "Atterrissage de fin d'année", "Pour chaque ligne : budget annuel, réel à date, budget à date, écart, budget des mois restants, atterrissage (réel à date + budget restant) et écart avec le budget annuel."],
         [32, 1007, 1408, 1847, "Détail des écarts", "Par catégorie ou par bien : réel, budget, écart en euros et en %, budget annuel, atterrissage et part du budget déjà consommée."],
         [32, 1865, 1408, 2027, "Objectifs de courte durée", "Nuits, occupation, prix moyen et chiffre d'affaires d'hébergement réels face aux objectifs, depuis janvier."],
@@ -247,7 +247,7 @@ const GUIDES = {
       { name: 'Détail d\'un régime', shot: 'simdet', steps: [
         [null, "Le détail d'un régime", "Tout le calcul d'un régime, année par année."],
         [152, 167, 1288, 329, "Chiffres clés", "Cash-flow cumulé, impôt sur les revenus et sur la plus-value, rendement net-net, VAN, TRI, délai de récupération et règle des 70 %."],
-        [152, 347, 1288, 724, "Cash-flow des années d'exploitation", "Le cash-flow de chaque année (barres) et le cumul (courbe). L'année de revente est résumée dessous pour ne pas écraser l'échelle."],
+        [152, 347, 1288, 724, "Cash-flow des années d'exploitation", "Le cash-flow de chaque année (barres) et le cumul (courbe). L'année de revente est résumée dessous pour ne pas écraser l'échelle.", { draw: [210, 398, 1272, 655] }],
         [152, 1984, 1288, 2652, "Résultat et cash-flow", "Le tableau du classeur : produits, charges, résultat imposable, puis du résultat au cash-flow (loyers encaissés, charges payées, capital remboursé, impôt, revente). « Afficher le détail » déplie toutes les lignes."],
         [152, 2670, 1288, 3051, "Impôt", "Le calcul de l'impôt de chaque année selon le régime."],
         [152, 3069, 1288, 3731, "Tableau d'emprunt", "Mensualité, capital remboursé, intérêts, assurance et capital restant dû, année par année, et le coût total du crédit."],
@@ -295,7 +295,8 @@ const GD_ICON = {
   play: '<path d="M7 4v16l13-8z"/>',
 };
 const gdSvg = (n, s) => `<svg width="${s || 18}" height="${s || 18}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${GD_ICON[n]}</svg>`;
-const _gdStep = st => st[0] === null ? { r: null, t: st[1], p: st[2], img: st[3] } : { r: st.slice(0, 4), t: st[4], p: st[5], img: st[6] };
+const _gdOpt = o => typeof o === 'string' ? { img: o } : (o || {});
+const _gdStep = st => st[0] === null ? { r: null, t: st[1], p: st[2], ..._gdOpt(st[3]) } : { r: st.slice(0, 4), t: st[4], p: st[5], ..._gdOpt(st[6]) };
 const _gdDur = s => Math.min(16, Math.max(5, 2.6 + (s.t.length + s.p.length) / 17)) * 1000;   // temps de lecture
 
 let _gd = { key: null, page: 0, step: 0, playing: true, timer: null, panTimer: null, t0: 0, left: 0, lastFocus: null, x0: null };
@@ -321,7 +322,10 @@ function openGuide(key, ev) {
       </div>
       <div class="gd-body">
         <div class="gd-stage" id="gd-stage" aria-hidden="true">
-          <div class="gd-cam" id="gd-cam"><img class="gd-shot" id="gd-img-a" alt=""><img class="gd-shot" id="gd-img-b" alt=""><div class="gd-spot" id="gd-spot"></div></div>
+          <div class="gd-tilt" id="gd-tilt"><div class="gd-cam" id="gd-cam"><img class="gd-shot" id="gd-img-a" alt=""><img class="gd-shot" id="gd-img-b" alt="">
+            <div class="gd-cover" id="gd-cover"></div><div class="gd-sweep" id="gd-sweep"></div><div class="gd-spot" id="gd-spot"></div><div class="gd-lift" id="gd-lift"></div></div>
+            <div class="gd-sheen" id="gd-sheen"></div></div>
+          <div class="gd-files" id="gd-files"></div>
         </div>
         <div class="gd-bars" id="gd-bars"></div>
         <div class="gd-cap" id="gd-cap" aria-live="polite"></div>
@@ -388,7 +392,12 @@ function guideGo(p, s) {
   const a = document.getElementById('gd-img-a'), b = document.getElementById('gd-img-b');
   const cur = a.classList.contains('on') ? a : (b.classList.contains('on') ? b : null);
   const apply = () => { if (seq !== _gd.seq) return; _guideCamera(step, !samePage); _guideTimer(step); };
-  if (cur && cur.getAttribute('src') === src) apply();
+  if (!samePage) _guideEnter();
+  _guideFiles(null);
+  if (step.files && cur && cur.getAttribute('src') !== src) {
+    apply(); _guideFiles(step, seq);
+    setTimeout(() => { if (seq !== _gd.seq) return; const next = cur === a ? b : a; next.onload = () => { if (seq !== _gd.seq) return; next.classList.add('on'); cur.classList.remove('on'); }; next.setAttribute('src', src); if (next.complete && next.naturalWidth) next.onload(); }, 2300);
+  } else if (cur && cur.getAttribute('src') === src) apply();
   else {
     const next = cur === a ? b : a;
     next.onload = () => { if (seq !== _gd.seq) return; next.classList.add('on'); if (cur) cur.classList.remove('on'); apply(); };
@@ -425,11 +434,74 @@ function _guideCamera(step, instant) {
   }
   cam.style.transform = `translate(${tx}px, ${ty}px) scale(${s})`;
   if (instant) { void cam.offsetWidth; cam.style.transition = ease; }
+  _gd.view = { s, tx, ty, SW, SH };
+  _guideLift(step, img, ty2 == null && step.r && (step.r[2] - step.r[0]) * s < SW * .9 && (step.r[3] - step.r[1]) * s < SH * .86, instant ? .15 : 1.0, s);
+  _guideDraw(step, instant ? .2 : 1.05, s);
   if (ty2 != null && ty2 < ty) {
     const dur = _gdDur(step) - 2600;
     _gd.panTimer = setTimeout(() => { cam.style.transition = `transform ${Math.max(2, dur / 1000)}s cubic-bezier(.45,0,.55,1)`; cam.style.transform = `translate(${tx}px, ${ty2}px) scale(${s})`; }, 1300);
   }
   img.style.height = IH + 'px';
+}
+
+// Entrée d'un nouvel écran : bascule 3D et reflet
+function _guideEnter() {
+  const t = document.getElementById('gd-tilt'), sh = document.getElementById('gd-sheen');
+  if (!t) return;
+  t.classList.remove('enter'); sh.classList.remove('run'); void t.offsetWidth;
+  t.classList.add('enter'); sh.classList.add('run');
+}
+
+// L'élément expliqué sort de l'écran : copie de la zone, soulevée, avec liseré et ombre
+function _guideLift(step, img, on, delay, s) {
+  const l = document.getElementById('gd-lift'), spot = document.getElementById('gd-spot');
+  l.classList.remove('pop'); spot.classList.remove('lifted'); void l.offsetWidth;
+  if (!on) return;
+  const [x1, y1, x2, y2] = step.r;
+  Object.assign(l.style, { left: x1 + 'px', top: y1 + 'px', width: (x2 - x1) + 'px', height: (y2 - y1) + 'px',
+    backgroundImage: `url(${img.getAttribute('src')})`, backgroundSize: '1440px auto', backgroundPosition: `${-x1}px ${-y1}px` });
+  l.style.setProperty('--s', s); l.style.setProperty('--d', delay + 's');
+  l.classList.add('pop'); spot.classList.add('lifted');
+}
+
+// Un graphique se dessine de gauche à droite, avec une ligne de balayage
+function _guideDraw(step, delay, s) {
+  const c = document.getElementById('gd-cover'), w = document.getElementById('gd-sweep');
+  c.style.transition = w.style.transition = 'none'; c.style.display = w.style.display = 'none';
+  if (!step.draw) return;
+  const [x1, y1, x2, y2] = step.draw;
+  Object.assign(c.style, { display: 'block', left: x1 + 'px', top: y1 + 'px', width: (x2 - x1) + 'px', height: (y2 - y1) + 'px', transform: 'scaleX(1)' });
+  Object.assign(w.style, { display: 'block', left: x1 + 'px', top: (y1 - 6) + 'px', height: (y2 - y1 + 12) + 'px', opacity: 1 });
+  w.style.setProperty('--s', s);
+  void c.offsetWidth;
+  const d = 1.9;
+  c.style.transition = `transform ${d}s cubic-bezier(.65,0,.35,1) ${delay}s`;
+  w.style.transition = `left ${d}s cubic-bezier(.65,0,.35,1) ${delay}s, opacity .3s ease ${delay + d}s`;
+  c.style.transform = 'scaleX(0)'; w.style.left = x2 + 'px'; w.style.opacity = 0;
+  const seq = _gd.seq; setTimeout(() => { if (seq === _gd.seq) { c.style.display = w.style.display = 'none'; } }, (delay + d) * 1000 + 150);   // garantit le graphique visible
+}
+
+// Outils › Import : les trois fichiers arrivent dans leurs cadres
+function _guideFiles(step, seq) {
+  const box = document.getElementById('gd-files'); if (!box) return;
+  box.innerHTML = '';
+  if (!step) return;
+  const FILES = [['09 - Septembre - 2026.xlsx', 'Relevé bancaire', '#22d3c8', 306], ['Export_Airbnb.xlsx', 'Versements et séjours', '#f5b731', 752], ['Export_Booking.xlsx', 'Versements et séjours', '#9b6ef3', 1197]];
+  const v = _gd.view; if (!v) return;
+  FILES.forEach(([n, sub, col, cx], i) => {
+    const f = document.createElement('div'); f.className = 'gd-file';
+    f.innerHTML = `<span class="gd-file-ic" style="color:${col};background:${col}22"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M8 13h2"/><path d="M14 13h2"/><path d="M8 17h2"/><path d="M14 17h2"/></svg></span><span><b>${n}</b><small>${sub}</small></span>`;
+    box.appendChild(f);
+    const tx = v.tx + cx * v.s, ty = v.ty + 223 * v.s;               // centre du cadre de dépôt
+    const sx = v.SW * (.2 + i * .3), sy = v.SH + 40;                  // départ sous la scène
+    f.style.transform = `translate(${sx}px, ${sy}px) translate(-50%, -50%)`;
+    f.animate([
+      { transform: `translate(${sx}px, ${sy}px) translate(-50%, -50%) scale(1)`, opacity: 0 },
+      { transform: `translate(${sx}px, ${v.SH * .62}px) translate(-50%, -50%) scale(1)`, opacity: 1, offset: .3 },
+      { transform: `translate(${(sx + tx) / 2}px, ${Math.min(v.SH * .4, ty - 60)}px) translate(-50%, -50%) scale(.85)`, opacity: 1, offset: .62 },
+      { transform: `translate(${tx}px, ${ty}px) translate(-50%, -50%) scale(.55)`, opacity: 0 },
+    ], { duration: 1500, delay: 900 + i * 260, easing: 'cubic-bezier(.45,0,.35,1)', fill: 'both' });
+  });
 }
 
 function _guideTimer(step) {
