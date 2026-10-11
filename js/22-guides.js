@@ -1,10 +1,11 @@
 // ══════════════════════════════════════════════
 //  GUIDES — « Comment ça marche » des 5 modules de l'accueil
 //
-//  Un bouton « Guide » dans chaque carte de l'accueil ouvre une fenêtre de 5 pages
-//  (capture du site + explication). Navigation : flèches, points, clavier (← → Échap),
-//  glissement du doigt sur mobile. La dernière page propose d'ouvrir le module.
-//  Images : img/guides/<module>-<n>.jpg (captures réalisées avec des données fictives).
+//  Un bouton « Guide » en haut de chaque module ouvre une fenêtre de 5 pages : une courte
+//  vidéo (motion design réalisé à partir de captures du site, données fictives) et une
+//  explication. Navigation : flèches, points, clavier (← → Échap), glissement du doigt sur
+//  mobile. La vidéo de la page affichée se lance seule ; « Revoir » la rejoue.
+//  Fichiers : img/guides/<module>-<n>.mp4 et .jpg (image d'attente).
 // ══════════════════════════════════════════════
 
 const GUIDES = {
@@ -91,6 +92,7 @@ const GD_ICON = {
   x: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
   help: '<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>',
   'arrow-right': '<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>',
+  replay: '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>',
 };
 const gdSvg = (n, s) => `<svg width="${s || 18}" height="${s || 18}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${GD_ICON[n]}</svg>`;
 
@@ -119,7 +121,11 @@ function openGuide(key, ev) {
         <div class="gd-track" id="gd-track">
           ${g.pages.map((pg, i) => `
             <section class="gd-slide" aria-roledescription="page" aria-label="Page ${i + 1} sur ${g.pages.length}">
-              <figure class="gd-fig"><img src="img/guides/${key}-${i + 1}.jpg" alt="${escHtml(pg.t)} : capture de l'écran ${escHtml(g.label)}" decoding="async"></figure>
+              <figure class="gd-fig">
+                <video muted playsinline preload="none" poster="img/guides/${key}-${i + 1}.jpg" aria-label="${escHtml(pg.t)} : démonstration en vidéo" onended="this.parentNode.classList.add('ended')">
+                  <source src="img/guides/${key}-${i + 1}.mp4" type="video/mp4"></video>
+                <button class="gd-replay" type="button" onclick="guidePlay(this.parentNode.querySelector('video'))">${gdSvg('replay', 16)}Revoir</button>
+              </figure>
               <div class="gd-text"><h3>${escHtml(pg.t)}</h3><p>${escHtml(pg.p)}</p></div>
             </section>`).join('')}
         </div>
@@ -154,12 +160,24 @@ function guideGo(i, instant) {
   if (track) { track.style.transition = instant ? 'none' : ''; track.style.transform = `translateX(${-_gd.i * 100}%)`; }
   document.querySelectorAll('#gd-track .gd-slide').forEach((s, k) => { s.setAttribute('aria-hidden', k !== _gd.i); s.inert = k !== _gd.i; });
   document.querySelectorAll('.gd-dot').forEach((d, k) => { d.classList.toggle('on', k === _gd.i); d.setAttribute('aria-selected', k === _gd.i); });
+  document.querySelectorAll('#gd-track video').forEach((v, k) => {
+    if (k === _gd.i) guidePlay(v);
+    else { v.pause(); if (k === _gd.i + 1) v.preload = 'auto'; }
+  });
   document.getElementById('gd-count').textContent = `${_gd.i + 1} / ${n}`;
   const prev = document.getElementById('gd-prev');
   prev.disabled = _gd.i === 0;
   document.getElementById('gd-next').innerHTML = _gd.i === n - 1
     ? `Ouvrir ${escHtml(g.label)}${gdSvg('arrow-right', 16)}`
     : `Suivant${gdSvg('chevron-right', 16)}`;
+}
+
+function guidePlay(v) {
+  if (!v) return;
+  v.parentNode.classList.remove('ended');
+  v.preload = 'auto';
+  try { v.currentTime = 0; } catch (e) {}
+  const p = v.play(); if (p && p.catch) p.catch(() => {});
 }
 
 function guideNext() {
@@ -172,7 +190,7 @@ function guideNext() {
 
 function closeGuide(skipFocus) {
   const ov = document.getElementById('gd-overlay');
-  if (ov) { ov.classList.remove('open'); ov.innerHTML = ''; }
+  if (ov) { ov.querySelectorAll('video').forEach(v => v.pause()); ov.classList.remove('open'); ov.innerHTML = ''; }
   document.removeEventListener('keydown', _guideKeys);
   document.documentElement.classList.remove('gd-lock');
   if (!skipFocus && _gd.lastFocus && _gd.lastFocus.focus) _gd.lastFocus.focus();
@@ -193,20 +211,22 @@ function _guideKeys(e) {
   }
 }
 
-// Bouton « Guide » dans chaque carte de l'accueil
+// Bouton « Guide » en haut de chaque module (à côté du nom du module : zone jamais redessinée)
 function guideButtons() {
-  const map = { 'h-card-tools': 'outils', 'h-card-dash': 'dashboard', 'h-card-market': 'marketplace', 'h-card-sim': 'simulateur', 'h-card-budget': 'budget' };
-  Object.entries(map).forEach(([cls, key]) => {
-    document.querySelectorAll('.' + cls).forEach(card => {
-      if (card.querySelector('.h-card-help')) return;
-      const b = document.createElement('button');
-      b.type = 'button'; b.className = 'h-card-help';
-      b.setAttribute('aria-label', 'Guide : comment fonctionne ' + GUIDES[key].label);
-      b.innerHTML = gdSvg('help', 14) + '<span>Guide</span>';
-      b.addEventListener('click', e => openGuide(key, e));
-      b.addEventListener('keydown', e => e.stopPropagation());
-      card.appendChild(b);
-    });
-  });
+  const place = (key, anchor, where) => {
+    if (!anchor || anchor.querySelector(':scope > .gd-pill') || (anchor.parentNode && anchor.parentNode.querySelector(':scope > .gd-pill'))) return;
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'gd-pill';
+    b.style.setProperty('--gd', GUIDES[key].color);
+    b.setAttribute('aria-label', 'Guide : comment fonctionne ' + GUIDES[key].label);
+    b.innerHTML = gdSvg('help', 14) + '<span>Guide</span>';
+    b.addEventListener('click', e => openGuide(key, e));
+    if (where === 'before') anchor.parentNode.insertBefore(b, anchor); else anchor.appendChild(b);
+  };
+  document.querySelectorAll('.app > header .logo').forEach(a => place('outils', a));
+  document.querySelectorAll('button[onclick="exportDashboardExcel()"]').forEach(a => place('dashboard', a, 'before'));
+  place('marketplace', document.querySelector('#marketplaceScreen .mkt-topbar > div'));
+  place('simulateur', document.querySelector('#sim-topbar > div'));
+  place('budget', document.querySelector('#bud-topbar > div'));
 }
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', guideButtons); else guideButtons();
