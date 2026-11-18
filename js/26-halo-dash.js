@@ -50,55 +50,79 @@ function _haloRecolor(v, map, depth) {
 })();
 
 // ── En-tête du dashboard ──
-const HDASH_TABS = [
-  { tab: 'synthese', label: 'Synthèse', ico: 'wallet', subs: [['ca', 'CA'], ['depenses', 'Dépenses'], ['tresorerie', 'Trésorerie']], kind: 'stab' },
-  { tab: 'resultat', label: 'Résultat', ico: 'scale' },
-  { tab: 'kpis', label: 'KPIs', ico: 'trending-up', subs: [['lcd', 'Courte durée'], ['lld', 'Longue durée']], kind: 'ktab' },
-  { tab: 'plateformes', label: 'Plateformes', ico: 'globe' },
-  { tab: 'budget', label: 'Réel vs budget', ico: 'target' },
+// Une seule barre d'onglets, à plat : chaque onglet mène directement à une vue
+const HDASH_NAV = [
+  { group: 'Finances', items: [
+    { id: 'ca', tab: 'synthese', sub: 'ca', label: "Chiffre d'affaires", ico: 'wallet', hint: 'Encaissements par bien, canal et mois' },
+    { id: 'depenses', tab: 'synthese', sub: 'depenses', label: 'Dépenses', ico: 'receipt', hint: 'Charges par catégorie et par bien' },
+    { id: 'tresorerie', tab: 'synthese', sub: 'tresorerie', label: 'Trésorerie', ico: 'piggy-bank', hint: 'Solde mensuel entrées − sorties' },
+    { id: 'resultat', tab: 'resultat', label: 'Résultat', ico: 'scale', hint: 'Compte de résultat et soldes de gestion (SIG)' },
+  ] },
+  { group: 'Locations', items: [
+    { id: 'lcd', tab: 'kpis', sub: 'lcd', label: 'Courte durée', ico: 'bed-double', hint: 'Occupation, prix moyen, point mort' },
+    { id: 'lld', tab: 'kpis', sub: 'lld', label: 'Longue durée', ico: 'key', hint: 'Loyers, vacance, rendement' },
+    { id: 'plateformes', tab: 'plateformes', label: 'Plateformes', ico: 'globe', hint: 'Airbnb, Booking, direct : revenus et commissions' },
+  ] },
+  { group: 'Pilotage', items: [
+    { id: 'budget', tab: 'budget', label: 'Réel vs budget', ico: 'target', hint: 'Écarts au budget et atterrissage de fin d’année' },
+  ] },
 ];
+const HDASH_ITEMS = HDASH_NAV.flatMap(g => g.items);
+function hdashCurrent() {
+  const tab = typeof _dashTab !== 'undefined' ? _dashTab : 'synthese';
+  if (tab === 'synthese') return typeof _synTab !== 'undefined' ? _synTab : 'ca';
+  if (tab === 'kpis') return typeof _kpiTab !== 'undefined' ? _kpiTab : 'lcd';
+  return tab;
+}
 function hdashBuild() {
   const sc6 = document.getElementById('sc6');
   if (!sc6 || document.getElementById('hdash-head')) return;
   const head = document.createElement('div');
   head.id = 'hdash-head';
-  head.innerHTML = '<div class="hpage-head"><div><div class="hpage-title">Dashboard</div><div class="hpage-sub" id="hdash-sub"></div></div>'
+  head.innerHTML = '<div class="hpage-head"><div><div class="hpage-title" id="hdash-title">Tableau de bord</div><div class="hpage-sub" id="hdash-sub"></div></div>'
     + '<div class="hpage-actions"><button class="hbtn hbtn-light" onclick="openGuide(\'dashboard\', event)">' + hIco('info', 15) + 'Guide</button>'
     + '<button class="hbtn hbtn-dark" onclick="exportDashboardExcel();">' + hIco('download', 15) + 'Exporter en Excel</button></div></div>'
-    + '<div class="hdash-tabs"><div class="hseg" id="hdash-main">' + HDASH_TABS.map(t => '<button data-tab="' + t.tab + '" onclick="hdashTab(\'' + t.tab + '\')">' + hIco(t.ico, 15) + t.label + '</button>').join('') + '</div>'
-    + '<div class="hseg hseg-sub" id="hdash-sub-seg"></div></div>';
+    + '<nav class="hdash-nav" aria-label="Vues du tableau de bord">' + HDASH_NAV.map(g => '<div class="hdn-group"><div class="hdn-cap">' + g.group + '</div><div class="hdn-row">'
+      + g.items.map(it => '<button class="hdn-tab" data-view="' + it.id + '" title="' + hEsc(it.hint) + '" onclick="hdashGo(\'' + it.id + '\')">' + hIco(it.ico, 16) + '<span>' + it.label + '</span></button>').join('')
+      + '</div></div>').join('') + '</nav>';
   sc6.insertBefore(head, sc6.firstChild);
   hdashSync();
 }
-function hdashTab(tab) {
-  const b = document.querySelector('#dash-nav .dnav-head[data-tab="' + tab + '"]');
-  if (b) b.click();
-  hdashSync();
-}
-function hdashSub(kind, val) {
-  const b = document.querySelector('#dash-nav .dnav-sub[data-' + kind + '="' + val + '"]');
-  if (b) b.click();
-  hdashSync();
-}
-function hdashSync() {
-  const cur = typeof _dashTab !== 'undefined' ? _dashTab : 'synthese';
-  document.querySelectorAll('#hdash-main button').forEach(b => b.classList.toggle('on', b.dataset.tab === cur));
-  const t = HDASH_TABS.find(x => x.tab === cur);
-  const seg = document.getElementById('hdash-sub-seg');
-  if (seg) {
-    if (t && t.subs) {
-      const v = t.kind === 'stab' ? (typeof _synTab !== 'undefined' ? _synTab : 'ca') : (typeof _kpiTab !== 'undefined' ? _kpiTab : 'lcd');
-      seg.innerHTML = t.subs.map(([k, l]) => '<button class="' + (k === v ? 'on' : '') + '" onclick="hdashSub(\'' + t.kind + '\',\'' + k + '\')">' + l + '</button>').join('');
-      seg.style.display = '';
-    } else { seg.innerHTML = ''; seg.style.display = 'none'; }
+// Ouvre une vue en un seul rendu (la sous-vue est choisie avant de basculer d'onglet)
+function hdashGo(id) {
+  const it = HDASH_ITEMS.find(x => x.id === id);
+  if (!it) return;
+  const curTab = typeof _dashTab !== 'undefined' ? _dashTab : '';
+  if (it.sub && curTab === it.tab) {
+    const b = document.querySelector('#dash-nav .dnav-sub[data-' + (it.tab === 'kpis' ? 'ktab' : 'stab') + '="' + it.sub + '"]');
+    if (b) b.click();
+  } else {
+    if (it.tab === 'synthese') { _synTab = it.sub; try { _adjustSynFilters(); } catch (e) {} }
+    if (it.tab === 'kpis') _kpiTab = it.sub;
+    const h = document.querySelector('#dash-nav .dnav-head[data-tab="' + it.tab + '"]');
+    if (h) h.click();
   }
+  hdashSync();
+}
+// Compatibilité avec les appels existants (palette, accueil…)
+function hdashTab(tab) { const it = HDASH_ITEMS.find(x => x.tab === tab && (!x.sub || x.sub === (tab === 'kpis' ? _kpiTab : _synTab))) || HDASH_ITEMS.find(x => x.tab === tab); if (it) hdashGo(it.id); }
+function hdashSub(kind, val) { hdashGo(val); }
+function hdashSync() {
+  const cur = hdashCurrent();
+  document.querySelectorAll('#hdash-head .hdn-tab').forEach(b => b.classList.toggle('on', b.dataset.view === cur));
+  const nav = document.querySelector('#hdash-head .hdash-nav'), on = nav && nav.querySelector('.hdn-tab.on');
+  if (nav && on && nav.scrollWidth > nav.clientWidth + 4) {
+    const r = on.getBoundingClientRect(), n = nav.getBoundingClientRect();
+    if (r.left < n.left || r.right > n.right) nav.scrollTo({ left: nav.scrollLeft + r.left - n.left - 24, behavior: 'smooth' });
+  }
+  const it = HDASH_ITEMS.find(x => x.id === cur);
   const sub = document.getElementById('hdash-sub');
   if (sub) {
     const a = document.getElementById('syn-date-min'), z = document.getElementById('syn-date-max');
     const f = s => { const m = String(s || '').match(/^(\d{4})-(\d{2})-(\d{2})$/); return m ? new Date(+m[1], +m[2] - 1, +m[3]).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }) : ''; };
-    const range = a && z && a.value && z.value ? 'Du ' + f(a.value) + ' au ' + f(z.value) : 'Toutes les périodes';
+    const range = a && z && a.value && z.value ? 'du ' + f(a.value) + ' au ' + f(z.value) : 'toutes les périodes';
     let n = 0; try { n = Object.keys(getDB().periods || {}).length; } catch (e) {}
-    sub.textContent = range + ' · ' + n + ' mois importés';
+    sub.innerHTML = (it ? '<b>' + it.label + '</b> · ' + hEsc(it.hint.charAt(0).toLowerCase() + it.hint.slice(1)) + '<br>' : '') + range.charAt(0).toUpperCase() + range.slice(1) + ' · ' + n + ' mois importés';
   }
 }
 // Toute bascule d'onglet (y compris depuis le tiroir mobile ou la palette) resynchronise l'en-tête

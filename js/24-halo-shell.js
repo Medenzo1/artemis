@@ -281,12 +281,7 @@ function haloPaletteItems() {
   HALO_NAV.filter(n => n.id).forEach(n => items.push({ sec: 'Aller à', label: n.label, hint: n.hint, ico: n.ico, run: () => haloGo(n.id), kw: n.label + ' ' + (n.hint || '') }));
   items.push({ sec: 'Aller à', label: 'Mapping du mois', ico: 'folder', run: () => haloGo('mapping'), kw: 'mapping étape 2' });
   items.push({ sec: 'Aller à', label: 'Validation du mois', ico: 'check-circle', run: () => haloGo('validation'), kw: 'validation étape 3' });
-  const tabs = [
-    ['Synthèse · CA', 'synthese', 'ca'], ['Synthèse · Dépenses', 'synthese', 'depenses'], ['Synthèse · Trésorerie', 'synthese', 'tresorerie'],
-    ['Résultat (SIG)', 'resultat'], ['KPIs · Location courte durée', 'kpis', 'lcd'], ['KPIs · Location longue durée', 'kpis', 'lld'],
-    ['Plateformes', 'plateformes'], ['Réel vs budget', 'budget'],
-  ];
-  tabs.forEach(([label, tab, sub]) => items.push({ sec: 'Dashboard', label, ico: 'bar-chart-3', kw: 'dashboard ' + label, run: () => haloOpenDashTab(tab, sub) }));
+  (typeof HDASH_ITEMS !== 'undefined' ? HDASH_ITEMS : []).forEach(it => items.push({ sec: 'Tableau de bord', label: it.label, hint: it.hint, ico: it.ico, kw: 'dashboard tableau ' + it.label + ' ' + it.hint, run: () => { haloGo('dashboard'); setTimeout(() => hdashGo(it.id), 60); } }));
   try {
     (getParams().biens || []).forEach(b => items.push({ sec: 'Biens', label: b.name, hint: (b.mode || b.type || '') + ' · ' + (b.sci || ''), ico: 'home', kw: b.name + ' ' + b.sci, run: () => haloOpenDashTab('synthese', 'ca', b.name) }));
   } catch (e) {}
@@ -298,12 +293,7 @@ function haloPaletteItems() {
 function haloOpenDashTab(tab, sub, bienName) {
   haloGo('dashboard');
   setTimeout(() => {
-    const head = document.querySelector('.dnav-head[data-tab="' + tab + '"]');
-    if (head) head.click();
-    if (sub) {
-      const s = document.querySelector('.dnav-sub[data-stab="' + sub + '"], .dnav-sub[data-ktab="' + sub + '"]');
-      if (s) s.click();
-    }
+    if (typeof hdashGo === 'function') hdashGo(sub || tab);
     if (bienName && typeof _msState === 'object') {
       _msState['syn-bien'] = [bienName];
       try { renderSynTab(); } catch (e) {}
