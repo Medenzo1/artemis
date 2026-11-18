@@ -18,6 +18,7 @@ function haloUI() {
 }
 function haloSaveUI(patch) {
   const u = Object.assign(haloUI(), patch);
+  try { if (_auth.currentUser) u._uid = _auth.currentUser.uid; } catch (e) {}
   try { localStorage.setItem(HALO_UI_KEY, JSON.stringify(u)); } catch (e) {}
   haloApplyUI(u);
   return u;

@@ -26,9 +26,12 @@ const _SYNC_KEYS = new Set([
   'artemis_airbnb_rows',
   'artemis_booking_rows',
   'artemis_budget',
-  'artemis_ui',        // profil et apparence (Paramètres)
-  'artemis_events',    // événements du calendrier
+  'artemis_ui',        // profil et apparence (Paramètres) — PROPRE À CHAQUE COMPTE, voir _PER_USER_KEYS
+  'artemis_events',    // événements du calendrier (partagés)
 ]);
+// Clés rangées à part pour chaque utilisateur connecté : « sync/k_<clé>__<uid> »
+const _PER_USER_KEYS = new Set(['artemis_ui']);
+const _cloudKey = k => (_PER_USER_KEYS.has(k) && _auth.currentUser) ? k + '__' + _auth.currentUser.uid : k;
 
 // NB: on a essayé d'intercepter localStorage.setItem/removeItem directement,
 // mais Safari ignore silencieusement ce genre de remplacement (protection
@@ -42,8 +45,8 @@ const _SYNC_KEYS = new Set([
 // morceaux « sync/k_<clé>_<i> » (≤ 400 000 caractères, < 1 Mo même en UTF-8 accentué).
 // « sync/shared » n'est plus que lu, pour migrer les données existantes.
 const _SYNC_CHUNK = 400000;
-const _syncHead = k => _fs.collection('sync').doc('k_' + k);
-const _syncPart = (k, i) => _fs.collection('sync').doc('k_' + k + '_' + i);
+const _syncHead = k => _fs.collection('sync').doc('k_' + _cloudKey(k));
+const _syncPart = (k, i) => _fs.collection('sync').doc('k_' + _cloudKey(k) + '_' + i);
 const _NEVER = '\u0000never-synced';
 
 let _lastSynced = {};
@@ -91,6 +94,19 @@ async function _pullCloudData() {
     const heads = await Promise.all([..._SYNC_KEYS].map(k => _syncHead(k).get().then(d => [k, d])));
     const missing = [];
     for (const [k, h] of heads) {
+      if (!h.exists && _PER_USER_KEYS.has(k)) {
+        // Pas encore de profil pour ce compte : on garde le profil local seulement s'il lui appartient
+        // (ou s'il n'a pas de propriétaire : appareil de l'utilisateur avant cette séparation), sinon on repart de zéro
+        const uid = _auth.currentUser && _auth.currentUser.uid;
+        let owner = null;
+        try { owner = (JSON.parse(localStorage.getItem(k) || 'null') || {})._uid || null; } catch (e) {}
+        if (localStorage.getItem(k) !== null && owner && owner !== uid) localStorage.removeItem(k);
+        else if (localStorage.getItem(k) !== null && !owner && uid) {
+          try { const v = JSON.parse(localStorage.getItem(k)); v._uid = uid; localStorage.setItem(k, JSON.stringify(v)); } catch (e) {}
+        }
+        _lastSynced[k] = localStorage.getItem(k) === null ? null : _NEVER;
+        continue;
+      }
       if (!h.exists) { missing.push(k); continue; }
       const { n, deleted } = h.data();
       if (deleted) { localStorage.removeItem(k); _lastSynced[k] = null; continue; }

@@ -279,7 +279,7 @@ function hcalUserForMonth(m) {
     const end = ev.end && ev.end >= ev.date ? ev.end : ev.date;
     if (end.slice(0, 7) < m || ev.date.slice(0, 7) > m) return;
     const cat = hcalCat(ev.cat);
-    const sub = cat[1] + (ev.bien ? ' · ' + ev.bien : '') + (end !== ev.date ? ' · jusqu\'au ' + end.split('-').reverse().slice(0, 2).join('/') : '') + (ev.note ? ' · ' + ev.note : '');
+    const sub = cat[1] + (ev.by && ev.by !== haloUserName() ? ' · par ' + ev.by : '') + (ev.bien ? ' · ' + ev.bien : '') + (end !== ev.date ? ' · jusqu\'au ' + end.split('-').reverse().slice(0, 2).join('/') : '') + (ev.note ? ' · ' + ev.note : '');
     for (let d = ev.date; d <= end; d = hcalAdd(d, 1)) {
       if (d.slice(0, 7) === m) out.push({ id: ev.id, date: d, type: 'user', label: ev.title, sub, color: cat[2], time: d === ev.date ? ev.time || '' : '', bien: ev.bien || '', go: "hcalEdit('" + ev.id + "')" });
     }
@@ -326,7 +326,7 @@ function hcalSaveEvent(id) {
   const data = { title, date, end, time: v('time'), cat: on ? on.dataset.cat : 'autre', bien: v('bien'), note: v('note').trim(), updated: new Date().toISOString() };
   const evs = hcalUserEvents();
   if (id) { const i = evs.findIndex(e => e.id === id); if (i >= 0) evs[i] = Object.assign(evs[i], data); }
-  else evs.push(Object.assign({ id: 'e' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), created: data.updated }, data));
+  else evs.push(Object.assign({ id: 'e' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), created: data.updated, by: haloUserName() || '' }, data));
   hcalSaveUserEvents(evs);
   hcalCloseEdit();
   _hcal.month = date.slice(0, 7); _hcal.day = date;
