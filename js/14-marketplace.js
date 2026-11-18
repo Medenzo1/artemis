@@ -718,11 +718,11 @@ async function mktRefreshGrid() {
         : '<div class="mkt-listing-photo">🏠</div>') +
       '<div style="padding:14px">' +
       '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:8px">' +
-      '<div><div style="font-size:13px;font-weight:700;color:#eaf0ff">' + escHtml(l.type || 'Bien') + ' · ' + escHtml(l.ville || '—') + '</div>' +
+      '<div><div style="font-size:13px;font-weight:700;color:var(--text)">' + escHtml(l.type || 'Bien') + ' · ' + escHtml(l.ville || '—') + '</div>' +
       '<div style="font-size:11px;color:var(--text2)">' + (l.surface || '?') + ' m² · ' + (l.pieces || '?') + ' pièces</div></div>' +
       '<div class="mkt-score-badge ' + _mktScoreClass(l.score) + '">' + (l.score != null ? l.score.toFixed(1) : '—') + '</div>' +
       '</div>' +
-      '<div style="font-size:16px;font-weight:800;color:#ffb400">' + (l.prix ? Math.round(l.prix).toLocaleString('fr-FR') + ' €' : '—') + '</div>' +
+      '<div style="font-size:16px;font-weight:800;color:var(--gold)">' + (l.prix ? Math.round(l.prix).toLocaleString('fr-FR') + ' €' : '—') + '</div>' +
       '</div></div>'
     ).join('');
   } catch (e) {
@@ -1614,7 +1614,7 @@ async function mktOpenDetail(id) {
       mapHtml +
       '<div class="card">' +
       '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">' +
-      '<div><div style="font-size:20px;font-weight:800;color:#eaf0ff">' + escHtml(l.type || '') + ' · ' + escHtml(l.ville || '') + '</div>' +
+      '<div><div style="font-size:20px;font-weight:800;color:var(--text)">' + escHtml(l.type || '') + ' · ' + escHtml(l.ville || '') + '</div>' +
       '<div style="font-size:12px;color:var(--text2)">' + escHtml(l.adresse || '') + '</div></div>' +
       '<div class="mkt-score-badge ' + _mktScoreClass(l.score) + '" style="font-size:20px;min-width:48px;height:48px">' + (l.score != null ? l.score.toFixed(1) : '—') + '</div>' +
       '</div>' +

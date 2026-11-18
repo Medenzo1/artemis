@@ -70,24 +70,24 @@ function haloCountUp(root) {
 
 // ════════════ Barre latérale ════════════
 const HALO_NAV = [
-  { group: 'Principal' },
-  { id: 'home', label: 'Accueil', ico: 'home' },
-  { id: 'dashboard', label: 'Dashboard', ico: 'layout-dashboard' },
-  { id: 'budget', label: 'Budget', ico: 'target' },
-  { group: 'Données' },
-  { id: 'import', label: 'Import', ico: 'upload' },
-  { id: 'mapping', label: 'Mapping', ico: 'folder' },
-  { id: 'validation', label: 'Validation', ico: 'check-circle' },
-  { id: 'base', label: 'Base', ico: 'database' },
+  { id: 'home', label: 'Accueil', ico: 'home', hint: "Vue d'ensemble de votre patrimoine" },
+  { group: 'Pilotage' },
+  { id: 'dashboard', label: 'Tableau de bord', ico: 'layout-dashboard', hint: 'CA, dépenses, trésorerie, résultat, KPIs' },
+  { id: 'budget', label: 'Budget', ico: 'target', hint: 'Prévisionnel annuel, réel vs budget, atterrissage' },
+  { group: 'Saisie mensuelle' },
+  { id: 'import', label: 'Importer un mois', ico: 'upload', hint: 'Relevé bancaire, Airbnb, Booking → mapping → validation',
+    steps: [['import', 'Relevés'], ['mapping', 'Mapping'], ['validation', 'Validation']] },
+  { id: 'base', label: 'Mois enregistrés', ico: 'database', hint: 'Historique des mois importés : consulter, éditer, supprimer' },
+  { group: 'Mon patrimoine' },
+  { id: 'params', label: 'Biens & sociétés', ico: 'building', hint: 'SCI, biens, correspondances Airbnb/Booking, quote-parts' },
+  { id: 'loans', label: 'Emprunts', ico: 'landmark', hint: 'Prêts et tableaux de remboursement' },
+  { id: 'amort', label: 'Amortissements', ico: 'trending-up', hint: "Tableau d'amortissements comptables" },
+  { id: 'lcd', label: 'Locations directes', ico: 'bed-double', hint: 'Réservations en direct (hors plateformes)' },
   { group: 'Outils' },
-  { id: 'simulateur', label: 'Simulateur', ico: 'calculator' },
-  { id: 'marketplace', label: 'Marketplace', ico: 'store' },
-  { group: 'Système' },
-  { id: 'params', label: 'Paramètres', ico: 'settings' },
-  { id: 'loans', label: 'Emprunts', ico: 'landmark' },
-  { id: 'lcd', label: 'Location directe', ico: 'bed-double' },
-  { id: 'amort', label: 'Amortissements', ico: 'trending-up' },
+  { id: 'simulateur', label: 'Simulateur', ico: 'calculator', hint: "Rentabilité et fiscalité d'un projet" },
+  { id: 'marketplace', label: 'Marketplace', ico: 'store', hint: 'Biens à vendre et opportunités' },
 ];
+const HALO_STEP_ROUTES = ['import', 'mapping', 'validation'];
 
 function haloUserName() {
   const u = haloUI();
@@ -110,10 +110,11 @@ function haloBuildSidebar() {
   sb.setAttribute('aria-label', 'Navigation principale');
   let html = '<div class="hsb-brand"><div class="hsb-logo"><img src="icon-192.png" alt=""></div>'
     + '<div><div class="hsb-name">ARTEMIS</div><div class="hsb-sub">Gestion patrimoniale</div></div></div>'
-    + '<button class="hsb-search" onclick="haloPalette()">' + hIco('search', 15) + '<span>Rechercher ou aller à…</span><kbd>⌘K</kbd></button>';
+    + '<button class="hsb-search" onclick="haloPalette()">' + hIco('search', 15) + '<span>Rechercher</span><kbd>⌘K</kbd></button>';
   HALO_NAV.forEach(n => {
     if (n.group) { html += '<div class="hsb-group">' + n.group + '</div>'; return; }
-    html += '<button class="hsb-item" data-route="' + n.id + '" onclick="haloGo(\'' + n.id + '\')">' + hIco(n.ico) + '<span>' + n.label + '</span></button>';
+    html += '<button class="hsb-item" data-route="' + n.id + '" title="' + hEsc(n.hint || '') + '" onclick="haloGo(\'' + n.id + '\')">' + hIco(n.ico) + '<span>' + n.label + '</span></button>';
+    if (n.steps) html += '<div class="hsb-steps">' + n.steps.map((st, i) => '<button class="hsb-step" data-step="' + st[0] + '" onclick="haloGo(\'' + st[0] + '\')"><i>' + (i + 1) + '</i>' + st[1] + '</button>').join('') + '</div>';
   });
   html += '<div class="hsb-spacer"></div>'
     + '<div class="hsb-user"><div class="hsb-av" id="hsb-av"></div><div style="min-width:0;cursor:pointer" onclick="haloAppearance(event)"><div class="hsb-uname" id="hsb-uname"></div><div class="hsb-urole">Apparence · thème</div></div>'
@@ -128,9 +129,36 @@ function haloRefreshUser() {
   if (a) a.textContent = n.slice(0, 2).toUpperCase();
   if (u) u.textContent = n;
 }
+const HALO_PAGE_TITLES = {
+  import: ['Importer un mois', 'Étape 1 · relevé bancaire et exports Airbnb / Booking du mois'],
+  mapping: ['Mapping', 'Étape 2 · chaque ligne reçoit une catégorie et un bien'],
+  validation: ['Validation', "Étape 3 · vérifiez la ventilation avant d'enregistrer le mois"],
+  base: ['Mois enregistrés', 'Tous les mois importés : consulter, éditer, supprimer'],
+  params: ['Biens & sociétés', 'SCI, biens, correspondances Airbnb / Booking et quote-parts'],
+  loans: ['Emprunts', 'Prêts et tableaux de remboursement'],
+  amort: ['Amortissements', "Tableau d'amortissements comptables"],
+  lcd: ['Locations directes', 'Réservations encaissées en direct, hors plateformes'],
+};
+function haloTitleTools(route) {
+  const t = HALO_PAGE_TITLES[route];
+  if (!t) return;
+  const h = document.getElementById('header-section'), p = document.querySelector('.app > header .logo p');
+  if (h) h.textContent = t[0];
+  if (p) p.textContent = t[1];
+}
 function haloSetActive(route) {
   window._haloRoute = route;
-  document.querySelectorAll('#hsb .hsb-item').forEach(b => b.classList.toggle('on', b.dataset.route === route));
+  haloTitleTools(route);
+  const mn = { home: 'home', dashboard: 'dash', budget: 'dash', import: 'tools', mapping: 'tools', validation: 'tools', base: 'tools', params: 'params', loans: 'params', amort: 'params', lcd: 'params' }[route];
+  document.querySelectorAll('#mobile-bottom-nav .mn-item').forEach(el => el.classList.toggle('active', !!mn && el.id === 'mn-' + mn));
+  const inSteps = HALO_STEP_ROUTES.includes(route);
+  document.querySelectorAll('#hsb .hsb-item').forEach(b => b.classList.toggle('on', b.dataset.route === route || (inSteps && b.dataset.route === 'import')));
+  const steps = document.querySelector('#hsb .hsb-steps');
+  if (steps) {
+    steps.classList.toggle('open', inSteps);
+    const idx = HALO_STEP_ROUTES.indexOf(route);
+    steps.querySelectorAll('.hsb-step').forEach((b, i) => { b.classList.toggle('on', i === idx); b.classList.toggle('done', idx > i); });
+  }
 }
 
 // ════════════ Routage ════════════
@@ -148,9 +176,18 @@ function _haloLeaveDash() {
     const sc6 = document.getElementById('sc6'); if (sc6) sc6.classList.remove('active');
   }
 }
-function _haloParamsTab(navId) {
+function _haloParamsTab(navId, route) {
   enterTools();
-  setTimeout(() => { const b = document.getElementById(navId); if (b) b.click(); haloSetActive(window._haloPendingRoute); }, 0);
+  setTimeout(() => {
+    window._haloPendingRoute = route;
+    const b = document.getElementById(navId); if (b) b.click();
+    haloSetActive(route);
+    // Les onglets « Sociétés & Biens / Quote-parts » ne concernent que Biens & sociétés
+    setTimeout(() => {
+      const show = route === 'params';
+      document.querySelectorAll('#paramsTabs, #paramsActionBar').forEach(el => { el.style.display = show ? '' : 'none'; });
+    }, 80);
+  }, 0);
 }
 function haloGo(route) {
   haloCloseOverlays();
@@ -168,10 +205,10 @@ function haloGo(route) {
       setTimeout(() => navTo(n), 0);
       break;
     }
-    case 'params': _haloLeaveDash(); _haloParamsTab('nav-params'); break;
-    case 'loans': _haloLeaveDash(); _haloParamsTab('nav-loans'); break;
-    case 'lcd': _haloLeaveDash(); _haloParamsTab('nav-lcd'); break;
-    case 'amort': _haloLeaveDash(); _haloParamsTab('nav-amort'); break;
+    case 'params': _haloLeaveDash(); _haloParamsTab('nav-params', 'params'); break;
+    case 'loans': _haloLeaveDash(); _haloParamsTab('nav-loans', 'loans'); break;
+    case 'lcd': _haloLeaveDash(); _haloParamsTab('nav-lcd', 'lcd'); break;
+    case 'amort': _haloLeaveDash(); _haloParamsTab('nav-amort', 'amort'); break;
   }
   haloSetActive(route);
   try { window.scrollTo(0, 0); } catch (e) {}
@@ -241,7 +278,9 @@ function haloSetAccent(id) {
 // ════════════ Palette ⌘K ════════════
 function haloPaletteItems() {
   const items = [];
-  HALO_NAV.filter(n => n.id).forEach(n => items.push({ sec: 'Aller à', label: n.label, ico: n.ico, run: () => haloGo(n.id), kw: n.label }));
+  HALO_NAV.filter(n => n.id).forEach(n => items.push({ sec: 'Aller à', label: n.label, hint: n.hint, ico: n.ico, run: () => haloGo(n.id), kw: n.label + ' ' + (n.hint || '') }));
+  items.push({ sec: 'Aller à', label: 'Mapping du mois', ico: 'folder', run: () => haloGo('mapping'), kw: 'mapping étape 2' });
+  items.push({ sec: 'Aller à', label: 'Validation du mois', ico: 'check-circle', run: () => haloGo('validation'), kw: 'validation étape 3' });
   const tabs = [
     ['Synthèse · CA', 'synthese', 'ca'], ['Synthèse · Dépenses', 'synthese', 'depenses'], ['Synthèse · Trésorerie', 'synthese', 'tresorerie'],
     ['Résultat (SIG)', 'resultat'], ['KPIs · Location courte durée', 'kpis', 'lcd'], ['KPIs · Location longue durée', 'kpis', 'lld'],
@@ -325,8 +364,25 @@ document.addEventListener('keydown', e => {
 });
 
 // ════════════ Démarrage ════════════
+// Barres du haut des écrans plein cadre → en-tête de page
+function haloOverlayHeads() {
+  [['#marketplaceScreen .mkt-topbar', 'Marketplace', 'Biens à vendre · opportunités · baromètre'],
+   ['#sim-topbar', 'Simulateur', 'Rentabilité · fiscalité · comparatif des régimes'],
+   ['#bud-topbar', 'Budget', 'Prévisionnel · réel vs budget · atterrissage']].forEach(([sel, t, sub]) => {
+    const el = document.querySelector(sel);
+    if (!el || el.classList.contains('hov-top')) return;
+    el.classList.add('hov-top');
+    const left = el.firstElementChild;
+    if (!left) return;
+    const d = document.createElement('div');
+    d.className = 'hov-title';
+    d.innerHTML = '<b>' + t + '</b><small>' + sub + '</small>';
+    left.insertBefore(d, left.firstChild);
+  });
+}
 document.addEventListener('DOMContentLoaded', () => {
+  haloOverlayHeads();
   haloBuildSidebar();
   haloWatchSession();
-  if (window._auth) { try { _auth.onAuthStateChanged(() => haloRefreshUser()); } catch (e) {} }
+  if (typeof _auth !== 'undefined') { try { _auth.onAuthStateChanged(() => { haloRefreshUser(); if (window._haloRoute === 'home') { try { haloRenderHome(true); } catch (e) {} } }); } catch (e) {} }
 });

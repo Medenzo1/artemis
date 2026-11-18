@@ -283,7 +283,7 @@ function hhRevenue(d) {
   const opts = [[3, '3 mois'], [6, '6 mois'], [12, '12 mois'], [0, 'Tout']];
   return '<section class="hg hh-rev"><div class="hh-card-h"><div><h3>Revenus</h3><small id="hh-rev-sub"></small></div>'
     + '<div class="hseg" id="hh-rev-seg">' + opts.map(o => '<button class="' + (o[0] === _hhRange ? 'on' : '') + '" onclick="hhSetRange(' + o[0] + ')">' + o[1] + '</button>').join('') + '</div></div>'
-    + '<div class="hh-legend"><span><i style="background:var(--acc)"></i>Chiffre d\'affaires</span><span><i style="background:#2a2124"></i>Charges</span></div>'
+    + '<div class="hh-legend"><span><i style="background:var(--acc)"></i>Chiffre d\'affaires</span><span><i style="background:var(--ink)"></i>Charges</span></div>'
     + '<div class="hh-chart" id="hh-chart"><svg id="hh-svg" preserveAspectRatio="none"></svg><div class="hh-tip" id="hh-tip"></div></div></section>';
 }
 function hhSetRange(n) {
@@ -339,7 +339,7 @@ function hhDrawRevenue(first) {
     labelsX.forEach((L, i) => { if (i % every === 0 || i === labelsX.length - 1) g += '<text x="' + L.x.toFixed(1) + '" y="' + (H - 8) + '" class="hh-ax" text-anchor="middle">' + H_MONTHS_S[+L.k.slice(5) - 1] + '</text>'; });
     g += '<path d="' + la + 'L' + x(N - 1) + ',' + (P.t + ch) + 'L' + P.l + ',' + (P.t + ch) + 'Z" fill="url(#hh-ga)"/>';
     g += '<path d="' + la + '" fill="none" stroke="var(--acc)" stroke-width="2.6" stroke-linecap="round"/>';
-    g += '<path d="' + lb + '" fill="none" stroke="#2a2124" stroke-width="2" stroke-linecap="round" opacity=".85"/>';
+    g += '<path d="' + lb + '" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" opacity=".85"/>';
     g += '<g id="hh-hover"></g>';
     svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
     svg.setAttribute('width', W); svg.setAttribute('height', H);
@@ -364,7 +364,7 @@ function hhDrawRevenue(first) {
     const hv = svg.querySelector('#hh-hover');
     if (hv) hv.innerHTML = '<line x1="' + L.x + '" x2="' + L.x + '" y1="' + P.t + '" y2="' + (P.t + ch) + '" class="hh-guide"/><circle cx="' + L.x + '" cy="' + yc + '" r="5" class="hh-dot-a"/><circle cx="' + L.x + '" cy="' + yd + '" r="4" class="hh-dot-b"/>';
     const tip = document.getElementById('hh-tip');
-    tip.innerHTML = '<b>' + hMonthLbl(L.k) + '</b><span><i style="background:var(--acc)"></i>CA ' + hEur(ca[i]) + '</span><span><i style="background:#2a2124"></i>Charges ' + hEur(dep[i]) + '</span>';
+    tip.innerHTML = '<b>' + hMonthLbl(L.k) + '</b><span><i style="background:var(--acc)"></i>CA ' + hEur(ca[i]) + '</span><span><i style="background:var(--ink)"></i>Charges ' + hEur(dep[i]) + '</span>';
     tip.style.opacity = 1;
     const tx = L.x / W * r.width, tw = tip.offsetWidth;
     tip.style.left = Math.max(4, Math.min(r.width - tw - 4, tx - tw / 2)) + 'px';

@@ -574,7 +574,7 @@ function simOpenScenarios() {
     '<div class="grid3" style="gap:14px">' +
     d.scenarios.slice().reverse().map(s =>
       '<div class="sim-regime-card">' +
-        '<div style="font-weight:700;color:#eaf0ff;margin-bottom:6px">' + escHtml(s.name) + '</div>' +
+        '<div style="font-weight:700;color:var(--text);margin-bottom:6px">' + escHtml(s.name) + '</div>' +
         '<div style="font-size:11px;color:var(--text2);margin-bottom:12px">' + new Date(s.createdAt).toLocaleDateString('fr-FR') + ' · ' + simFmtEURCompact(s.inputs.prixBien) + '</div>' +
         '<div style="display:flex;gap:8px">' +
           '<button class="btn btn-outline" style="flex:1;font-size:11px;padding:7px 10px" onclick="simLoadScenario(\'' + s.id + '\')">Charger</button>' +

@@ -1114,7 +1114,7 @@ function _renderSynMap(biens) {
               <span style="background:${col}18;color:${col};border:1px solid ${col}30;border-radius:5px;font-size:11px;font-weight:700;padding:2px 7px;letter-spacing:.06em">${b.type||'LCD'}</span>
               <span style="font-size:11px;color:#2a3a50">${sci}</span>
             </div>
-            <div style="font-size:13px;font-weight:700;color:#eaf0ff;margin-bottom:4px">${b.name}</div>
+            <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px">${b.name}</div>
             <div style="font-size:11px;color:#4a6080">${b.lot||''}</div>
           </div>`;
         }).join('')}

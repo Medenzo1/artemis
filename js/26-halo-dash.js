@@ -11,18 +11,21 @@ function haloAccHex() {
 }
 function haloChartTheme() {
   if (typeof ArtCharts === 'undefined' || !ArtCharts.colors) return;
+  const cs = getComputedStyle(document.documentElement);
+  const v = (n, d) => (cs.getPropertyValue(n) || '').trim() || d;
+  const t = v('--tint', '110,60,45'), tx = v('--text', '#231a1c'), t2 = v('--text2', '#6e6064');
   Object.assign(ArtCharts.colors, {
-    text: '#231a1c', text2: '#6e6064', grid: 'rgba(110,60,45,0.09)', zero: 'rgba(110,60,45,0.28)',
+    text: tx, text2: t2, grid: 'rgba(' + t + ',0.09)', zero: 'rgba(' + t + ',0.28)',
     card: '#ffffff', green: '#16a35f', red: '#e0353f', cyan: haloAccHex(), gold: '#d98a0b', purple: '#7c5cf5',
-    hover: 'rgba(255,255,255,0.55)', year: 'rgba(110,96,100,0.65)', guide: 'rgba(110,60,45,0.25)', guide2: 'rgba(110,60,45,0.4)',
-    axis: 'rgba(110,60,45,0.22)', track: 'rgba(110,60,45,0.10)', band: 'rgba(255,255,255,0.35)', other: '#a08f93',
+    hover: 'rgba(255,255,255,0.55)', year: 'rgba(' + t + ',0.5)', guide: 'rgba(' + t + ',0.25)', guide2: 'rgba(' + t + ',0.4)',
+    axis: 'rgba(' + t + ',0.22)', track: 'rgba(' + t + ',0.10)', band: 'rgba(255,255,255,0.35)', other: '#a09398',
     font: "'Inter Tight', 'Inter', system-ui, sans-serif",
   });
 }
 const _HALO_COLMAP = () => ({
   '#22d3c8': haloAccHex(), '#0fa89f': haloAccHex(), '#22c97a': '#16a35f', '#34d399': '#16a35f', '#f0566a': '#e0353f',
   '#f5b731': '#d98a0b', '#ffb400': '#d98a0b', '#9b6ef3': '#7c5cf5', '#4f9eff': '#2f74f0', '#ff9142': '#ef7d1f',
-  '#f472b6': '#e0559b', '#e2e8f3': '#231a1c', '#8a9ab2': '#6e6064',
+  '#f472b6': '#e0559b', '#e2e8f3': (getComputedStyle(document.documentElement).getPropertyValue('--text') || '#231a1c').trim(), '#8a9ab2': (getComputedStyle(document.documentElement).getPropertyValue('--text2') || '#6e6064').trim(),
 });
 function _haloRecolor(v, map, depth) {
   if (depth > 5 || v == null) return v;
