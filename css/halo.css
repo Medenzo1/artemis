@@ -493,7 +493,6 @@ html.halo .chart-mode-toggle button { border-radius: 999px !important; padding: 
 html.halo .chart-mode-toggle button[style*="var(--cyan)"] { background: var(--ink) !important; color: #fff !important; }
 html.halo .dash-panel .card-title { font-size: 15px; font-weight: 750; }
 html.halo .dash-panel .card { padding: 20px 22px; }
-html.halo #sc6 .art-emo { opacity: .5; }
 html.halo .gd-pill { background: rgba(255,255,255,.7) !important; color: var(--text) !important; border: 1px solid #fff !important; }
 @media (max-width: 900px) {
   .hdash-tabs { flex-wrap: nowrap; overflow-x: auto; margin: 0 -16px 14px; padding: 2px 16px 6px; scrollbar-width: none; }
@@ -502,7 +501,6 @@ html.halo .gd-pill { background: rgba(255,255,255,.7) !important; color: var(--t
   html.halo body.halo-in .app { padding: 8px 16px 100px !important; }
 }
 html.halo .kpi-card [style*="uppercase"], html.halo #syn-filters .lbl, html.halo .dash-panel .lbl { text-transform: none !important; letter-spacing: 0 !important; font-size: 12px !important; font-weight: 650 !important; color: var(--text2) !important; }
-html.halo .kpi-card .art-emo { opacity: .22 !important; }
 /* Bandes haute et basse : le contenu qui défile disparaît au bord du panneau */
 @media (min-width: 901px) {
   html.halo body.halo-in::after, html.halo body.halo-in #hsb::after { content: none; }
@@ -746,5 +744,12 @@ html.halo .kpi-card.hk .hk-ico, html.halo .hh-kpi.hk .hh-kpi-ico {
 }
 html.halo .kpi-card.hk .hk-ico svg { width: 16px; height: 16px; }
 html.halo .kpi-card.hk .kpi-v2-lbl { gap: 10px; }
-html.halo .kpi-card.hk .hk-deco { color: rgb(var(--krgb)) !important; opacity: .2 !important; }
+html.halo .kpi-card.hk .hk-deco { color: rgb(var(--krgb)) !important; opacity: .55 !important; }
 html.halo .kpi-card.hk .hk-name { color: rgb(var(--krgb)) !important; }
+
+/* Icônes vectorielles : pleinement visibles */
+html.halo .art-emo { opacity: 1; }
+html.halo .kpi-card.hk .hk-ico { opacity: 1 !important; background: rgba(var(--krgb),.15) !important; }
+html.halo .kpi-card.hk .hk-ico svg, html.halo .kpi-card.hk .hk-deco svg { stroke-width: 2.1; }
+html.halo .card-title .art-emo, html.halo .card-title > span > svg { color: var(--acc); opacity: 1; }
+html.halo .kpi-card.hk [style*="opacity:.35"], html.halo .kpi-card.hk [style*="opacity:.5"], html.halo .kpi-card.hk [style*="opacity:.3"], html.halo .kpi-card.hk [style*="opacity: 0.35"] { opacity: 1 !important; }
