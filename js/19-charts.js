@@ -12,7 +12,9 @@ const ArtCharts = (() => {
   const FONT = 'Archivo, system-ui, sans-serif';
   const C = {
     text: '#e2e8f3', text2: '#8a9ab2', grid: 'rgba(255,255,255,0.055)', zero: 'rgba(255,255,255,0.18)',
-    card: '#141922', green: '#22c97a', red: '#f0566a', cyan: '#22d3c8', gold: '#f5b731', purple: '#9b6ef3'
+    card: '#141922', green: '#22c97a', red: '#f0566a', cyan: '#22d3c8', gold: '#f5b731', purple: '#9b6ef3',
+    hover: 'rgba(255,255,255,0.035)', year: 'rgba(138,154,178,0.6)', guide: 'rgba(226,232,243,0.22)', guide2: 'rgba(226,232,243,0.35)',
+    axis: 'rgba(255,255,255,0.16)', track: 'rgba(255,255,255,0.07)', band: 'rgba(255,255,255,0.025)', other: '#5b6980', font: FONT
   };
   const MONTHS_S = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
   const MONTHS_L = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
@@ -134,7 +136,7 @@ const ArtCharts = (() => {
     }
   }
   function pill(ctx, x, y, text, color, align) {
-    ctx.font = '700 11px ' + FONT;
+    ctx.font = '700 11px ' + C.font;
     const tw = ctx.measureText(text).width, pw = tw + 14, ph = 20;
     const bx = align === 'right' ? x - pw : align === 'left' ? x : x - pw / 2;
     ctx.fillStyle = C.card; ctx.strokeStyle = hexA(color, 0.55); ctx.lineWidth = 1;
@@ -163,7 +165,7 @@ const ArtCharts = (() => {
     function layout(ctx, W) {
       const minV = Math.min(...vals, ...budVals, 0), maxV = Math.max(...vals, ...budVals, 0);
       const sc = niceScale(minV, maxV === minV ? minV + 1 : maxV, 4);
-      ctx.font = '500 11px ' + FONT;
+      ctx.font = '500 11px ' + C.font;
       const yW = Math.max(...sc.ticks.map(t => ctx.measureText(fmtAxis(t)).width));
       const P = { top: 30, right: 20, bottom: 40, left: Math.ceil(yW) + 16 };
       const cW = W - P.left - P.right, cH = H - P.top - P.bottom;
@@ -180,7 +182,7 @@ const ArtCharts = (() => {
       const y0 = yOf(Math.max(sc.min, Math.min(0, sc.max)));
 
       // Grille + axe Y
-      ctx.font = '500 11px ' + FONT; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+      ctx.font = '500 11px ' + C.font; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
       sc.ticks.forEach(t => {
         const y = Math.round(yOf(t)) + 0.5;
         ctx.strokeStyle = t === 0 && sc.min < 0 ? C.zero : C.grid; ctx.lineWidth = 1;
@@ -196,10 +198,10 @@ const ArtCharts = (() => {
         const isLast = i === n - 1;
         if (i % step && !(isLast && (n - 1) % step >= step / 2)) continue;
         const x = xOf(i), p = periods[i];
-        ctx.fillStyle = i === hover ? C.text : C.text2; ctx.font = '500 11px ' + FONT;
+        ctx.fillStyle = i === hover ? C.text : C.text2; ctx.font = '500 11px ' + C.font;
         ctx.fillText(shortLbl(i), x, H - P.bottom + 18);
         if (p && (i === 0 || p.m === 0 || (i - step >= 0 && periods[i - step] && periods[i - step].y !== p.y))) {
-          ctx.fillStyle = 'rgba(138,154,178,0.6)'; ctx.font = '600 10px ' + FONT;
+          ctx.fillStyle = C.year; ctx.font = '600 10px ' + C.font;
           ctx.fillText(String(p.y), x, H - P.bottom + 32);
         }
       }
@@ -239,7 +241,7 @@ const ArtCharts = (() => {
         bud.forEach((v, i) => { if (v === null) flush(); else seg.push({ x: xOf(i), y: yOf(v) }); });
         flush(); ctx.restore();
         if (hover >= 0 && bud[hover] !== null) { ctx.beginPath(); ctx.arc(xOf(hover), yOf(bud[hover]), 3.5, 0, Math.PI * 2); ctx.fillStyle = C.gold; ctx.fill(); }
-        ctx.font = '600 11px ' + FONT; ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
+        ctx.font = '600 11px ' + C.font; ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
         const lx = P.left + 4, ly = 10;
         ctx.strokeStyle = color; ctx.lineWidth = 2.25; ctx.beginPath(); ctx.moveTo(lx, ly); ctx.lineTo(lx + 16, ly); ctx.stroke();
         ctx.fillStyle = C.text2; ctx.fillText('Réel', lx + 22, ly + 0.5);
@@ -251,7 +253,7 @@ const ArtCharts = (() => {
       // Survol : repère vertical + point mis en valeur
       if (hover >= 0) {
         const x = Math.round(pts[hover].x) + 0.5;
-        ctx.strokeStyle = 'rgba(226,232,243,0.22)'; ctx.setLineDash([3, 4]); ctx.lineWidth = 1;
+        ctx.strokeStyle = C.guide; ctx.setLineDash([3, 4]); ctx.lineWidth = 1;
         ctx.beginPath(); ctx.moveTo(x, P.top - 6); ctx.lineTo(x, P.top + cH); ctx.stroke(); ctx.setLineDash([]);
         ctx.beginPath(); ctx.arc(pts[hover].x, pts[hover].y, 9, 0, Math.PI * 2); ctx.fillStyle = hexA(colAt(hover), 0.18); ctx.fill();
       }
@@ -265,7 +267,7 @@ const ArtCharts = (() => {
       });
       if (hover !== n - 1) {
         const p = pts[n - 1], txt = fmtEur(vals[n - 1]);
-        ctx.font = '700 11px ' + FONT;
+        ctx.font = '700 11px ' + C.font;
         const pw = ctx.measureText(txt).width + 14;
         const below = p.y - 22 < P.top - 18;
         pill(ctx, Math.min(p.x + pw / 2, W - 2) , below ? p.y + 20 : p.y - 20, txt, colAt(n - 1), 'right');
@@ -317,7 +319,7 @@ const ArtCharts = (() => {
     }
     const total = entries.reduce((s, [, v]) => s + v, 0);
     if (!total) return;
-    const pal = i => entries[i][0].startsWith('Autres (') ? '#5b6980' : cfg.palette[i % cfg.palette.length];
+    const pal = i => entries[i][0].startsWith('Autres (') ? C.other : cfg.palette[i % cfg.palette.length];
     const valCol = cfg.valueColor || C.text;
     const fmtV = v => cfg.sign === '-' ? fmtEur(-v) : fmtEur(v, cfg.sign === '+');
     let hover = -1, G;
@@ -341,14 +343,14 @@ const ArtCharts = (() => {
       ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
       if (hover >= 0) {
         const [lbl, v] = entries[hover];
-        ctx.font = '600 11px ' + FONT; ctx.fillStyle = C.text2;
+        ctx.font = '600 11px ' + C.font; ctx.fillStyle = C.text2;
         let l = lbl; while (ctx.measureText(l).width > r * 1.6 && l.length > 4) l = l.slice(0, -2);
         ctx.fillText(l === lbl ? l : l + '…', cx0, cy0 - 14);
-        ctx.font = '800 18px ' + FONT; ctx.fillStyle = pal(hover); ctx.fillText(fmtV(v), cx0, cy0 + 6);
-        ctx.font = '600 11px ' + FONT; ctx.fillStyle = C.text2; ctx.fillText(fmtPct(v / total * 100).replace('+', ''), cx0, cy0 + 22);
+        ctx.font = '800 18px ' + C.font; ctx.fillStyle = pal(hover); ctx.fillText(fmtV(v), cx0, cy0 + 6);
+        ctx.font = '600 11px ' + C.font; ctx.fillStyle = C.text2; ctx.fillText(fmtPct(v / total * 100).replace('+', ''), cx0, cy0 + 22);
       } else {
-        ctx.font = '800 19px ' + FONT; ctx.fillStyle = valCol; ctx.fillText(fmtV(total), cx0, cy0 + 4);
-        ctx.font = '600 11px ' + FONT; ctx.fillStyle = C.text2; ctx.fillText(cfg.centerLabel || 'Total', cx0, cy0 + 21);
+        ctx.font = '800 19px ' + C.font; ctx.fillStyle = valCol; ctx.fillText(fmtV(total), cx0, cy0 + 4);
+        ctx.font = '600 11px ' + C.font; ctx.fillStyle = C.text2; ctx.fillText(cfg.centerLabel || 'Total', cx0, cy0 + 21);
       }
     }
     function hit(e) {
@@ -392,7 +394,7 @@ const ArtCharts = (() => {
     function draw() {
       const { ctx, W } = setup(cv, H);
       const maxAbs = Math.max(...rows.map(r => Math.abs(r.delta)), 1);
-      ctx.font = '700 12px ' + FONT;
+      ctx.font = '700 12px ' + C.font;
       const valW = Math.max(...rows.map(r => ctx.measureText(fmtEur(r.delta, true)).width)) + 12;
       const lblW = W < 480 ? Math.max(96, W * 0.32) : Math.min(Math.max(140, W * 0.26), 220);
       const zoneL = lblW + 12, zoneR = W - 4;
@@ -404,12 +406,12 @@ const ArtCharts = (() => {
 
       rows.forEach((r, i) => {
         const yc = TOP + i * ROW + ROW / 2, on = i === hover;
-        if (on) { ctx.fillStyle = 'rgba(255,255,255,0.035)'; ctx.beginPath(); ctx.roundRect(0, yc - ROW / 2 + 2, W, ROW - 4, 8); ctx.fill(); }
+        if (on) { ctx.fillStyle = C.hover; ctx.beginPath(); ctx.roundRect(0, yc - ROW / 2 + 2, W, ROW - 4, 8); ctx.fill(); }
         // Libellé sur deux lignes, tronqué proprement
         const clip = (s, font, max) => { ctx.font = font; if (ctx.measureText(s).width <= max) return s; while (s.length > 3 && ctx.measureText(s + '…').width > max) s = s.slice(0, -1); return s + '…'; };
         ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-        ctx.fillStyle = C.text; ctx.fillText(clip(r.label, '600 12px ' + FONT, lblW - 10), 10, r.sub ? yc - 8 : yc);
-        if (r.sub) { ctx.fillStyle = C.text2; ctx.fillText(clip(r.sub, '500 11px ' + FONT, lblW - 10), 10, yc + 9); }
+        ctx.fillStyle = C.text; ctx.fillText(clip(r.label, '600 12px ' + C.font, lblW - 10), 10, r.sub ? yc - 8 : yc);
+        if (r.sub) { ctx.fillStyle = C.text2; ctx.fillText(clip(r.sub, '500 11px ' + C.font, lblW - 10), 10, yc + 9); }
 
         const good = upGood ? r.delta >= 0 : r.delta <= 0;
         const col = good ? C.green : C.red;
@@ -419,14 +421,14 @@ const ArtCharts = (() => {
         ctx.fillStyle = hexA(col, on ? 0.95 : 0.8);
         ctx.beginPath(); ctx.roundRect(bx, yc - 8, bw, 16, r.delta >= 0 ? [0, 5, 5, 0] : [5, 0, 0, 5]); ctx.fill();
         // Montant au bout de la barre, jamais sur elle
-        ctx.font = '700 12px ' + FONT; ctx.fillStyle = col;
+        ctx.font = '700 12px ' + C.font; ctx.fillStyle = col;
         ctx.textAlign = r.delta >= 0 ? 'left' : 'right';
         const vx = r.delta >= 0 ? bx + bw + 8 : bx - 8;
         ctx.fillText(fmtEur(r.delta, true), vx, yc - (r.pct !== undefined ? 6 : 0));
-        if (r.pct !== undefined && isFinite(r.pct)) { ctx.font = '600 10px ' + FONT; ctx.fillStyle = C.text2; ctx.fillText(fmtPct(r.pct), vx, yc + 9); }
+        if (r.pct !== undefined && isFinite(r.pct)) { ctx.font = '600 10px ' + C.font; ctx.fillStyle = C.text2; ctx.fillText(fmtPct(r.pct), vx, yc + 9); }
         if (i < rows.length - 1) { ctx.fillStyle = C.grid; ctx.fillRect(10, TOP + (i + 1) * ROW, W - 10, 1); }
       });
-      ctx.fillStyle = 'rgba(255,255,255,0.16)'; ctx.fillRect(Math.round(axis), TOP - 2, 1, H - TOP * 2 + 4);
+      ctx.fillStyle = C.axis; ctx.fillRect(Math.round(axis), TOP - 2, 1, H - TOP * 2 + 4);
     }
     cv.style.touchAction = 'pan-y';
     cv.onpointermove = e => {
@@ -457,7 +459,7 @@ const ArtCharts = (() => {
       const R = Math.min(W / 2 - 10, H - 26), cx0 = W / 2, cy0 = H - 14, lw = Math.max(10, R * 0.16);
       const max = cfg.max || 100, pct = Math.max(0, Math.min((cfg.value || 0) / max, 1));
       ctx.lineCap = 'round'; ctx.lineWidth = lw;
-      ctx.beginPath(); ctx.arc(cx0, cy0, R, Math.PI, 0); ctx.strokeStyle = 'rgba(255,255,255,0.07)'; ctx.stroke();
+      ctx.beginPath(); ctx.arc(cx0, cy0, R, Math.PI, 0); ctx.strokeStyle = C.track; ctx.stroke();
       if (pct > 0.002) { ctx.beginPath(); ctx.arc(cx0, cy0, R, Math.PI, Math.PI + pct * Math.PI); ctx.strokeStyle = cfg.color || C.cyan; ctx.stroke(); }
       if (cfg.threshold !== undefined && cfg.threshold !== null) {
         const t = Math.max(0, Math.min(cfg.threshold / max, 1)), a = Math.PI + t * Math.PI;
@@ -466,7 +468,7 @@ const ArtCharts = (() => {
         ctx.lineTo(cx0 + (R + lw / 2 + 4) * Math.cos(a), cy0 + (R + lw / 2 + 4) * Math.sin(a)); ctx.stroke();
       }
       ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
-      ctx.font = '800 ' + Math.round(Math.max(18, R * 0.34)) + 'px ' + FONT; ctx.fillStyle = C.text;
+      ctx.font = '800 ' + Math.round(Math.max(18, R * 0.34)) + 'px ' + C.font; ctx.fillStyle = C.text;
       ctx.fillText(String(cfg.label), cx0, cy0 - 4);
     }
     draw(); observe(cv, draw);
@@ -480,20 +482,20 @@ const ArtCharts = (() => {
     const rows = cfg.rows, ROW = 40, H = rows.length * ROW + 4;
     function draw() {
       const { ctx, W } = setup(cv, H);
-      ctx.font = '600 12px ' + FONT;
+      ctx.font = '600 12px ' + C.font;
       const lblW = Math.min(Math.max(...rows.map(r => ctx.measureText(r.label).width)) + 16, W * 0.38);
-      ctx.font = '700 12px ' + FONT;
+      ctx.font = '700 12px ' + C.font;
       const valW = Math.max(...rows.map(r => ctx.measureText(fmtEur(r.val)).width)) + 14;
       const zx = lblW, zw = Math.max(20, W - lblW - valW);
       const maxAbs = Math.max(...rows.map(r => Math.abs(r.val)), 1);
       rows.forEach((r, i) => {
         const yc = 2 + i * ROW + ROW / 2;
         ctx.textBaseline = 'middle';
-        ctx.font = '600 12px ' + FONT; ctx.fillStyle = C.text2; ctx.textAlign = 'left'; ctx.fillText(r.label, 0, yc);
-        ctx.fillStyle = 'rgba(255,255,255,0.035)'; ctx.beginPath(); ctx.roundRect(zx, yc - 13, zw, 26, 7); ctx.fill();
+        ctx.font = '600 12px ' + C.font; ctx.fillStyle = C.text2; ctx.textAlign = 'left'; ctx.fillText(r.label, 0, yc);
+        ctx.fillStyle = C.hover; ctx.beginPath(); ctx.roundRect(zx, yc - 13, zw, 26, 7); ctx.fill();
         const bw = Math.max(4, Math.abs(r.val) / maxAbs * zw), bx = zx + (zw - bw) / 2;
         ctx.fillStyle = hexA(r.color, 0.85); ctx.beginPath(); ctx.roundRect(bx, yc - 13, bw, 26, 7); ctx.fill();
-        ctx.font = '700 12px ' + FONT; ctx.fillStyle = r.color; ctx.textAlign = 'right';
+        ctx.font = '700 12px ' + C.font; ctx.fillStyle = r.color; ctx.textAlign = 'right';
         ctx.fillText(fmtEur(r.val), W, yc);
       });
     }
@@ -514,7 +516,7 @@ const ArtCharts = (() => {
       const { ctx, W } = setup(cv, H);
       const hi = Math.max(...cfg.values, ...cfg.trend.map(t => t + cfg.ci)), lo = Math.min(0, ...cfg.trend.map(t => t - cfg.ci));
       const sc = niceScale(Math.max(0, lo), hi || 1, 4);
-      ctx.font = '500 11px ' + FONT;
+      ctx.font = '500 11px ' + C.font;
       const yW = Math.max(...sc.ticks.map(t => ctx.measureText(fmtAxis(t)).width));
       const P = { top: 14, right: 12, bottom: 38, left: Math.ceil(yW) + 14 };
       const cW = W - P.left - P.right, cH = H - P.top - P.bottom;
@@ -524,8 +526,8 @@ const ArtCharts = (() => {
       sc.ticks.forEach(t => { const y = Math.round(yOf(t)) + 0.5; ctx.strokeStyle = C.grid; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(P.left, y); ctx.lineTo(P.left + cW, y); ctx.stroke(); ctx.fillStyle = C.text2; ctx.fillText(fmtAxis(t), P.left - 8, y); });
       // Zone prévision
       const sx = xOf(n - 1);
-      ctx.fillStyle = 'rgba(255,255,255,0.025)'; ctx.fillRect(sx, P.top, P.left + cW - sx, cH);
-      ctx.fillStyle = C.text2; ctx.font = '600 10px ' + FONT; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+      ctx.fillStyle = C.band; ctx.fillRect(sx, P.top, P.left + cW - sx, cH);
+      ctx.fillStyle = C.text2; ctx.font = '600 10px ' + C.font; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
       ctx.fillText('PRÉVISION', sx + 8, P.top + 4);
       // Bande de confiance
       ctx.beginPath();
@@ -533,7 +535,7 @@ const ArtCharts = (() => {
       for (let i = N - 1; i >= n - 1; i--) ctx.lineTo(xOf(i), yOf(Math.max(sc.min, cfg.trend[i] - cfg.ci)));
       ctx.closePath(); ctx.fillStyle = hexA(color, 0.12); ctx.fill();
       // Tendance
-      ctx.setLineDash([4, 4]); ctx.lineWidth = 1.5; ctx.strokeStyle = 'rgba(226,232,243,0.35)';
+      ctx.setLineDash([4, 4]); ctx.lineWidth = 1.5; ctx.strokeStyle = C.guide2;
       ctx.beginPath(); cfg.trend.forEach((t, i) => ctx[i ? 'lineTo' : 'moveTo'](xOf(i), yOf(t))); ctx.stroke(); ctx.setLineDash([]);
       // Historique
       const pts = cfg.values.map((v, i) => ({ x: xOf(i), y: yOf(v) }));
@@ -543,12 +545,12 @@ const ArtCharts = (() => {
       const step = Math.max(1, Math.ceil(48 / (cW / (N - 1))));
       for (let i = 0; i < N; i += step) {
         const p = periods[i]; if (!p) continue;
-        ctx.font = '500 11px ' + FONT; ctx.fillStyle = i === hover ? C.text : C.text2; ctx.fillText(MONTHS_S[p.m], xOf(i), H - P.bottom + 18);
-        if (i === 0 || p.m < step) { ctx.font = '600 10px ' + FONT; ctx.fillStyle = 'rgba(138,154,178,0.6)'; ctx.fillText(String(p.y), xOf(i), H - P.bottom + 31); }
+        ctx.font = '500 11px ' + C.font; ctx.fillStyle = i === hover ? C.text : C.text2; ctx.fillText(MONTHS_S[p.m], xOf(i), H - P.bottom + 18);
+        if (i === 0 || p.m < step) { ctx.font = '600 10px ' + C.font; ctx.fillStyle = C.year; ctx.fillText(String(p.y), xOf(i), H - P.bottom + 31); }
       }
       if (hover >= 0) {
         const x = Math.round(xOf(hover)) + 0.5;
-        ctx.strokeStyle = 'rgba(226,232,243,0.22)'; ctx.setLineDash([3, 4]); ctx.beginPath(); ctx.moveTo(x, P.top); ctx.lineTo(x, P.top + cH); ctx.stroke(); ctx.setLineDash([]);
+        ctx.strokeStyle = C.guide; ctx.setLineDash([3, 4]); ctx.beginPath(); ctx.moveTo(x, P.top); ctx.lineTo(x, P.top + cH); ctx.stroke(); ctx.setLineDash([]);
         const v = hover < n ? cfg.values[hover] : cfg.trend[hover];
         ctx.beginPath(); ctx.arc(xOf(hover), yOf(v), 4.5, 0, Math.PI * 2); ctx.fillStyle = hover < n ? color : C.card; ctx.fill();
         ctx.lineWidth = 2; ctx.strokeStyle = hover < n ? C.card : color; ctx.stroke();
@@ -590,7 +592,7 @@ const ArtCharts = (() => {
       const sums = cfg.stacked ? cfg.labels.map((_, i) => bars.reduce((t, b) => t + Math.max(0, b.values[i] || 0), 0)) : [];
       const all = [0, ...(cfg.stacked ? sums : bars.flatMap(b => b.values)), ...(line ? line.values : [])];
       const sc = tightScale(Math.min(...all), Math.max(...all) || 1);
-      ctx.font = '500 11px ' + FONT;
+      ctx.font = '500 11px ' + C.font;
       const yW = Math.max(...sc.ticks.map(t => ctx.measureText(fmtAxis(t)).width));
       const P = { top: 16, right: 12, bottom: 40, left: Math.ceil(yW) + 16 };
       const cW = W - P.left - P.right, cH = H - P.top - P.bottom, slot = cW / n;
@@ -599,7 +601,7 @@ const ArtCharts = (() => {
       L = { P, cW, slot, cx };
       ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
       sc.ticks.forEach(t => { const y = Math.round(yOf(t)) + 0.5; ctx.strokeStyle = t === 0 ? C.zero : C.grid; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(P.left, y); ctx.lineTo(P.left + cW, y); ctx.stroke(); ctx.fillStyle = C.text2; ctx.fillText(fmtAxis(t), P.left - 10, y); });
-      if (hover >= 0) { ctx.fillStyle = 'rgba(255,255,255,0.035)'; ctx.fillRect(P.left + slot * hover, P.top, slot, cH); }
+      if (hover >= 0) { ctx.fillStyle = C.hover; ctx.fillRect(P.left + slot * hover, P.top, slot, cH); }
       // Barres
       if (cfg.stacked) {
         // Barres empilées : un segment par série, coins arrondis seulement en haut de la pile
@@ -633,9 +635,9 @@ const ArtCharts = (() => {
       const step = Math.max(1, Math.ceil(44 / slot));
       for (let i = 0; i < n; i += step) {
         const p = periods[i];
-        ctx.font = '500 11px ' + FONT; ctx.fillStyle = i === hover ? C.text : C.text2;
+        ctx.font = '500 11px ' + C.font; ctx.fillStyle = i === hover ? C.text : C.text2;
         ctx.fillText(p ? MONTHS_S[p.m] : String(cfg.labels[i]), cx(i), H - P.bottom + 18);
-        if (p && (i === 0 || p.m < step)) { ctx.font = '600 10px ' + FONT; ctx.fillStyle = 'rgba(138,154,178,0.6)'; ctx.fillText(String(p.y), cx(i), H - P.bottom + 31); }
+        if (p && (i === 0 || p.m < step)) { ctx.font = '600 10px ' + C.font; ctx.fillStyle = C.year; ctx.fillText(String(p.y), cx(i), H - P.bottom + 31); }
       }
     }
     cv.style.touchAction = 'pan-y';
