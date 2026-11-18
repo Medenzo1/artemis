@@ -19,7 +19,7 @@ html.halo {
   --acc-ink: #fff;
   --hb1: #f7eee8; --hb2: #f0ddd2; --hb3: #e8c9ba; --hglow: rgba(255,214,180,.85);
   --tint: 110,60,45; --tint2: 110,40,20; --ink: #1f1719;
-  --sb1: #ea5238; --sb2: #b5301c;
+  --sb1: #ea5238; --sb2: #b5301c; --surf: #fdfaf8; --surf2: #f7efea;
   --font: 'Inter Tight', 'Inter', system-ui, -apple-system, sans-serif;
   --serif: 'Instrument Serif', Georgia, serif;
 
@@ -49,13 +49,13 @@ html.halo {
 }
 html.halo[data-acc="lagune"]  { --acc: #0fa595; --acc2: #49d3bf; --acc3: #0a7a6e;
   --hb1: #eef8f5; --hb2: #d6eee7; --hb3: #b9ded5; --hglow: rgba(186,240,224,.9); --tint: 25,85,78; --tint2: 12,72,64;
-  --sb1: #0f9586; --sb2: #08625a; --text: #0e1f1d; --text1: #0e1f1d; --text2: #3c5553; --text3: #6a8180; --ink: #0f2421; }
+  --sb1: #0f9586; --sb2: #08625a; --surf: #f9fdfc; --surf2: #ebf5f2; --text: #0e1f1d; --text1: #0e1f1d; --text2: #3c5553; --text3: #6a8180; --ink: #0f2421; }
 html.halo[data-acc="lavande"] { --acc: #7657f2; --acc2: #a58bff; --acc3: #5636d6;
   --hb1: #f4f1fd; --hb2: #e3dcf8; --hb3: #cbc0ef; --hglow: rgba(226,212,255,.9); --tint: 72,55,125; --tint2: 60,38,125;
-  --sb1: #6c4de8; --sb2: #4527bd; --text: #1a1829; --text1: #1a1829; --text2: #4e4966; --text3: #7c7794; --ink: #1b1730; }
+  --sb1: #6c4de8; --sb2: #4527bd; --surf: #fbfaff; --surf2: #efecfb; --text: #1a1829; --text1: #1a1829; --text2: #4e4966; --text3: #7c7794; --ink: #1b1730; }
 html.halo[data-acc="ocean"]   { --acc: #2f74f0; --acc2: #6fa8ff; --acc3: #1c55c4;
   --hb1: #eff5fd; --hb2: #dae6f8; --hb3: #bfd3f1; --hglow: rgba(198,222,255,.9); --tint: 40,68,115; --tint2: 22,55,118;
-  --sb1: #2b67e0; --sb2: #1645ab; --text: #121a28; --text1: #121a28; --text2: #434f65; --text3: #727d94; --ink: #121a2b; }
+  --sb1: #2b67e0; --sb2: #1645ab; --surf: #fafcff; --surf2: #ebf1fb; --text: #121a28; --text1: #121a28; --text2: #434f65; --text3: #727d94; --ink: #121a2b; }
 
 /* ─── Fond : lumière chaude teintée par l'accent ─── */
 html.halo {
@@ -601,9 +601,6 @@ html.halo .mkt-listing-photo { color: var(--text3); background-color: rgba(255,2
 /* Cellules figées des grilles : opaques pour masquer ce qui défile dessous */
 html.halo .sim-cmp th:first-child, html.halo .sim-cmp td:first-child, html.halo .sim-sheet-table th:first-child, html.halo .sim-sheet-table td:first-child,
 html.halo .bud-grid thead th, html.halo .bud-grid .bud-c-cat, html.halo .bud-stick { background: #fbf6f3 !important; }
-html.halo[data-acc="lagune"] .bud-grid thead th, html.halo[data-acc="lagune"] .bud-grid .bud-c-cat { background: #f4faf8 !important; }
-html.halo[data-acc="lavande"] .bud-grid thead th, html.halo[data-acc="lavande"] .bud-grid .bud-c-cat { background: #f7f5fd !important; }
-html.halo[data-acc="ocean"] .bud-grid thead th, html.halo[data-acc="ocean"] .bud-grid .bud-c-cat { background: #f5f8fd !important; }
 html.halo .bud-sec-total td, html.halo .bud-sec-total td.bud-c-cat, html.halo .sim-sheet-table tr.sim-sub-row td { background: #f3ebe6 !important; }
 html.halo .sim-row-click:hover td, html.halo .sim-row-click:focus td { background: #fff !important; }
 html.halo .bud-grid input, html.halo .bud-grid select { background: transparent !important; border-color: transparent !important; box-shadow: none !important; color: var(--text) !important; }
@@ -725,14 +722,26 @@ html.halo .td-muted, html.halo .kpi-v2-sub, html.halo .kpi-v2-blbl { color: var(
 /* Badges de variation : couleurs plus franches */
 html.halo { --ok: #0f8a4f; --ko: #cf2a35; }
 
-/* ════════════ Quadrillage des tableaux ════════════ */
-html.halo { --border: rgba(var(--tint),.14); --border2: rgba(var(--tint),.22); }
+/* ════════════ Tableaux : lignes fines et régulières ════════════ */
+html.halo { --border: rgba(var(--tint),.13); --border2: rgba(var(--tint),.2); --row-line: rgba(var(--tint),.11); }
 html.halo table { border-collapse: collapse; }
-html.halo thead tr, html.halo thead th { border-bottom: 1.5px solid rgba(var(--tint),.24) !important; }
-html.halo tbody tr { border-bottom: 1px solid rgba(var(--tint),.13) !important; }
-html.halo tbody td, html.halo tbody th { border-bottom: 1px solid rgba(var(--tint),.13); }
-html.halo td + td, html.halo th + th { border-left: 1px solid rgba(var(--tint),.08); }
-html.halo tbody tr:nth-child(even) { background-color: rgba(var(--tint),.025); }
-html.halo tbody tr:hover { background-color: color-mix(in srgb, var(--acc) 7%, transparent); }
-html.halo .tbl-wrap { border: 1px solid rgba(var(--tint),.16) !important; background: #fff; }
-html.halo .bud-grid td, html.halo .bud-grid th { border-bottom: 1px solid rgba(var(--tint),.12) !important; }
+html.halo thead tr { border-bottom: 0 !important; background: transparent !important; }
+html.halo thead th { border-bottom: 1px solid rgba(var(--tint),.22) !important; font-weight: 650 !important; color: var(--text2) !important; }
+html.halo tbody tr { border-bottom: 0 !important; transition: background-color .15s; }
+html.halo tbody td, html.halo tbody th { border-bottom: 1px solid var(--row-line); }
+html.halo tbody tr:last-child td, html.halo tbody tr:last-child th { border-bottom: 0; }
+html.halo tbody tr:hover > td, html.halo tbody tr:hover > th { background-color: rgba(var(--tint),.04); }
+html.halo td, html.halo th { border-left: 0 !important; border-right: 0 !important; }
+html.halo .tbl-wrap { border: 0 !important; background: transparent !important; border-radius: 0 !important; }
+/* Lignes de total : simple filet supérieur, pas de fond coloré */
+html.halo tr.bud-sec-total td, html.halo tfoot td, html.halo tr[style*="font-weight:700"] td, html.halo tr[style*="font-weight:800"] td { border-top: 1px solid rgba(var(--tint),.24); }
+/* Grille du budget : colonnes figées à la couleur de la carte, totaux discrets */
+html.halo .bud-grid thead th, html.halo .bud-grid .bud-c-cat, html.halo .bud-stick,
+html.halo .sim-cmp th:first-child, html.halo .sim-cmp td:first-child, html.halo .sim-sheet-table th:first-child, html.halo .sim-sheet-table td:first-child { background: var(--surf) !important; }
+html.halo .bud-sec-total td, html.halo .bud-sec-total td.bud-c-cat, html.halo .sim-sheet-table tr.sim-sub-row td { background: var(--surf2) !important; }
+html.halo .bud-grid td, html.halo .bud-grid th { border-bottom: 1px solid var(--row-line) !important; }
+html.halo .bud-grid tbody tr:hover > td { background-color: var(--surf2) !important; }
+
+/* ════════════ Espacement régulier entre les blocs ════════════ */
+html.halo .dash-panel > * + *, html.halo [id$="-content"] > * + *, html.halo #bud-content > * + * { margin-top: 18px; }
+html.halo .dash-panel > [style*="display:none"] + *, html.halo .dash-panel > [style*="display: none"] + * { margin-top: 0; }
