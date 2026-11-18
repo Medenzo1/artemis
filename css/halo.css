@@ -19,6 +19,7 @@ html.halo {
   --acc-ink: #fff;
   --hb1: #f7eee8; --hb2: #f0ddd2; --hb3: #e8c9ba; --hglow: rgba(255,214,180,.85);
   --tint: 110,60,45; --tint2: 110,40,20; --ink: #1f1719;
+  --sb1: #ea5238; --sb2: #b5301c;
   --font: 'Inter Tight', 'Inter', system-ui, -apple-system, sans-serif;
   --serif: 'Instrument Serif', Georgia, serif;
 
@@ -48,13 +49,13 @@ html.halo {
 }
 html.halo[data-acc="lagune"]  { --acc: #0fa595; --acc2: #49d3bf; --acc3: #0a7a6e;
   --hb1: #eef8f5; --hb2: #d6eee7; --hb3: #b9ded5; --hglow: rgba(186,240,224,.9); --tint: 25,85,78; --tint2: 12,72,64;
-  --text: #0e1f1d; --text1: #0e1f1d; --text2: #3c5553; --text3: #6a8180; --ink: #0f2421; }
+  --sb1: #0f9586; --sb2: #08625a; --text: #0e1f1d; --text1: #0e1f1d; --text2: #3c5553; --text3: #6a8180; --ink: #0f2421; }
 html.halo[data-acc="lavande"] { --acc: #7657f2; --acc2: #a58bff; --acc3: #5636d6;
   --hb1: #f4f1fd; --hb2: #e3dcf8; --hb3: #cbc0ef; --hglow: rgba(226,212,255,.9); --tint: 72,55,125; --tint2: 60,38,125;
-  --text: #1a1829; --text1: #1a1829; --text2: #4e4966; --text3: #7c7794; --ink: #1b1730; }
+  --sb1: #6c4de8; --sb2: #4527bd; --text: #1a1829; --text1: #1a1829; --text2: #4e4966; --text3: #7c7794; --ink: #1b1730; }
 html.halo[data-acc="ocean"]   { --acc: #2f74f0; --acc2: #6fa8ff; --acc3: #1c55c4;
   --hb1: #eff5fd; --hb2: #dae6f8; --hb3: #bfd3f1; --hglow: rgba(198,222,255,.9); --tint: 40,68,115; --tint2: 22,55,118;
-  --text: #121a28; --text1: #121a28; --text2: #434f65; --text3: #727d94; --ink: #121a2b; }
+  --sb1: #2b67e0; --sb2: #1645ab; --text: #121a28; --text1: #121a28; --text2: #434f65; --text3: #727d94; --ink: #121a2b; }
 
 /* ─── Fond : lumière chaude teintée par l'accent ─── */
 html.halo {
@@ -408,7 +409,7 @@ html.halo #homeScreen { position: relative; z-index: 1; padding: 14px 30px 60px;
 .hh-legend i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
 .hh-chart { position: relative; height: 250px; }
 .hh-chart svg { display: block; width: 100%; height: 250px; overflow: visible; }
-.hh-grid-l { stroke: rgba(var(--tint),.09); stroke-dasharray: 3 5; }
+.hh-grid-l { stroke: rgba(var(--tint),.15); stroke-dasharray: 3 5; }
 .hh-ax { font: 500 10.5px var(--font); fill: var(--text3); }
 .hh-guide { stroke: rgba(var(--tint),.25); stroke-dasharray: 3 4; }
 .hh-dot-a { fill: #fff; stroke: var(--acc); stroke-width: 3; }
@@ -693,12 +694,15 @@ html.halo #sig-table-body, html.halo .dash-panel > .tbl-wrap, html.halo #res-con
   padding: 4px 18px 14px; margin-top: 16px; -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
 }
 /* Barre latérale : couleur pleine et profonde, texte blanc bien contrasté */
-#hsb {
-  background:
-    radial-gradient(120% 60% at 0% 0%, rgba(255,255,255,.16), transparent 60%),
-    linear-gradient(170deg, color-mix(in srgb, var(--acc) 94%, black), var(--acc3)) !important;
-  border-color: rgba(255,255,255,.22);
+html.halo #hsb {
+  background-color: var(--sb2) !important;
+  background-image: radial-gradient(120% 60% at 0% 0%, rgba(255,255,255,.14), rgba(255,255,255,0) 60%), linear-gradient(170deg, var(--sb1), var(--sb2)) !important;
+  -webkit-backdrop-filter: none !important; backdrop-filter: none !important;
+  border-color: rgba(255,255,255,.2); color: #fff; opacity: 1;
+  box-shadow: 0 30px 60px -28px rgba(var(--tint2),.6);
 }
+html.halo #hsb .hsb-name, html.halo #hsb .hsb-item, html.halo #hsb .hsb-step, html.halo #hsb .hsb-uname, html.halo #hsb .hsb-search { color: #fff !important; opacity: 1; }
+html.halo #hsb .hsb-item.on { color: var(--text) !important; }
 #hsb .hsb-item, #hsb .hsb-step { color: #fff; }
 #hsb .hsb-group { opacity: .78; }
 #hsb .hsb-sub, #hsb .hsb-urole { opacity: .85; }
@@ -720,3 +724,15 @@ html.halo thead th { color: var(--text2) !important; }
 html.halo .td-muted, html.halo .kpi-v2-sub, html.halo .kpi-v2-blbl { color: var(--text2) !important; }
 /* Badges de variation : couleurs plus franches */
 html.halo { --ok: #0f8a4f; --ko: #cf2a35; }
+
+/* ════════════ Quadrillage des tableaux ════════════ */
+html.halo { --border: rgba(var(--tint),.14); --border2: rgba(var(--tint),.22); }
+html.halo table { border-collapse: collapse; }
+html.halo thead tr, html.halo thead th { border-bottom: 1.5px solid rgba(var(--tint),.24) !important; }
+html.halo tbody tr { border-bottom: 1px solid rgba(var(--tint),.13) !important; }
+html.halo tbody td, html.halo tbody th { border-bottom: 1px solid rgba(var(--tint),.13); }
+html.halo td + td, html.halo th + th { border-left: 1px solid rgba(var(--tint),.08); }
+html.halo tbody tr:nth-child(even) { background-color: rgba(var(--tint),.025); }
+html.halo tbody tr:hover { background-color: color-mix(in srgb, var(--acc) 7%, transparent); }
+html.halo .tbl-wrap { border: 1px solid rgba(var(--tint),.16) !important; background: #fff; }
+html.halo .bud-grid td, html.halo .bud-grid th { border-bottom: 1px solid rgba(var(--tint),.12) !important; }
