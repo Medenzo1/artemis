@@ -282,7 +282,7 @@ html.halo .hacc, .hacc {
 @keyframes hpop { from { opacity: 0; transform: translateY(10px) scale(.97) } to { opacity: 1; transform: none } }
 @keyframes hrise { from { opacity: 0; transform: perspective(900px) rotateX(14deg) translateY(16px); filter: blur(12px) } to { opacity: 1; transform: none; filter: blur(0) } }
 @keyframes hopen { from { clip-path: circle(0% at 50% 45%); filter: blur(22px) } to { clip-path: circle(120% at 50% 45%); filter: blur(0) } }
-html.halo .hrise { animation: hrise .7s cubic-bezier(.2,.8,.2,1) both; }
+html.halo .hrise { animation: hrise .7s cubic-bezier(.2,.8,.2,1) backwards; }
 html.halo .hopen { animation: hopen 1.05s cubic-bezier(.6,.05,.2,1) both; }
 html.halo.no-anim *, html.halo.no-anim *::before { animation: none !important; transition: none !important; }
 @media (prefers-reduced-motion: reduce) { html.halo .hrise, html.halo .hopen { animation: none !important; } }
@@ -666,3 +666,12 @@ html.halo .lc-btn { background: var(--ink) !important; color: #fff !important; b
 #hsb .hsb-step.done i { background: rgba(255,255,255,.3); border-color: transparent; }
 #hsb .hsb-group { padding-top: 14px; }
 @media (max-height: 820px) { #hsb .hsb-item { padding: 7px 11px; } #hsb .hsb-group { padding: 9px 10px 4px; } }
+
+/* ════════════ Animations d'arrivée sur chaque page ════════════ */
+@keyframes hwipe { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+@keyframes hrow { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+html.halo .hwipe { animation: hwipe 1.2s cubic-bezier(.65,.05,.25,1) backwards; }
+html.halo .hrow { animation: hrow .5s cubic-bezier(.2,.8,.2,1) backwards; }
+html.halo .halo-pre { opacity: 0 !important; }
+html.halo .screen.active { animation: none; }
+@media (prefers-reduced-motion: reduce) { html.halo .hwipe, html.halo .hrow { animation: none !important; } html.halo .halo-pre { opacity: 1 !important; } }
