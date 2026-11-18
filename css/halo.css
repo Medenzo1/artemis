@@ -852,3 +852,90 @@ html.halo.text-lg body { zoom: 1.08; }
 .hs-glass-l { display: flex; justify-content: space-between; font-size: 11px; font-weight: 650; color: var(--text3); }
 @media (max-width: 1100px) { .hs-grid { grid-auto-rows: auto; } }
 @media (max-width: 560px) { .hs-glass { width: 100%; } }
+
+/* ════════════ Calendrier ════════════ */
+#calendarScreen { position: fixed; inset: 0; z-index: 700; overflow-y: auto; }
+html.halo #calendarScreen { background: linear-gradient(160deg, rgba(255,255,255,var(--pa1,.62)), rgba(255,255,255,var(--pa2,.42))), var(--hbg); background-attachment: scroll, fixed, fixed, fixed, fixed; }
+@media (min-width: 901px) { html.halo #calendarScreen { top: 14px; right: 14px; bottom: 14px; left: var(--hsb-w); border-radius: 30px; border: 1px solid rgba(255,255,255,.6); box-shadow: 0 1px 0 rgba(255,255,255,.8) inset, 0 40px 80px -40px rgba(var(--tint2),.45); } }
+@media (max-width: 900px) { html.halo #calendarScreen { bottom: 64px; } }
+#hcal-content { padding: 22px 30px 60px; max-width: 1500px; margin: 0 auto; }
+.hcal-sel { width: auto !important; min-width: 170px; }
+.hh-ag-ico { border: 0; cursor: pointer; }
+.hcal-head { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin-bottom: 16px; }
+.hcal-nav { display: flex; align-items: center; gap: 8px; }
+.hcal-nav h2 { font-size: 26px; font-weight: 800; letter-spacing: -.02em; min-width: 210px; text-align: center; }
+.hcal-arrow { padding: 9px !important; }
+.hcal-legend { display: flex; gap: 6px; flex-wrap: wrap; }
+.hcal-legend button { display: inline-flex; align-items: center; gap: 7px; border: 1px solid rgba(var(--tint),.14); background: rgba(255,255,255,.7); border-radius: 999px; padding: 6px 12px; font: 600 12px var(--font); color: var(--text3); cursor: pointer; transition: all .2s; }
+.hcal-legend button i { width: 10px; height: 10px; border-radius: 50%; opacity: .35; }
+.hcal-legend button.on { color: var(--text); background: #fff; }
+.hcal-legend button.on i { opacity: 1; }
+.hcal-kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-bottom: 16px; }
+.hcal-kpi { flex-direction: row !important; align-items: center; gap: 12px !important; padding: 14px 16px !important; }
+.hcal-kpi b { display: block; font-size: 22px; font-weight: 800; letter-spacing: -.02em; }
+.hcal-kpi small { font-size: 12px; color: var(--text2); }
+.hcal-empty { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 12px 16px; margin-bottom: 16px; border-radius: 16px; background: rgba(var(--acc-rgb),.08); border: 1px solid rgba(var(--acc-rgb),.2); font-size: 13px; color: var(--text2); }
+.hcal-empty svg { color: var(--acc); }
+.hcal-empty span { flex: 1; min-width: 200px; }
+.hcal-main { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 16px; align-items: start; }
+.hcal-month { padding: 14px !important; }
+.hcal-dow { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; padding: 0 2px 8px; }
+.hcal-dow span { font-size: 11px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: .08em; text-align: center; }
+.hcal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
+.hcal-cell { min-height: 104px; border-radius: 14px; border: 1px solid rgba(var(--tint),.1); background: rgba(255,255,255,.7); padding: 7px; display: flex; flex-direction: column; gap: 4px; text-align: left; cursor: pointer; position: relative; font-family: var(--font); color: var(--text); transition: border-color .15s, box-shadow .15s, transform .15s; min-width: 0; }
+.hcal-cell:hover { border-color: rgba(var(--acc-rgb),.45); }
+.hcal-cell.off { background: transparent; border-style: dashed; border-color: rgba(var(--tint),.07); cursor: default; }
+.hcal-cell.we { background: var(--surf); }
+.hcal-cell.today { border-color: var(--acc); box-shadow: 0 0 0 2px rgba(var(--acc-rgb),.2); }
+.hcal-cell.today .hcal-n { background: var(--acc); color: #fff; }
+.hcal-cell.sel { border-color: var(--ink); box-shadow: 0 0 0 2px rgba(0,0,0,.12); }
+.hcal-n { font-size: 12.5px; font-weight: 750; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; }
+.hcal-occ { position: absolute; top: 9px; right: 8px; display: inline-flex; align-items: center; gap: 3px; font-size: 10.5px; font-weight: 700; color: var(--text2); }
+.hcal-its { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.hcal-its i { font-style: normal; font-size: 10.5px; font-weight: 650; padding: 2px 6px; border-radius: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  background: color-mix(in srgb, var(--c) 14%, white); color: color-mix(in srgb, var(--c) 80%, black); border-left: 2.5px solid var(--c); }
+.hcal-its i.out { background: transparent; border-left-style: dashed; }
+.hcal-its em { font-style: normal; font-size: 10.5px; color: var(--text3); padding-left: 4px; }
+.hcal-side { padding: 16px !important; position: sticky; top: 92px; max-height: calc(100vh - 140px); overflow: auto; }
+.hcal-side-h { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+.hcal-side-h b { font-size: 15px; }
+.hcal-side-h small { font-size: 12px; color: var(--text2); }
+.hcal-side .hbtn { padding: 6px 11px; font-size: 12px; }
+/* Planning */
+.hcal-plan { padding: 14px 16px !important; }
+.hcal-plan-scroll { overflow-x: auto; }
+.hcal-plan-in { min-width: calc(170px + var(--days) * 30px + 70px); }
+.hcal-pr { display: grid; grid-template-columns: 170px 1fr 70px; align-items: center; border-bottom: 1px solid var(--row-line); min-height: 44px; }
+.hcal-pr:last-child { border-bottom: 0; }
+.hcal-ph { min-height: 40px; border-bottom: 1px solid rgba(var(--tint),.22); }
+.hcal-pb { font-size: 13px; font-weight: 650; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 10px; }
+.hcal-ph .hcal-pb, .hcal-ph .hcal-po { font-size: 11px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: .06em; }
+.hcal-pd { display: grid; grid-template-columns: repeat(var(--days), minmax(0, 1fr)); height: 100%; align-items: center; }
+.hcal-ph .hcal-pd span { display: flex; flex-direction: column; align-items: center; font-size: 11.5px; font-weight: 650; color: var(--text2); line-height: 1.1; }
+.hcal-ph .hcal-pd span small { font-size: 9px; color: var(--text3); }
+.hcal-ph .hcal-pd span.we { color: var(--text3); }
+.hcal-ph .hcal-pd span.today { color: var(--acc); }
+.hcal-pgrid { background-image: repeating-linear-gradient(90deg, rgba(var(--tint),.06) 0 1px, transparent 1px calc(100% / var(--days))); min-height: 44px; padding: 8px 0; }
+.hcal-bar { font-style: normal; height: 26px; border-radius: 8px; margin: 0 2px; display: flex; align-items: center; padding: 0 7px; font-size: 11px; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--c) 88%, white), var(--c)); box-shadow: 0 4px 10px -6px var(--c); grid-row: 1; }
+.hcal-po { text-align: right; display: flex; flex-direction: column; align-items: flex-end; }
+.hcal-po b { font-size: 13px; }
+.hcal-po small { font-size: 11px; color: var(--text3); }
+.hcal-none { padding: 20px; color: var(--text3); font-size: 13px; }
+.hcal-plan-leg { display: flex; gap: 16px; padding-top: 12px; font-size: 12px; color: var(--text2); }
+.hcal-plan-leg i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+@media (max-width: 1200px) { .hcal-main { grid-template-columns: minmax(0, 1fr); } .hcal-side { position: static; max-height: none; } .hcal-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 700px) {
+  #hcal-content { padding: 14px 12px 40px; }
+  .hcal-nav h2 { font-size: 19px; min-width: 0; }
+  .hcal-grid, .hcal-dow { gap: 3px; }
+  .hcal-cell { min-height: 54px; padding: 4px; border-radius: 10px; }
+  .hcal-its i { font-size: 0; padding: 0; height: 5px; border-radius: 3px; border: 0; background: var(--c); }
+  .hcal-its em, .hcal-occ { display: none; }
+  .hcal-n { width: 20px; height: 20px; font-size: 11.5px; }
+  .hcal-dow span { font-size: 9.5px; letter-spacing: 0; }
+}
+.hcal-main.plan { grid-template-columns: minmax(0, 1fr); }
+.hcal-main.plan .hcal-side { position: static; max-height: none; }
+.hcal-main.plan .hcal-side .hh-evs { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 8px; }
+.hcal-plan-in { min-width: calc(170px + var(--days) * 24px + 70px); }

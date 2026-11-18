@@ -247,7 +247,7 @@ function hhAgenda(d, todo) {
   const items = todo.slice(0, 3).map(t => '<div class="hh-ev"' + (t.go ? ' onclick="' + t.go + '" style="cursor:pointer"' : '') + '><span class="hh-ev-tag">' + hEsc(t.tag) + '</span><i style="background:' + t.c + '"></i><div><b>' + hEsc(t.t) + '</b><small>' + hEsc(t.s) + '</small></div></div>').join('')
     || '<div class="hh-ev hh-ev-empty">' + hIco('check-circle', 16) + '<div><b>Rien à signaler</b><small>Vos données sont à jour</small></div></div>';
   return '<section class="hg hh-agenda"><div class="hh-ag-head"><div class="hh-ag-n">' + now.getDate() + '</div><div><b>' + wd.charAt(0).toUpperCase() + wd.slice(1) + '</b><small>' + my.charAt(0).toUpperCase() + my.slice(1) + ' · ' + todo.length + ' élément' + (todo.length > 1 ? 's' : '') + '</small></div>'
-    + '<span class="hh-ag-ico">' + hIco('calendar', 16) + '</span></div><div class="hh-week">' + week + '</div><div class="hh-evs">' + items + '</div></section>';
+    + '<button class="hh-ag-ico" title="Ouvrir le calendrier" onclick="haloGo(\'calendar\')">' + hIco('calendar', 16) + '</button></div><div class="hh-week">' + week + '</div><div class="hh-evs">' + items + '</div></section>';
 }
 
 function hhKpis(d, biens) {

@@ -4,7 +4,7 @@
 //  profil et l'interface suivent l'utilisateur d'un appareil à l'autre.
 // ════════════════════════════════════════════════════════════════
 
-const HS_START = [['home', 'Accueil'], ['dashboard', 'Tableau de bord'], ['budget', 'Budget']];
+const HS_START = [['home', 'Accueil'], ['dashboard', 'Tableau de bord'], ['calendar', 'Calendrier'], ['budget', 'Budget']];
 
 // ── Application des réglages d'interface (étend celle de la coquille) ──
 (function () {
