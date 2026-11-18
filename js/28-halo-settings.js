@@ -13,9 +13,12 @@ const HS_START = [['home', 'Accueil'], ['dashboard', 'Tableau de bord'], ['budge
     u = u || haloUI();
     base(u);
     const h = document.documentElement;
-    const g = Math.max(0, Math.min(100, u.glass == null ? 40 : +u.glass)) / 100;
-    h.style.setProperty('--glass', 'linear-gradient(155deg, rgba(255,255,255,' + (1 - g * 0.2).toFixed(3) + '), rgba(255,255,255,' + (0.95 - g * 0.4).toFixed(3) + '))');
-    h.style.setProperty('--glass-blur', 'blur(' + Math.round(10 + g * 24) + 'px) saturate(1.45)');
+    // 0 = opaque (cartes et fond blancs) · 100 = verre (cartes transparentes, couleur du thème très présente)
+    const g = Math.max(0, Math.min(100, u.glass == null ? 25 : +u.glass)) / 100;
+    h.style.setProperty('--glass', 'linear-gradient(155deg, rgba(255,255,255,' + (1 - g * 0.5).toFixed(3) + '), rgba(255,255,255,' + (0.96 - g * 0.66).toFixed(3) + '))');
+    h.style.setProperty('--glass-blur', 'blur(' + Math.round(8 + g * 26) + 'px) saturate(' + (1.2 + g * 0.6).toFixed(2) + ')');
+    h.style.setProperty('--pa1', (0.8 - g * 0.65).toFixed(3));
+    h.style.setProperty('--pa2', (0.62 - g * 0.57).toFixed(3));
     h.classList.toggle('compact', !!u.compact);
     h.classList.toggle('text-lg', u.textSize === 'l');
   };
@@ -86,10 +89,10 @@ function hsRender() {
     + '</div></section>';
 
   // Apparence
-  const g = u.glass == null ? 40 : +u.glass;
+  const g = u.glass == null ? 25 : +u.glass;
   const look = '<section class="hg hs-card"><div class="hs-h"><span class="hs-ico">' + hIco('sparkles', 16) + '</span><div><h3>Apparence</h3><small>Couleur d\'accent, verre et densité de l\'interface</small></div></div>'
     + '<div class="hs-swatches">' + HALO_ACCENTS.map(a => '<button class="hs-sw' + ((u.acc || 'corail') === a.id ? ' on' : '') + '" onclick="hsAccent(\'' + a.id + '\')"><i style="background:' + a.c + '"></i><span>' + a.name + '</span></button>').join('') + '</div>'
-    + '<div class="hs-row hs-slider"><span><b>Intensité du verre</b><small>Plus de transparence ou des cartes plus opaques</small></span><input type="range" min="0" max="100" step="5" value="' + g + '" oninput="hsGlass(this.value)" onchange="hsSet(\'glass\', +this.value)"></div>'
+    + '<div class="hs-row hs-slider"><span><b>Intensité du verre</b><small>Cartes opaques, ou transparentes avec la couleur du thème qui ressort</small></span><div class="hs-glass"><input type="range" min="0" max="100" step="5" value="' + g + '" oninput="hsGlass(this.value)" onchange="hsSet(\'glass\', +this.value)"><div class="hs-glass-l"><span>Opaque</span><span>Verre</span></div></div></div>'
     + tog('anim', u.anim !== false, 'Animations', 'Transitions, cascades et compteurs animés')
     + tog('compact', !!u.compact, 'Mode compact', 'Réduit les espacements pour voir plus de données')
     + '<div class="hs-row"><span><b>Taille du texte</b><small>Agrandit toute l\'interface</small></span>' + seg('textSize', u.textSize || 'n', [['n', 'Normale'], ['l', 'Grande']]) + '</div>'
@@ -135,7 +138,7 @@ function hsAccent(id) {
   document.querySelectorAll('.hs-sw').forEach((b, i) => b.classList.toggle('on', HALO_ACCENTS[i].id === id));
 }
 function hsResetLook() {
-  haloSaveUI({ acc: 'corail', glass: 40, anim: true, compact: false, textSize: 'n' });
+  haloSaveUI({ acc: 'corail', glass: 25, anim: true, compact: false, textSize: 'n' });
   hsRender();
   try { showToast('Apparence par défaut rétablie'); } catch (e) {}
 }
