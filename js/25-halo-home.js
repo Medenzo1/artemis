@@ -7,6 +7,7 @@
 
 const HH_BIEN_COLORS = ['#5b8cff', '#f59e0b', '#14b8a6', '#a855f7', '#ec4899', '#ef4444', '#22c55e', '#0ea5e9', '#f97316', '#8b5cf6'];
 let _hhRange = 12;
+const HH_K = { ca: '22,163,95', dep: '224,53,63', net: 'var(--acc-rgb)', marg: '124,92,245' };
 
 // ── Agrégats mensuels ──
 function hhData() {
@@ -67,7 +68,7 @@ function hhSpark(vals, color) {
   if (!vals || vals.length < 2) return '';
   const W = 92, H = 30, mn = Math.min(...vals), mx = Math.max(...vals), rg = mx - mn || 1;
   const pts = vals.map((v, i) => [i / (vals.length - 1) * W, H - 3 - (v - mn) / rg * (H - 6)]);
-  return '<svg class="hh-spark" viewBox="0 0 ' + W + ' ' + H + '" width="' + W + '" height="' + H + '"><path d="' + hhSmooth(pts) + '" fill="none" stroke="' + color + '" stroke-width="2" stroke-linecap="round"/></svg>';
+  return '<svg class="hh-spark" viewBox="0 0 ' + W + ' ' + H + '" width="' + W + '" height="' + H + '"><path d="' + hhSmooth(pts) + '" fill="none" style="stroke:' + color + '" stroke-width="2" stroke-linecap="round"/></svg>';
 }
 // Courbe lissée (Catmull-Rom → Bézier)
 function hhSmooth(p) {
@@ -253,13 +254,13 @@ function hhKpis(d, biens) {
   const s = k => d.w12.map(m => d.M[m] ? d.M[m][k] : 0);
   const marg = d.ca12 ? d.net12 / d.ca12 * 100 : 0, margP = d.caP12 ? d.netP12 / d.caP12 * 100 : 0;
   const lcd = biens.filter(b => (b.mode || b.type) === 'LCD').length, lld = biens.length - lcd;
-  const card = (ico, val, fmt, lbl, sub, badge, spark, acc) => '<section class="hg hh-kpi' + (acc ? ' hacc' : '') + '"><div class="hh-kpi-top"><span class="hh-kpi-ico">' + hIco(ico, 16) + '</span>' + badge + '</div>'
-    + '<div class="hh-kpi-v"><b data-hcount="' + val + '" data-hfmt="' + fmt + '"' + (fmt === 'eur' && acc ? ' data-hsigned="1"' : '') + '>0</b></div><div class="hh-kpi-b"><div><div class="hh-kpi-l">' + lbl + '</div><div class="hh-kpi-s">' + sub + '</div></div>' + spark + '</div></section>';
+  const card = (ico, val, fmt, lbl, sub, badge, spark, krgb) => '<section class="hg hh-kpi hk" style="--krgb:' + krgb + '"><div class="hh-kpi-top"><span class="hh-kpi-ico">' + hIco(ico, 16) + '</span>' + badge + '</div>'
+    + '<div class="hh-kpi-v"><b data-hcount="' + val + '" data-hfmt="' + fmt + '"' + (fmt === 'eur' && krgb === HH_K.net ? ' data-hsigned="1"' : '') + '>0</b></div><div class="hh-kpi-b"><div><div class="hh-kpi-l">' + lbl + '</div><div class="hh-kpi-s">' + sub + '</div></div>' + spark + '</div></section>';
   if (!d.last) return '';
-  return card('wallet', Math.round(d.ca12), 'eur', "Chiffre d'affaires", '12 derniers mois', hhVar(d.ca12, d.caP12), hhSpark(s('ca'), '#16a35f'))
-    + card('receipt', Math.round(d.dep12), 'eur', 'Charges', '12 derniers mois', hhVar(d.dep12, d.depP12, true), hhSpark(s('dep'), '#e0353f'))
-    + card('coins', Math.round(d.net12), 'eur', 'Cash-flow net', 'après crédits · 12 mois', hhVar(d.net12, d.netP12), hhSpark(s('net'), 'rgba(255,255,255,.95)'), true)
-    + card('percent', marg.toFixed(1), 'pct', 'Marge nette', biens.length ? lcd + ' LCD · ' + lld + ' LLD' : 'cash-flow / CA', d.caP12 ? '<span class="hbadge ' + (marg >= margP ? 'up' : 'down') + '">' + hPct(marg - margP, true).replace('%', 'pt') + '</span>' : '<span class="hbadge flat">—</span>', '');
+  return card('wallet', Math.round(d.ca12), 'eur', "Chiffre d'affaires", '12 derniers mois', hhVar(d.ca12, d.caP12), hhSpark(s('ca'), '#16a35f'), HH_K.ca)
+    + card('receipt', Math.round(d.dep12), 'eur', 'Charges', '12 derniers mois', hhVar(d.dep12, d.depP12, true), hhSpark(s('dep'), '#e0353f'), HH_K.dep)
+    + card('coins', Math.round(d.net12), 'eur', 'Cash-flow net', 'après crédits · 12 mois', hhVar(d.net12, d.netP12), hhSpark(s('net'), 'var(--acc)'), HH_K.net)
+    + card('percent', marg.toFixed(1), 'pct', 'Marge nette', biens.length ? lcd + ' LCD · ' + lld + ' LLD' : 'cash-flow / CA', d.caP12 ? '<span class="hbadge ' + (marg >= margP ? 'up' : 'down') + '">' + hPct(marg - margP, true).replace('%', 'pt') + '</span>' : '<span class="hbadge flat">—</span>', '', HH_K.marg);
 }
 
 function hhActions(d) {
@@ -331,15 +332,15 @@ function hhDrawRevenue(first) {
   const draw = s => {
     const pa = s.a.map((v, i) => [x(i), yv(v, s.mx)]), pb = s.b.map((v, i) => [x(i), yv(v, s.mx)]);
     const la = hhSmooth(pa), lb = hhSmooth(pb);
-    let g = '<defs><linearGradient id="hh-ga" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--acc)" stop-opacity=".42"/><stop offset="1" stop-color="var(--acc)" stop-opacity="0"/></linearGradient></defs>';
+    let g = '<defs><linearGradient id="hh-ga" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--acc)" stop-opacity=".42"/><stop offset="1" style="stop-color:var(--acc)" stop-opacity="0"/></linearGradient></defs>';
     for (let i = 0; i <= ticks; i++) {
       const v = s.mx / 1.12 * i / ticks, yy = yv(v, s.mx);
       g += '<line x1="' + P.l + '" x2="' + (W - P.r) + '" y1="' + yy.toFixed(1) + '" y2="' + yy.toFixed(1) + '" class="hh-grid-l"/><text x="' + (P.l - 8) + '" y="' + (yy + 4).toFixed(1) + '" class="hh-ax" text-anchor="end">' + fmtAx(v) + '</text>';
     }
     labelsX.forEach((L, i) => { if (i % every === 0 || i === labelsX.length - 1) g += '<text x="' + L.x.toFixed(1) + '" y="' + (H - 8) + '" class="hh-ax" text-anchor="middle">' + H_MONTHS_S[+L.k.slice(5) - 1] + '</text>'; });
     g += '<path d="' + la + 'L' + x(N - 1) + ',' + (P.t + ch) + 'L' + P.l + ',' + (P.t + ch) + 'Z" fill="url(#hh-ga)"/>';
-    g += '<path d="' + la + '" fill="none" stroke="var(--acc)" stroke-width="2.6" stroke-linecap="round"/>';
-    g += '<path d="' + lb + '" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" opacity=".85"/>';
+    g += '<path d="' + la + '" fill="none" style="stroke:var(--acc)" stroke-width="2.6" stroke-linecap="round"/>';
+    g += '<path d="' + lb + '" fill="none" style="stroke:var(--ink)" stroke-width="2" stroke-linecap="round" opacity=".85"/>';
     g += '<g id="hh-hover"></g>';
     svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
     svg.setAttribute('width', W); svg.setAttribute('height', H);

@@ -19,7 +19,7 @@ html.halo {
   --acc-ink: #fff;
   --hb1: #f7eee8; --hb2: #f0ddd2; --hb3: #e8c9ba; --hglow: rgba(255,214,180,.85);
   --tint: 110,60,45; --tint2: 110,40,20; --ink: #1f1719;
-  --sb1: #ea5238; --sb2: #b5301c; --surf: #fdfaf8; --surf2: #f7efea;
+  --sb1: #ea5238; --sb2: #b5301c; --acc-rgb: 242,85,61; --surf: #fdfaf8; --surf2: #f7efea;
   --font: 'Inter Tight', 'Inter', system-ui, -apple-system, sans-serif;
   --serif: 'Instrument Serif', Georgia, serif;
 
@@ -49,13 +49,13 @@ html.halo {
 }
 html.halo[data-acc="lagune"]  { --acc: #0fa595; --acc2: #49d3bf; --acc3: #0a7a6e;
   --hb1: #eef8f5; --hb2: #d6eee7; --hb3: #b9ded5; --hglow: rgba(186,240,224,.9); --tint: 25,85,78; --tint2: 12,72,64;
-  --sb1: #0f9586; --sb2: #08625a; --surf: #f9fdfc; --surf2: #ebf5f2; --text: #0e1f1d; --text1: #0e1f1d; --text2: #3c5553; --text3: #6a8180; --ink: #0f2421; }
+  --sb1: #0f9586; --sb2: #08625a; --acc-rgb: 15,165,149; --surf: #f9fdfc; --surf2: #ebf5f2; --text: #0e1f1d; --text1: #0e1f1d; --text2: #3c5553; --text3: #6a8180; --ink: #0f2421; }
 html.halo[data-acc="lavande"] { --acc: #7657f2; --acc2: #a58bff; --acc3: #5636d6;
   --hb1: #f4f1fd; --hb2: #e3dcf8; --hb3: #cbc0ef; --hglow: rgba(226,212,255,.9); --tint: 72,55,125; --tint2: 60,38,125;
-  --sb1: #6c4de8; --sb2: #4527bd; --surf: #fbfaff; --surf2: #efecfb; --text: #1a1829; --text1: #1a1829; --text2: #4e4966; --text3: #7c7794; --ink: #1b1730; }
+  --sb1: #6c4de8; --sb2: #4527bd; --acc-rgb: 118,87,242; --surf: #fbfaff; --surf2: #efecfb; --text: #1a1829; --text1: #1a1829; --text2: #4e4966; --text3: #7c7794; --ink: #1b1730; }
 html.halo[data-acc="ocean"]   { --acc: #2f74f0; --acc2: #6fa8ff; --acc3: #1c55c4;
   --hb1: #eff5fd; --hb2: #dae6f8; --hb3: #bfd3f1; --hglow: rgba(198,222,255,.9); --tint: 40,68,115; --tint2: 22,55,118;
-  --sb1: #2b67e0; --sb2: #1645ab; --surf: #fafcff; --surf2: #ebf1fb; --text: #121a28; --text1: #121a28; --text2: #434f65; --text3: #727d94; --ink: #121a2b; }
+  --sb1: #2b67e0; --sb2: #1645ab; --acc-rgb: 47,116,240; --surf: #fafcff; --surf2: #ebf1fb; --text: #121a28; --text1: #121a28; --text2: #434f65; --text3: #727d94; --ink: #121a2b; }
 
 /* ─── Fond : lumière chaude teintée par l'accent ─── */
 html.halo {
@@ -501,17 +501,6 @@ html.halo .gd-pill { background: rgba(255,255,255,.7) !important; color: var(--t
   .hdash-tabs .hseg { flex: none; }
   html.halo body.halo-in .app { padding: 8px 16px 100px !important; }
 }
-/* Première carte de chiffres = carte accent, comme la vidéo */
-html.halo #syn-content > .dash-grid-4 > .kpi-card:first-child {
-  color: #fff;
-  background: radial-gradient(120% 90% at 85% 0%, rgba(255,255,255,.28), transparent 55%), linear-gradient(140deg, var(--acc2) -10%, var(--acc) 45%, var(--acc3) 120%) !important;
-  border-color: rgba(255,255,255,.45) !important;
-  box-shadow: 0 1px 0 rgba(255,255,255,.4) inset, 0 28px 50px -26px color-mix(in srgb, var(--acc3) 90%, transparent) !important;
-}
-html.halo #syn-content > .dash-grid-4 > .kpi-card:first-child * { color: #fff !important; }
-html.halo #syn-content > .dash-grid-4 > .kpi-card:first-child .kpi-v2-pill { background: rgba(255,255,255,.22) !important; }
-html.halo #syn-content > .dash-grid-4 > .kpi-card:first-child svg path, html.halo #syn-content > .dash-grid-4 > .kpi-card:first-child svg polyline { stroke: #fff !important; }
-html.halo #syn-content > .dash-grid-4 > .kpi-card:first-child svg [fill^="url"] { opacity: .35; }
 html.halo .kpi-card [style*="uppercase"], html.halo #syn-filters .lbl, html.halo .dash-panel .lbl { text-transform: none !important; letter-spacing: 0 !important; font-size: 12px !important; font-weight: 650 !important; color: var(--text2) !important; }
 html.halo .kpi-card .art-emo { opacity: .22 !important; }
 /* Bandes haute et basse : le contenu qui défile disparaît au bord du panneau */
@@ -745,3 +734,17 @@ html.halo .bud-grid tbody tr:hover > td { background-color: var(--surf2) !import
 /* ════════════ Espacement régulier entre les blocs ════════════ */
 html.halo .dash-panel > * + *, html.halo [id$="-content"] > * + *, html.halo #bud-content > * + * { margin-top: 18px; }
 html.halo .dash-panel > [style*="display:none"] + *, html.halo .dash-panel > [style*="display: none"] + * { margin-top: 0; }
+
+/* ════════════ Cartes de chiffres : toutes blanches, une couleur de sens chacune ════════════ */
+html.halo .kpi-card.hk, html.halo .hh-kpi.hk {
+  background: radial-gradient(130% 100% at 0% 0%, rgba(var(--krgb),.11), rgba(var(--krgb),0) 55%), var(--glass) !important;
+}
+html.halo .kpi-card.hk .hk-val, html.halo .hh-kpi.hk .hh-kpi-v b { color: var(--text) !important; }
+html.halo .kpi-card.hk .hk-ico, html.halo .hh-kpi.hk .hh-kpi-ico {
+  width: 32px; height: 32px; border-radius: 11px; display: inline-grid; place-items: center; flex: none;
+  background: rgba(var(--krgb),.13) !important; color: rgb(var(--krgb)) !important; box-shadow: none !important; vertical-align: middle;
+}
+html.halo .kpi-card.hk .hk-ico svg { width: 16px; height: 16px; }
+html.halo .kpi-card.hk .kpi-v2-lbl { gap: 10px; }
+html.halo .kpi-card.hk .hk-deco { color: rgb(var(--krgb)) !important; opacity: .2 !important; }
+html.halo .kpi-card.hk .hk-name { color: rgb(var(--krgb)) !important; }

@@ -114,3 +114,38 @@ function hdashSync() {
   window.enterDashboard._halo = true;
 })();
 document.addEventListener('DOMContentLoaded', hdashBuild);
+
+// ── Cartes de chiffres : couleur de sens lue sur le montant, montant passé en noir ──
+function haloDecorateKpis(root) {
+  (root || document).querySelectorAll('.kpi-card:not(.hk)').forEach(card => {
+    let val = card.querySelector('.kpi-v2-val');
+    if (!val) {
+      let best = null, max = 0;
+      card.querySelectorAll('div, span').forEach(n => {
+        if (n.children.length || !n.textContent.trim() || n.closest('.art-emo')) return;
+        const f = parseFloat(getComputedStyle(n).fontSize) || 0;
+        if (f > max) { max = f; best = n; }
+      });
+      val = best;
+    }
+    if (!val) return;
+    const m = getComputedStyle(val).color.match(/\d+(\.\d+)?/g);
+    if (!m) return;
+    card.style.setProperty('--krgb', m.slice(0, 3).join(','));
+    card.classList.add('hk');
+    val.classList.add('hk-val');
+    const lblIco = card.querySelector('.kpi-v2-lbl .art-emo');
+    if (lblIco) lblIco.classList.add('hk-ico');
+    card.querySelectorAll('.art-emo').forEach(e => { if (e !== lblIco) e.classList.add('hk-deco'); });
+    // Nom du « meilleur bien » / « poste principal » : garde la couleur de sens
+    card.querySelectorAll('div').forEach(n => { if (!n.children.length && n !== val && /color:\s*var\(--(green|red|gold|purple|cyan|blue|orange|pink)\)/.test(n.getAttribute('style') || '')) n.classList.add('hk-name'); });
+  });
+}
+(function () {
+  let t = null;
+  const run = () => { clearTimeout(t); t = setTimeout(() => haloDecorateKpis(document.getElementById('sc6')), 30); };
+  document.addEventListener('DOMContentLoaded', () => {
+    const sc6 = document.getElementById('sc6');
+    if (sc6) new MutationObserver(run).observe(sc6, { childList: true, subtree: true });
+  });
+})();
