@@ -117,8 +117,8 @@ function haloBuildSidebar() {
     if (n.steps) html += '<div class="hsb-steps">' + n.steps.map((st, i) => '<button class="hsb-step" data-step="' + st[0] + '" onclick="haloGo(\'' + st[0] + '\')"><i>' + (i + 1) + '</i>' + st[1] + '</button>').join('') + '</div>';
   });
   html += '<div class="hsb-spacer"></div>'
-    + '<div class="hsb-user"><div class="hsb-av" id="hsb-av"></div><div style="min-width:0;cursor:pointer" onclick="haloAppearance(event)"><div class="hsb-uname" id="hsb-uname"></div><div class="hsb-urole">Apparence · thème</div></div>'
-    + '<button class="hsb-out" title="Se déconnecter" onclick="logout()">' + hIco('power', 16) + '</button></div>';
+    + '<div class="hsb-user" role="button" tabindex="0" title="Profil et paramètres" onclick="haloAppearance(event)" onkeydown="if(event.key===\'Enter\')haloAppearance(event)"><div class="hsb-av" id="hsb-av"></div><div style="min-width:0"><div class="hsb-uname" id="hsb-uname"></div><div class="hsb-urole">Paramètres</div></div>'
+    + '<button class="hsb-out" title="Se déconnecter" onclick="event.stopPropagation();logout()">' + hIco('power', 16) + '</button></div>';
   sb.innerHTML = html;
   document.body.appendChild(sb);
   haloRefreshUser();

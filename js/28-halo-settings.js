@@ -164,7 +164,21 @@ function hsPhoto(input) {
 // ── Branchement dans la navigation ──
 (function () {
   // Route « settings » dans la barre latérale (groupe Système)
-  HALO_NAV.push({ group: 'Système' }, { id: 'settings', label: 'Paramètres', ico: 'settings', hint: 'Profil, apparence et préférences' });
+  // Pas d'entrée dans la barre latérale : on y accède en cliquant sur le profil (et par la recherche)
+  const basePal = window.haloPaletteItems;
+  window.haloPaletteItems = function () {
+    const items = basePal.apply(this, arguments);
+    items.splice(1, 0, { sec: 'Aller à', label: 'Paramètres', hint: 'Profil, apparence et préférences', ico: 'settings', kw: 'parametres profil apparence theme couleur preferences', run: () => haloGo('settings') });
+    return items;
+  };
+  // Le profil s'allume quand on est dans les Paramètres
+  const baseActive = window.haloSetActive;
+  window.haloSetActive = function (route) {
+    const r = baseActive.apply(this, arguments);
+    const u = document.querySelector('#hsb .hsb-user');
+    if (u) u.classList.toggle('on', route === 'settings');
+    return r;
+  };
   const baseGo = window.haloGo;
   window.haloGo = function (route) {
     const s = document.getElementById('settingsScreen');

@@ -971,3 +971,10 @@ html.halo .hcal-swap { animation: hcalswap .28s ease; }
 @media (max-width: 560px) { .hcal-f2 { grid-template-columns: 1fr 1fr; } .hcal-f2 .hcal-f:last-child { grid-column: 1 / -1; } .hcal-mbox { padding: 18px; border-radius: 22px; } }
 .hcal-f input, .hcal-f select, .hcal-f textarea { width: 100% !important; min-width: 0 !important; height: auto !important; box-sizing: border-box; }
 .hcal-f input[type=date], .hcal-f input[type=time] { min-height: 42px; }
+/* Profil = accès aux Paramètres */
+#hsb .hsb-user { cursor: pointer; transition: background .2s, box-shadow .2s; }
+#hsb .hsb-user:hover { background: rgba(0,0,0,.2); }
+#hsb .hsb-user.on { background: #fff; color: var(--text); box-shadow: 0 8px 18px -10px rgba(0,0,0,.45); }
+html.halo #hsb .hsb-user.on .hsb-uname { color: var(--text) !important; }
+#hsb .hsb-user.on .hsb-urole { color: var(--text2); opacity: 1; }
+#hsb .hsb-user.on .hsb-out { color: var(--text2); }
