@@ -101,7 +101,7 @@ function haloRenderHome(quiet) {
   const params = (() => { try { return getParams(); } catch (e) { return { biens: [] }; } })();
   const biens = params.biens || [];
   const now = new Date();
-  const name = haloUserName();
+  const name = haloUI().greet === false ? '' : haloUserName();
   const todayLbl = now.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
 
   // Sous-titre : choses à faire

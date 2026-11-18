@@ -26,6 +26,7 @@ const _SYNC_KEYS = new Set([
   'artemis_airbnb_rows',
   'artemis_booking_rows',
   'artemis_budget',
+  'artemis_ui',        // profil et apparence (Paramètres)
 ]);
 
 // NB: on a essayé d'intercepter localStorage.setItem/removeItem directement,
