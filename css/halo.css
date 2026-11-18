@@ -25,14 +25,14 @@ html.halo {
   /* Anciens jetons, recalés sur le thème clair */
   --bg: #f3e6de; --bg2: rgba(255,255,255,.5); --bg3: rgba(255,255,255,.62); --bg4: rgba(255,255,255,.78);
   --border: rgba(255,255,255,.62); --border2: rgba(var(--tint),.14);
-  --text: #231a1c; --text1: #231a1c; --text2: #6e6064; --text3: #988a8d;
+  --text: #231a1c; --text1: #231a1c; --text2: #594c50; --text3: #84777a;
   --cyan: var(--acc); --cyan2: var(--acc3);
   --gold: #d98a0b; --gold2: #b8730a;
   --red: #e0353f; --green: #16a35f; --purple: #7c5cf5; --blue: #2f7bf5; --blue2: #1e5bd0;
   --orange: #ef7d1f; --orange2: #d6650e; --pink: #e0559b; --pink2: #c43c82;
 
   /* Verre */
-  --glass: linear-gradient(155deg, rgba(255,255,255,.72), rgba(255,255,255,.42));
+  --glass: linear-gradient(155deg, rgba(255,255,255,.92), rgba(255,255,255,.78));
   --glass-soft: linear-gradient(155deg, rgba(255,255,255,.5), rgba(255,255,255,.26));
   --glass-line: rgba(255,255,255,.78);
   --glass-blur: blur(22px) saturate(1.45);
@@ -48,20 +48,20 @@ html.halo {
 }
 html.halo[data-acc="lagune"]  { --acc: #0fa595; --acc2: #49d3bf; --acc3: #0a7a6e;
   --hb1: #eef8f5; --hb2: #d6eee7; --hb3: #b9ded5; --hglow: rgba(186,240,224,.9); --tint: 25,85,78; --tint2: 12,72,64;
-  --text: #10211f; --text1: #10211f; --text2: #4f6866; --text3: #84999a; --ink: #0f2421; }
+  --text: #0e1f1d; --text1: #0e1f1d; --text2: #3c5553; --text3: #6a8180; --ink: #0f2421; }
 html.halo[data-acc="lavande"] { --acc: #7657f2; --acc2: #a58bff; --acc3: #5636d6;
   --hb1: #f4f1fd; --hb2: #e3dcf8; --hb3: #cbc0ef; --hglow: rgba(226,212,255,.9); --tint: 72,55,125; --tint2: 60,38,125;
-  --text: #1c1a2c; --text1: #1c1a2c; --text2: #615c78; --text3: #928ca9; --ink: #1b1730; }
+  --text: #1a1829; --text1: #1a1829; --text2: #4e4966; --text3: #7c7794; --ink: #1b1730; }
 html.halo[data-acc="ocean"]   { --acc: #2f74f0; --acc2: #6fa8ff; --acc3: #1c55c4;
   --hb1: #eff5fd; --hb2: #dae6f8; --hb3: #bfd3f1; --hglow: rgba(198,222,255,.9); --tint: 40,68,115; --tint2: 22,55,118;
-  --text: #141c2a; --text1: #141c2a; --text2: #556177; --text3: #8893a8; --ink: #121a2b; }
+  --text: #121a28; --text1: #121a28; --text2: #434f65; --text3: #727d94; --ink: #121a2b; }
 
 /* ─── Fond : lumière chaude teintée par l'accent ─── */
 html.halo {
   --hbg:
-    radial-gradient(1100px 720px at 8% -12%, color-mix(in srgb, var(--acc2) 52%, transparent), transparent 62%),
+    radial-gradient(1100px 720px at 8% -12%, color-mix(in srgb, var(--acc2) 30%, transparent), transparent 62%),
     radial-gradient(900px 700px at 100% 8%, var(--hglow), transparent 64%),
-    radial-gradient(1300px 820px at 62% 118%, color-mix(in srgb, var(--acc) 48%, transparent), transparent 62%),
+    radial-gradient(1300px 820px at 62% 118%, color-mix(in srgb, var(--acc) 24%, transparent), transparent 62%),
     linear-gradient(162deg, var(--hb1) 0%, var(--hb2) 48%, var(--hb3) 100%);
 }
 html.halo body {
@@ -675,3 +675,48 @@ html.halo .hrow { animation: hrow .5s cubic-bezier(.2,.8,.2,1) backwards; }
 html.halo .halo-pre { opacity: 0 !important; }
 html.halo .screen.active { animation: none; }
 @media (prefers-reduced-motion: reduce) { html.halo .hwipe, html.halo .hrow { animation: none !important; } html.halo .halo-pre { opacity: 1 !important; } }
+
+/* ════════════ Lisibilité ════════════ */
+/* Panneau de fond plus calme : le contenu ressort mieux */
+@media (min-width: 901px) {
+  html.halo body.halo-in::before { background: linear-gradient(160deg, rgba(255,255,255,.62), rgba(255,255,255,.4)); }
+}
+html.halo #marketplaceScreen, html.halo #simulateurScreen, html.halo #budgetScreen {
+  background: linear-gradient(160deg, rgba(255,255,255,.64), rgba(255,255,255,.42)), var(--hbg) !important;
+  background-attachment: scroll, fixed, fixed, fixed, fixed !important;
+}
+/* Cartes : verre presque opaque, contour net */
+html.halo { --shadow: 0 0 0 1px rgba(var(--tint),.06), 0 1px 0 rgba(255,255,255,.95) inset, 0 16px 36px -22px rgba(var(--tint2),.4), 0 2px 6px -3px rgba(var(--tint2),.12); }
+/* Blocs posés sans carte → carte */
+html.halo #sig-table-body, html.halo .dash-panel > .tbl-wrap, html.halo #res-content > table {
+  background: var(--glass); border: 1px solid var(--glass-line); border-radius: var(--r); box-shadow: var(--shadow);
+  padding: 4px 18px 14px; margin-top: 16px; -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
+}
+/* Barre latérale : couleur pleine et profonde, texte blanc bien contrasté */
+#hsb {
+  background:
+    radial-gradient(120% 60% at 0% 0%, rgba(255,255,255,.16), transparent 60%),
+    linear-gradient(170deg, color-mix(in srgb, var(--acc) 94%, black), var(--acc3)) !important;
+  border-color: rgba(255,255,255,.22);
+}
+#hsb .hsb-item, #hsb .hsb-step { color: #fff; }
+#hsb .hsb-group { opacity: .78; }
+#hsb .hsb-sub, #hsb .hsb-urole { opacity: .85; }
+#hsb .hsb-item:hover { background: rgba(255,255,255,.16); }
+#hsb .hsb-search { background: rgba(0,0,0,.12); border-color: rgba(255,255,255,.22); color: #fff; }
+#hsb .hsb-user { background: rgba(0,0,0,.12); }
+/* Champs : fond blanc et contour visible */
+html.halo select.sel, html.halo input.inp, html.halo input[type="date"], html.halo input[type="text"], html.halo input[type="number"],
+html.halo input[type="search"], html.halo input[type="email"], html.halo input[type="password"], html.halo textarea, html.halo .ms-btn,
+html.halo .sim-form input, html.halo .sim-form select, html.halo .sim-form textarea, html.halo .mkt-form input, html.halo .mkt-form select, html.halo .mkt-form textarea, html.halo .li {
+  background-color: #fff !important; border: 1px solid rgba(var(--tint),.2) !important; box-shadow: 0 1px 2px rgba(var(--tint),.06) !important;
+}
+html.halo .bud-grid input { border-color: transparent !important; box-shadow: none !important; background: transparent !important; }
+html.halo .bud-grid input:hover { background: #fff !important; border-color: rgba(var(--tint),.18) !important; }
+/* Tableaux : texte un cran plus grand, séparateurs visibles, en-têtes lisibles */
+html.halo table { font-size: 13px; }
+html.halo tbody tr { border-bottom-color: rgba(var(--tint),.1); }
+html.halo thead th { color: var(--text2) !important; }
+html.halo .td-muted, html.halo .kpi-v2-sub, html.halo .kpi-v2-blbl { color: var(--text2) !important; }
+/* Badges de variation : couleurs plus franches */
+html.halo { --ok: #0f8a4f; --ko: #cf2a35; }
