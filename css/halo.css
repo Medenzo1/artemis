@@ -939,3 +939,5 @@ html.halo #calendarScreen { background: linear-gradient(160deg, rgba(255,255,255
 .hcal-main.plan .hcal-side { position: static; max-height: none; }
 .hcal-main.plan .hcal-side .hh-evs { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 8px; }
 .hcal-plan-in { min-width: calc(170px + var(--days) * 24px + 70px); }
+@keyframes hcalswap { from { opacity: .35; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+html.halo .hcal-swap { animation: hcalswap .28s ease; }

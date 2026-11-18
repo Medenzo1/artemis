@@ -115,11 +115,15 @@ function showCalendar() {
   if (!_hcal.month) _hcal.month = hcalToday().slice(0, 7);
   hcalRender();
 }
-function hcalNav(d) { _hcal.month = d === 0 ? hcalToday().slice(0, 7) : hShift(_hcal.month, d); _hcal.day = null; hcalRender(true); }
-function hcalSet(k, v) { _hcal[k] = v; if (k !== 'day') _hcal.day = null; hcalRender(true); }
-function hcalToggle(k) { _hcal.show[k] = !_hcal.show[k]; hcalRender(true); }
+function hcalNav(d) { _hcal.month = d === 0 ? hcalToday().slice(0, 7) : hShift(_hcal.month, d); _hcal.day = null; hcalRender('month'); }
+// Clic sur un jour : seul le panneau de droite et la case sélectionnée changent (pas de rechargement)
+function hcalSet(k, v) {
+  if (k === 'day') { _hcal.day = (v === _hcal.day ? null : v); return hcalRender('day'); }
+  _hcal[k] = v; _hcal.day = null; hcalRender(k === 'month' ? 'month' : 'soft');
+}
+function hcalToggle(k) { _hcal.show[k] = !_hcal.show[k]; hcalRender('soft'); }
 
-function hcalRender(anim) {
+function hcalRender(mode) {
   const box = document.getElementById('hcal-content');
   if (!box) return;
   const m = _hcal.month, [Y, M] = m.split('-').map(Number);
@@ -167,8 +171,12 @@ function hcalRender(anim) {
     empty = '<div class="hcal-empty">' + hIco('info', 15) + '<span>Aucune réservation importée pour l\'instant : importez un export Airbnb ou Booking pour voir les séjours ici.</span><button class="hbtn hbtn-light" onclick="haloGo(\'import\')">Importer</button></div>';
   }
 
-  box.innerHTML = head + kpis + empty + '<div class="hcal-main' + (_hcal.view === 'planning' ? ' plan' : '') + '">' + body + hcalSide(m, stays, events) + '</div>';
-  if (anim && typeof haloAnimateIn === 'function') requestAnimationFrame(() => haloAnimateIn(box));
+  if (mode === 'day' && box.querySelector('.hcal-side')) {
+    box.querySelectorAll('.hcal-cell[data-d]').forEach(c => c.classList.toggle('sel', c.dataset.d === _hcal.day));
+    box.querySelector('.hcal-side').outerHTML = hcalSide(m, stays, events);
+    return;
+  }
+  box.innerHTML = head + kpis + empty + '<div class="hcal-main' + (_hcal.view === 'planning' ? ' plan' : '') + (mode === 'month' ? ' hcal-swap' : '') + '">' + body + hcalSide(m, stays, events) + '</div>';
 }
 
 // Vue Mois : grille 7 colonnes
@@ -194,7 +202,7 @@ function hcalMonth(m, dim, stays, events) {
     if (!d) { html += '<div class="hcal-cell off"></div>'; return; }
     const its = (byDay[d] || []).sort((a, b) => a.k - b.k);
     const occ = occBy[d] || 0;
-    html += '<button class="hcal-cell' + (d === today ? ' today' : '') + (d === _hcal.day ? ' sel' : '') + (d.slice(8) && new Date(d).getDay() % 6 === 0 ? ' we' : '') + '" onclick="hcalSet(\'day\',\'' + d + '\')">'
+    html += '<button data-d="' + d + '" class="hcal-cell' + (d === today ? ' today' : '') + (d === _hcal.day ? ' sel' : '') + (d.slice(8) && new Date(d).getDay() % 6 === 0 ? ' we' : '') + '" onclick="hcalSet(\'day\',\'' + d + '\')">'
       + '<span class="hcal-n">' + (+d.slice(8)) + '</span>' + (occ ? '<span class="hcal-occ" title="' + occ + ' logement(s) occupé(s)">' + hIco('bed-double', 11) + occ + '</span>' : '')
       + '<span class="hcal-its">' + its.slice(0, 3).map(it => '<i class="' + (it.out ? 'out' : '') + '" style="--c:' + it.c + '">' + hEsc(it.t) + '</i>').join('') + (its.length > 3 ? '<em>+' + (its.length - 3) + ' autre' + (its.length > 4 ? 's' : '') + '</em>' : '') + '</span></button>';
   });
