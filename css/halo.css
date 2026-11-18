@@ -941,3 +941,33 @@ html.halo #calendarScreen { background: linear-gradient(160deg, rgba(255,255,255
 .hcal-plan-in { min-width: calc(170px + var(--days) * 24px + 70px); }
 @keyframes hcalswap { from { opacity: .35; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 html.halo .hcal-swap { animation: hcalswap .28s ease; }
+
+/* ════════════ Calendrier : événements personnels ════════════ */
+.hcal-its i.ev { cursor: pointer; background: var(--c); color: #fff; border-left-color: color-mix(in srgb, var(--c) 70%, black); }
+.hcal-its i.ev:hover { filter: brightness(1.08); }
+.hcal-side-a { display: inline-flex; gap: 6px; }
+#hcal-modal { position: fixed; inset: 0; z-index: 10001; display: flex; align-items: center; justify-content: center; padding: 16px;
+  background: rgba(var(--tint2),.25); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); animation: hfade .18s ease; }
+.hcal-mbox { width: min(560px, 100%); max-height: calc(100vh - 32px); overflow: auto; border-radius: 26px; padding: 22px 24px;
+  background: linear-gradient(160deg, rgba(255,255,255,.98), rgba(255,255,255,.92)); border: 1px solid #fff;
+  box-shadow: 0 40px 90px -30px rgba(var(--tint2),.6); display: flex; flex-direction: column; gap: 14px; animation: hpop .28s cubic-bezier(.2,.9,.3,1.2); }
+.hcal-mh { display: flex; align-items: center; justify-content: space-between; }
+.hcal-mh b { font-size: 19px; font-weight: 800; letter-spacing: -.01em; }
+.hcal-mx { border: 0; background: rgba(var(--tint),.07); width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; cursor: pointer; color: var(--text2); }
+.hcal-mx:hover { background: rgba(var(--tint),.13); color: var(--text); }
+.hcal-f { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.hcal-f > span { font-size: 12px; font-weight: 650; color: var(--text2); }
+.hcal-f > span small { font-weight: 500; color: var(--text3); }
+.hcal-f input, .hcal-f select, .hcal-f textarea { padding: 10px 12px; font: 500 13.5px var(--font); width: 100%; resize: vertical; }
+.hcal-f2 { display: grid; grid-template-columns: 1fr 1fr 120px; gap: 12px; }
+.hcal-cats { display: flex; flex-wrap: wrap; gap: 6px; }
+.hcal-cats button { display: inline-flex; align-items: center; gap: 7px; padding: 7px 12px; border-radius: 999px; cursor: pointer;
+  border: 1.5px solid rgba(var(--tint),.14); background: #fff; font: 600 12.5px var(--font); color: var(--text2); transition: all .15s; }
+.hcal-cats button i { width: 10px; height: 10px; border-radius: 50%; background: var(--c); }
+.hcal-cats button.on { border-color: var(--c); color: var(--text); box-shadow: 0 0 0 3px color-mix(in srgb, var(--c) 18%, transparent); }
+.hcal-mf { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; padding-top: 6px; border-top: 1px solid var(--row-line); }
+.hcal-mf > span { display: inline-flex; gap: 8px; }
+.hcal-del { color: var(--ko) !important; }
+@media (max-width: 560px) { .hcal-f2 { grid-template-columns: 1fr 1fr; } .hcal-f2 .hcal-f:last-child { grid-column: 1 / -1; } .hcal-mbox { padding: 18px; border-radius: 22px; } }
+.hcal-f input, .hcal-f select, .hcal-f textarea { width: 100% !important; min-width: 0 !important; height: auto !important; box-sizing: border-box; }
+.hcal-f input[type=date], .hcal-f input[type=time] { min-height: 42px; }

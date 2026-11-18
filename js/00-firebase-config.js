@@ -27,6 +27,7 @@ const _SYNC_KEYS = new Set([
   'artemis_booking_rows',
   'artemis_budget',
   'artemis_ui',        // profil et apparence (Paramètres)
+  'artemis_events',    // événements du calendrier
 ]);
 
 // NB: on a essayé d'intercepter localStorage.setItem/removeItem directement,

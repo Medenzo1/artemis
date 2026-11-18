@@ -155,6 +155,16 @@ function hhTodo(d) {
       if (dt && dt >= mon && dt < sun) out.push({ t: 'Arrivée · ' + (r.logement || 'réservation'), s: r.nuits + ' nuit' + (r.nuits > 1 ? 's' : '') + ' · ' + (r.source === 'booking' ? 'Booking' : 'Airbnb'), tag: dt.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric' }), c: r.source === 'booking' ? '#2f74f0' : '#ff5a5f', date: dt });
     });
   } catch (e) {}
+  try {
+    const mon = new Date(now); mon.setHours(0, 0, 0, 0); mon.setDate(mon.getDate() - ((mon.getDay() + 6) % 7));
+    const sun = new Date(mon); sun.setDate(sun.getDate() + 7);
+    (typeof hcalUserEvents === 'function' ? hcalUserEvents() : []).forEach(ev => {
+      const dt = hhParseDate(ev.date);
+      if (!dt || dt < mon || dt >= sun) return;
+      const cat = hcalCat(ev.cat);
+      out.unshift({ t: ev.title, s: cat[1] + (ev.time ? ' · ' + ev.time : '') + (ev.bien ? ' · ' + ev.bien : ''), tag: dt.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric' }), c: cat[2], date: dt, go: "haloGo('calendar');setTimeout(()=>hcalEdit('" + ev.id + "'),50)" });
+    });
+  } catch (e) {}
   return out;
 }
 function hhParseDate(s) {

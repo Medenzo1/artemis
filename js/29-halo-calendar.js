@@ -10,7 +10,7 @@
 const HCAL_COL = { airbnb: '#ff5a5f', booking: '#2f74f0', direct: '#16a35f', loan: '#7c5cf5', op: '#8d7f84', todo: 'var(--acc)' };
 const HCAL_LBL = { airbnb: 'Airbnb', booking: 'Booking', direct: 'Direct', loan: 'Échéance de prêt', op: 'Opération bancaire', todo: 'Rappel' };
 const HCAL_DAYS = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
-const _hcal = { month: null, view: 'month', bien: 'all', day: null, show: { stays: true, loan: true, op: true, todo: true } };
+const _hcal = { month: null, view: 'month', bien: 'all', day: null, show: { user: true, stays: true, loan: true, op: true, todo: true } };
 
 function hcalISO(d) {
   if (!d) return '';
@@ -132,12 +132,13 @@ function hcalRender(mode) {
   const allStays = hcalStays();
   const stays = allStays.filter(s => s.start <= last && s.end > first && (_hcal.bien === 'all' || s.bien === _hcal.bien));
   const events = hcalEvents(m).filter(e => _hcal.bien === 'all' || !e.sub || e.type === 'loan' || e.type === 'todo' || (e.sub || '').includes(_hcal.bien));
+  events.push(...hcalUserForMonth(m).filter(e => _hcal.bien === 'all' || !e.bien || e.bien === _hcal.bien));
   const biensLCD = (p.biens || []).filter(b => (b.mode || b.type) === 'LCD').map(b => b.name);
   const biensList = [...new Set([...(p.biens || []).map(b => b.name), ...allStays.map(s => s.bien)])];
 
   // Barre d'actions
   const act = document.getElementById('hcal-actions');
-  if (act) act.innerHTML = '<div class="hseg">' + [['month', 'Mois'], ['planning', 'Planning']].map(([v, l]) => '<button class="' + (_hcal.view === v ? 'on' : '') + '" onclick="hcalSet(\'view\',\'' + v + '\')">' + l + '</button>').join('') + '</div>'
+  if (act) act.innerHTML = '<button class="hbtn hbtn-dark" onclick="hcalEdit(null, _hcal.day)">' + hIco('plus', 15) + 'Événement</button><div class="hseg">' + [['month', 'Mois'], ['planning', 'Planning']].map(([v, l]) => '<button class="' + (_hcal.view === v ? 'on' : '') + '" onclick="hcalSet(\'view\',\'' + v + '\')">' + l + '</button>').join('') + '</div>'
     + '<select class="sel hcal-sel" onchange="hcalSet(\'bien\', this.value)"><option value="all">Tous les biens</option>' + biensList.map(b => '<option value="' + hEsc(b) + '"' + (_hcal.bien === b ? ' selected' : '') + '>' + hEsc(b) + '</option>').join('') + '</select>';
 
   // Résumé du mois
@@ -151,7 +152,7 @@ function hcalRender(mode) {
   const head = '<div class="hcal-head"><div class="hcal-nav"><button class="hbtn hbtn-light hcal-arrow" onclick="hcalNav(-1)" aria-label="Mois précédent">' + hIco('chevron-left', 16) + '</button>'
     + '<h2>' + hMonthLbl(m).replace(/^./, c => c.toUpperCase()) + '</h2><button class="hbtn hbtn-light hcal-arrow" onclick="hcalNav(1)" aria-label="Mois suivant">' + hIco('chevron-right', 16) + '</button>'
     + '<button class="hbtn hbtn-light" onclick="hcalNav(0)">Aujourd\'hui</button></div>'
-    + '<div class="hcal-legend">' + [['stays', 'Séjours', 'linear-gradient(90deg,#ff5a5f,#2f74f0,#16a35f)'], ['loan', 'Échéances', HCAL_COL.loan], ['op', 'Opérations', HCAL_COL.op], ['todo', 'Rappels', 'var(--acc)']]
+    + '<div class="hcal-legend">' + [['user', 'Événements', 'var(--ink)'], ['stays', 'Séjours', 'linear-gradient(90deg,#ff5a5f,#2f74f0,#16a35f)'], ['loan', 'Échéances', HCAL_COL.loan], ['op', 'Opérations', HCAL_COL.op], ['todo', 'Rappels', 'var(--acc)']]
       .map(([k, l, c]) => '<button class="' + (_hcal.show[k] ? 'on' : '') + '" onclick="hcalToggle(\'' + k + '\')"><i style="background:' + c + '"></i>' + l + '</button>').join('') + '</div></div>';
 
   const kpi = (ico, v, l, krgb) => '<div class="hg hh-kpi hk hcal-kpi" style="--krgb:' + krgb + '"><span class="hh-kpi-ico">' + hIco(ico, 16) + '</span><div><b>' + v + '</b><small>' + l + '</small></div></div>';
@@ -194,7 +195,7 @@ function hcalMonth(m, dim, stays, events) {
     if (s.start.startsWith(m)) push(s.start, { c: HCAL_COL[s.src], t: '→ ' + s.bien, k: 0 });
     if (s.end.startsWith(m)) push(s.end, { c: HCAL_COL[s.src], t: '← ' + s.bien, k: 1, out: true });
   });
-  events.forEach(e => { if (_hcal.show[e.type]) push(e.date, { c: HCAL_COL[e.type], t: e.label, k: e.type === 'todo' ? -1 : 2 }); });
+  events.forEach(e => { if (_hcal.show[e.type]) push(e.date, { c: e.color || HCAL_COL[e.type], t: (e.time ? e.time + ' ' : '') + e.label, k: e.type === 'user' ? -2 : e.type === 'todo' ? -1 : 2, id: e.id }); });
   const occBy = {};
   if (_hcal.show.stays) stays.forEach(s => { for (let d = s.start; d < s.end; d = hcalAdd(d, 1)) if (d.startsWith(m)) occBy[d] = (occBy[d] || 0) + 1; });
   let html = '<section class="hg hcal-month"><div class="hcal-dow">' + HCAL_DAYS.map(d => '<span>' + d + '</span>').join('') + '</div><div class="hcal-grid">';
@@ -202,9 +203,9 @@ function hcalMonth(m, dim, stays, events) {
     if (!d) { html += '<div class="hcal-cell off"></div>'; return; }
     const its = (byDay[d] || []).sort((a, b) => a.k - b.k);
     const occ = occBy[d] || 0;
-    html += '<button data-d="' + d + '" class="hcal-cell' + (d === today ? ' today' : '') + (d === _hcal.day ? ' sel' : '') + (d.slice(8) && new Date(d).getDay() % 6 === 0 ? ' we' : '') + '" onclick="hcalSet(\'day\',\'' + d + '\')">'
+    html += '<button data-d="' + d + '" class="hcal-cell' + (d === today ? ' today' : '') + (d === _hcal.day ? ' sel' : '') + (d.slice(8) && new Date(d).getDay() % 6 === 0 ? ' we' : '') + '" onclick="hcalSet(\'day\',\'' + d + '\')" ondblclick="hcalEdit(null,\'' + d + '\')" title="Double-clic : ajouter un événement">'
       + '<span class="hcal-n">' + (+d.slice(8)) + '</span>' + (occ ? '<span class="hcal-occ" title="' + occ + ' logement(s) occupé(s)">' + hIco('bed-double', 11) + occ + '</span>' : '')
-      + '<span class="hcal-its">' + its.slice(0, 3).map(it => '<i class="' + (it.out ? 'out' : '') + '" style="--c:' + it.c + '">' + hEsc(it.t) + '</i>').join('') + (its.length > 3 ? '<em>+' + (its.length - 3) + ' autre' + (its.length > 4 ? 's' : '') + '</em>' : '') + '</span></button>';
+      + '<span class="hcal-its">' + its.slice(0, 3).map(it => '<i class="' + (it.out ? 'out' : '') + (it.id ? ' ev' : '') + '" style="--c:' + it.c + '"' + (it.id ? ' onclick="event.stopPropagation();hcalEdit(\'' + it.id + '\')" title="Modifier"' : '') + '>' + hEsc(it.t) + '</i>').join('') + (its.length > 3 ? '<em>+' + (its.length - 3) + ' autre' + (its.length > 4 ? 's' : '') + '</em>' : '') + '</span></button>';
   });
   return html + '</div></section>';
 }
@@ -247,17 +248,98 @@ function hcalSide(m, stays, events) {
       else if (s.end === day) items.push({ c: HCAL_COL[s.src], t: 'Départ · ' + s.bien, s: HCAL_LBL[s.src] });
       else if (s.start < day && s.end > day) items.push({ c: HCAL_COL[s.src], t: 'Occupé · ' + s.bien, s: HCAL_LBL[s.src] + ' · jusqu\'au ' + s.end.split('-').reverse().slice(0, 2).join('/') });
     });
-    events.filter(e => e.date === day).forEach(e => items.push({ c: HCAL_COL[e.type], t: e.label, s: e.sub, go: e.go }));
+    events.filter(e => e.date === day).forEach(e => items.push({ c: e.color || HCAL_COL[e.type], t: (e.time ? e.time + ' · ' : '') + e.label, s: e.sub, go: e.go }));
   } else {
     const all = [];
     stays.forEach(s => { if (s.start.startsWith(m)) all.push({ d: s.start, c: HCAL_COL[s.src], t: 'Arrivée · ' + s.bien, s: HCAL_LBL[s.src] + ' · ' + s.nuits + ' nuit' + (s.nuits > 1 ? 's' : '') }); });
-    events.forEach(e => { if (_hcal.show[e.type]) all.push({ d: e.date, c: HCAL_COL[e.type], t: e.label, s: e.sub, go: e.go }); });
+    const seen = new Set();
+    events.forEach(e => { if (!_hcal.show[e.type] || (e.id && seen.has(e.id))) return; if (e.id) seen.add(e.id); all.push({ d: e.date, c: e.color || HCAL_COL[e.type], t: (e.time ? e.time + ' · ' : '') + e.label, s: e.sub, go: e.go }); });
     items = all.sort((a, b) => a.d.localeCompare(b.d)).map(x => Object.assign(x, { tag: new Date(x.d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) }));
   }
   const title = day ? fmtD(day).replace(/^./, c => c.toUpperCase()) : 'Ce mois-ci';
   const list = items.length ? items.slice(0, 40).map(i => '<div class="hh-ev"' + (i.go ? ' onclick="' + i.go + '" style="cursor:pointer"' : '') + '>' + (i.tag ? '<span class="hh-ev-tag">' + i.tag + '</span>' : '') + '<i style="background:' + i.c + '"></i><div><b>' + hEsc(i.t) + '</b><small>' + hEsc(i.s || '') + '</small></div></div>').join('')
     : '<div class="hh-ev hh-ev-empty">' + hIco('check-circle', 16) + '<div><b>Rien de prévu</b><small>' + (day ? 'Aucun événement ce jour-là' : 'Aucun événement ce mois-ci') + '</small></div></div>';
-  return '<aside class="hg hcal-side"><div class="hcal-side-h"><b>' + title + '</b>' + (day ? '<button class="hbtn hbtn-light" onclick="hcalSet(\'day\', null)">Tout le mois</button>' : '<small>' + items.length + ' élément' + (items.length > 1 ? 's' : '') + '</small>') + '</div><div class="hh-evs">' + list + '</div></aside>';
+  return '<aside class="hg hcal-side"><div class="hcal-side-h"><b>' + title + '</b>' + (day ? '<span class="hcal-side-a"><button class="hbtn hbtn-dark" onclick="hcalEdit(null,\'' + day + '\')">' + hIco('plus', 13) + 'Ajouter</button><button class="hbtn hbtn-light" onclick="hcalSet(\'day\', null)">Tout le mois</button></span>' : '<small>' + items.length + ' élément' + (items.length > 1 ? 's' : '') + '</small>') + '</div><div class="hh-evs">' + list + '</div></aside>';
+}
+
+// ════════════ Événements personnels ════════════
+const HCAL_EV_KEY = 'artemis_events';
+const HCAL_CATS = [
+  ['rdv', 'Rendez-vous', '#2f74f0'], ['travaux', 'Travaux', '#ef7d1f'], ['menage', 'Ménage', '#0fa595'],
+  ['admin', 'Administratif', '#7c5cf5'], ['perso', 'Personnel', '#e0559b'], ['autre', 'Autre', '#5c6170'],
+];
+function hcalUserEvents() { try { const a = JSON.parse(localStorage.getItem(HCAL_EV_KEY) || '[]'); return Array.isArray(a) ? a : []; } catch (e) { return []; } }
+function hcalSaveUserEvents(a) { try { localStorage.setItem(HCAL_EV_KEY, JSON.stringify(a)); } catch (e) { showToast('⚠ Enregistrement impossible : ' + e.message, '#e0353f'); } }
+function hcalCat(id) { return HCAL_CATS.find(c => c[0] === id) || HCAL_CATS[HCAL_CATS.length - 1]; }
+// Un élément par jour couvert (pour la grille) ; le panneau dédoublonne par id
+function hcalUserForMonth(m) {
+  const out = [];
+  hcalUserEvents().forEach(ev => {
+    if (!ev.date) return;
+    const end = ev.end && ev.end >= ev.date ? ev.end : ev.date;
+    if (end.slice(0, 7) < m || ev.date.slice(0, 7) > m) return;
+    const cat = hcalCat(ev.cat);
+    const sub = cat[1] + (ev.bien ? ' · ' + ev.bien : '') + (end !== ev.date ? ' · jusqu\'au ' + end.split('-').reverse().slice(0, 2).join('/') : '') + (ev.note ? ' · ' + ev.note : '');
+    for (let d = ev.date; d <= end; d = hcalAdd(d, 1)) {
+      if (d.slice(0, 7) === m) out.push({ id: ev.id, date: d, type: 'user', label: ev.title, sub, color: cat[2], time: d === ev.date ? ev.time || '' : '', bien: ev.bien || '', go: "hcalEdit('" + ev.id + "')" });
+    }
+  });
+  return out;
+}
+// Fenêtre de création / modification
+function hcalEdit(id, date) {
+  const evs = hcalUserEvents();
+  const ev = id ? evs.find(e => e.id === id) : null;
+  if (id && !ev) return;
+  const d0 = ev ? ev.date : (date || (_hcal.month === hcalToday().slice(0, 7) ? hcalToday() : _hcal.month + '-01'));
+  const cur = ev || { title: '', date: d0, end: '', time: '', cat: 'rdv', bien: '', note: '' };
+  let p = { biens: [] }; try { p = getParams(); } catch (e) {}
+  const m = document.createElement('div');
+  m.id = 'hcal-modal';
+  m.innerHTML = '<div class="hcal-mbox" role="dialog" aria-label="' + (ev ? 'Modifier' : 'Nouvel') + ' événement">'
+    + '<div class="hcal-mh"><b>' + (ev ? 'Modifier l\'événement' : 'Nouvel événement') + '</b><button class="hcal-mx" onclick="hcalCloseEdit()" aria-label="Fermer">' + hIco('x', 16) + '</button></div>'
+    + '<label class="hcal-f"><span>Titre</span><input id="hce-title" type="text" maxlength="80" placeholder="Ex. : Visite du plombier, AG de copropriété…" value="' + hEsc(cur.title) + '"></label>'
+    + '<div class="hcal-f2"><label class="hcal-f"><span>Date</span><input id="hce-date" type="date" value="' + cur.date + '"></label>'
+    + '<label class="hcal-f"><span>Jusqu\'au <small>(facultatif)</small></span><input id="hce-end" type="date" value="' + (cur.end || '') + '"></label>'
+    + '<label class="hcal-f"><span>Heure <small>(facultatif)</small></span><input id="hce-time" type="time" value="' + (cur.time || '') + '"></label></div>'
+    + '<div class="hcal-f"><span>Catégorie</span><div class="hcal-cats" id="hce-cats">' + HCAL_CATS.map(c => '<button type="button" class="' + (c[0] === cur.cat ? 'on' : '') + '" data-cat="' + c[0] + '" style="--c:' + c[2] + '" onclick="document.querySelectorAll(\'#hce-cats button\').forEach(b=>b.classList.toggle(\'on\', b===this))"><i></i>' + c[1] + '</button>').join('') + '</div></div>'
+    + '<label class="hcal-f"><span>Bien concerné <small>(facultatif)</small></span><select id="hce-bien" class="sel"><option value="">Aucun</option>' + (p.biens || []).map(b => '<option' + (b.name === cur.bien ? ' selected' : '') + '>' + hEsc(b.name) + '</option>').join('') + '</select></label>'
+    + '<label class="hcal-f"><span>Note <small>(facultatif)</small></span><textarea id="hce-note" rows="2" maxlength="300" placeholder="Détails, contact, montant…">' + hEsc(cur.note || '') + '</textarea></label>'
+    + '<div class="hcal-mf">' + (ev ? '<button class="hbtn hbtn-light hcal-del" onclick="hcalDeleteEvent(\'' + ev.id + '\')">' + hIco('trash-2', 14) + 'Supprimer</button>' : '<span></span>')
+    + '<span><button class="hbtn hbtn-light" onclick="hcalCloseEdit()">Annuler</button><button class="hbtn hbtn-dark" onclick="hcalSaveEvent(' + (ev ? '\'' + ev.id + '\'' : 'null') + ')">' + hIco('check', 14) + 'Enregistrer</button></span></div></div>';
+  m.addEventListener('mousedown', e => { if (e.target === m) hcalCloseEdit(); });
+  m.addEventListener('keydown', e => { if (e.key === 'Escape') hcalCloseEdit(); if (e.key === 'Enter' && e.target.tagName === 'INPUT') hcalSaveEvent(ev ? ev.id : null); });
+  hcalCloseEdit();
+  document.body.appendChild(m);
+  setTimeout(() => { const t = document.getElementById('hce-title'); if (t) t.focus(); }, 30);
+}
+function hcalCloseEdit() { const m = document.getElementById('hcal-modal'); if (m) m.remove(); }
+function hcalSaveEvent(id) {
+  const v = k => (document.getElementById('hce-' + k) || {}).value || '';
+  const title = v('title').trim(), date = v('date');
+  if (!title) { document.getElementById('hce-title').focus(); showToast('Donne un titre à l\'événement', '#e0353f'); return; }
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) { showToast('Choisis une date', '#e0353f'); return; }
+  let end = v('end');
+  if (end && end < date) { showToast('La date de fin est avant la date de début', '#e0353f'); return; }
+  if (end === date) end = '';
+  const on = document.querySelector('#hce-cats button.on');
+  const data = { title, date, end, time: v('time'), cat: on ? on.dataset.cat : 'autre', bien: v('bien'), note: v('note').trim(), updated: new Date().toISOString() };
+  const evs = hcalUserEvents();
+  if (id) { const i = evs.findIndex(e => e.id === id); if (i >= 0) evs[i] = Object.assign(evs[i], data); }
+  else evs.push(Object.assign({ id: 'e' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), created: data.updated }, data));
+  hcalSaveUserEvents(evs);
+  hcalCloseEdit();
+  _hcal.month = date.slice(0, 7); _hcal.day = date;
+  hcalRender('soft');
+  showToast(id ? 'Événement modifié' : 'Événement ajouté');
+}
+function hcalDeleteEvent(id) {
+  const ev = hcalUserEvents().find(e => e.id === id);
+  if (!ev || !confirm('Supprimer l\'événement « ' + ev.title + ' » ?')) return;
+  hcalSaveUserEvents(hcalUserEvents().filter(e => e.id !== id));
+  hcalCloseEdit();
+  hcalRender('soft');
+  showToast('Événement supprimé');
 }
 
 // ── Branchement dans la navigation ──
