@@ -7,8 +7,18 @@
 //  importantes, rappels (import du mois, budget).
 // ════════════════════════════════════════════════════════════════
 
-const HCAL_COL = { airbnb: '#ff5a5f', booking: '#2f74f0', direct: '#16a35f', loan: '#7c5cf5', op: '#8d7f84', todo: 'var(--acc)' };
-const HCAL_LBL = { airbnb: 'Airbnb', booking: 'Booking', direct: 'Direct', loan: 'Échéance de prêt', op: 'Opération bancaire', todo: 'Rappel' };
+const HCAL_COL = { airbnb: '#ff5a5f', booking: '#2f74f0', direct: '#16a35f', blocked: '#9aa0a6', loan: '#7c5cf5', op: '#8d7f84', todo: 'var(--acc)' };
+const HCAL_LBL = { airbnb: 'Airbnb', booking: 'Booking', direct: 'Direct', blocked: 'Bloqué', loan: 'Échéance de prêt', op: 'Opération bancaire', todo: 'Rappel' };
+// Libellés de séjour : voyageur, personnes et prix quand Smoobu les fournit
+function hcalStayWho(s) { return s.guest ? ' — ' + s.guest : ''; }
+function hcalStaySub(s, extra) {
+  const parts = [s.channel || HCAL_LBL[s.src] || ''];
+  if (extra) parts.push(extra); else parts.push(s.nuits + ' nuit' + (s.nuits > 1 ? 's' : ''));
+  const pers = (s.adults || 0) + (s.children || 0);
+  if (pers) parts.push(pers + ' pers.');
+  if (s.price != null && s.price !== '') parts.push(hEur(+s.price) + (s.paid ? ' payé' : ''));
+  return parts.filter(Boolean).join(' · ');
+}
 const HCAL_DAYS = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
 const _hcal = { month: null, view: 'month', bien: 'all', day: null, show: { user: true, stays: true, loan: true, op: true, todo: true } };
 
@@ -230,11 +240,11 @@ function hcalPlanning(m, dim, stays, biensLCD) {
       const endIso = s.end, endDay = endIso.slice(0, 7) > m ? dim + 1 : +endIso.slice(8);
       const span = Math.max(1, endDay - a);
       n += span;
-      return '<i class="hcal-bar" style="--c:' + HCAL_COL[s.src] + ';grid-column:' + a + ' / span ' + span + '" title="' + hEsc(HCAL_LBL[s.src] + ' · ' + s.nuits + ' nuit' + (s.nuits > 1 ? 's' : '') + ' · ' + s.start.split('-').reverse().join('/') + ' → ' + s.end.split('-').reverse().join('/')) + '">' + (span >= 2 ? s.nuits + ' n.' : '') + '</i>';
+      return '<i class="hcal-bar" style="--c:' + HCAL_COL[s.src] + ';grid-column:' + a + ' / span ' + span + '" title="' + hEsc((s.guest ? s.guest + ' · ' : '') + hcalStaySub(s) + ' · ' + s.start.split('-').reverse().join('/') + ' → ' + s.end.split('-').reverse().join('/')) + '">' + (span >= 4 && s.guest ? hEsc(s.guest.split(' ')[0]) + ' · ' + s.nuits + ' n.' : span >= 2 ? s.nuits + ' n.' : '') + '</i>';
     }).join('');
     html += '<div class="hcal-pr"><div class="hcal-pb" title="' + hEsc(b) + '">' + hEsc(b) + '</div><div class="hcal-pd hcal-pgrid">' + bars + '</div><div class="hcal-po"><b>' + Math.round(Math.min(n, dim) / dim * 100) + '%</b><small>' + n + ' n.</small></div></div>';
   });
-  return html + '</div></div><div class="hcal-plan-leg">' + ['airbnb', 'booking', 'direct'].map(k => '<span><i style="background:' + HCAL_COL[k] + '"></i>' + HCAL_LBL[k] + '</span>').join('') + '</div></section>';
+  return html + '</div></div><div class="hcal-plan-leg">' + ['airbnb', 'booking', 'direct', 'blocked'].map(k => '<span><i style="background:' + HCAL_COL[k] + '"></i>' + HCAL_LBL[k] + '</span>').join('') + '</div></section>';
 }
 
 // Colonne de droite : détail du jour sélectionné, sinon à venir dans le mois
@@ -244,14 +254,14 @@ function hcalSide(m, stays, events) {
   let items = [];
   if (day) {
     stays.forEach(s => {
-      if (s.start === day) items.push({ c: HCAL_COL[s.src], t: 'Arrivée · ' + s.bien, s: HCAL_LBL[s.src] + ' · ' + s.nuits + ' nuit' + (s.nuits > 1 ? 's' : '') });
-      else if (s.end === day) items.push({ c: HCAL_COL[s.src], t: 'Départ · ' + s.bien, s: HCAL_LBL[s.src] });
-      else if (s.start < day && s.end > day) items.push({ c: HCAL_COL[s.src], t: 'Occupé · ' + s.bien, s: HCAL_LBL[s.src] + ' · jusqu\'au ' + s.end.split('-').reverse().slice(0, 2).join('/') });
+      if (s.start === day) items.push({ c: HCAL_COL[s.src], t: 'Arrivée · ' + s.bien + hcalStayWho(s), s: hcalStaySub(s) + (s.notice ? ' · « ' + s.notice.slice(0, 80) + ' »' : '') });
+      else if (s.end === day) items.push({ c: HCAL_COL[s.src], t: 'Départ · ' + s.bien + hcalStayWho(s), s: hcalStaySub(s, s.checkOut ? 'départ ' + s.checkOut : '') });
+      else if (s.start < day && s.end > day) items.push({ c: HCAL_COL[s.src], t: 'Occupé · ' + s.bien + hcalStayWho(s), s: hcalStaySub(s, 'jusqu\'au ' + s.end.split('-').reverse().slice(0, 2).join('/')) });
     });
     events.filter(e => e.date === day).forEach(e => items.push({ c: e.color || HCAL_COL[e.type], t: (e.time ? e.time + ' · ' : '') + e.label, s: e.sub, go: e.go }));
   } else {
     const all = [];
-    stays.forEach(s => { if (s.start.startsWith(m)) all.push({ d: s.start, c: HCAL_COL[s.src], t: 'Arrivée · ' + s.bien, s: HCAL_LBL[s.src] + ' · ' + s.nuits + ' nuit' + (s.nuits > 1 ? 's' : '') }); });
+    stays.forEach(s => { if (s.start.startsWith(m)) all.push({ d: s.start, c: HCAL_COL[s.src], t: 'Arrivée · ' + s.bien + hcalStayWho(s), s: hcalStaySub(s) }); });
     const seen = new Set();
     events.forEach(e => { if (!_hcal.show[e.type] || (e.id && seen.has(e.id))) return; if (e.id) seen.add(e.id); all.push({ d: e.date, c: e.color || HCAL_COL[e.type], t: (e.time ? e.time + ' · ' : '') + e.label, s: e.sub, go: e.go }); });
     items = all.sort((a, b) => a.d.localeCompare(b.d)).map(x => Object.assign(x, { tag: new Date(x.d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) }));
