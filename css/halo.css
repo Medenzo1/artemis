@@ -1000,3 +1000,8 @@ html.halo #hsb .hsb-user.on .hsb-uname { color: var(--text) !important; }
 .hsm-chip.err { color: var(--ko); border-color: rgba(224,53,63,.3); }
 .hsm-chip.err i { background: var(--ko); }
 @media (max-width: 560px) { .hsm-map-h, .hsm-map-r { grid-template-columns: 1fr; gap: 6px; } .hsm-map-h span:last-child { display: none; } .hsm-url-a { min-width: 0; } }
+
+/* En-têtes de tableaux figés : fond plein pour que les lignes ne transparaissent pas au défilement */
+html.halo thead th { background: var(--surf) !important; background-clip: padding-box; }
+html.halo thead th[style*="sticky"], html.halo thead[style*="sticky"] th, html.halo thead tr[style*="sticky"] th { z-index: 3; }
+html.halo .tbl-wrap thead th, html.halo [style*="overflow"] thead th, html.halo #ca-ops-wrap thead th { position: sticky; top: 0; z-index: 3; box-shadow: 0 1px 0 rgba(var(--tint),.22); }
