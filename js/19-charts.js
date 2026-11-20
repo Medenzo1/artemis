@@ -289,6 +289,17 @@ const ArtCharts = (() => {
         const good = (cfg.deltaGoodWhenUp === false) ? pct <= 0 : pct >= 0;
         delta = '<div class="ac-tip-sub"><span style="color:' + (good ? C.green : C.red) + '">' + fmtPct(pct) + '</span> vs mois précédent</div>';
       }
+      // Même mois de l'année précédente, s'il est dans la série
+      const cur = periods[hover];
+      if (cur) {
+        const j = periods.findIndex(q => q && q.y === cur.y - 1 && q.m === cur.m);
+        const ly = j >= 0 ? vals[j] : null;
+        if (ly !== null && ly !== undefined && ly !== 0) {
+          const pctY = (v - ly) / Math.abs(ly) * 100;
+          const goodY = (cfg.deltaGoodWhenUp === false) ? pctY <= 0 : pctY >= 0;
+          delta += '<div class="ac-tip-sub"><span style="color:' + (goodY ? C.green : C.red) + '">' + fmtPct(pctY) + '</span> vs ' + MONTHS_L[cur.m].toLowerCase() + ' ' + (cur.y - 1) + ' <span style="opacity:.7">(' + fmtEur(ly) + ')</span></div>';
+        }
+      }
       T.show('<div class="ac-tip-head">' + longLbl(hover) + '</div>' +
         '<div class="ac-tip-row"><span class="ac-dot" style="background:' + colAt(hover) + '"></span>' + (cfg.name || 'Valeur') +
         '<b style="color:' + colAt(hover) + '">' + fmtEur(v) + '</b></div>' + budTip(hover) + delta, L.pts[hover].x, Math.min(L.pts[hover].y, y));
