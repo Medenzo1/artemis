@@ -140,12 +140,20 @@
       { clipPath: 'circle(0% at 50% 50%)', filter: 'blur(22px)' },
       { clipPath: 'circle(80% at 50% 50%)', filter: 'blur(0px)' },
     ], { duration: 1500, delay: 180, easing: 'cubic-bezier(.7,0,.2,1)', fill: 'both' });
+    // Pendant que le cercle s'ouvre, la pièce s'éclaire et se fond dans le fond du site (pas de coupure à la fin)
+    const room = el.querySelector('.hi-room');
+    room.getAnimations().forEach(x => { try { x.commitStyles(); } catch (e) {} x.cancel(); });
+    room.animate([
+      { filter: 'blur(9px) brightness(1.05) saturate(1)', transform: 'scale(1.02)' },
+      { filter: 'blur(36px) brightness(1.9) saturate(.7)', transform: 'scale(1.12)' },
+    ], { duration: 1500, delay: 180, easing: 'cubic-bezier(.5,0,.3,1)', fill: 'forwards' });
+    el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 1250, delay: 480, easing: 'cubic-bezier(.4,0,.4,1)', fill: 'forwards' });
     a.onfinish = () => finish(el, a);
   }
 
   function finish(el, a) {
     const app = document.getElementById('mainContent');
-    const f = el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 420, easing: 'ease-out', fill: 'forwards' });
+    const f = el.animate([{ opacity: 0 }, { opacity: 0 }], { duration: 30, fill: 'forwards' });
     f.onfinish = () => {
       el.remove();
       if (a) a.cancel();
