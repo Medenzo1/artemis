@@ -302,7 +302,7 @@ const ArtCharts = (() => {
       }
       T.show('<div class="ac-tip-head">' + longLbl(hover) + '</div>' +
         '<div class="ac-tip-row"><span class="ac-dot" style="background:' + colAt(hover) + '"></span>' + (cfg.name || 'Valeur') +
-        '<b style="color:' + colAt(hover) + '">' + fmtEur(v) + '</b></div>' + budTip(hover) + delta + pickHint(cfg, cv), L.pts[hover].x, Math.min(L.pts[hover].y, y));
+        '<b style="color:' + colAt(hover) + '">' + fmtEur(v) + '</b></div>' + budTip(hover) + delta + pickHint(cfg, cv, cfg.labels[hover]), L.pts[hover].x, Math.min(L.pts[hover].y, y));
     }
     function budTip(i) {
       if (!bud || bud[i] === null) return '';
@@ -667,7 +667,7 @@ const ArtCharts = (() => {
       const rows = shown.map(b => '<div class="ac-tip-row"><span class="ac-dot" style="background:' + b.color + '"></span>' + b.name + '<b>' + fmtEur(b.values[idx]) + '</b></div>').join('') +
         (cfg.stacked ? '<div class="ac-tip-sub" style="display:flex">Total<b style="margin-left:auto;padding-left:12px;color:var(--text)">' + fmtEur(bars.reduce((t, b) => t + (b.values[idx] || 0), 0)) + '</b></div>' : '') +
         (line ? '<div class="ac-tip-sub" style="display:flex;gap:8px;align-items:center"><span class="ac-dot" style="background:' + line.color + '"></span>' + line.name + '<b style="margin-left:auto;padding-left:12px;color:' + (line.values[idx] < 0 ? C.red : line.color) + '">' + fmtEur(line.values[idx], true) + '</b></div>' : '');
-      T.show('<div class="ac-tip-head">' + (p ? MONTHS_L[p.m] + ' ' + p.y : cfg.labels[idx]) + '</div>' + rows + pickHint(cfg, cv), L.cx(idx), y);
+      T.show('<div class="ac-tip-head">' + (p ? MONTHS_L[p.m] + ' ' + p.y : cfg.labels[idx]) + '</div>' + rows + pickHint(cfg, cv, cfg.labels[idx]), L.cx(idx), y);
     };
     const _mv = cv.onpointermove;
     cv.onpointerdown = e => { cv._ptype = e.pointerType; _mv(e); };
@@ -678,10 +678,12 @@ const ArtCharts = (() => {
   }
 
   // Clic sur un mois : filtre la période (cfg.onPick, sinon le filtre du tableau de bord)
-  function pickHint(cfg, cv) {
+  function pickHint(cfg, cv, label) {
     if (cv._ptype && cv._ptype !== 'mouse') return '';
     if (!cfg.onPick && !(window.haloChartPick && window._haloRoute === 'dashboard')) return '';
-    return '<div class="ac-tip-sub" style="opacity:.6;margin-top:4px">Cliquer pour filtrer sur ce mois</div>';
+    const p = parsePeriod(label); if (!p) return '';
+    const txt = (window.haloChartHint && window.haloChartHint(p.y, p.m)) || 'Cliquer pour filtrer sur ce mois';
+    return '<div class="ac-tip-sub" style="opacity:.6;margin-top:4px">' + txt + '</div>';
   }
   function pickPeriod(cfg, label, cv) {
     const fn = cfg.onPick || window.haloChartPick, p = parsePeriod(label);
