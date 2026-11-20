@@ -82,9 +82,6 @@ function _renderSynTresorerie() {
       _kpiCard('📊','Solde net',(solde>=0?'+':'')+_fmtK(solde), solde>=0?'var(--cyan)':'var(--red)', '', _varBadges(lastSolde, lastTresPeriod, tresPeriodMapSolde, true), Object.keys(tresPeriodMapSolde).sort().map(k=>tresPeriodMapSolde[k]))+
       _kpiCardBig('💳','Nb opérations',''+lines.length,'var(--gold)', null, '💳')+
     '</div>'+
-    '<div style="text-align:right;margin-bottom:12px">'+
-      '<button onclick="openDiagTreso()" style="background:rgba(34,211,200,.08);border:1px solid rgba(34,211,200,.2);border-radius:7px;color:var(--cyan);font-size:11px;padding:5px 14px;cursor:pointer">🔍 Diagnostic lignes</button>'+
-    '</div>'+
     '<div class="card" style="margin-bottom:18px">'+
       '<div class="card-title" style="justify-content:space-between">'+
         '<span>Trésorerie — '+ (_chartMode==='cumul'?'solde cumulé':'solde mensuel') +'</span>'+

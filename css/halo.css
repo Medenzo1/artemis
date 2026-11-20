@@ -1005,3 +1005,4 @@ html.halo #hsb .hsb-user.on .hsb-uname { color: var(--text) !important; }
 html.halo thead th { background: var(--surf) !important; background-clip: padding-box; }
 html.halo thead th[style*="sticky"], html.halo thead[style*="sticky"] th, html.halo thead tr[style*="sticky"] th { z-index: 3; }
 html.halo .tbl-wrap thead th, html.halo [style*="overflow"] thead th, html.halo #ca-ops-wrap thead th { position: sticky; top: 0; z-index: 3; box-shadow: 0 1px 0 rgba(var(--tint),.22); }
+#hbud-toggle.off { color: var(--text3) !important; text-decoration: line-through; text-decoration-color: rgba(var(--tint),.35); }
