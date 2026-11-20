@@ -164,10 +164,11 @@ const ArtCharts = (() => {
 
     function layout(ctx, W) {
       const minV = Math.min(...vals, ...budVals, 0), maxV = Math.max(...vals, ...budVals, 0);
-      const sc = niceScale(minV, maxV === minV ? minV + 1 : maxV, 4);
+      // cfg.scale / cfg.padLeft : échelle et marge imposées (transitions animées sans à-coups)
+      const sc = cfg.scale || niceScale(minV, maxV === minV ? minV + 1 : maxV, 4);
       ctx.font = '500 11px ' + C.font;
       const yW = Math.max(...sc.ticks.map(t => ctx.measureText(fmtAxis(t)).width));
-      const P = { top: 30, right: 20, bottom: 40, left: Math.ceil(yW) + 16 };
+      const P = { top: 30, right: 20, bottom: 40, left: cfg.padLeft != null ? cfg.padLeft : Math.ceil(yW) + 16 };
       const cW = W - P.left - P.right, cH = H - P.top - P.bottom;
       const inset = n > 1 ? Math.min(18, cW / (n * 2)) : 0;
       const xOf = i => n === 1 ? P.left + cW / 2 : P.left + inset + i / (n - 1) * (cW - inset * 2);
@@ -661,5 +662,5 @@ const ArtCharts = (() => {
     return { redraw: draw };
   }
 
-  return { area, donut, diverging, gauge, funnel, forecast, combo, fmtEur, fmtAxis, fmtPct, colors: C };
+  return { area, donut, diverging, gauge, funnel, forecast, combo, fmtEur, fmtAxis, fmtPct, colors: C, _niceScale: niceScale };
 })();

@@ -81,8 +81,18 @@ function haloBudgetSync() {
   const anims = new WeakMap();
   const baseArea = ArtCharts.area;
   const ease = p => p < .5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+  // Échelle « arrondie » et marge gauche qu'aurait le graphique pour ces valeurs
+  const _mctx = document.createElement('canvas').getContext('2d');
+  function scaleOf(values, budget) {
+    const bv = (budget || []).filter(v => v != null).map(Number);
+    const minV = Math.min(...values, ...bv, 0), maxV = Math.max(...values, ...bv, 0);
+    const sc = ArtCharts._niceScale(minV, maxV === minV ? minV + 1 : maxV, 4);
+    _mctx.font = '500 11px ' + (ArtCharts.colors.font || 'sans-serif');
+    const pad = Math.ceil(Math.max(...sc.ticks.map(t => _mctx.measureText(ArtCharts.fmtAxis(t)).width))) + 16;
+    return { sc, pad };
+  }
   ArtCharts.area = function (cv, cfg) {
-    if (!cv || !cfg || !Array.isArray(cfg.values)) return baseArea.apply(this, arguments);
+    if (!cv || !cfg || !Array.isArray(cfg.values) || !ArtCharts._niceScale) return baseArea.apply(this, arguments);
     const key = String(cfg.color || '') + '|' + (cfg.labels || []).join(',');
     const prev = last[key];
     const target = { values: cfg.values.map(v => +v || 0), budget: Array.isArray(cfg.budget) ? cfg.budget.slice() : null };
@@ -91,16 +101,28 @@ function haloBudgetSync() {
       && typeof haloAnimOn === 'function' && haloAnimOn();
     if (!morph) return baseArea.call(this, cv, cfg);
     const old = anims.get(cv); if (old) cancelAnimationFrame(old);
-    const t0 = performance.now(), D = 800, self = this;
-    const lerpB = (a, b, e) => (b || []).map((v, i) => v == null ? null : (a && a[i] != null ? a[i] + (v - a[i]) * e : v));
-    const step = t => {
-      const p = Math.min(1, (t - t0) / D), e = ease(p);
-      if (p < 1) {
-        baseArea.call(self, cv, Object.assign({}, cfg, { values: prev.values.map((v, i) => v + (target.values[i] - v) * e), budget: target.budget ? lerpB(prev.budget, target.budget, e) : cfg.budget }));
-        anims.set(cv, requestAnimationFrame(step));
-      } else { anims.delete(cv); baseArea.call(self, cv, cfg); }
+    // Échelle, graduations et marge varient en continu : plus de sauts d'un palier à l'autre
+    const A = scaleOf(prev.values, prev.budget), B = scaleOf(target.values, target.budget);
+    const nT = B.sc.ticks.length;
+    const ticksAt = (lo, hi) => Array.from({ length: nT }, (_, i) => lo + (hi - lo) * i / (nT - 1));
+    const t0 = performance.now(), D = 900, self = this;
+    const lerp = (a, b, e) => a + (b - a) * e;
+    const lerpB = (a, b, e) => (b || []).map((v, i) => v == null ? null : (a && a[i] != null ? lerp(a[i], v, e) : v));
+    const frame = e => {
+      const lo = lerp(A.sc.min, B.sc.min, e), hi = lerp(A.sc.max, B.sc.max, e);
+      baseArea.call(self, cv, Object.assign({}, cfg, {
+        values: prev.values.map((v, i) => lerp(v, target.values[i], e)),
+        budget: target.budget ? lerpB(prev.budget, target.budget, e) : cfg.budget,
+        scale: { min: lo, max: hi, ticks: ticksAt(lo, hi) },
+        padLeft: Math.round(lerp(A.pad, B.pad, e)),
+      }));
     };
-    baseArea.call(this, cv, Object.assign({}, cfg, { values: prev.values, budget: prev.budget || cfg.budget }));
+    const step = t => {
+      const p = Math.min(1, (t - t0) / D);
+      if (p < 1) { frame(ease(p)); anims.set(cv, requestAnimationFrame(step)); }
+      else { anims.delete(cv); baseArea.call(self, cv, cfg); }
+    };
+    frame(0);
     anims.set(cv, requestAnimationFrame(step));
   };
   const orig = window._toggleChartMode;
