@@ -5,10 +5,12 @@ async function doLogin(){
   // Par défaut, la session se ferme avec le navigateur ; « Rester connecté » la garde
   const remember=!!document.getElementById('loginRemember')?.checked;
   try{ localStorage.setItem('artemis_remember', remember?'1':'0'); }catch(e){}
+  try{ if(window.haloIntroStart) haloIntroStart(); }catch(e){}
   await _auth.setPersistence(remember ? firebase.auth.Auth.Persistence.LOCAL : firebase.auth.Auth.Persistence.SESSION);
   await _auth.signInWithEmailAndPassword(user, pass);
   // L'écran d'accueil est affiché par le listener onAuthStateChanged (js/02-state-core.js)
  }catch(e){
+  try{ if(window.haloIntroCancel) haloIntroCancel(); }catch(_){}
   const err=document.getElementById('loginError');
   err.style.display='block';
   document.getElementById('loginPass').value='';

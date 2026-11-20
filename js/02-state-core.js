@@ -396,6 +396,7 @@ _auth.onAuthStateChanged(async function(user){
     renderRecentActivity();
     showHome();
     try { _initHomeBackBtn(); } catch(e) {}
+    try { if (window.haloIntroReveal) requestAnimationFrame(() => haloIntroReveal()); } catch(e) {}
   } else {
     document.getElementById('loginScreen').style.display='flex';
   }
