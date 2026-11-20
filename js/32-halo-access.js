@@ -138,6 +138,12 @@ function haloHideLinks(root) {
   // Calendrier : pas de création ni de modification d'événement en lecture seule
   const ed = window.hcalEdit;
   if (typeof ed === 'function') window.hcalEdit = function () { if (_hac && !haloCanEdit()) { ro(); return; } return ed.apply(this, arguments); };
+  // Accueil masqué : toute ouverture de l'accueil (connexion, logo, retour) mène à la première page autorisée
+  const sh = window.showHome;
+  if (typeof sh === 'function') window.showHome = function () {
+    if (_hac && !haloRouteAllowed('home')) { const r = sh.apply(this, arguments); setTimeout(() => haloGo(haloFirstRoute()), 0); return r; }
+    return sh.apply(this, arguments);
+  };
   // L'accueil et les écrans re-rendus gardent les liens masqués
   const home = window.haloRenderHome;
   if (typeof home === 'function') window.haloRenderHome = function () { const r = home.apply(this, arguments); try { haloHideLinks(document.getElementById('hh')); } catch (e) {} return r; };
