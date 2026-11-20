@@ -1,0 +1,56 @@
+rules_version = '2';
+// ════════════════════════════════════════════════════════════════
+//  ARTEMIS — Règles de sécurité Firestore (rôles et droits)
+//  À coller dans : console Firebase › Firestore Database › Règles › Publier.
+//  Remplacer ADMIN_EMAIL par l'e-mail du compte administrateur.
+//
+//  Rôles (document access/{uid}) : admin · manager · viewer · custom · none
+//  - admin / manager : lecture et écriture des données partagées
+//  - viewer / custom : lecture seule ; custom ne lit pas les parties masquées
+//  - none ou aucun document : aucun accès
+// ════════════════════════════════════════════════════════════════
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function isOwner() { return signedIn() && request.auth.token.email == 'ADMIN_EMAIL'; }
+    function hasAccess() { return signedIn() && exists(/databases/$(database)/documents/access/$(request.auth.uid)); }
+    function acc() { return get(/databases/$(database)/documents/access/$(request.auth.uid)).data; }
+    function role() { return hasAccess() ? acc().role : 'none'; }
+    function isAdmin() { return isOwner() || role() == 'admin'; }
+    function canEdit() { return isAdmin() || role() == 'manager'; }
+    function canRead() { return canEdit() || role() == 'viewer' || role() == 'custom'; }
+    function hidden(section) { return role() == 'custom' && acc().get('hidden', []).hasAny([section]); }
+
+    // Droits de chaque compte : lisibles par lui-même, modifiables par l'administrateur seul
+    match /access/{uid} {
+      allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
+      allow write: if isAdmin();
+    }
+
+    // Liste des comptes (e-mail, nom, dernière visite) : chacun écrit la sienne, l'administrateur les lit
+    match /members/{uid} {
+      allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
+      allow write: if signedIn() && request.auth.uid == uid;
+    }
+
+    // Données synchronisées du site
+    match /sync/{doc} {
+      // Profil et apparence : chacun ne lit et n'écrit que le sien
+      allow read, write: if signedIn() && doc.matches('k_artemis_ui__' + request.auth.uid + '(_[0-9]+)?');
+      // Données partagées : lecture selon le rôle, sauf parties masquées
+      allow read: if canRead()
+        && !(doc.matches('k_artemis_budget(_[0-9]+)?') && hidden('budget'))
+        && !(doc.matches('k_artemis_events(_[0-9]+)?') && hidden('calendar'))
+        && !(doc.matches('k_artemis_amort(_pending)?(_[0-9]+)?') && hidden('patrimoine'));
+      // Écriture réservée à l'administrateur et aux gestionnaires
+      allow write: if canEdit();
+    }
+
+    // Marketplace
+    match /listings/{id} {
+      allow read: if canRead() && !hidden('marketplace');
+      allow write: if canEdit();
+    }
+  }
+}

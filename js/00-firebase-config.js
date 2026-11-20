@@ -67,7 +67,9 @@ async function _pushKey(k, val) {
 
 async function _checkAndPushChanges() {
   if (!_auth.currentUser || _syncBusy) return;
-  const todo = [..._SYNC_KEYS].filter(k => localStorage.getItem(k) !== _lastSynced[k]);
+  // Lecture seule : seul le profil personnel est envoyé (les règles Firestore refuseraient le reste)
+  const canEdit = typeof haloCanEdit !== 'function' || haloCanEdit();
+  const todo = [..._SYNC_KEYS].filter(k => localStorage.getItem(k) !== _lastSynced[k] && (canEdit || _PER_USER_KEYS.has(k)));
   if (!todo.length) return;
   _syncBusy = true;
   let ok = 0;
