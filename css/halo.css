@@ -190,10 +190,10 @@ html.halo .btn-cyan, html.halo .btn-gold, html.halo .hbtn-dark {
   background: var(--ink) !important; color: #fff !important; box-shadow: 0 10px 22px -12px rgba(0,0,0,.6) !important;
 }
 html.halo .btn-outline, html.halo .hbtn-light {
-  background: rgba(255,255,255,.7) !important; color: var(--text) !important; border: 1px solid rgba(255,255,255,.9) !important;
+  background: rgba(255,255,255,.7) !important; color: var(--text) !important; border: 1px solid rgba(20,24,40,.14) !important;
   box-shadow: 0 6px 16px -10px rgba(var(--tint2),.4) !important;
 }
-html.halo .btn-outline:hover { color: var(--acc) !important; }
+html.halo .btn-outline:hover, html.halo .hbtn-light:hover { color: var(--acc) !important; border-color: rgba(var(--acc-rgb),.45) !important; }
 
 /* Champs */
 html.halo select.sel, html.halo input.inp, html.halo input[type="date"], html.halo input[type="text"],
