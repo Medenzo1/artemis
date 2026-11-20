@@ -1094,7 +1094,7 @@ html.ro .hac-ro-note { display: block; }
 #hintro .hi-bokeh i:nth-child(4) { width: 18vmax; height: 18vmax; left: 70%; top: 4%;  background: #f39a62; animation-delay: -1s; }
 #hintro .hi-bokeh i:nth-child(5) { width: 14vmax; height: 14vmax; left: 20%; top: 0%;  background: #ffd2a8; animation-delay: -3s; }
 @keyframes hiDrift { to { transform: translate(3vmax, -2vmax) scale(1.08); } }
-#hintro .hi-brand { position: absolute; left: 50%; top: 50%; translate: -50% -50%; display: flex; flex-direction: column; align-items: center; gap: 12px; color: #fff; }
-#hintro .hi-brand img { width: 44px; height: 44px; border-radius: 13px; box-shadow: 0 10px 30px rgba(0,0,0,.35); }
-#hintro .hi-brand b { font: 800 15px/1 'Inter Tight', system-ui, sans-serif; letter-spacing: .42em; padding-left: .42em; text-shadow: 0 2px 18px rgba(0,0,0,.35); }
+#hintro .hi-brand { position: absolute; left: 50%; top: 50%; translate: -50% -50%; display: flex; flex-direction: column; align-items: center; gap: 22px; color: #fff; }
+#hintro .hi-brand img { width: clamp(84px, 11vmin, 120px); height: clamp(84px, 11vmin, 120px); border-radius: 26%; box-shadow: 0 18px 50px rgba(0,0,0,.45), 0 0 0 1px rgba(255,255,255,.12); }
+#hintro .hi-brand b { font: 800 clamp(26px, 4vmin, 38px)/1 'Inter Tight', system-ui, sans-serif; letter-spacing: .32em; padding-left: .32em; text-shadow: 0 4px 28px rgba(0,0,0,.45); }
 html.halo #mainContent.hi-reveal, #mainContent.hi-reveal { position: relative; z-index: 10011; }
