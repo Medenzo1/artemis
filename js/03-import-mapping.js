@@ -963,9 +963,27 @@ function getDB() {
 try {
 const db = JSON.parse(localStorage.getItem(DB_KEY) || '{"periods":{}}');
 if(!db || !db.periods) return {periods:{}};
+_canonSciNames(db);
 _computeArtemisDateBounds(db);
 return db;
 } catch(e) { return {periods:{}}; }
+}
+// Une même société peut avoir été écrite de plusieurs façons au fil des imports
+// (« SCI - Vulcain 1 », « Vulcain 1 », espaces, majuscules) : on la ramène au nom
+// défini dans Biens & sociétés, sinon à la première écriture rencontrée.
+function _sciKey(s) {
+return String(s || '').replace(/[\u00a0\u202f]/g, ' ').trim().replace(/^sci\b\s*[-–—:]?\s*/i, '').replace(/\s+/g, ' ').toLowerCase();
+}
+function _canonSciNames(db) {
+const canon = {};
+(typeof SCIS_LIVE !== 'undefined' && SCIS_LIVE.length ? SCIS_LIVE : []).forEach(n => { const k = _sciKey(n); if (k && !canon[k]) canon[k] = n; });
+Object.values(db.periods).forEach(p => (p.lines || []).forEach(l => {
+if (!l || !l.sci) return;
+const k = _sciKey(l.sci);
+if (!k) return;
+if (!canon[k]) canon[k] = l.sci;
+if (l.sci !== canon[k]) l.sci = canon[k];
+}));
 }
 function saveDB(db) {
 localStorage.setItem(DB_KEY, JSON.stringify(db));
