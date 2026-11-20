@@ -134,6 +134,25 @@ async function _pullCloudData() {
   }
 }
 
-function logout() {
-  _auth.signOut();
+// Déconnexion : on attend Firebase, on pousse les derniers changements locaux, puis on recharge
+// la page pour repartir d'un état propre (écran de connexion, aucune donnée de session affichée).
+let _loggingOut = false;
+async function logout() {
+  if (_loggingOut) return;
+  _loggingOut = true;
+  try { showToast('Déconnexion…'); } catch (e) {}
+  try { await _checkAndPushChanges(); } catch (e) {}
+  try {
+    await _auth.signOut();
+  } catch (e) {
+    _loggingOut = false;
+    console.error('[artemis] échec de déconnexion', e);
+    try { showToast('⚠ Déconnexion impossible : ' + ((e && (e.code || e.message)) || e), '#e0353f'); } catch (_) {}
+    return;
+  }
+  try { document.getElementById('mainContent').style.display = 'none'; document.getElementById('loginScreen').style.display = 'flex'; } catch (e) {}
+  location.replace(location.pathname + '?logout=' + Date.now());
 }
+
+// Après une déconnexion, on retire le marqueur de l'adresse
+if (/[?&]logout=/.test(location.search)) { try { history.replaceState(null, '', location.pathname); } catch (e) {} }
