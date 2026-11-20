@@ -1006,3 +1006,43 @@ html.halo thead th { background: var(--surf) !important; background-clip: paddin
 html.halo thead th[style*="sticky"], html.halo thead[style*="sticky"] th, html.halo thead tr[style*="sticky"] th { z-index: 3; }
 html.halo .tbl-wrap thead th, html.halo [style*="overflow"] thead th, html.halo #ca-ops-wrap thead th { position: sticky; top: 0; z-index: 3; box-shadow: 0 1px 0 rgba(var(--tint),.22); }
 #hbud-toggle.off { color: var(--text3) !important; text-decoration: line-through; text-decoration-color: rgba(var(--tint),.35); }
+
+/* ════════════ Lecture seule (Lecteur / Personnalisé) ════════════ */
+html.ro #budgetScreen [onclick*="budOpenNew"], html.ro #budgetScreen [onclick*="budDuplicate"], html.ro #budgetScreen [onclick*="budRename"],
+html.ro #budgetScreen [onclick*="budDelete"], html.ro #budgetScreen [onclick*="budOpenRebase"], html.ro #budgetScreen [onclick*="budSetRef"],
+html.ro #budgetScreen [onclick*="budApplyEntityPct"], html.ro #budgetScreen [onclick*="budDelRow"], html.ro #budgetScreen label:has(input[onchange*="budImportXlsx"]),
+html.ro #budgetScreen [onchange*="budAddRow"], html.ro #budgetScreen .bud-add,
+html.ro #sc5 button:not(.ptab), html.ro #sc5 .btn, html.ro #sc5 .upload-zone, html.ro #sc5 input[type=file], html.ro #sc5 [onclick^="del"], html.ro #sc5 [onclick^="add"],
+html.ro #sc5 [onclick*="toggleAddQpForm"], html.ro #sc5 [onclick*="deleteLcdRow"], html.ro #sc5 [onclick*="deleteAmortRow"],
+html.ro #sc4 [onclick*="editPeriod"], html.ro #sc4 [onclick*="deletePeriod"], html.ro #sc4 [onclick*="clearDatabase"],
+html.ro [onclick*="mktOpenForm"], html.ro [onclick*="mktDeleteListing"],
+html.ro [onclick^="hcalEdit(null"], html.ro .hcal-side-a .hbtn-dark { display: none !important; }
+html.ro #budgetScreen .bud-grid input, html.ro #budgetScreen .bud-lcd-card input, html.ro #sc5 input, html.ro #sc5 select, html.ro #sc5 textarea { pointer-events: none !important; }
+html.ro #sc5 input, html.ro #sc5 select, html.ro #sc5 textarea { background: var(--surf) !important; }
+.hac-badge { margin-left: auto; display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 700; color: var(--acc3); background: rgba(var(--acc-rgb),.12); padding: 4px 10px; border-radius: 999px; }
+html.ro .hac-ro-note { display: block; }
+
+/* Écran « accès en attente » */
+#hac-block { position: fixed; inset: 0; z-index: 9000; display: grid; place-items: center; padding: 16px; background: var(--hbg); background-attachment: fixed; }
+#hac-block .hac-box { width: min(420px, 100%); text-align: center; padding: 32px 28px; border-radius: 28px; background: linear-gradient(160deg, rgba(255,255,255,.95), rgba(255,255,255,.8)); border: 1px solid #fff; box-shadow: var(--shadow-lg); display: flex; flex-direction: column; align-items: center; gap: 12px; }
+#hac-block h2 { font-size: 22px; font-weight: 800; }
+#hac-block p { font-size: 13.5px; color: var(--text2); line-height: 1.5; }
+
+/* Paramètres › Utilisateurs et accès */
+.hac-refresh { margin-left: auto; padding: 7px 12px !important; }
+.hac-list { display: flex; flex-direction: column; }
+.hac-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(220px, 300px); gap: 8px 16px; align-items: center; padding: 12px 0; border-top: 1px solid var(--row-line); }
+.hac-who b { display: block; font-size: 13.5px; }
+.hac-who b small { color: var(--text3); font-weight: 500; }
+.hac-who > small { font-size: 12px; color: var(--text2); }
+.hac-ctl { display: flex; flex-direction: column; gap: 4px; }
+.hac-ctl select { width: 100% !important; }
+.hac-ctl small { font-size: 11.5px; color: var(--text3); }
+.hac-admin { justify-self: end; display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: var(--acc3); background: rgba(var(--acc-rgb),.12); padding: 6px 12px; border-radius: 999px; }
+.hac-secs { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 12px; color: var(--text2); }
+.hac-secs > span { margin-right: 4px; font-weight: 650; }
+.hac-chip { display: inline-flex; align-items: center; gap: 6px; padding: 6px 11px; border-radius: 999px; border: 1.5px solid rgba(var(--tint),.14); background: #fff; cursor: pointer; font-weight: 600; color: var(--text2); }
+.hac-chip input { accent-color: var(--ko); }
+.hac-chip.on { border-color: rgba(224,53,63,.4); color: var(--ko); background: var(--ko-bg); text-decoration: line-through; }
+.hac-empty { padding: 14px 0; font-size: 13px; color: var(--text3); }
+@media (max-width: 700px) { .hac-row { grid-template-columns: 1fr; } .hac-admin { justify-self: start; } }
