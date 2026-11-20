@@ -173,3 +173,44 @@ function haloDecorateKpis(root) {
     if (sc6) new MutationObserver(run).observe(sc6, { childList: true, subtree: true });
   });
 })();
+
+// ── Clic sur un mois d'un graphique : filtre la période sur ce mois ──
+(function () {
+  const MOIS = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+  const pad = n => String(n).padStart(2, '0');
+  let undo = null, timer = null;
+
+  function setRange(pre, a, z) {
+    document.querySelectorAll('[id="' + pre + '-date-min"]').forEach(el => { el.value = a; });
+    document.querySelectorAll('[id="' + pre + '-date-max"]').forEach(el => { el.value = z; });
+    if (pre === 'kpi') { if (typeof renderKpis === 'function') renderKpis(); }
+    else if (typeof _synDateInputChange === 'function') _synDateInputChange();
+    else if (typeof renderSynTab === 'function') renderSynTab();
+    try { hdashSync(); } catch (e) {}
+  }
+
+  function pill(text, onUndo) {
+    let el = document.getElementById('hpick');
+    if (!el) { el = document.createElement('div'); el.id = 'hpick'; document.body.appendChild(el); }
+    el.innerHTML = '<span>' + text + '</span><button type="button">Annuler</button>';
+    el.querySelector('button').onclick = () => { hide(); onUndo(); };
+    el.classList.add('on');
+    clearTimeout(timer); timer = setTimeout(hide, 7000);
+  }
+  function hide() { const el = document.getElementById('hpick'); if (el) el.classList.remove('on'); clearTimeout(timer); }
+
+  window.haloChartPick = function (y, m, cv) {
+    if (window._haloRoute !== 'dashboard') return false;
+    if (cv && cv.closest && cv.closest('#settingsScreen,.hh-wrap')) return false;
+    const pre = (typeof _dashTab !== 'undefined' && _dashTab === 'kpis') ? 'kpi' : 'syn';
+    const minEl = document.getElementById(pre + '-date-min'), maxEl = document.getElementById(pre + '-date-max');
+    if (!minEl || !maxEl) return false;
+    const a = y + '-' + pad(m + 1) + '-01';
+    const z = y + '-' + pad(m + 1) + '-' + pad(new Date(y, m + 1, 0).getDate());
+    if (minEl.value === a && maxEl.value === z) return false;
+    const prev = [minEl.value, maxEl.value];
+    setRange(pre, a, z);
+    pill('Période filtrée sur ' + MOIS[m] + ' ' + y, () => setRange(pre, prev[0], prev[1]));
+    return true;
+  };
+})();
