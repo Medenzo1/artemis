@@ -1006,3 +1006,13 @@ html.halo thead th { background: var(--surf) !important; background-clip: paddin
 html.halo thead th[style*="sticky"], html.halo thead[style*="sticky"] th, html.halo thead tr[style*="sticky"] th { z-index: 3; }
 html.halo .tbl-wrap thead th, html.halo [style*="overflow"] thead th, html.halo #ca-ops-wrap thead th { position: sticky; top: 0; z-index: 3; box-shadow: 0 1px 0 rgba(var(--tint),.22); }
 #hbud-toggle.off { color: var(--text3) !important; text-decoration: line-through; text-decoration-color: rgba(var(--tint),.35); }
+
+/* Sélecteur de période (Importer un mois) : au-dessus des cartes suivantes, fond opaque */
+html.halo .card:has(> .pp[style*="block"]) { position: relative; z-index: 60; }
+html.halo .pp { background: var(--surf) !important; border: 1px solid rgba(var(--acc-rgb), .25) !important; box-shadow: 0 18px 48px rgba(20, 24, 40, .18) !important; z-index: 70; }
+html.halo .pp .pbtn { color: var(--text2); }
+html.halo .pmb { color: var(--text2); font-size: 12px; }
+html.halo .pmb.has-data { color: var(--text); }
+html.halo .pmb:hover { background: rgba(var(--acc-rgb), .1); color: var(--acc); }
+html.halo .pmb.selected { background: var(--acc) !important; color: #fff !important; border-color: transparent !important; }
+html.halo .pmb.selected::after { color: #fff; }
