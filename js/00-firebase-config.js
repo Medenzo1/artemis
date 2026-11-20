@@ -93,19 +93,26 @@ setInterval(_checkAndPushChanges, 3000);
 async function _pullCloudData() {
   try {
     let applied = 0;
-    const heads = await Promise.all([..._SYNC_KEYS].map(k => _syncHead(k).get().then(d => [k, d])));
+    // Une clé refusée par les règles (partie masquée pour ce compte) n'empêche pas de récupérer les autres
+    const heads = await Promise.all([..._SYNC_KEYS].map(k => _syncHead(k).get().then(d => [k, d], e => [k, null, e])));
     const missing = [];
-    for (const [k, h] of heads) {
+    for (const [k, h, err] of heads) {
+      if (!h) {
+        if (err && err.code === 'permission-denied') {
+          // Ne pas laisser sur l'appareil des données d'un autre compte auxquelles celui-ci n'a pas droit
+          localStorage.removeItem(k); _lastSynced[k] = null;
+        } else console.warn('[artemis] lecture impossible pour', k, err);
+        continue;
+      }
       if (!h.exists && _PER_USER_KEYS.has(k)) {
         // Pas encore de profil pour ce compte : on garde le profil local seulement s'il lui appartient
         // (ou s'il n'a pas de propriétaire : appareil de l'utilisateur avant cette séparation), sinon on repart de zéro
         const uid = _auth.currentUser && _auth.currentUser.uid;
         let owner = null;
         try { owner = (JSON.parse(localStorage.getItem(k) || 'null') || {})._uid || null; } catch (e) {}
-        if (localStorage.getItem(k) !== null && owner && owner !== uid) localStorage.removeItem(k);
-        else if (localStorage.getItem(k) !== null && !owner && uid) {
-          try { const v = JSON.parse(localStorage.getItem(k)); v._uid = uid; localStorage.setItem(k, JSON.stringify(v)); } catch (e) {}
-        }
+        // Le profil local n'est gardé que s'il appartient à ce compte : sinon (autre compte ou propriétaire inconnu
+        // sur un navigateur partagé) on repart d'un profil vierge
+        if (localStorage.getItem(k) !== null && owner !== uid) localStorage.removeItem(k);
         _lastSynced[k] = localStorage.getItem(k) === null ? null : _NEVER;
         continue;
       }
@@ -152,6 +159,10 @@ async function logout() {
     try { showToast('⚠ Déconnexion impossible : ' + ((e && (e.code || e.message)) || e), '#e0353f'); } catch (_) {}
     return;
   }
+  // Navigateur partagé : on retire de l'appareil ce qui est déjà en sécurité dans le cloud (et toujours le profil personnel)
+  try {
+    _SYNC_KEYS.forEach(k => { if (_PER_USER_KEYS.has(k) || localStorage.getItem(k) === _lastSynced[k]) localStorage.removeItem(k); });
+  } catch (e) {}
   try { document.getElementById('mainContent').style.display = 'none'; document.getElementById('loginScreen').style.display = 'flex'; } catch (e) {}
   location.replace(location.pathname + '?logout=' + Date.now());
 }

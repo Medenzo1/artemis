@@ -388,6 +388,7 @@ _auth.onAuthStateChanged(async function(user){
     document.getElementById('mainContent').style.display='flex';
     document.getElementById('mainContent').style.width='100%';
     await _pullCloudData(); // récupère les dernières données partagées avant de peupler l'écran
+    try { haloApplyUI(haloUI()); haloRefreshUser(); } catch(e) {}  // profil du compte connecté
     _rebuildLiveVars();
     initPeriodPicker();
     restorePlatformIndexes();  // reload Airbnb/Booking from localStorage
