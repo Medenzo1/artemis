@@ -74,24 +74,38 @@ function haloBudgetSync() {
   };
 })();
 
-// ── Mensuel / Cumulé : le graphique se redessine avec le même déroulé qu'à l'arrivée ──
+// ── Mensuel / Cumulé : la courbe se transforme d'une forme à l'autre (comme le graphique de l'accueil) ──
 (function () {
+  if (typeof ArtCharts === 'undefined' || typeof ArtCharts.area !== 'function') return;
+  const last = {};                 // dernières valeurs affichées, par graphique (couleur + mois)
+  const anims = new WeakMap();
+  const baseArea = ArtCharts.area;
+  const ease = p => p < .5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+  ArtCharts.area = function (cv, cfg) {
+    if (!cv || !cfg || !Array.isArray(cfg.values)) return baseArea.apply(this, arguments);
+    const key = String(cfg.color || '') + '|' + (cfg.labels || []).join(',');
+    const prev = last[key];
+    const target = { values: cfg.values.map(v => +v || 0), budget: Array.isArray(cfg.budget) ? cfg.budget.slice() : null };
+    last[key] = target;
+    const morph = window._haloMorphUntil && Date.now() < window._haloMorphUntil && prev && prev.values.length === target.values.length
+      && typeof haloAnimOn === 'function' && haloAnimOn();
+    if (!morph) return baseArea.call(this, cv, cfg);
+    const old = anims.get(cv); if (old) cancelAnimationFrame(old);
+    const t0 = performance.now(), D = 800, self = this;
+    const lerpB = (a, b, e) => (b || []).map((v, i) => v == null ? null : (a && a[i] != null ? a[i] + (v - a[i]) * e : v));
+    const step = t => {
+      const p = Math.min(1, (t - t0) / D), e = ease(p);
+      if (p < 1) {
+        baseArea.call(self, cv, Object.assign({}, cfg, { values: prev.values.map((v, i) => v + (target.values[i] - v) * e), budget: target.budget ? lerpB(prev.budget, target.budget, e) : cfg.budget }));
+        anims.set(cv, requestAnimationFrame(step));
+      } else { anims.delete(cv); baseArea.call(self, cv, cfg); }
+    };
+    baseArea.call(this, cv, Object.assign({}, cfg, { values: prev.values, budget: prev.budget || cfg.budget }));
+    anims.set(cv, requestAnimationFrame(step));
+  };
   const orig = window._toggleChartMode;
-  if (typeof orig !== 'function') return;
-  window._toggleChartMode = function () {
-    const r = orig.apply(this, arguments);
-    // Le graphique est souvent re-rendu : on rejoue le déroulé sur les graphiques qui ont ce sélecteur
-    if (typeof haloAnimOn === 'function' && haloAnimOn()) setTimeout(() => {
-      document.querySelectorAll('.chart-mode-toggle').forEach(t => {
-        const card = t.closest('.card');
-        if (!card || !card.offsetParent) return;
-        card.querySelectorAll('canvas').forEach(c => {
-          c.classList.remove('hwipe'); void c.offsetWidth;
-          c.style.animationDelay = '0s'; c.classList.add('hwipe');
-          c.addEventListener('animationend', function done() { c.classList.remove('hwipe'); c.removeEventListener('animationend', done); });
-        });
-      });
-    }, 0);
-    return r;
+  if (typeof orig === 'function') window._toggleChartMode = function () {
+    window._haloMorphUntil = Date.now() + 1500;   // le prochain dessin des courbes se fait en transformation
+    return orig.apply(this, arguments);
   };
 })();
