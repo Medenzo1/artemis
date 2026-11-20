@@ -1078,3 +1078,7 @@ html.ro .hac-ro-note { display: block; }
 .hac-chip.on { border-color: rgba(224,53,63,.4); color: var(--ko); background: var(--ko-bg); text-decoration: line-through; }
 .hac-empty { padding: 14px 0; font-size: 13px; color: var(--text3); }
 @media (max-width: 700px) { .hac-row { grid-template-columns: 1fr; } .hac-admin { justify-self: start; } }
+
+/* Écran de connexion : « Rester connecté » */
+.li-remember { display: flex; align-items: center; gap: 9px; font-size: 12.5px; color: var(--text2); cursor: pointer; user-select: none; margin-top: -2px; }
+.li-remember input { width: 16px; height: 16px; margin: 0; accent-color: var(--acc, #e5664d); cursor: pointer; }
