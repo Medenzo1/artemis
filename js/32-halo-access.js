@@ -20,6 +20,7 @@ const HAC_ROLES = [
   ['none', 'Aucun accès', 'Compte bloqué'],
 ];
 const HAC_SECTIONS = [
+  ['home', 'Accueil', ['home']],
   ['dashboard', 'Tableau de bord', ['dashboard']],
   ['budget', 'Budget', ['budget']],
   ['calendar', 'Calendrier', ['calendar']],
@@ -42,6 +43,11 @@ function haloHiddenRoutes() {
   return out;
 }
 function haloRouteAllowed(route) { return !haloHiddenRoutes().has(route); }
+// Première page autorisée (remplace l'accueil quand il est masqué)
+function haloFirstRoute() {
+  const order = ['home', 'dashboard', 'calendar', 'budget', 'base', 'params', 'loans', 'amort', 'lcd', 'simulateur', 'marketplace'];
+  return order.find(haloRouteAllowed) || 'settings';
+}
 
 // ── Chargement des droits à la connexion ──
 async function haloLoadAccess() {
@@ -102,7 +108,8 @@ function haloHideLinks(root) {
   // Navigation
   const go = window.haloGo;
   window.haloGo = function (route) {
-    if (route !== 'home' && route !== 'settings' && !haloRouteAllowed(route)) { try { showToast('Accès non autorisé à cette partie', '#e0353f'); } catch (e) {} return; }
+    if (route === 'home' && !haloRouteAllowed('home')) { arguments[0] = haloFirstRoute(); return go.apply(this, arguments); }
+    if (route !== 'settings' && !haloRouteAllowed(route)) { try { showToast('Accès non autorisé à cette partie', '#e0353f'); } catch (e) {} return; }
     return go.apply(this, arguments);
   };
   // Palette
@@ -202,6 +209,6 @@ _auth.onAuthStateChanged(async user => {
   if (!user) { _hac = null; return; }
   await haloLoadAccess();
   haloApplyAccess();
-  // Si on était sur une partie désormais interdite, retour à l'accueil
-  if (window._haloRoute && window._haloRoute !== 'home' && !haloRouteAllowed(window._haloRoute)) haloGo('home');
+  // Si on était sur une partie désormais interdite, retour à la première page autorisée
+  if (window._haloRoute && window._haloRoute !== 'settings' && !haloRouteAllowed(window._haloRoute)) haloGo(haloFirstRoute());
 });
