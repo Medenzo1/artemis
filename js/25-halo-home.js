@@ -49,20 +49,33 @@ function hhData() {
     });
     w12.forEach(k => M[k] && Object.entries(M[k].biens).forEach(([b, v]) => { (bienCA[b] = bienCA[b] || { cur: 0, prev: 0 }).cur += v; }));
     p12.forEach(k => M[k] && Object.entries(M[k].biens).forEach(([b, v]) => { (bienCA[b] = bienCA[b] || { cur: 0, prev: 0 }).prev += v; }));
+    // Évolution par bien à périmètre égal (mois présents les deux années)
+    w12.filter(k => M[k] && M[hShift(k, -12)]).forEach(k => {
+      Object.entries(M[k].biens).forEach(([b, v]) => { const o = bienCA[b]; o.curC = (o.curC || 0) + v; });
+      Object.entries(M[hShift(k, -12)].biens).forEach(([b, v]) => { const o = bienCA[b] = bienCA[b] || { cur: 0, prev: 0 }; o.prevC = (o.prevC || 0) + v; });
+    });
   }
   return {
     db, keys, M, last, w12, p12, chan, bienCA,
     has: k => !!M[k], sum,
     ca12: sum(w12, r => r.ca), dep12: sum(w12, r => r.dep), net12: sum(w12, r => r.net),
     caP12: sum(p12, r => r.ca), depP12: sum(p12, r => r.dep), netP12: sum(p12, r => r.net),
+    // Comparaison à périmètre égal : seulement les mois présents à la fois sur les 12 derniers mois et un an plus tôt
+    ...(() => {
+      const cur = w12.filter(k => M[k] && M[hShift(k, -12)]), prev = cur.map(k => hShift(k, -12));
+      return { cmpN: cur.length,
+        caC: sum(cur, r => r.ca), depC: sum(cur, r => r.dep), netC: sum(cur, r => r.net),
+        caP: sum(prev, r => r.ca), depP: sum(prev, r => r.dep), netP: sum(prev, r => r.net) };
+    })(),
   };
 }
 
-function hhVar(cur, prev, lowerIsBetter) {
-  if (!prev) return '<span class="hbadge flat">—</span>';
+function hhVar(cur, prev, lowerIsBetter, n) {
+  if (!prev || !n) return '<span class="hbadge flat" title="Pas encore de mois comparables un an plus tôt">—</span>';
   const p = (cur - prev) / Math.abs(prev) * 100;
   const good = lowerIsBetter ? p <= 0 : p >= 0;
-  return '<span class="hbadge ' + (good ? 'up' : 'down') + '">' + hIco(p >= 0 ? 'trending-up' : 'trending-down', 12) + hPct(p, true) + '</span>';
+  const tip = 'Évolution vs les mêmes mois un an plus tôt' + (n < 12 ? ' (' + n + ' mois comparables sur 12)' : '');
+  return '<span class="hbadge ' + (good ? 'up' : 'down') + '" title="' + tip + '">' + hIco(p >= 0 ? 'trending-up' : 'trending-down', 12) + hPct(p, true) + '</span>';
 }
 function hhSpark(vals, color) {
   if (!vals || vals.length < 2) return '';
@@ -262,15 +275,16 @@ function hhAgenda(d, todo) {
 
 function hhKpis(d, biens) {
   const s = k => d.w12.map(m => d.M[m] ? d.M[m][k] : 0);
-  const marg = d.ca12 ? d.net12 / d.ca12 * 100 : 0, margP = d.caP12 ? d.netP12 / d.caP12 * 100 : 0;
+  const marg = d.ca12 ? d.net12 / d.ca12 * 100 : 0;
+  const margC = d.caC ? d.netC / d.caC * 100 : 0, margP = d.caP ? d.netP / d.caP * 100 : 0;
   const lcd = biens.filter(b => (b.mode || b.type) === 'LCD').length, lld = biens.length - lcd;
   const card = (ico, val, fmt, lbl, sub, badge, spark, krgb) => '<section class="hg hh-kpi hk" style="--krgb:' + krgb + '"><div class="hh-kpi-top"><span class="hh-kpi-ico">' + hIco(ico, 16) + '</span>' + badge + '</div>'
     + '<div class="hh-kpi-v"><b data-hcount="' + val + '" data-hfmt="' + fmt + '"' + (fmt === 'eur' && krgb === HH_K.net ? ' data-hsigned="1"' : '') + '>0</b></div><div class="hh-kpi-b"><div><div class="hh-kpi-l">' + lbl + '</div><div class="hh-kpi-s">' + sub + '</div></div>' + spark + '</div></section>';
   if (!d.last) return '';
-  return card('wallet', Math.round(d.ca12), 'eur', "Chiffre d'affaires", '12 derniers mois', hhVar(d.ca12, d.caP12), hhSpark(s('ca'), '#16a35f'), HH_K.ca)
-    + card('receipt', Math.round(d.dep12), 'eur', 'Charges', '12 derniers mois', hhVar(d.dep12, d.depP12, true), hhSpark(s('dep'), '#e0353f'), HH_K.dep)
-    + card('coins', Math.round(d.net12), 'eur', 'Cash-flow net', 'après crédits · 12 mois', hhVar(d.net12, d.netP12), hhSpark(s('net'), 'var(--acc)'), HH_K.net)
-    + card('percent', marg.toFixed(1), 'pct', 'Marge nette', biens.length ? lcd + ' LCD · ' + lld + ' LLD' : 'cash-flow / CA', d.caP12 ? '<span class="hbadge ' + (marg >= margP ? 'up' : 'down') + '">' + hPct(marg - margP, true).replace('%', 'pt') + '</span>' : '<span class="hbadge flat">—</span>', '', HH_K.marg);
+  return card('wallet', Math.round(d.ca12), 'eur', "Chiffre d'affaires", '12 derniers mois', hhVar(d.caC, d.caP, false, d.cmpN), hhSpark(s('ca'), '#16a35f'), HH_K.ca)
+    + card('receipt', Math.round(d.dep12), 'eur', 'Charges', '12 derniers mois', hhVar(d.depC, d.depP, true, d.cmpN), hhSpark(s('dep'), '#e0353f'), HH_K.dep)
+    + card('coins', Math.round(d.net12), 'eur', 'Cash-flow net', 'après crédits · 12 mois', hhVar(d.netC, d.netP, false, d.cmpN), hhSpark(s('net'), 'var(--acc)'), HH_K.net)
+    + card('percent', marg.toFixed(1), 'pct', 'Marge nette', biens.length ? lcd + ' LCD · ' + lld + ' LLD' : 'cash-flow / CA', d.caP && d.cmpN ? '<span class="hbadge ' + (margC >= margP ? 'up' : 'down') + '" title="Écart de marge vs les mêmes mois un an plus tôt' + (d.cmpN < 12 ? ' (' + d.cmpN + ' mois comparables sur 12)' : '') + '">' + hPct(margC - margP, true).replace('%', 'pt') + '</span>' : '<span class="hbadge flat">—</span>', '', HH_K.marg);
 }
 
 function hhActions(d) {
@@ -413,8 +427,8 @@ function hhBiens(d, biens) {
     return '<div class="hh-bien" onclick="haloOpenDashTab(\'synthese\',\'ca\',' + hEsc(JSON.stringify(x.n)) + ')"><span class="hh-orb sm" style="--c:' + col + '"><span>' + hEsc(hhInitials(x.n)) + '</span></span>'
       + '<div class="hh-bien-n"><b>' + hEsc(x.n) + '</b><small>' + hEsc((x.b.mode || x.b.type || '') + (x.b.sci ? ' · ' + x.b.sci.replace('SCI - ', 'SCI ') : '')) + '</small></div>'
       + '<div class="hh-bar"><i style="width:0;background:' + col + '" data-w="' + (x.v.cur / mx * 100).toFixed(1) + '%"></i></div>'
-      + '<div class="hh-bien-p">' + hPct(share) + '</div><div class="hh-bien-v">' + hEur(x.v.cur) + '</div>' + hhVar(x.v.cur, x.v.prev) + '</div>';
+      + '<div class="hh-bien-p">' + hPct(share) + '</div><div class="hh-bien-v">' + hEur(x.v.cur) + '</div>' + hhVar(x.v.curC || 0, x.v.prevC || 0, false, d.cmpN) + '</div>';
   }).join('');
-  return '<section class="hg hh-biens"><div class="hh-card-h"><div><h3>Mes biens</h3><small>Chiffre d\'affaires sur 12 mois · part du total · évolution vs 12 mois précédents</small></div>'
+  return '<section class="hg hh-biens"><div class="hh-card-h"><div><h3>Mes biens</h3><small>Chiffre d\'affaires sur 12 mois · part du total · évolution vs les mêmes mois un an plus tôt</small></div>'
     + '<button class="hbtn hbtn-light" onclick="haloGo(\'dashboard\')">Tout le détail ' + hIco('arrow-right', 14) + '</button></div><div class="hh-biens-l">' + rows + '</div></section>';
 }
